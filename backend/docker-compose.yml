@@ -1,0 +1,56 @@
+
+services:
+   backend: # Your application service (the backend).
+      build: # Defines how the image for this service is built.
+         context: . # The build context is the current directory (where Dockerfile resides).
+         dockerfile: Dockerfile # The file used to build the image.
+      ports: # Maps ports from the container to the host (though we'll adjust this with Nginx).
+         - "5858:5858" # Maps host port 5858 to container port 5858 (we’ll shift this to Nginx later).
+      depends_on: # Specifies services that must start before this one.
+         - mongodb # Ensures MongoDB starts first.
+         - redis # Ensures Redis starts first.
+      environment: # Environment variables passed to the container.
+         - MONGO_URI=mongodb://mongodb:27017/MentorsHub # MongoDB connection string using service name as hostname.
+         - REDIS_HOST=redis # Redis hostname (service name).
+         - REDIS_PORT=6379 # Redis port.
+         - NODE_ENV=production # Sets Node.js environment to production.
+      volumes: # Mounts directories/files into the container.
+         - .:/app # Mounts the current directory to /app in the container (for live code changes).
+         - /app/node_modules # Ensures node_modules inside the container is isolated (not overridden by host).
+
+   mongodb: # MongoDB service.
+      image: mongo:6.0 # Uses MongoDB version 6.0 image from Docker Hub.
+      restart: always # Restarts the container if it stops (unless manually stopped).
+      ports: # Exposes MongoDB port.
+         - "27017:27017" # Maps host port 27017 to container port 27017.
+      volumes: # Persists MongoDB data.
+         - mongo-data:/data/db # Mounts the named volume mongo-data to /data/db in the container.
+
+   redis: # Redis service.
+      image: redis:latest # Uses the latest Redis image from Docker Hub.
+      restart: always # Restarts the container if it stops.
+      ports: # Exposes Redis port.
+         - "6379:6379" # Maps host port 6379 to container port 6379.
+      volumes: # Persists Redis data.
+         - redis-data:/data # Mounts the named volume redis-data to /data in the container.
+
+   nginx: # New service: Nginx as a reverse proxy for HTTPS.
+      image: nginx:latest # Uses the latest Nginx image.
+      ports: # Exposes HTTP and HTTPS ports to the host.
+         - "80:80" # Maps host port 80 to container port 80 (HTTP).
+         - "443:443" # Maps host port 443 to container port 443 (HTTPS).
+      volumes: # Mounts configuration and certificates.
+         - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+         - ./certs:/etc/nginx/certs # Mounts SSL certificates directory.
+      depends_on: # Ensures the backend starts before Nginx.
+         - backend
+      networks: # Connects to the same network as other services.
+         - app-network
+
+networks: # Defines a custom network for service communication.
+   app-network: # Network name.
+      driver: bridge # Uses bridge network (default, isolates services).
+
+volumes: # Defines named volumes for persistent data.
+   mongo-data: # Volume for MongoDB data.
+   redis-data: # Volume for Redis data.
