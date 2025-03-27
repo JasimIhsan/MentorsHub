@@ -23,7 +23,7 @@ body {
 	--foreground: oklch(0.2 0.01 240); /* Dark gray (#333333) */
 
 	/* Cards: Light gray background with dark text */
-	--card: oklch(0.98 0.01 240); /* Light gray (#F5F5F5) */
+	--card: oklch(1 0 0); /* Light gray (#F5F5F5) */
 	--card-foreground: oklch(0.2 0.01 240); /* Dark gray (#333333) */
 
 	/* Popovers: Same as cards */
@@ -154,3 +154,5 @@ body {
 		@apply bg-background text-foreground;
 	}
 }
+
+
