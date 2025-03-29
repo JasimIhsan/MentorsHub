@@ -1,9 +1,10 @@
 import { UserEntity, UserInterface } from "../../../domain/entities/user.entity";
 import { IUserRepository } from "../../../domain/dbrepository/user.repository";
 import { UserModel } from "../models/user.model";
+import mongoose from "mongoose";
 
 // Helper function for error handling
-const handleError = (error: unknown, message: string): never => {
+export const handleError = (error: unknown, message: string): never => {
 	console.error(`${message}:`, error);
 	throw new Error(error instanceof Error ? error.message : message);
 };
@@ -22,7 +23,7 @@ export class UserRepositoryImpl implements IUserRepository {
 	async findUserByEmail(email: string): Promise<UserEntity | null> {
 		try {
 			const userDoc = await UserModel.findOne({ email });
-			return UserEntity.fromDBDocument(userDoc);
+			return userDoc ? UserEntity.fromDBDocument(userDoc) : null;
 		} catch (error) {
 			return handleError(error, "Error finding user by email");
 		}
@@ -30,24 +31,23 @@ export class UserRepositoryImpl implements IUserRepository {
 
 	async findUserById(id: string): Promise<UserEntity | null> {
 		try {
+			if (!mongoose.Types.ObjectId.isValid(id)) return null; // Validate MongoDB ObjectId
 			const userDoc = await UserModel.findById(id);
-			return UserEntity.fromDBDocument(userDoc);
+			return userDoc ? UserEntity.fromDBDocument(userDoc) : null;
 		} catch (error) {
 			return handleError(error, "Error finding user by ID");
 		}
 	}
 
-	async findUserByResetToken(token: string): Promise<UserEntity | null> {
-		try {
-			const userDoc = await UserModel.findOne({ resetPasswordToken: token });
-			if (!userDoc) return null;
-			return UserEntity.fromDBDocument(userDoc);
-		} catch (error) {
-			return handleError(error, "Error finding user by reset token");
-		}
-	}
-
 	async save(user: UserEntity): Promise<void> {
-		await UserModel.updateOne({ _id: user.getId() }, user.getProfile(), { upsert: true });
+		try {
+			console.log('in save: ', user.getProfile().password)
+			console.log('user.getId(): ', user.getId());
+			console.log('user.getProfile(): ', user.getProfile(true));
+
+			await UserModel.findByIdAndUpdate(user.getId(), user.getProfile(true), { upsert: true, new: true });
+		} catch (error) {
+			handleError(error, "Error saving user");
+		}
 	}
 }

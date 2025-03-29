@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IForgotPasswordUseCase } from "../../domain/interfaces/auth.usecases";
+import { IForgotPasswordUseCase } from "../../application/interfaces/auth.usecases";
 
 export class ForgotPasswrodController {
 	constructor(private forgotUseCase: IForgotPasswordUseCase) {}
@@ -12,7 +12,7 @@ export class ForgotPasswrodController {
 				return;
 			}
 			await this.forgotUseCase.execute(email);
-			res.status(200).json({ message: "Password reset link sent to your email" });
+			res.status(200).json({ success: true, message: "Password reset link sent to your email" });
 		} catch (error) {
 			console.error("Forgot password error:", error);
 			if (error instanceof Error) res.status(500).json({ success: false, error: error.message || "Failed to send magic link" });

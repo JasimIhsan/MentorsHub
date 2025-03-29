@@ -5,6 +5,7 @@ export const verifyResetToken = async (token: string) => {
 		const response = await axiosInstance(`/verify-reset-token/${token}`);
 		return response.data;
 	} catch (error) {
+		console.log(`Error form verifyresettoken api : `, error);
 		if (error instanceof Error) {
 			throw new Error(error.message);
 		}

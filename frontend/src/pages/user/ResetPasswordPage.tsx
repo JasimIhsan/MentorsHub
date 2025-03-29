@@ -45,9 +45,9 @@ export default function ResetPasswordPage() {
 		setIsTokenValid(false);
 		// Redirect after a short delay to allow the user to read the toast
 		toast.error("Invalid or expired link. Please request a new password reset link.");
-		setTimeout(() => {
-			navigate("/authenticate");
-		}, 5000);
+		// setTimeout(() => {
+		// 	navigate("/authenticate");
+		// }, 5000);
 	};
 
 	// Verify the token when the component mounts

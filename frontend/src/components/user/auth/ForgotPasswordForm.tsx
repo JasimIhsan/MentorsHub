@@ -33,7 +33,7 @@ export default function ForgotPasswordForm({ setFormState }: ForgotPasswordFormP
 		try {
 			const response = await axiosInstance.post("/forgot-password", { email: data.email });
 			if (response.data.success) {
-				toast.success("A magic link has been sent to your email to reset your password.");
+				toast.success("Password reset link has been sent to your email");
 				form.reset();
 				setFormState("login"); // Return to login form after success
 			}

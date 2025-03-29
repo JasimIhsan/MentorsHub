@@ -1,5 +1,5 @@
 import { IUserRepository } from "../../../domain/dbrepository/user.repository";
-import { ITokenService } from "../../providers/token.service.interface";
+import { ITokenService } from "../../interfaces/token.service.interface";
 import { UserEntity } from "../../../domain/entities/user.entity";
 
 export class SigninUseCase {

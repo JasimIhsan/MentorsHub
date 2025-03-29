@@ -1,4 +1,4 @@
-import { MentorDetails } from "../../../domain/entities/mentor.detailes.entity";
+import { IMentorDetails } from "../../../domain/entities/mentor.detailes.entity";
 import { IMentorDetailsRepository } from "../../../domain/dbrepository/mentor.details.repository";
 import { MentorDetailsModel } from "../models/mentor.details.model";
 // Helper function for error handling
@@ -8,7 +8,7 @@ const handleError = (error: unknown, message: string): never => {
 };
 
 export class MentorDetailsRespositoryImpl implements IMentorDetailsRepository {
-	async create(mentorDetails: MentorDetails): Promise<MentorDetails> {
+	async create(mentorDetails: IMentorDetails): Promise<IMentorDetails> {
 		try {
 			const createdMentorDetails = new MentorDetailsModel(mentorDetails);
 			return await createdMentorDetails.save();
@@ -17,7 +17,7 @@ export class MentorDetailsRespositoryImpl implements IMentorDetailsRepository {
 		}
 	}
 
-	async update(userId: string, data: Partial<MentorDetails>): Promise<MentorDetails | null> {
+	async update(userId: string, data: Partial<IMentorDetails>): Promise<IMentorDetails | null> {
 		try {
 			return await MentorDetailsModel.findByIdAndUpdate(userId, data, { new: true });
 		} catch (error) {
@@ -25,7 +25,7 @@ export class MentorDetailsRespositoryImpl implements IMentorDetailsRepository {
 		}
 	}
 
-	async findByUserId(userId: string): Promise<MentorDetails | null> {
+	async findByUserId(userId: string): Promise<IMentorDetails | null> {
 		try {
 			return await MentorDetailsModel.findOne({ userId });
 		} catch (error) {

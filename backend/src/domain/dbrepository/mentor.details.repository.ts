@@ -1,7 +1,7 @@
-import { MentorDetails } from "../entities/mentor.detailes.entity";
+import { IMentorDetails } from "../entities/mentor.detailes.entity";
 
 export interface IMentorDetailsRepository {
-	create(mentorDetails: MentorDetails): Promise<MentorDetails>;
-	update(userId: string, data: Partial<MentorDetails>): Promise<MentorDetails | null>;
-	findByUserId(userId: string): Promise<MentorDetails | null>;
+	create(mentorDetails: IMentorDetails): Promise<IMentorDetails>;
+	update(userId: string, data: Partial<IMentorDetails>): Promise<IMentorDetails | null>;
+	findByUserId(userId: string): Promise<IMentorDetails | null>;
 }

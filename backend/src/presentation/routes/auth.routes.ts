@@ -6,24 +6,27 @@ import { SigninUseCase } from "../../application/usecases/authentication/signin.
 import { SigninController } from "../controllers/signin.controller";
 import { TokenServicesImpl } from "../../infrastructure/jwt/jwt.services";
 import { IUserRepository } from "../../domain/dbrepository/user.repository";
-import { ITokenService } from "../../application/providers/token.service.interface";
+import { ITokenService } from "../../application/interfaces/token.service.interface";
 import { verifyAccessToken } from "../middlewares/auth.access.token.middleware";
 import { verifyRefreshToken } from "../middlewares/auth.refresh.token.middleware";
 import { RefreshTokenUseCase } from "../../application/usecases/authentication/refresh.token.usecase";
 import { RefreshTokenController } from "../controllers/refresh.token.controller";
 import { ForgotPasswrodController } from "../controllers/forgot.password.controller";
 import { ForgotPasswordUseCase } from "../../application/usecases/forgot-password/forgot.password.usecase";
-import { IEmailService } from "../../domain/interfaces/email.service.interface";
+import { IEmailService } from "../../application/interfaces/email.service.interface";
 import { EmailServiceImpl } from "../../infrastructure/services/email.service";
 import { VerifyResetTokenController } from "../controllers/verify.reset.token.controller";
 import { VerifyResetTokenUseCase } from "../../application/usecases/forgot-password/verify.rest.password.usecase";
 import { ResetPasswordController } from "../controllers/reset.password.controller";
 import { ResetPasswordUseCase } from "../../application/usecases/forgot-password/reset.password.usecase";
+import { ForgotPasswordResetTokenImpl } from "../../infrastructure/database/implementation/forgot.password.token.impl";
+import { IForgotPasswordTokensRepository } from "../../domain/dbrepository/forgot.password.token.respository";
 
 export const authRouter = Router();
 
 // initialize database repository implementation
 const userRepository: IUserRepository = new UserRepositoryImpl();
+const forgotResetRespository: IForgotPasswordTokensRepository = new ForgotPasswordResetTokenImpl();
 
 // intialize interface
 const tokenInterface: ITokenService = new TokenServicesImpl();
@@ -33,12 +36,12 @@ const emailService: IEmailService = new EmailServiceImpl();
 const signupUseCase = new SignupUseCase(userRepository, tokenInterface);
 const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
 const refreshUseCase = new RefreshTokenUseCase(tokenInterface);
-const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, emailService);
-const verifyRefreshTokenUseCase = new VerifyResetTokenUseCase(userRepository);
-const resetPasswordUseCase = new ResetPasswordUseCase(userRepository);
+const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, emailService, forgotResetRespository);
+const verifyRefreshTokenUseCase = new VerifyResetTokenUseCase(forgotResetRespository);
+const resetPasswordUseCase = new ResetPasswordUseCase(forgotResetRespository, userRepository);
 
 // initialize controller implementation
-const signupController = new SignupController(signupUseCase);
+const signupController = new SignupController(signupUseCase); 
 const signinController = new SigninController(signinUseCase);
 const refreshController = new RefreshTokenController(refreshUseCase);
 const forgotPasswordController = new ForgotPasswrodController(forgotPasswordUseCase);

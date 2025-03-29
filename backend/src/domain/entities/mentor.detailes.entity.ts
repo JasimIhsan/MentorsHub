@@ -1,6 +1,6 @@
 import { ObjectId } from "mongoose";
 
-export interface MentorDetails {
+export interface IMentorDetails {
 	id?: string;
 	userId: ObjectId;
 	certifications: {
@@ -20,12 +20,15 @@ export interface MentorDetails {
 	createdAt: Date;
 	updatedAt?: Date | null;
 	featuredMentor?: boolean | null;
+	isVerified?: boolean;
+	mentorRequestStatus?: "approved" | "rejected" | "pending" | 'not applied';
+	rating?: number | null;
 }
 
 export class MentorProfileEntity {
-	constructor(public mentorProfile: MentorDetails) {}
+	constructor(public mentorProfile: IMentorDetails) {}
 
-	static create(userId: ObjectId, data: Partial<MentorDetails>): MentorProfileEntity {
+	static create(userId: ObjectId, data: Partial<IMentorDetails>): MentorProfileEntity {
 		return new MentorProfileEntity({
 			userId,
 			certifications: data.certifications || [],

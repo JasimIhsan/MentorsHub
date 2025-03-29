@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IVerifyResetTokenUseCase } from "../../domain/interfaces/auth.usecases";
+import { IVerifyResetTokenUseCase } from "../../application/interfaces/auth.usecases";
 
 export class VerifyResetTokenController {
 	constructor(private verifyTokenUseCase: IVerifyResetTokenUseCase) {}
@@ -12,6 +12,8 @@ export class VerifyResetTokenController {
 				return;
 			}
 			const isValid = await this.verifyTokenUseCase.execute(token);
+			console.log('isValid: ', isValid);
+
 			if (isValid) {
 				res.status(200).json({ success: true, message: "Token is valid" });
 			} else {

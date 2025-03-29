@@ -1,17 +1,19 @@
+import { IForgotPasswordTokensRepository } from "../../../domain/dbrepository/forgot.password.token.respository";
 import { IUserRepository } from "../../../domain/dbrepository/user.repository";
 import { UserEntity } from "../../../domain/entities/user.entity";
 
 export class ResetPasswordUseCase {
-	constructor(private userRepo: IUserRepository) {}
+	constructor(private restRepo: IForgotPasswordTokensRepository, private userRepo: IUserRepository) {}
 
 	async execute(token: string, newPassword: string): Promise<void> {
-		const user = await this.userRepo.findUserByResetToken(token);
-		const userDetails = user?.getProfile();
-		if (!user || !userDetails?.resetPasswordToken || !userDetails.resetPasswordExpires || userDetails.resetPasswordExpires < Date.now()) {
+		const user = await this.restRepo.findUserByResetToken(token);
+		const tokenDetails = await this.restRepo.findAllTokenDetails(token);
+		if (!user || !tokenDetails?.token || !tokenDetails.expiresAt || tokenDetails.expiresAt.getTime() < Date.now()) {
 			throw new Error("Invalid or expired reset token");
 		}
 
 		const isSamePassword = await user.isPasswordValid(newPassword);
+		console.log('isSamePassword: ', isSamePassword);
 		if (isSamePassword) {
 			throw new Error("Password cannot be the same as the old password");
 		}
