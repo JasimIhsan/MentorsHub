@@ -21,6 +21,7 @@ import { ResetPasswordController } from "../controllers/reset.password.controlle
 import { ResetPasswordUseCase } from "../../application/usecases/forgot-password/reset.password.usecase";
 import { ForgotPasswordResetTokenImpl } from "../../infrastructure/database/implementation/forgot.password.token.impl";
 import { IForgotPasswordTokensRepository } from "../../domain/dbrepository/forgot.password.token.respository";
+import { LogoutController } from "../controllers/logout.controller";
 
 export const authRouter = Router();
 
@@ -47,6 +48,7 @@ const refreshController = new RefreshTokenController(refreshUseCase);
 const forgotPasswordController = new ForgotPasswrodController(forgotPasswordUseCase);
 const verifyResetTokenController = new VerifyResetTokenController(verifyRefreshTokenUseCase);
 const resetPasswordController = new ResetPasswordController(resetPasswordUseCase);
+const logoutController = new LogoutController()
 
 authRouter.post("/register", (req, res) => signupController.handle(req, res));
 authRouter.post("/login", (req, res) => signinController.handle(req, res));
@@ -54,6 +56,7 @@ authRouter.post("/refresh-token", verifyRefreshToken, (req, res) => refreshContr
 authRouter.post("/forgot-password", (req, res) => forgotPasswordController.handle(req, res));
 authRouter.get("/verify-reset-token/:token", (req, res) => verifyResetTokenController.handle(req, res));
 authRouter.post("/reset-password", (req, res) => resetPasswordController.handle(req, res));
+authRouter.post("/logout", verifyAccessToken, (req, res) => logoutController.handle(req, res));
 
 authRouter.get("/test", verifyAccessToken, (req, res) => {
 	res.json({ success: true, message: "Hello, authenticated user!" });

@@ -86,7 +86,7 @@ export default function Home() {
 			<main className="flex-1">
 				{/* Hero Section */}
 				<section className="relative overflow-hidden mt-10 px-10 md:px-20 xl:px-25 flex justify-center">
-					<div className="container relative z-10 grid gap-8 md:grid-cols-2 md:items-center items-center">
+					<div className="container relative z-10 grid gap-8 md:grid-cols-2 md:items-center items-center ">
 						{/* Image Section - Moves to top on small screens */}
 						<div className="relative h-[400px] w-full flex justify-center items-center order-first md:order-last">
 							<div className="md:w-3/4 relative">

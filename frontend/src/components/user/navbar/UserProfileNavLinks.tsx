@@ -1,15 +1,36 @@
+import { logoutSession } from "@/api/user/authentication";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { UserInterface } from "@/interfaces/interfaces";
+import { logout } from "@/store/slices/authSlice";
 import { Bell, LogOut, Settings, User } from "lucide-react";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 interface UserProfileNavLinksProps {
 	user: UserInterface;
 }
 
 export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
+	const dispatch = useDispatch();
+
+	const handleLogout = async () => {
+		try {
+			const response = await logoutSession();
+			if (response.success) {
+				localStorage.removeItem("persist:root");
+				dispatch(logout());
+				// navigate("/");
+				toast.success(response.message);
+			}
+		} catch (error) {
+			toast.error("Failed to log out");
+			console.error("Error logging out:", error);
+		}
+	};
+
 	return (
 		<div className="flex items-center gap-4 pr-10 md:pr-20 xl:pr-25 justify-center ">
 			<Button variant="ghost" size="icon" className="relative">
@@ -48,7 +69,7 @@ export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
 						</DropdownMenuItem>
 					</DropdownMenuGroup>
 					<DropdownMenuSeparator />
-					<DropdownMenuItem className="hover:bg-red-600">
+					<DropdownMenuItem className="hover:bg-red-600" onClick={handleLogout}>
 						<LogOut className="mr-2 h-4 w-4 hover:text-primary-foreground" />
 						<span className="hover:text-primary-foreground">Log out</span>
 					</DropdownMenuItem>
