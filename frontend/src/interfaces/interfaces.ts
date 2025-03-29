@@ -56,3 +56,10 @@ export interface Mentor {
 	isPaid: boolean;
 	rate?: string; // Optional, only present if isPaid is true
 }
+
+export interface ISignupData {
+	email: string;
+	password: string;
+	firstName: string;
+	lastName: string;
+}

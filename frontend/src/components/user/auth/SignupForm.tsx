@@ -3,26 +3,29 @@ import { LucideUserPlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignupFormData, signupSchema } from "@/schema/auth.form";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { login } from "@/store/slices/authSlice";
-import axiosInstance from "@/api/api.config";
+// import { useNavigate } from "react-router-dom";
+// import { useDispatch } from "react-redux";
+// import { login } from "@/store/slices/authSlice";
+// import axiosInstance from "@/api/api.config";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ISignupData } from "@/interfaces/interfaces";
+import { sendOtp } from "@/api/user/authentication";
 
-type FormState = "login" | "signup" | "forgot-password";
+type FormState = "login" | "signup" | "forgot-password" | "otp-varification";
 
 interface SignupFormProps {
 	setFormState: (value: FormState) => void;
+	setSignupData: (data: ISignupData) => void;
 }
 
-export default function SignupForm({ setFormState }: SignupFormProps) {
-	const navigate = useNavigate();
-	const dispatch = useDispatch();
+export default function SignupForm({ setFormState, setSignupData }: SignupFormProps) {
+	// const navigate = useNavigate();
+	// const dispatch = useDispatch();
 
 	const form = useForm<SignupFormData>({
 		resolver: zodResolver(signupSchema),
@@ -31,13 +34,17 @@ export default function SignupForm({ setFormState }: SignupFormProps) {
 
 	const onSubmit = async (data: SignupFormData) => {
 		try {
-			const response = await axiosInstance.post("/register", data);
-			if (response.data.success) {
-				dispatch(login(response.data.user));
-				form.reset();
-				setFormState("login");
-				navigate("/dashboard", { replace: true });
-				toast.success("Signup successful");
+			const response = await sendOtp(data.email);
+			if (response.success) {
+				toast.success("OTP sent to your email");
+				// Store signup data and move to OTP verification
+				setSignupData({
+					firstName: data.firstName,
+					lastName: data.lastName,
+					email: data.email,
+					password: data.password,
+				});
+				setFormState("otp-varification");
 			}
 		} catch (error: any) {
 			console.error("Signup error:", error);

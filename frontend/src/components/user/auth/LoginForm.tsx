@@ -33,7 +33,7 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 	const onSubmit = async (data: LoginFormData) => {
 		try {
 			const response = await axiosInstance.post("/login", data);
-			console.log('response', response)
+			console.log("response", response);
 			if (response.data.success) {
 				dispatch(login(response.data.user));
 				form.reset();
@@ -52,8 +52,19 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 				<CardTitle className="text-xl">Login to your account</CardTitle>
 				<CardDescription>Enter your email and password to access your account</CardDescription>
 			</CardHeader>
+
 			<form onSubmit={form.handleSubmit(onSubmit)}>
 				<div className="space-y-4 px-6">
+					<GoogleLoginButton />
+					<div className="relative w-full my-4">
+						<div className="absolute inset-0 flex items-center">
+							<span className="w-full border-t border-muted"></span>
+						</div>
+						<div className="relative flex justify-center text-xs uppercase">
+							<span className="bg-white px-2 text-muted-foreground">Or continue with</span>
+						</div>
+					</div>
+
 					<div className="space-y-2">
 						<Label htmlFor="email">Email</Label>
 						<Input id="email" type="email" placeholder="m@example.com" {...form.register("email")} />
@@ -75,17 +86,6 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 						<LucideLogIn className="mr-2 h-4 w-4" />
 						Login
 					</Button>
-
-					<div className="relative w-full my-4">
-						<div className="absolute inset-0 flex items-center">
-							<span className="w-full border-t border-muted"></span>
-						</div>
-						<div className="relative flex justify-center text-xs uppercase">
-							<span className="bg-white px-2 text-muted-foreground">Or continue with</span>
-						</div>
-					</div>
-
-					<GoogleLoginButton />
 
 					<p className="text-center text-sm text-muted-foreground">
 						Don’t have an account?{" "}
