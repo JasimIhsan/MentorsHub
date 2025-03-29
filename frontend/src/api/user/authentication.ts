@@ -20,3 +20,15 @@ export const resetPassword = async (token: string, newPassword: string) => {
 		throw new Error(error?.response?.data?.message);
 	}
 };
+
+export const logoutSession = async () => {
+	try {
+		const response = await axiosInstance.post(`/logout`);
+		return response.data;
+	} catch (error) {
+		console.log(`Error form logoutSession api : `, error);
+		if (error instanceof Error) {
+			throw new Error(error.message);
+		}
+	}
+};

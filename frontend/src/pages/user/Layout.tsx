@@ -13,7 +13,6 @@ import { UserInterface } from "@/interfaces/interfaces";
 export default function MainLayout() {
 	const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
 	const navigate = useNavigate();
-	console.log('user in layout: ' , user);
 	
 	return (
 		<div className="flex min-h-screen flex-col items-stretch">
