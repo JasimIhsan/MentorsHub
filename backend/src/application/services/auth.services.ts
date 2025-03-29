@@ -1,4 +1,4 @@
-import { SignupUseCase } from "../usecases/signup.usecase";
+import { SignupUseCase } from "../usecases/authentication/signup.usecase";
 import { UserRepositoryImpl } from "../../infrastructure/database/implementation/user.repository.impl";
 
 

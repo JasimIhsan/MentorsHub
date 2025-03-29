@@ -24,7 +24,7 @@ const refreshAccessToken = async () => {
 	} catch (error) {
 		// console.log("Error from refreshing access token : ", error);
 		if (axios.isAxiosError(error) && error.response?.status === 401) {
-			localStorage.clear();
+			localStorage.removeItem("persist:root");
 			window.location.href = "/authenticate";
 			return;
 		}

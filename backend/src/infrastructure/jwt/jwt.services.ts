@@ -10,7 +10,7 @@ if (!JWT_ACCESS_TOKEN || !JWT_REFRESH_TOKEN) {
 	throw new Error("JWT secret keys are missing in .env file!");
 }
 
-export class TokenServices implements ITokenService {
+export class TokenServicesImpl implements ITokenService {
 	generateAccessToken(userId: string): string {
 		return jwt.sign({userId}, JWT_ACCESS_TOKEN, { expiresIn: "5m" });
 	}

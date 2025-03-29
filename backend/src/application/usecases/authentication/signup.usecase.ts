@@ -1,7 +1,7 @@
-import { UserInterface, UserEntity } from "../../domain/entities/user.entity";
-import { IUserRepository } from "../../domain/repository/user.repository";
+import { UserInterface, UserEntity } from "../../../domain/entities/user.entity";
+import { IUserRepository } from "../../../domain/dbrepository/user.repository";
 import bcrypt from "bcrypt";
-import { ITokenService } from "../providers/token.service.interface";
+import { ITokenService } from "../../providers/token.service.interface";
 
 export class SignupUseCase {
 	constructor(private userRepository: IUserRepository, private tokenSerivice: ITokenService) {}

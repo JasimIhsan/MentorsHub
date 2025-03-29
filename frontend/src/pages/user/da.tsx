@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 // import { logout } from "@/store/slices/authSlice";
 import { RootState } from "@/store/store";
 import axiosInstance from "@/api/api.config";
+import { CustomHeader } from "@/components/custom-ui/header";
 
 export default function DashboardPage() {
 	// const dispatch = useDispatch();
@@ -19,49 +20,46 @@ export default function DashboardPage() {
 		return null;
 	}
 
-	const test = async() => {
-		const response = await axiosInstance.get('/test');
-		console.log(response); 
-	}
+	const test = async () => {
+		const response = await axiosInstance.get("/test");
+		console.log(response);
+	};
 
 	return (
-		<div className="container py-8">
+		<div className="container pb-6">
 			<div className="flex flex-col gap-8">
+				<div className="flex flex-col gap-2 h-40 justify-center px-10 md:px-20 xl:px-25 bg-gradient-to-b from-blue-100/70 to-background">
+					<h1 className="text-3xl font-bold tracking-tight">
+						Welcome back, {user.firstName} {user.lastName}
+					</h1>
+					<p className="text-muted-foreground">Here's what's happening with your mentorship journey.</p>
+				</div>
 				{/* Welcome Section */}
-				<section className="flex flex-col gap-4">
-					<div className="flex flex-col gap-2">
-						<h1 className="text-3xl font-bold tracking-tight">
-							Welcome back, {user.firstName} {user.lastName}
-						</h1>
-						<p className="text-muted-foreground">Here's what's happening with your mentorship journey.</p>
-					</div>
-
+				<section className="flex flex-col gap-4 px-10 md:px-20 xl:px-25 justify-center">
 					{/* Gamification Card */}
-					<Card className="bg-gradient-to-r from-primary/10 to-purple-500/10 border-primary/20">
-						<CardContent className="p-6">
+					<Card className="bg-gradient-to-r from-purple-900 to-purple-700 ">
+						<CardContent className="px-6 py-3">
 							<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 								<div className="flex items-center gap-4">
-									<div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+									<div className="flex h-15 w-15 items-center justify-center rounded-full bg-white">
 										<Award className="h-6 w-6 text-primary" />
 									</div>
 									<div>
-										<h3 className="font-medium">Level 12 Growth Seeker</h3>
-										<div className="flex items-center gap-2 text-sm text-muted-foreground">
+										<h3 className="font-bold text-xl text-muted">Level 12 Growth Seeker</h3>
+										<div className="flex items-center gap-2 text-sm text-muted">
 											<span>1,240 XP</span>
 											<span>•</span>
 											<span>760 XP until Level 13</span>
 										</div>
 									</div>
 								</div>
-								<Button onClick={test}>
-									Test
-								</Button>
+								<Button onClick={test}>Test</Button>
 								<div className="flex items-center gap-3">
 									<div className="flex items-center gap-1">
 										<Zap className="h-4 w-4 text-yellow-500" />
-										<span className="text-sm font-medium">8 Week Streak!</span>
+										<span className="text-sm text-muted font-medium">8 Week Streak!</span>
 									</div>
-									<Button asChild size="sm">
+									<Button asChild size="sm" className="bg-background text-primary hover:bg-secondary">
 										<Link to="/gamification">View Progress</Link>
 									</Button>
 								</div>
@@ -71,11 +69,10 @@ export default function DashboardPage() {
 
 					{/* Upcoming Sessions */}
 					<Card>
-						<CardHeader className="pb-3">
+						<CardHeader >
 							<div className="flex items-center justify-between">
 								<div>
-									<CardTitle>Upcoming Sessions</CardTitle>
-									<CardDescription>Your scheduled mentorship sessions</CardDescription>
+									<CustomHeader head="Upcoming Sessions" description="Your scheduled mentorship sessions"/>
 								</div>
 								<Button variant="ghost" size="sm" asChild>
 									<Link to="/sessions">View All</Link>
@@ -129,11 +126,10 @@ export default function DashboardPage() {
 
 					{/* Notifications */}
 					<Card>
-						<CardHeader className="pb-3">
+						<CardHeader>
 							<div className="flex items-center justify-between">
 								<div>
-									<CardTitle>Notifications</CardTitle>
-									<CardDescription>Stay updated with your mentorship activities</CardDescription>
+									<CustomHeader head="Notifications" description="Stay updated with your mentorship activities"/>
 								</div>
 								<Button variant="ghost" size="sm">
 									Mark All as Read
@@ -179,12 +175,11 @@ export default function DashboardPage() {
 				</section>
 
 				{/* Quick Links and Mentors Ready Now */}
-				<div className="grid gap-6 md:grid-cols-2">
+				<div className="grid gap-6 md:grid-cols-2 px-10 md:px-20 xl:px-25 justify-center">
 					{/* Quick Links */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Quick Links</CardTitle>
-							<CardDescription>Frequently used actions</CardDescription>
+							<CustomHeader head="Quick Links" description="Frequently used actions"/>
 						</CardHeader>
 						<CardContent className="grid gap-4 sm:grid-cols-2">
 							<Button variant="outline" className="h-auto py-4 justify-start text-left" asChild>
@@ -219,7 +214,7 @@ export default function DashboardPage() {
 						<CardHeader>
 							<div className="flex items-center justify-between">
 								<div>
-									<CardTitle>Mentors Ready Now</CardTitle>
+									<CardTitle className="text-xl">Mentors Ready Now</CardTitle>
 									<CardDescription>Connect with mentors available right now</CardDescription>
 								</div>
 								<Button variant="ghost" size="sm" asChild>

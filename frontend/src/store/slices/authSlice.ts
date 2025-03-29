@@ -1,4 +1,4 @@
-import { UserInterface } from "@/interfaces/user.interface";
+import { UserInterface } from "@/interfaces/interfaces";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface AuthState {

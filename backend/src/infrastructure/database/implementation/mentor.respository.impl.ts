@@ -1,5 +1,5 @@
 import { MentorDetails } from "../../../domain/entities/mentor.detailes.entity";
-import { IMentorDetailsRepository } from "../../../domain/repository/mentor.details.repository";
+import { IMentorDetailsRepository } from "../../../domain/dbrepository/mentor.details.repository";
 import { MentorDetailsModel } from "../models/mentor.details.model";
 // Helper function for error handling
 const handleError = (error: unknown, message: string): never => {

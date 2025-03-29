@@ -19,6 +19,7 @@ export interface MentorDetails {
 	yearOfExperience?: number | null;
 	createdAt: Date;
 	updatedAt?: Date | null;
+	featuredMentor?: boolean | null;
 }
 
 export class MentorProfileEntity {
@@ -31,6 +32,7 @@ export class MentorProfileEntity {
 			education: data.education || [],
 			expertiseIn: data.expertiseIn || null,
 			title: data.title || null,
+
 			yearOfExperience: data.yearOfExperience || null,
 			createdAt: new Date(),
 			updatedAt: data.updatedAt || null,

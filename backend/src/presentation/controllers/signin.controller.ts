@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SigninUseCase } from "../../application/usecases/signin.usecase";
+import { SigninUseCase } from "../../application/usecases/authentication/signin.usecase";
 
 export class SigninController {
 	constructor(private signinUseCase: SigninUseCase) {}

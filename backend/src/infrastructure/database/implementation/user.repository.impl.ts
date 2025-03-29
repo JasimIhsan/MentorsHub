@@ -1,5 +1,5 @@
 import { UserEntity, UserInterface } from "../../../domain/entities/user.entity";
-import { IUserRepository } from "../../../domain/repository/user.repository";
+import { IUserRepository } from "../../../domain/dbrepository/user.repository";
 import { UserModel } from "../models/user.model";
 
 // Helper function for error handling
@@ -12,26 +12,42 @@ export class UserRepositoryImpl implements IUserRepository {
 	async createUser(user: UserEntity): Promise<UserEntity> {
 		try {
 			const newUser = new UserModel(user);
-			const savedUser = await newUser.save()
-			return new UserEntity(savedUser);
+			const savedUser = await newUser.save();
+			return UserEntity.fromDBDocument(savedUser);
 		} catch (error) {
 			return handleError(error, "Error creating user");
 		}
 	}
 
-	async findUserByEmail(email: string): Promise<UserInterface | null> {
+	async findUserByEmail(email: string): Promise<UserEntity | null> {
 		try {
-			return await UserModel.findOne({ email });
+			const userDoc = await UserModel.findOne({ email });
+			return UserEntity.fromDBDocument(userDoc);
 		} catch (error) {
 			return handleError(error, "Error finding user by email");
 		}
 	}
 
-	async findUserById(id: string): Promise<UserInterface | null> {
+	async findUserById(id: string): Promise<UserEntity | null> {
 		try {
-			return await UserModel.findById(id);
+			const userDoc = await UserModel.findById(id);
+			return UserEntity.fromDBDocument(userDoc);
 		} catch (error) {
 			return handleError(error, "Error finding user by ID");
 		}
+	}
+
+	async findUserByResetToken(token: string): Promise<UserEntity | null> {
+		try {
+			const userDoc = await UserModel.findOne({ resetPasswordToken: token });
+			if (!userDoc) return null;
+			return UserEntity.fromDBDocument(userDoc);
+		} catch (error) {
+			return handleError(error, "Error finding user by reset token");
+		}
+	}
+
+	async save(user: UserEntity): Promise<void> {
+		await UserModel.updateOne({ _id: user.getId() }, user.getProfile(), { upsert: true });
 	}
 }

@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { TokenServices } from "../../infrastructure/jwt/jwt.services";
+import { TokenServicesImpl } from "../../infrastructure/jwt/jwt.services";
 import { AuthenticatedRequest } from "../../types/express";
 
-const tokenService = new TokenServices();
+const tokenService = new TokenServicesImpl();
 export const verifyAccessToken = (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const token = req.cookies.access_token || req.headers.authorization?.split(" ")[1];

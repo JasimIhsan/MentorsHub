@@ -14,11 +14,13 @@ import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+type FormState = "login" | "signup" | "forgot-password";
+
 interface SignupFormProps {
-	setIsLogin: (value: boolean) => void;
+	setFormState: (value: FormState) => void;
 }
 
-export default function SignupForm({ setIsLogin }: SignupFormProps) {
+export default function SignupForm({ setFormState }: SignupFormProps) {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
@@ -33,7 +35,7 @@ export default function SignupForm({ setIsLogin }: SignupFormProps) {
 			if (response.data.success) {
 				dispatch(login(response.data.user));
 				form.reset();
-				setIsLogin(true);
+				setFormState("login");
 				navigate("/dashboard", { replace: true });
 				toast.success("Signup successful");
 			}
@@ -46,7 +48,7 @@ export default function SignupForm({ setIsLogin }: SignupFormProps) {
 	return (
 		<>
 			<CardHeader className="mb-4">
-				<CardTitle  className="text-xl">Create an account</CardTitle>
+				<CardTitle className="text-xl">Create an account</CardTitle>
 				<CardDescription>Enter your details to create a new account</CardDescription>
 			</CardHeader>
 			<form onSubmit={form.handleSubmit(onSubmit)}>
@@ -86,7 +88,7 @@ export default function SignupForm({ setIsLogin }: SignupFormProps) {
 					</Button>
 					<p className="text-center text-sm text-muted-foreground">
 						Already have an account?{" "}
-						<button type="button" onClick={() => setIsLogin(true)} className="text-primary hover:underline hover:cursor-pointer">
+						<button type="button" onClick={() => setFormState("login")} className="text-primary hover:underline hover:cursor-pointer">
 							Login
 						</button>
 					</p>

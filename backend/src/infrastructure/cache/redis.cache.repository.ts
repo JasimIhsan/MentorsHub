@@ -1,5 +1,5 @@
 import { createClient } from "redis";
-import { ICacheRepository } from "../../domain/repository/cache.respository";
+import { ICacheRepository } from "../../domain/dbrepository/cache.respository";
 
 export class RedisCacheRepository implements ICacheRepository {
 	private client = createClient({ url: "redis://localhost:6379" });

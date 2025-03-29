@@ -1,7 +1,7 @@
 import { ObjectId } from "mongoose";
 import bcrypt from "bcrypt";
 
-// Interface representing the structure of user
+// Interface representing the user structure
 export interface UserInterface {
 	id?: string;
 	email: string;
@@ -13,137 +13,119 @@ export interface UserInterface {
 	bio?: string | null;
 	interests?: string[] | null;
 	skills?: string[] | null;
-	isActive?: boolean | null;
-	location?: {
-		city: string | null;
-		country: string | null;
-		timezone: string | null;
-	};
+	isActive: boolean;
+	location?: { city: string | null; country: string | null; timezone: string | null };
 	createdAt?: Date;
 	updatedAt?: Date | null;
 	lastActive?: Date | null;
-	isVerified?: boolean | null;
+	isVerified?: boolean;
 	mentorProfileId?: ObjectId | null;
 	mentorRequestStatus?: string | null;
 	rating?: number | null;
 	sessionCompleted?: number | null;
 	featuredMentor?: boolean | null;
 	badges?: ObjectId[] | null;
+	resetPasswordToken?: string | null;
+	resetPasswordExpires?: number | null;
 }
 
 type UserRole = "user" | "mentor";
 
-// ✅ BaseEntity for common properties
 class BaseEntity {
-	protected id?: string;
-	protected createdAt?: Date;
-	protected updatedAt?: Date | null;
+	constructor(protected id?: string, protected createdAt: Date = new Date(), protected updatedAt: Date | null = null) {}
 
-	constructor(id?: string, createdAt?: Date, updatedAt?: Date | null) {
-		this.id = id;
-		this.createdAt = createdAt || new Date();
-		this.updatedAt = updatedAt || null;
-	}
-
-	public getId(): string | undefined {
+	getId(): string | undefined {
 		return this.id;
 	}
 }
 
-// UserEntity with proper encapsulation
 export class UserEntity extends BaseEntity {
-	private email: string;
-	private password: string;
-	private firstName: string;
-	private lastName: string;
-	private role?: UserRole;
-	private avatar?: string | null;
-	private bio?: string | null;
-	private interests?: string[] | null;
-	private skills?: string[] | null;
 	private isActive: boolean;
-	private location?: {
-		city: string | null;
-		country: string | null;
-		timezone: string | null;
-	};
-	private lastActive?: Date | null;
-	private isVerified?: boolean | null;
-	private mentorProfileId?: ObjectId | null;
-	private mentorRequestStatus?: string | null;
-	private rating?: number | null;
-	private sessionCompleted?: number | null;
-	private featuredMentor?: boolean | null;
-	private badges?: ObjectId[] | null;
+	private role: UserRole;
 
-	// Private constructor to enforce controlled instance creation
-	constructor(user: UserInterface) {
+	constructor(private user: UserInterface) {
 		super(user.id, user.createdAt, user.updatedAt);
-		this.email = user.email;
-		this.password = user.password;
-		this.firstName = user.firstName;
-		this.lastName = user.lastName;
-		this.role = user.role || "user";
-		this.avatar = user.avatar || null;
-		this.bio = user.bio || null;
-		this.interests = user.interests || null;
-		this.skills = user.skills || null;
 		this.isActive = user.isActive ?? true;
-		this.location = user.location || { city: null, country: null, timezone: null };
-		this.lastActive = user.lastActive || null;
-		this.isVerified = user.isVerified || false;
-		this.mentorProfileId = user.mentorProfileId || null;
-		this.mentorRequestStatus = user.mentorRequestStatus || null;
-		this.rating = user.rating || null;
-		this.sessionCompleted = user.sessionCompleted || null;
-		this.featuredMentor = user.featuredMentor || null;
-		this.badges = user.badges || null;
+		this.role = user.role || "user";
 	}
 
-	// Factory method for creating a new UserEntity
 	static async create(email: string, password: string, firstName: string, lastName: string) {
 		const hashedPassword = await bcrypt.hash(password, 10);
-		return new UserEntity({ email, password: hashedPassword, firstName, lastName });
+		return new UserEntity({ email, password: hashedPassword, firstName, lastName, isActive: true });
 	}
 
-	// Password validation
-	async isPasswordValid(plainPassword: string): Promise<boolean> {
-		return await bcrypt.compare(plainPassword, this.password);
+	// Convert MongoDB user document to UserEntity (For existing users)
+	static fromDBDocument(userDoc: any): UserEntity {
+		console.log(`fromDBDocument`);
+		return new UserEntity({
+			id: userDoc._id?.toString(),
+			email: userDoc.email,
+			password: userDoc.password,
+			firstName: userDoc.firstName,
+			lastName: userDoc.lastName,
+			role: userDoc.role || "user",
+			avatar: userDoc.avatar ?? null,
+			bio: userDoc.bio ?? null,
+			interests: userDoc.interests ?? null,
+			skills: userDoc.skills ?? null,
+			isActive: userDoc.isActive ?? true,
+			location: userDoc.location ?? { city: null, country: null, timezone: null },
+			createdAt: userDoc.createdAt ?? new Date(),
+			updatedAt: userDoc.updatedAt ?? null,
+			lastActive: userDoc.lastActive ?? null,
+			isVerified: userDoc.isVerified ?? false,
+			mentorProfileId: userDoc.mentorProfileId ?? null,
+			mentorRequestStatus: userDoc.mentorRequestStatus ?? null,
+			rating: userDoc.rating ?? null,
+			sessionCompleted: userDoc.sessionCompleted ?? null,
+			featuredMentor: userDoc.featuredMentor ?? null,
+			badges: userDoc.badges ?? null,
+			resetPasswordToken: userDoc.resetPasswordToken ?? null,
+			resetPasswordExpires: userDoc.resetPasswordExpires ?? null,
+		});
 	}
 
-	// Getters for accessing private fields safely
-	public getEmail(): string {
-		return this.email;
+	static async hashPassword(password: string) {
+		return bcrypt.hash(password, 10);
 	}
 
-	public getRole(): UserRole | undefined {
+	async isPasswordValid(plainPassword: string) {
+		return bcrypt.compare(plainPassword, this.user.password);
+	}
+
+	updateUserDetails(updatedData: Partial<UserInterface>) {
+		this.user = { ...this.user, ...updatedData, updatedAt: new Date() };
+	}
+
+	toggleActiveStatus(status: boolean) {
+		this.isActive = status;
+		this.user.isActive = status;
+		this.user.updatedAt = new Date();
+	}
+
+	verifyUser() {
+		this.user.isVerified = true;
+		this.user.updatedAt = new Date();
+	}
+
+	setPasswordResetToken(token: string, expiresIn: number) {
+		this.user.resetPasswordToken = token;
+		this.user.resetPasswordExpires = Date.now() + expiresIn;
+	}
+
+	getEmail() {
+		return this.user.email;
+	}
+
+	getRole() {
 		return this.role;
 	}
 
-	public getName(): string {
-		return `${this.firstName} ${this.lastName}`;
+	getName() {
+		return `${this.user.firstName} ${this.user.lastName}`;
 	}
 
-	public getProfile(): Partial<UserInterface> {
-		return {
-			id: this.id,
-			email: this.email,
-			firstName: this.firstName,
-			lastName: this.lastName,
-			role: this.role,
-			avatar: this.avatar,
-			bio: this.bio,
-			interests: this.interests,
-			skills: this.skills,
-			isActive: this.isActive,
-			isVerified: this.isVerified,
-			mentorProfileId: this.mentorProfileId,
-			mentorRequestStatus: this.mentorRequestStatus,
-			rating: this.rating,
-			sessionCompleted: this.sessionCompleted,
-			featuredMentor: this.featuredMentor,
-			badges: this.badges,
-			location: this.location,
-		};
+	getProfile(): Partial<UserInterface> {
+		return { ...this.user, isActive: this.isActive, role: this.role };
 	}
 }

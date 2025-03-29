@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { TokenServices } from "../../infrastructure/jwt/jwt.services";
+import { TokenServicesImpl } from "../../infrastructure/jwt/jwt.services";
 import { AuthenticatedRequest } from "../../types/express";
 
-const tokenService = new TokenServices();
+const tokenService = new TokenServicesImpl();
 
 export const verifyRefreshToken = (req: Request, res: Response, next: NextFunction): void => {
 	try {

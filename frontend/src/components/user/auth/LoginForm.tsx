@@ -15,11 +15,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import GoogleLoginButton from "./GoogleLoginButton";
 
+type FormState = "login" | "signup" | "forgot-password";
+
 interface LoginFormProps {
-	setIsLogin: (value: boolean) => void;
+	setFormState: (value: FormState) => void;
 }
 
-export default function LoginForm({ setIsLogin }: LoginFormProps) {
+export default function LoginForm({ setFormState }: LoginFormProps) {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
@@ -31,15 +33,16 @@ export default function LoginForm({ setIsLogin }: LoginFormProps) {
 	const onSubmit = async (data: LoginFormData) => {
 		try {
 			const response = await axiosInstance.post("/login", data);
+			console.log('response', response)
 			if (response.data.success) {
 				dispatch(login(response.data.user));
 				form.reset();
 				navigate("/dashboard", { replace: true });
 				toast.success("Login successful");
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Login error:", error);
-			toast.error("Login failed");
+			toast.error(error.response.data.error);
 		}
 	};
 
@@ -61,6 +64,11 @@ export default function LoginForm({ setIsLogin }: LoginFormProps) {
 						<Input id="password" type="password" {...form.register("password")} />
 						{form.formState.errors.password && <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>}
 					</div>
+					<div className="text-right">
+						<button type="button" onClick={() => setFormState("forgot-password")} className="text-sm text-primary hover:underline">
+							Forgot Password?
+						</button>
+					</div>
 				</div>
 				<CardFooter className="flex flex-col space-y-4 my-4 px-6">
 					<Button className="w-full" size="lg" type="submit" disabled={form.formState.isSubmitting}>
@@ -81,7 +89,7 @@ export default function LoginForm({ setIsLogin }: LoginFormProps) {
 
 					<p className="text-center text-sm text-muted-foreground">
 						Don’t have an account?{" "}
-						<button type="button" onClick={() => setIsLogin(false)} className="text-primary hover:underline hover:cursor-pointer">
+						<button type="button" onClick={() => setFormState("signup")} className="text-primary hover:underline hover:cursor-pointer">
 							Sign up
 						</button>
 					</p>
