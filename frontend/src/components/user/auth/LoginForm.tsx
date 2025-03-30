@@ -33,7 +33,6 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 	const onSubmit = async (data: LoginFormData) => {
 		try {
 			const response = await axiosInstance.post("/login", data);
-			console.log("response", response);
 			if (response.data.success) {
 				dispatch(login(response.data.user));
 				form.reset();

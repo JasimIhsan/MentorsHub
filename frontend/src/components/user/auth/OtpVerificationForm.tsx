@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 // import { useDispatch } from "react-redux";
-import { verifyOtpAndCompleteRegistration } from "@/api/user/authentication";
+import { resendOTP, verifyOtpAndCompleteRegistration } from "@/api/user/authentication";
 import { ISignupData } from "@/interfaces/interfaces";
+import { useDispatch } from "react-redux";
+import { login } from "@/store/slices/authSlice";
 
 type FormState = "login" | "signup" | "forgot-password" | "reset-password" | "otp-varification";
 
@@ -24,6 +26,8 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 	const [resendLoading, setResendLoading] = useState(false);
 	const [timer, setTimer] = useState(5); //150 2:30 minutes in seconds
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+	const dispatch = useDispatch();
+
 	// const [error, setError] = useState(false);
 	// const dispatch = useDispatch();
 
@@ -89,43 +93,44 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 			return;
 		}
 
-		const response = await verifyOtpAndCompleteRegistration(otpString, signupData);
+		try {
+			const response = await verifyOtpAndCompleteRegistration(otpString, signupData);
+			console.log("response: ", response);
 
-		if (response.success) {
-			// dispatch(login(mockResponse.data.user));
-			setFormState("login");
-			toast.success("Account created successfully");
-			navigate("/dashboard", { replace: true });
+			if (response.success) {
+				dispatch(login(response.user));
+				setFormState("login");
+				toast.success("Account created successfully");
+				navigate("/dashboard", { replace: true });
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				toast.error(error.message);
+			}
+		} finally {
+			setLoading(false);
 		}
-
-		// Add your OTP verification logic here
-		// const response = await axiosInstance.post("/register", data);
-		// if (response.data.success) {
-		// dispatch(login(response.data.user));
-		// 	form.reset();
-		// 	setFormState("login");
-		// 	navigate("/dashboard", { replace: true });
-		// 	toast.success("Signup successful");
-		// }
-		setLoading(false);
 	};
 
 	const handleResend = async () => {
 		setResendLoading(true);
-		// Add your resend OTP logic here
-		// For example:
-		// const result = await resendOTP({ email: email as string });
-
 		try {
 			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			setTimer(5); // Reset timer
-			setOtp(["", "", "", "", "", ""]); // Clear OTP inputs
-			toast.success("New OTP sent successfully");
+			const response = await resendOTP(signupData.email);
+			if (response.success) {
+				setTimer(5); // Reset timer
+				setOtp(["", "", "", "", "", ""]);
+				toast.success("New OTP sent successfully");
+			} else {
+				toast.error("Failed to resend OTP");
+			}
 		} catch (error) {
-			toast.error("Failed to resend OTP");
+			if (error instanceof Error) {
+				toast.error(error.message);
+			}
+		} finally {
+			setResendLoading(false);
 		}
-		setResendLoading(false);
 	};
 
 	const handleBack = () => {

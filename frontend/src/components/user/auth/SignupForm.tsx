@@ -1,5 +1,5 @@
 // src/components/auth/SignupForm.tsx
-import { LucideUserPlus } from "lucide-react";
+import { Loader2, LucideUserPlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignupFormData, signupSchema } from "@/schema/auth.form";
@@ -36,8 +36,6 @@ export default function SignupForm({ setFormState, setSignupData }: SignupFormPr
 		try {
 			const response = await sendOtp(data.email);
 			if (response.success) {
-				toast.success("OTP sent to your email");
-				// Store signup data and move to OTP verification
 				setSignupData({
 					firstName: data.firstName,
 					lastName: data.lastName,
@@ -45,10 +43,13 @@ export default function SignupForm({ setFormState, setSignupData }: SignupFormPr
 					password: data.password,
 				});
 				setFormState("otp-varification");
+				toast.success("OTP sent to your email");
 			}
-		} catch (error: any) {
+		} catch (error) {
 			console.error("Signup error:", error);
-			toast.error(error.response?.data?.message || "Signup failed");
+			if(error instanceof Error){
+				toast.error(error.message);
+			}
 		}
 	};
 
@@ -89,10 +90,17 @@ export default function SignupForm({ setFormState, setSignupData }: SignupFormPr
 					</div>
 				</div>
 				<CardFooter className="flex flex-col space-y-4 my-4 px-6">
-					<Button className="w-full" size="lg" type="submit" disabled={form.formState.isSubmitting}>
-						<LucideUserPlus className="mr-2 h-4 w-4" />
-						Create Account
-					</Button>
+					{!form.formState.isSubmitting ? (
+						<Button className="w-full" size="lg" type="submit">
+							<LucideUserPlus className="mr-2 h-4 w-4" />
+							Create Account
+						</Button>
+					) : (
+						<Button className="w-full" size="lg" type="submit" disabled={form.formState.isSubmitting}>
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							Sending OTP...
+						</Button>
+					)}
 					<p className="text-center text-sm text-muted-foreground">
 						Already have an account?{" "}
 						<button type="button" onClick={() => setFormState("login")} className="text-primary hover:underline hover:cursor-pointer">

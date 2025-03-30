@@ -36,13 +36,13 @@ export const logoutSession = async () => {
 
 export const sendOtp = async (email: string) => {
 	try {
-		const response = await axiosInstance.post(`/send-otp`, email);
+		console.log("email: ", email);
+		const response = await axiosInstance.post(`/send-otp`, { email: email });
+		console.log(`response: `, response);
 		return response.data;
-	} catch (error) {
+	} catch (error: any) {
 		console.log(`Error form sendOtp api : `, error);
-		if (error instanceof Error) {
-			throw new Error(error.message);
-		}
+		throw new Error(error.response.data.message);
 	}
 };
 
@@ -52,10 +52,18 @@ export const verifyOtpAndCompleteRegistration = async (otp: string, signupData: 
 	try {
 		const response = await axiosInstance.post(`/register`, { otp, signupData });
 		return response.data;
-	} catch (error) {
+	} catch (error: any) {
 		console.log(`Error form verifyOtpAndCompleteRegistration api : `, error);
-		if (error instanceof Error) {
-			throw new Error(error.message);
-		}
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const resendOTP = async (email: string) => {
+	try {
+		const response = await axiosInstance.post(`/resend-otp`, { email: email });
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error form resendOTP api : `, error);
+		throw new Error(error.response.data.message);
 	}
 };
