@@ -7,7 +7,6 @@ const tokenService = new TokenServicesImpl();
 export const verifyRefreshToken = (req: Request, res: Response, next: NextFunction): void => {
 	try {
 		const refreshToken = req.cookies.refresh_token;
-		console.log("refreshToken : ", refreshToken);
 		if (!refreshToken) {
 			res.clearCookie("access_token");
 			res.clearCookie("refresh_token");

@@ -1,28 +1,31 @@
 // src/components/auth/SignupForm.tsx
-import { LucideUserPlus } from "lucide-react";
+import { Loader2, LucideUserPlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignupFormData, signupSchema } from "@/schema/auth.form";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { login } from "@/store/slices/authSlice";
-import axiosInstance from "@/api/api.config";
+// import { useNavigate } from "react-router-dom";
+// import { useDispatch } from "react-redux";
+// import { login } from "@/store/slices/authSlice";
+// import axiosInstance from "@/api/api.config";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ISignupData } from "@/interfaces/interfaces";
+import { sendOtp } from "@/api/user/authentication";
 
-type FormState = "login" | "signup" | "forgot-password";
+type FormState = "login" | "signup" | "forgot-password" | "otp-varification";
 
 interface SignupFormProps {
 	setFormState: (value: FormState) => void;
+	setSignupData: (data: ISignupData) => void;
 }
 
-export default function SignupForm({ setFormState }: SignupFormProps) {
-	const navigate = useNavigate();
-	const dispatch = useDispatch();
+export default function SignupForm({ setFormState, setSignupData }: SignupFormProps) {
+	// const navigate = useNavigate();
+	// const dispatch = useDispatch();
 
 	const form = useForm<SignupFormData>({
 		resolver: zodResolver(signupSchema),
@@ -31,17 +34,22 @@ export default function SignupForm({ setFormState }: SignupFormProps) {
 
 	const onSubmit = async (data: SignupFormData) => {
 		try {
-			const response = await axiosInstance.post("/register", data);
-			if (response.data.success) {
-				dispatch(login(response.data.user));
-				form.reset();
-				setFormState("login");
-				navigate("/dashboard", { replace: true });
-				toast.success("Signup successful");
+			const response = await sendOtp(data.email);
+			if (response.success) {
+				setSignupData({
+					firstName: data.firstName,
+					lastName: data.lastName,
+					email: data.email,
+					password: data.password,
+				});
+				setFormState("otp-varification");
+				toast.success("OTP sent to your email");
 			}
-		} catch (error: any) {
+		} catch (error) {
 			console.error("Signup error:", error);
-			toast.error(error.response?.data?.message || "Signup failed");
+			if(error instanceof Error){
+				toast.error(error.message);
+			}
 		}
 	};
 
@@ -82,10 +90,17 @@ export default function SignupForm({ setFormState }: SignupFormProps) {
 					</div>
 				</div>
 				<CardFooter className="flex flex-col space-y-4 my-4 px-6">
-					<Button className="w-full" size="lg" type="submit" disabled={form.formState.isSubmitting}>
-						<LucideUserPlus className="mr-2 h-4 w-4" />
-						Create Account
-					</Button>
+					{!form.formState.isSubmitting ? (
+						<Button className="w-full" size="lg" type="submit">
+							<LucideUserPlus className="mr-2 h-4 w-4" />
+							Create Account
+						</Button>
+					) : (
+						<Button className="w-full" size="lg" type="submit" disabled={form.formState.isSubmitting}>
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							Sending OTP...
+						</Button>
+					)}
 					<p className="text-center text-sm text-muted-foreground">
 						Already have an account?{" "}
 						<button type="button" onClick={() => setFormState("login")} className="text-primary hover:underline hover:cursor-pointer">

@@ -22,6 +22,11 @@ import { ResetPasswordUseCase } from "../../application/usecases/forgot-password
 import { ForgotPasswordResetTokenImpl } from "../../infrastructure/database/implementation/forgot.password.token.impl";
 import { IForgotPasswordTokensRepository } from "../../domain/dbrepository/forgot.password.token.respository";
 import { LogoutController } from "../controllers/logout.controller";
+import { SendOtpUsecase } from "../../application/usecases/authentication/send.otp.usecase";
+import { SendOtpController } from "../controllers/send.otp.controller";
+import { ICacheRepository } from "../../domain/dbrepository/cache.respository";
+import { RedisCacheRepository } from "../../infrastructure/cache/redis.cache.repository";
+import { VerifyOtpUsecase } from "../../application/usecases/authentication/verify.otp.usecase";
 
 export const authRouter = Router();
 
@@ -32,23 +37,27 @@ const forgotResetRespository: IForgotPasswordTokensRepository = new ForgotPasswo
 // intialize interface
 const tokenInterface: ITokenService = new TokenServicesImpl();
 const emailService: IEmailService = new EmailServiceImpl();
+const redisService: ICacheRepository = new RedisCacheRepository();
 
 // intialize useCases
-const signupUseCase = new SignupUseCase(userRepository, tokenInterface);
 const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
 const refreshUseCase = new RefreshTokenUseCase(tokenInterface);
 const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, emailService, forgotResetRespository);
 const verifyRefreshTokenUseCase = new VerifyResetTokenUseCase(forgotResetRespository);
 const resetPasswordUseCase = new ResetPasswordUseCase(forgotResetRespository, userRepository);
+const verifyOTPUsecase = new VerifyOtpUsecase(redisService);
+const signupUseCase = new SignupUseCase(userRepository, tokenInterface, verifyOTPUsecase);
+const sendOtpUseCase = new SendOtpUsecase(emailService, userRepository, redisService);
 
 // initialize controller implementation
-const signupController = new SignupController(signupUseCase); 
+const signupController = new SignupController(signupUseCase);
 const signinController = new SigninController(signinUseCase);
 const refreshController = new RefreshTokenController(refreshUseCase);
 const forgotPasswordController = new ForgotPasswrodController(forgotPasswordUseCase);
 const verifyResetTokenController = new VerifyResetTokenController(verifyRefreshTokenUseCase);
 const resetPasswordController = new ResetPasswordController(resetPasswordUseCase);
-const logoutController = new LogoutController()
+const logoutController = new LogoutController();
+const sendOtpController = new SendOtpController(sendOtpUseCase);
 
 authRouter.post("/register", (req, res) => signupController.handle(req, res));
 authRouter.post("/login", (req, res) => signinController.handle(req, res));
@@ -57,6 +66,8 @@ authRouter.post("/forgot-password", (req, res) => forgotPasswordController.handl
 authRouter.get("/verify-reset-token/:token", (req, res) => verifyResetTokenController.handle(req, res));
 authRouter.post("/reset-password", (req, res) => resetPasswordController.handle(req, res));
 authRouter.post("/logout", verifyAccessToken, (req, res) => logoutController.handle(req, res));
+authRouter.post("/send-otp", (req, res) => sendOtpController.handle(req, res));
+authRouter.post("/resend-otp", (req, res) => sendOtpController.handle(req, res));
 
 authRouter.get("/test", verifyAccessToken, (req, res) => {
 	res.json({ success: true, message: "Hello, authenticated user!" });

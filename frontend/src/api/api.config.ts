@@ -16,13 +16,11 @@ const refreshAccessToken = async () => {
 			withCredentials: true, // include cookies in the request
 		});
 
-		console.log("response from refreshAccessToken : ", response);
 		const { accessToken } = response.data;
 		// Set the new access token in the cookie (should be secure and same-site)
 		axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 		return accessToken;
 	} catch (error) {
-		// console.log("Error from refreshing access token : ", error);
 		if (axios.isAxiosError(error) && error.response?.status === 401) {
 			localStorage.removeItem("persist:root");
 			window.location.href = "/authenticate";
@@ -73,7 +71,6 @@ axiosInstance.interceptors.response.use(
 
 				return axiosInstance(originalRequest);
 			} catch (refreshError) {
-				console.log("Error from refreshing access token : ", refreshError);
 				return Promise.reject(refreshError); // handle the token refresh error
 			}
 		}

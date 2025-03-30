@@ -1,3 +1,4 @@
+import { ISignupData } from "@/interfaces/interfaces";
 import axiosInstance from "../api.config";
 
 export const verifyResetToken = async (token: string) => {
@@ -30,5 +31,39 @@ export const logoutSession = async () => {
 		if (error instanceof Error) {
 			throw new Error(error.message);
 		}
+	}
+};
+
+export const sendOtp = async (email: string) => {
+	try {
+		console.log("email: ", email);
+		const response = await axiosInstance.post(`/send-otp`, { email: email });
+		console.log(`response: `, response);
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error form sendOtp api : `, error);
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const verifyOtpAndCompleteRegistration = async (otp: string, signupData: ISignupData) => {
+	console.log("signupData: ", signupData);
+	console.log("otp: ", otp);
+	try {
+		const response = await axiosInstance.post(`/register`, { otp, signupData });
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error form verifyOtpAndCompleteRegistration api : `, error);
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const resendOTP = async (email: string) => {
+	try {
+		const response = await axiosInstance.post(`/resend-otp`, { email: email });
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error form resendOTP api : `, error);
+		throw new Error(error.response.data.message);
 	}
 };

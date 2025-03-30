@@ -87,7 +87,6 @@ export default function ResetPasswordPage() {
 		try {
 			// This would be your actual API call to reset the password
 			const response = await resetPassword(token, data.password);
-			console.log(response)
 			if (response.success) {
 				navigate("/authenticate");
 				toast.success("Password reset successful. Please log in with your new password.");

@@ -6,8 +6,11 @@ export class SignupController {
 
 	async handle(req: Request, res: Response) {
 		try {
-			const { email, password, firstName, lastName } = req.body;
-			const { user, refreshToken, accessToken } = await this.signupUseCase.execute(email, password, firstName, lastName);
+			console.log(`in signup`);
+			const { otp, signupData } = req.body;
+			console.log("signupData: ", signupData);
+
+			const { user, refreshToken, accessToken } = await this.signupUseCase.execute(otp, signupData.firstName, signupData.lastName, signupData.email, signupData.password);
 
 			res.cookie("refresh_token", refreshToken, { httpOnly: true, sameSite: "strict", maxAge: 60 * 15 * 1000 });
 			res.cookie("access_token", accessToken, { httpOnly: true, sameSite: "strict", maxAge: 60 * 5 * 1000 });

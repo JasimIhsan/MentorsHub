@@ -49,7 +49,7 @@ export const DashboardPage: React.FC = () => {
 		console.log(response);
 	};
 
-	if(loading){
+	if (loading) {
 		return <div>Loading...</div>;
 	}
 
