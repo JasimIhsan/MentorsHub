@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Reset Your Password</title>
+		<style>
+			body {
+				font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+				line-height: 1.6;
+				color: #333;
+				margin: 0;
+				padding: 0;
+				background-color: #f9f9f9;
+			}
+			.email-container {
+				max-width: 600px;
+				margin: 0 auto;
+				background-color: #fcfcfc;
+				border-radius: 8px;
+				overflow: hidden;
+				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+			}
+			.email-header {
+				background-color: #112d4e;
+				padding: 24px;
+				text-align: center;
+			}
+			.email-header img {
+				max-width: 180px;
+				height: auto;
+			}
+			.email-body {
+				padding: 32px 24px;
+			}
+			.email-footer {
+				background-color: #f4f4f5;
+				padding: 16px 24px;
+				font-size: 12px;
+				color: #6b7280;
+				text-align: center;
+			}
+			h1 {
+				color: #111827;
+				font-size: 24px;
+				margin-top: 0;
+				margin-bottom: 16px;
+			}
+			p {
+				margin-bottom: 16px;
+			}
+			.reset-button {
+				display: inline-block;
+				background-color: #112d4e;
+				color: #ffffff !important;
+				text-decoration: none;
+				padding: 12px 24px;
+				border-radius: 4px;
+				font-weight: 600;
+				margin: 24px 0;
+				text-align: center;
+				cursor: none !important;
+			}
+			.reset-button:hover {
+				background-color: #163b65;
+				cursor: pointer;
+			}
+			.security-notice {
+				background-color: #f9fafb;
+				border-left: 4px solid #d1d5db;
+				padding: 16px;
+				margin: 24px 0;
+				font-size: 14px;
+			}
+			.help-text {
+				font-size: 14px;
+				color: #6b7280;
+			}
+			.reset-link {
+				word-break: break-all;
+				color: #112d4e;
+				font-size: 14px;
+			}
+			@media only screen and (max-width: 600px) {
+				.email-body {
+					padding: 24px 16px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="email-container">
+			<div class="email-header">
+				<img width="80px" src="https://res.cloudinary.com/dhspaq4xe/image/upload/v1743155919/favicon_uww47p.png" alt="MentorsHub Logo" />
+			</div>
+			<div class="email-body">
+				<h1>Reset Your Password</h1>
+				<p>Hello {{user_name}},</p>
+				<p>We received a request to reset your password for your MentorsHub account. To proceed with resetting your password, please click the button below:</p>
+
+				<div style="text-align: center">
+					<a href="{{reset_link}}" class="reset-button">Reset Password</a>
+				</div>
+
+				<p>This link will expire in <strong>10 Minutes</strong>. If you didn't request a password reset, please ignore this email or contact our support team if you have concerns.</p>
+
+				<div class="security-notice"><strong>Security Tip:</strong> For your protection, the link above can only be used once. If you need to reset your password again, you'll need to request another link.</div>
+
+				<p>If you have any questions or need assistance, please contact our support team at <a href="mailto:mentorshub000@gmail.com">mentorshub000@gmail.com</a>.</p>
+
+				<p>Best regards,<br />The MentorsHub Team</p>
+			</div>
+			<div class="email-footer">
+				<p>&copy; 2025 MentorsHub. All rights reserved.</p>
+				<p>123 Learning Street, Knowledge City, 12345</p>
+				<p>
+					<a href="{{privacy_policy_url}}">Privacy Policy</a> |
+					<a href="{{terms_url}}">Terms of Service</a>
+				</p>
+				<p>This email was sent to {{user_email}} because you have an account with MentorsHub.</p>
+			</div>
+		</div>
+	</body>
+</html>
