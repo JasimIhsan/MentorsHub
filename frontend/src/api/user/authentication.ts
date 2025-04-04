@@ -67,3 +67,14 @@ export const resendOTP = async (email: string) => {
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const googleAthentication = async (credential: any) => {
+	console.log("credential: ", credential);
+	try {
+		const response = await axiosInstance.post("/auth/google", { credential });
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error from googleAuthentication api : `, error);
+		throw new Error(error.response.data.message);
+	}
+};

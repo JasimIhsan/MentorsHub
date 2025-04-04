@@ -47,6 +47,7 @@ export const DashboardPage: React.FC = () => {
 	const test = async () => {
 		const response = await axiosInstance.get("/test");
 		console.log(response);
+		toast.success(response.data.message)
 	};
 
 	if (loading) {

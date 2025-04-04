@@ -63,6 +63,7 @@ axiosInstance.interceptors.response.use(
 		if (error.response.status === 401 && !originalRequest._retry) {
 			originalRequest._retry = true;
 			try {
+				console.log(`in 401`);
 				// refresh the access token
 				const newAccessToken = await refreshAccessToken();
 				// update the default authorization header with the new access token
@@ -71,8 +72,15 @@ axiosInstance.interceptors.response.use(
 
 				return axiosInstance(originalRequest);
 			} catch (refreshError) {
+				localStorage.removeItem("persist:root");
+				window.location.href = "/authenticate";
 				return Promise.reject(refreshError); // handle the token refresh error
 			}
+		} else if (error.response.status === 403) {
+			console.log(`in 403`);
+			localStorage.removeItem("persist:root");
+			window.location.href = "/authenticate";
+			return Promise.reject(error); // handle 403 error (forbidden)
 		}
 		return Promise.reject(error); // handle other response error
 	}
