@@ -73,6 +73,11 @@ axiosInstance.interceptors.response.use(
 			} catch (refreshError) {
 				return Promise.reject(refreshError); // handle the token refresh error
 			}
+		} else if (error.response.status === 403) {
+			console.log(`in 403`);
+			localStorage.removeItem("persist:root");
+			window.location.href = "/authenticate";
+			return Promise.reject(error); // handle 403 error (forbidden)
 		}
 		return Promise.reject(error); // handle other response error
 	}
