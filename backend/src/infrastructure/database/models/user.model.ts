@@ -58,7 +58,8 @@ const UsersSchema: Schema = new Schema(
 		featuredMentor: { type: Boolean },
 		badges: [{ type: Schema.Types.ObjectId }],
 		resetPasswordToken: { type: String },
-      resetPasswordExpires: { type: Date },
+		resetPasswordExpires: { type: Date },
+		googleId: { type: String },
 	},
 	{ timestamps: true }
 );

@@ -18,6 +18,8 @@ export const verifyRefreshToken = (req: Request, res: Response, next: NextFuncti
 		const decoded = tokenService.validateRefreshToken(refreshToken);
 
 		if (!decoded) {
+			res.clearCookie("access_token");
+			res.clearCookie("refresh_token");
 			res.status(403).json({ success: false, message: "Invalid or expired refresh token" });
 			return;
 		}

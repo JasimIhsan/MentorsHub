@@ -26,8 +26,7 @@ export interface UserInterface {
 	sessionCompleted?: number;
 	// location?: IUserLocation;
 	mentorDetailsId?: ObjectId | null;
-	resetPasswordToken?: string | null;
-	resetPasswordExpires?: number | null;
+	googleId?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date | null;
 }
@@ -49,6 +48,7 @@ export class UserEntity {
 	private sessionCompleted?: number;
 	private location?: Location;
 	private mentorDetailsId?: ObjectId | null;
+	private googleId?: string | null;
 	private createdAt: Date;
 	private updatedAt?: Date | null;
 
@@ -68,11 +68,13 @@ export class UserEntity {
 		this.sessionCompleted = user.sessionCompleted ?? 0;
 		// this.location = user.location as IUserLocation ?? { city: null, country: null, timezone: null } as IUserLocation;
 		this.mentorDetailsId = user.mentorDetailsId ?? null;
+		this.googleId = user.googleId ?? null;
 		this.createdAt = user.createdAt ?? new Date();
 		this.updatedAt = user.updatedAt ?? null;
 	}
 
 	// Static method to create a new user with hashed password
+
 	static async create(email: string, password: string, firstName: string, lastName: string): Promise<UserEntity> {
 		const hashedPassword = await bcrypt.hash(password, 10);
 		return new UserEntity({
@@ -82,6 +84,21 @@ export class UserEntity {
 			lastName,
 			isActive: true,
 			sessionCompleted: 0,
+			createdAt: new Date(),
+		});
+	}
+
+	static async createWithGoogle(email: string, password: string, firstName: string, lastName: string, googleId: string, avatar: string): Promise<UserEntity> {
+		const hashedPassword = await bcrypt.hash(password, 10);
+		return new UserEntity({
+			email,
+			password: hashedPassword,
+			firstName,
+			lastName,
+			isActive: true,
+			sessionCompleted: 0,
+			googleId: googleId ?? null,
+			avatar,
 			createdAt: new Date(),
 		});
 	}
@@ -99,6 +116,7 @@ export class UserEntity {
 			bio: userDoc.bio ?? null,
 			interests: userDoc.interests ?? null,
 			skills: userDoc.skills ?? null,
+			googleId: userDoc.googleId ?? null,
 			isActive: userDoc.isActive ?? true,
 			// location: userDoc.location ?? { city: null, country: null, timezone: null },
 			mentorDetailsId: userDoc.mentorDetails ?? {},
@@ -124,8 +142,8 @@ export class UserEntity {
 
 	// Update user details
 	updateUserDetails(updatedData: Partial<UserInterface>) {
-		console.log('pasword before: ', this.password)
-		
+		console.log("pasword before: ", this.password);
+
 		if (updatedData.password !== undefined) this.password = updatedData.password;
 		if (updatedData.email !== undefined) this.email = updatedData.email;
 		if (updatedData.firstName !== undefined) this.firstName = updatedData.firstName;
@@ -138,11 +156,11 @@ export class UserEntity {
 		if (updatedData.badges !== undefined) this.badges = updatedData.badges;
 		if (updatedData.sessionCompleted !== undefined) this.sessionCompleted = updatedData.sessionCompleted;
 		if (updatedData.mentorDetailsId !== undefined) this.mentorDetailsId = updatedData.mentorDetailsId;
-		
+
 		this.updatedAt = new Date();
-		console.log('pasword after : ', this.password)
+		console.log("pasword after : ", this.password);
 	}
-	
+
 	// Toggle active status
 	toggleActiveStatus(status: boolean) {
 		this.isActive = status;
@@ -183,7 +201,7 @@ export class UserEntity {
 			mentorDetailsId: this.mentorDetailsId,
 			createdAt: this.createdAt,
 			updatedAt: this.updatedAt,
-			...(includePassword? { password: this.password } : {}),
+			...(includePassword ? { password: this.password } : {}),
 		};
 	}
 }

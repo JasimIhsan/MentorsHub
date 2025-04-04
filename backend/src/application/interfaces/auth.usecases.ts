@@ -27,3 +27,7 @@ export interface ISendOtpUsecase {
 export interface IVerifyOtpUsecase {
 	execute(email: string, otp: string): Promise<boolean>;
 }
+
+export interface IGoogleAuthUsecase {
+	execute(googleToken: string): Promise<{ user: UserEntity; refreshToken: string; accessToken: string }>;
+}
