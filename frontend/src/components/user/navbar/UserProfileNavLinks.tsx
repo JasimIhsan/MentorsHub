@@ -31,6 +31,8 @@ export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
 		}
 	};
 
+	console.log(user);
+
 	return (
 		<div className="flex items-center gap-4 pr-10 md:pr-20 xl:pr-25 justify-center">
 			<Button variant="ghost" size="icon" className="relative">
@@ -41,7 +43,7 @@ export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
 				<DropdownMenuTrigger asChild>
 					<Button variant="ghost" className="relative h-8 w-8 rounded-full">
 						<Avatar className="h-8 w-8">
-							<AvatarImage src={user.avatar ? user.avatar : ""} alt="User" />
+							<AvatarImage src={user.avatar as string} alt="User" />
 							<AvatarFallback>{user.firstName.slice(0, 1) + user.lastName.slice(0, 1)}</AvatarFallback>
 						</Avatar>
 					</Button>
