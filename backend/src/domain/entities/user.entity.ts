@@ -18,7 +18,7 @@ export interface UserInterface {
 	password: string;
 	role?: UserRole;
 	avatar?: string | null;
-	isActive?: boolean;
+	status: 'blocked' | 'unblocked'
 	bio?: string | null;
 	interests?: string[] | null;
 	skills?: string[] | null;
@@ -40,9 +40,9 @@ export class UserEntity {
 	private password: string;
 	private role: UserRole;
 	private avatar?: string | null;
-	private isActive: boolean;
 	private bio?: string | null;
 	private interests?: string[] | null;
+	private status : 'blocked' | 'unblocked'
 	private skills?: string[] | null;
 	private badges?: ObjectId[] | null;
 	private sessionCompleted?: number;
@@ -59,8 +59,8 @@ export class UserEntity {
 		this.lastName = user.lastName;
 		this.password = user.password;
 		this.role = user.role || "user";
+		this.status = user.status || 'unblocked'
 		this.avatar = user.avatar ?? null;
-		this.isActive = user.isActive ?? true;
 		this.bio = user.bio ?? null;
 		this.interests = user.interests ?? null;
 		this.skills = user.skills ?? null;
@@ -82,7 +82,7 @@ export class UserEntity {
 			password: hashedPassword,
 			firstName,
 			lastName,
-			isActive: true,
+			status: 'unblocked',
 			sessionCompleted: 0,
 			createdAt: new Date(),
 		});
@@ -95,7 +95,7 @@ export class UserEntity {
 			password: hashedPassword,
 			firstName,
 			lastName,
-			isActive: true,
+			status: 'unblocked',
 			sessionCompleted: 0,
 			googleId: googleId ?? null,
 			avatar,
@@ -116,8 +116,8 @@ export class UserEntity {
 			bio: userDoc.bio ?? null,
 			interests: userDoc.interests ?? null,
 			skills: userDoc.skills ?? null,
+			status: userDoc.status || 'unblocked',
 			googleId: userDoc.googleId ?? null,
-			isActive: userDoc.isActive ?? true,
 			// location: userDoc.location ?? { city: null, country: null, timezone: null },
 			mentorDetailsId: userDoc.mentorDetails ?? {},
 			sessionCompleted: userDoc.sessionCompleted ?? 0,
@@ -149,7 +149,6 @@ export class UserEntity {
 		if (updatedData.firstName !== undefined) this.firstName = updatedData.firstName;
 		if (updatedData.lastName !== undefined) this.lastName = updatedData.lastName;
 		if (updatedData.avatar !== undefined) this.avatar = updatedData.avatar;
-		if (updatedData.isActive !== undefined) this.isActive = updatedData.isActive;
 		if (updatedData.bio !== undefined) this.bio = updatedData.bio;
 		if (updatedData.interests !== undefined) this.interests = updatedData.interests;
 		if (updatedData.skills !== undefined) this.skills = updatedData.skills;
@@ -163,7 +162,6 @@ export class UserEntity {
 
 	// Toggle active status
 	toggleActiveStatus(status: boolean) {
-		this.isActive = status;
 		this.updatedAt = new Date();
 	}
 
@@ -191,7 +189,7 @@ export class UserEntity {
 			lastName: this.lastName,
 			role: this.role,
 			avatar: this.avatar,
-			isActive: this.isActive,
+			status: this.status,
 			bio: this.bio,
 			interests: this.interests,
 			skills: this.skills,

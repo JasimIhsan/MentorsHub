@@ -14,6 +14,8 @@ import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import GoogleLoginButton from "./GoogleLoginButton";
+// import { adminLogout } from "@/store/slices/adminAuthSlice";
+// import { RootState } from "@/store/store";
 
 type FormState = "login" | "signup" | "forgot-password";
 
@@ -22,6 +24,7 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ setFormState }: LoginFormProps) {
+	// const isAdminAuthenticated = useSelector((state: RootState) => state.adminAuth.isAuthenticated);
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
@@ -34,7 +37,11 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 		try {
 			const response = await axiosInstance.post("/login", data);
 			if (response.data.success) {
+				// if (isAdminAuthenticated) {
+				// 	dispatch(adminLogout());
+				// }
 				dispatch(login(response.data.user));
+
 				form.reset();
 				navigate("/dashboard", { replace: true });
 				toast.success("Login successful");
@@ -44,8 +51,6 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 			toast.error(error.response.data.error);
 		}
 	};
-
-
 
 	return (
 		<>

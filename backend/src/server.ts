@@ -5,11 +5,13 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import connectDB from "./infrastructure/database/config";
-import authRouter from "./presentation/routes/auth.routes";
+import authRouter from "./presentation/routes/user/auth.routes";
 import passport from "passport";
-import { googleAuthRouter } from "./presentation/routes/google.auth.routes";
+import { googleAuthRouter } from "./presentation/routes/user/google.auth.routes";
 import { configurePassport } from "./infrastructure/services/passport/passport.config";
 import { tokenInterface, userRepository } from "./infrastructure";
+import { adminAuthRouter } from "./presentation/routes/admin/admin.auth.routes";
+import { usertabRouter } from "./presentation/routes/admin/admin.usertab.routes";
 
 dotenv.config();
 
@@ -35,6 +37,8 @@ connectDB();
 app.use(morgan("dev"));
 app.use("/api", authRouter);
 app.use("/api/auth", googleAuthRouter);
+app.use("/api/admin", adminAuthRouter);
+app.use("/api/admin/users", usertabRouter);
 
 app.listen(process.env.PORT, () => {
 	console.log(` Server is running  : ✅✅✅`);

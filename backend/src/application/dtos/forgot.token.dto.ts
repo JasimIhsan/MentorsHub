@@ -1,5 +1,5 @@
 
-export interface IUserDTO {
+export interface IForgotUserDTO {
 	_id: string;
 	email: string;
 	firstName: string;
@@ -12,13 +12,13 @@ export interface IUserDTO {
 export interface IForgotPasswordTokenDTO {
 	token: string;
 	expiresAt: Date;
-	user: IUserDTO;
+	user: IForgotUserDTO;
 }
 
 export class ForgotPasswordTokenDTO {
 	token: string;
 	expiresAt: Date;
-	user: IUserDTO;
+	user: IForgotUserDTO;
 
 	constructor(data: IForgotPasswordTokenDTO) {
 		this.token = data.token;

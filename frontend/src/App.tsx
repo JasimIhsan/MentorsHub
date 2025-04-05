@@ -1,56 +1,24 @@
 import "./App.css";
-import Authentication from "@/pages/user/Authentication";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { DashboardPage } from "./pages/user/DashboardPage";
 import { Provider } from "react-redux";
 import { store, persistor } from "./store/store";
-import { ProtectedRoute } from "./router/ProtectedRoute";
 import { PersistGate } from "redux-persist/integration/react";
-import { AuthGuard } from "./router/AuthGuard";
-import MainLayout from "@/pages/user/Layout";
-import PageNotFound from "./pages/PageNotFound";
-import Home from "./pages/user/Home";
-import ResetPasswordPage from "./pages/user/ResetPasswordPage";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import UserRoutes from "./router/user/UserRoutes";
+import AdminRoutes from "./router/admin/AdminRoutes";
+// import PageNotFound from "./pages/PageNotFound";
 
 function App() {
-	const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID; 
-
-	if (!googleClientId) {
-		console.error("Google Client ID is not set in the environment variables!");
-	}
-
+	const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 	return (
 		<Provider store={store}>
 			<PersistGate loading={null} persistor={persistor}>
 				<GoogleOAuthProvider clientId={googleClientId}>
 					<BrowserRouter>
 						<Routes>
-							{/* Public Route */}
-							<Route
-								path="/authenticate"
-								element={
-									<AuthGuard>
-										<Authentication />
-									</AuthGuard>
-								}
-							/>
-
-							<Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-
-							{/* Protected Routes with MainLayout */}
-							<Route element={<MainLayout />}>
-								<Route path="/" element={<Home />} />
-								<Route
-									path="/dashboard"
-									element={
-										<ProtectedRoute>
-											<DashboardPage />
-										</ProtectedRoute>
-									}
-								/>
-								<Route path="*" element={<PageNotFound />} />
-							</Route>
+							<Route path="/*" element={<UserRoutes />} />
+							<Route path="/admin/*" element={<AdminRoutes />} />
+							{/* <Route path="*" element={<PageNotFound />} /> */}
 						</Routes>
 					</BrowserRouter>
 				</GoogleOAuthProvider>

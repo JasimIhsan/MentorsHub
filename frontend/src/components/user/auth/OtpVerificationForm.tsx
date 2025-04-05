@@ -10,6 +10,7 @@ import { resendOTP, verifyOtpAndCompleteRegistration } from "@/api/user/authenti
 import { ISignupData } from "@/interfaces/interfaces";
 import { useDispatch } from "react-redux";
 import { login } from "@/store/slices/authSlice";
+// import { adminLogout } from "@/store/slices/adminAuthSlice";
 
 type FormState = "login" | "signup" | "forgot-password" | "reset-password" | "otp-varification";
 
@@ -98,6 +99,7 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 			console.log("response: ", response);
 
 			if (response.success) {
+				// dispatch(adminLogout());
 				dispatch(login(response.user));
 				setFormState("login");
 				toast.success("Account created successfully");
