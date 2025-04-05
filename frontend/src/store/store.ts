@@ -1,6 +1,7 @@
 // src/store/store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "@/store/slices/authSlice";
+import adminAuthReducer from "@/store/slices/adminAuthSlice";
 import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage
 
@@ -11,11 +12,13 @@ const persistConfig = {
 	// whitelist: ["auth"], // Only persist the 'auth' slice
 };
 
-const persistedReducer = persistReducer(persistConfig, authReducer);
+const persistedAuthReducer = persistReducer(persistConfig, authReducer);
+const persistedAdminAuthReducer = persistReducer(persistConfig, adminAuthReducer);
 
 export const store = configureStore({
 	reducer: {
-		auth: persistedReducer,
+		auth: persistedAuthReducer,
+		adminAuth: persistedAdminAuthReducer,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({

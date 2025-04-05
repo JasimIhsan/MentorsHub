@@ -55,7 +55,7 @@ export const DashboardPage: React.FC = () => {
 	}
 
 	return (
-		<div className="container pb-6">
+		<div className="w-full pb-6">
 			<div className="flex flex-col gap-8">
 				<WelcomeHeader user={user} />
 				<section className="flex flex-col gap-4 px-10 md:px-20 xl:px-25 justify-center">

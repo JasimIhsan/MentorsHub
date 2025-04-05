@@ -14,6 +14,5 @@ export function AuthGuard({ children, redirectUrl = "/dashboard" }: AuthGuardPro
 	if (isAuthenticated) {
 		return <Navigate to={redirectUrl} state={{ from: location }} replace />;
 	}
-
 	return <>{children}</>;
 }

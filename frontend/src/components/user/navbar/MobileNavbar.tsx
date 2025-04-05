@@ -8,10 +8,31 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+import { logoutSession } from "@/api/user/authentication";
+import { logout } from "@/store/slices/authSlice";
+import { useDispatch } from "react-redux";
+import { toast } from "sonner";
+
 export function MobileNav() {
 	const [open, setOpen] = useState(false);
 	const location = useLocation();
 	const pathname = location.pathname;
+	const dispatch = useDispatch();
+
+	const handleLogout = async () => {
+		try {
+			const response = await logoutSession();
+			if (response.success) {
+				localStorage.removeItem("persist:root");
+				dispatch(logout());
+				setOpen(false);
+				toast.success(response.message);
+			}
+		} catch (error) {
+			toast.error("Failed to log out");
+			console.error("Error logging out:", error);
+		}
+	};
 
 	const routes = [
 		{
@@ -61,7 +82,7 @@ export function MobileNav() {
 					</div>
 					<nav className="mt-8 flex flex-col gap-4">
 						{routes.map((route) => (
-							<Link key={route.to} to={route.to} onClick={() => setOpen(false)} className={cn("px-7 py-2 text-base font-medium transition-colors hover:text-primary", pathname === route.to ? "text-primary" : "text-muted-foreground")}>
+							<Link key={route.to} to={route.to} onClick={handleLogout} className={cn("px-7 py-2 text-base font-medium transition-colors hover:text-primary", pathname === route.to ? "text-primary" : "text-muted-foreground")}>
 								{route.label}
 							</Link>
 						))}

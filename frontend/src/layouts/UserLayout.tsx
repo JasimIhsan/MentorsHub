@@ -15,7 +15,7 @@ export default function MainLayout() {
 	const navigate = useNavigate();
 	
 	return (
-		<div className="flex min-h-screen flex-col items-stretch">
+		<div className="flex min-h-screen flex-col items-stretch ">
 			{/* <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange> */}
 
 			<header className="sticky top-0 z-50 w-full h-16 border-b backdrop-blur-3xl bg-transparent">
@@ -41,7 +41,7 @@ export default function MainLayout() {
 				</div>
 			</header>
 			{/* sm:px-6 lg:px-8 */}
-			<main className="flex-1 ">
+			<main className="flex">
 				<Outlet />
 			</main>
 
