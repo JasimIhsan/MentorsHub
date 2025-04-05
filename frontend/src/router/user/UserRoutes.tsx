@@ -3,7 +3,7 @@ import MainLayout from "@/layouts/UserLayout";
 import Home from "@/pages/user/Home";
 import Authentication from "@/pages/user/Authentication";
 import ResetPasswordPage from "@/pages/user/ResetPasswordPage";
-import PageNotFound from "@/pages/PageNotFound";
+import PageNotFound from "@/pages/user/PageNotFound";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { AuthGuard } from "./AuthGuard";
 import { DashboardPage } from "@/pages/user/DashboardPage";

@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { IEmailService } from "../../../application/interfaces/email.service.interface";
+import { IEmailService } from "../../../application/interfaces/user/email.service.interface";
 import fs from "fs";
 import path from "path";
 

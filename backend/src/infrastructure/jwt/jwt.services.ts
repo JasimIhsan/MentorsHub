@@ -1,6 +1,6 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import dotenv from "dotenv";
-import { ITokenService } from "../../application/interfaces/token.service.interface";
+import { ITokenService } from "../../application/interfaces/user/token.service.interface";
 dotenv.config();
 
 const JWT_ACCESS_TOKEN = process.env.JWT_ACCESS_TOKEN as string;

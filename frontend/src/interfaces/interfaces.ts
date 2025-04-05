@@ -10,6 +10,7 @@ export interface UserInterface {
 	interests?: string[] | null;
 	skills?: string[] | null;
 	isActive?: boolean | null;
+	status: "blocked" | "unblocked";
 	location?: {
 		city: string | null;
 		country: string | null;
