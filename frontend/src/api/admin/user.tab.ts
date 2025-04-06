@@ -39,3 +39,13 @@ export const updateUseStatusApi = async (userId: string) => {
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const deleteUserApi = async (userId: string) => {
+	try {
+		const response = await axiosInstance.delete(`/admin/users/delete-user/${userId}`);
+		return response.data;
+	} catch (error: any) {
+		console.log("Error from deleteUserApi: ", error);
+		throw new Error(error.response.data.message);
+	}
+};

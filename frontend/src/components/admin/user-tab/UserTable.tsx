@@ -1,4 +1,4 @@
-import { ArrowUpDown, MoreHorizontal, UserCog, ShieldOff, Trash } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, ShieldOff, Trash, } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,14 +6,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { RoleBadge, StatusBadge } from "./UserBadges";
 import { IUserDTO } from "@/interfaces/IUserDTO";
 import { useState, useEffect } from "react";
+import Alert from "@/components/custom-ui/alert";
 
 interface UserTableProps {
 	users: IUserDTO[];
 	loading: boolean;
 	handleStatusUpdate: (userId: string) => void;
+	handleDeleteUser: (userId: string) => void;
 }
 
-export function UserTable({ users, loading, handleStatusUpdate }: UserTableProps) {
+export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser }: UserTableProps) {
 	const [sortedUsers, setSortedUsers] = useState<IUserDTO[]>(users);
 	const [sortAsc, setSortAsc] = useState(true);
 	const [sortColumn, setSortColumn] = useState<"name" | "joinedDate">("name");
@@ -128,20 +130,43 @@ export function UserTable({ users, loading, handleStatusUpdate }: UserTableProps
 											<DropdownMenuItem>View profile</DropdownMenuItem>
 											<DropdownMenuItem>Edit user</DropdownMenuItem>
 											<DropdownMenuSeparator />
-											{user.role !== "mentor" && (
+											{/* {user.role !== "mentor" && (
 												<DropdownMenuItem>
 													<UserCog className="mr-2 h-4 w-4" />
 													Make mentor
 												</DropdownMenuItem>
-											)}
-											<DropdownMenuItem className="text-destructive" onClick={() => handleStatusUpdate(user.id as string)}>
-												<ShieldOff className="mr-2 h-4 w-4" />
-												{user.status === "blocked" ? "Unblock user" : "Block user"}
-											</DropdownMenuItem>
-											<DropdownMenuItem className="text-destructive">
-												<Trash className="mr-2 h-4 w-4" />
-												Delete user
-											</DropdownMenuItem>
+											)} */}
+											{/* Delete Confirmation Alert */}
+											<Alert
+												triggerElement={
+													<div className="w-full">
+														<DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
+															<Trash className="mr-2 h-4 w-4" />
+															Delete user
+														</DropdownMenuItem>
+													</div>
+												}
+												contentTitle="Confirm Delete User"
+												contentDescription={`Are you sure you want to delete "${user.fullName}"?`}
+												actionText="Delete"
+												onConfirm={() => handleDeleteUser(user.id as string)} // Only called when confirmed
+											/>
+
+											{/* Status Update Confirmation Alert */}
+											<Alert
+												triggerElement={
+													<div className="w-full">
+														<DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
+															<ShieldOff className="mr-2 h-4 w-4" />
+															{user.status === "blocked" ? "Unblock user" : "Block user"}
+														</DropdownMenuItem>
+													</div>
+												}
+												contentTitle={`Confirm ${user.status === "blocked" ? "Unblock" : "Block"} User`}
+												contentDescription={`Are you sure you want to ${user.status === "blocked" ? "Unblock" : "Block"} "${user.fullName}"?`}
+												actionText={`${user.status === "blocked" ? "Unblock" : "Block"}`}
+												onConfirm={() => handleStatusUpdate(user.id as string)} // Only called when confirmed
+											/>
 										</DropdownMenuContent>
 									</DropdownMenu>
 								</TableCell>

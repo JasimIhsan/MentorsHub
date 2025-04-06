@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchAllUsers, updateUseStatusApi } from "@/api/admin/user.tab";
+import { deleteUserApi, fetchAllUsers, updateUseStatusApi } from "@/api/admin/user.tab";
 import { toast } from "sonner";
 import { IUserDTO } from "@/interfaces/IUserDTO";
 import { UserFilter } from "@/components/admin/user-tab/UserFilters";
@@ -14,7 +14,7 @@ export default function AdminUsersTab() {
 	const [users, setUsers] = useState<IUserDTO[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
-	const [itemsPerPage] = useState(10);
+	const [itemsPerPage] = useState(7);
 
 	const filteredUsers = users.filter((user) => {
 		const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -49,6 +49,26 @@ export default function AdminUsersTab() {
 		}
 	};
 
+	const handleUserDelete = async (userId: string) => {
+		try {
+			const response = await deleteUserApi(userId);
+			if (response.success) {
+				setUsers((prevUsers) => {
+					return prevUsers.filter((user) => {
+						if (user.id !== userId) {
+							return user;
+						}
+					});
+				});
+				toast.success(response.message);
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				toast.error(error.message);
+			}
+		}
+	};
+
 	useEffect(() => {
 		const fetchUsers = async () => {
 			try {
@@ -75,12 +95,12 @@ export default function AdminUsersTab() {
 					<h1 className="text-3xl font-bold tracking-tight">Users</h1>
 					<p className="text-muted-foreground">Manage and monitor all users on the platform</p>
 				</div>
-				<AddUserForm />
+				<AddUserForm setUsers={setUsers}/>
 			</div>
 
 			<UserFilter searchTerm={searchTerm} setSearchTerm={setSearchTerm} roleFilter={roleFilter} setRoleFilter={setRoleFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
 
-			<UserTable users={paginatedUsers} loading={loading} handleStatusUpdate={handleStatusUpdate} />
+			<UserTable users={paginatedUsers} loading={loading} handleStatusUpdate={handleStatusUpdate} handleDeleteUser={handleUserDelete} />
 
 			<UserPagination currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} filteredUsersLength={filteredUsers.length} paginatedUsersLength={paginatedUsers.length} loading={loading} />
 		</div>

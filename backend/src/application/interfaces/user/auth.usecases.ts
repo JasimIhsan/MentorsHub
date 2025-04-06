@@ -31,3 +31,7 @@ export interface IVerifyOtpUsecase {
 export interface IGoogleAuthUsecase {
 	execute(googleToken: string): Promise<{ user: UserEntity; refreshToken: string; accessToken: string }>;
 }
+
+export interface IRefreshTokenUsecase {
+	execute(userId: string, isAdmin: boolean): string;
+}

@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
-import { Bell, HelpCircle } from "lucide-react";
+import { Bell, HelpCircle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 // import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import Alert from "../custom-ui/alert";
+
 // import { ModeToggle } from "@/components/mode-toggle";
 
 export function AdminHeader() {
@@ -62,6 +64,25 @@ export function AdminHeader() {
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
+
+			{/* Logout Confirmation Alert */}
+			{/* <Alert
+				triggerElement={
+					<div className="w-full">
+						<DropdownMenuItem
+							className="hover:bg-red-600 w-full"
+							onSelect={(e) => e.preventDefault()} // Prevent immediate invocation
+						>
+							<LogOut className="mr-2 h-4 w-4 hover:text-primary-foreground" />
+							<span className="hover:text-primary-foreground">Log out</span>
+						</DropdownMenuItem>
+					</div>
+				}
+				contentTitle="Confirm Logout"
+				contentDescription="Are you sure you want to log out? This will end your session."
+				actionText="Log Out"
+				onConfirm={handleLogout} // Only called when confirmed
+			/> */}
 		</header>
 	);
 }

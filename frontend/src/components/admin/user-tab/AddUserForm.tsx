@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { createUserApi } from "@/api/admin/user.tab";
 import { useState } from "react";
 
+import { IUserDTO } from "@/interfaces/IUserDTO";
+
 const formSchema = z.object({
 	firstName: z.string().min(1, "First name is required").max(50, "First name must be 50 characters or less"),
 	lastName: z.string().min(1, "Last name is required").max(50, "Last name must be 50 characters or less"),
@@ -21,8 +23,11 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
+interface AddUserFormProps {
+	setUsers: React.Dispatch<React.SetStateAction<IUserDTO[]>>;
+}
 
-export function AddUserForm() {
+export function AddUserForm({ setUsers }: AddUserFormProps) {
 	const {
 		register,
 		handleSubmit,
@@ -46,6 +51,7 @@ export function AddUserForm() {
 			const response = await createUserApi(data);
 			if (response.success) {
 				setIsOpen(false);
+				setUsers((prevUsers) => [response.user, ...prevUsers]);
 				toast.success("User created successfully!");
 			}
 		} catch (error) {

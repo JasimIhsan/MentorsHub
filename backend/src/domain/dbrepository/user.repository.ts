@@ -8,4 +8,5 @@ export interface IUserRepository {
 	save(user: UserEntity): Promise<void>;
 	findAllUsers(): Promise<IUserDTO[]>;
 	updateUser(user: UserEntity): Promise<UserEntity | null>;
+	deleteUser(id: string): Promise<void | null>;
 }

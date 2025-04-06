@@ -50,7 +50,7 @@ export class UserRepositoryImpl implements IUserRepository {
 
 	async findAllUsers(): Promise<IUserDTO[]> {
 		try {
-			const userDocs = await UserModel.find();
+			const userDocs = await UserModel.find().sort({ createdAt: -1 });
 			const usersData: UserEntity[] = userDocs.map((doc) => UserEntity.fromDBDocument(doc));
 			return usersData.map((user: UserEntity) => UserDTO.fromEntity(user));
 		} catch (error) {
@@ -64,6 +64,14 @@ export class UserRepositoryImpl implements IUserRepository {
 			return updatedUser ? UserEntity.fromDBDocument(updatedUser) : null;
 		} catch (error) {
 			return handleError(error, "Error updating user");
+		}
+	}
+
+	async deleteUser(id: string): Promise<void | null> {
+		try {
+			return await UserModel.findByIdAndDelete(id);
+		} catch (error) {
+			handleError(error, "Error deleting user");
 		}
 	}
 }

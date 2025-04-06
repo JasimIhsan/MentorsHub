@@ -34,4 +34,5 @@ export class AdminRepositoryImpl implements IAdminRepository {
 		const adminModel = new AdminModel(admin);
 		await adminModel.save();
 	}
+
 }

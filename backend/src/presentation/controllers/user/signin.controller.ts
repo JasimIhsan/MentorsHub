@@ -6,7 +6,6 @@ export class SigninController {
 
 	async handle(req: Request, res: Response) {
 		try {
-			console.log(`in login controller`);
 			const { email, password } = req.body;
 			const { user, accessToken, refreshToken } = await this.signinUseCase.execute(email, password);
 
@@ -15,9 +14,7 @@ export class SigninController {
 
 			res.status(200).json({ success: true, user });
 		} catch (error) {
-			console.log(`error in login controller: `, error);
 			if (error instanceof Error) {
-				console.log(error.message)
 				res.status(404).json({ success: false, message: error.message });
 				return;
 			}

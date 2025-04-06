@@ -11,3 +11,7 @@ export interface ICreateUserUsecase {
 export interface IUpdateUserUsecase {
 	execute(userId: string): Promise<IUserDTO>;
 }
+
+export interface IDeleteUserUsecase {
+	execute(userId: string): Promise<void>;
+}
