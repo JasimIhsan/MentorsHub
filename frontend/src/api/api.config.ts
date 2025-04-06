@@ -55,8 +55,10 @@ axiosInstance.interceptors.response.use(
 	(response) => {
 		return response; // return the response if there is no error
 	},
-	// may be the response have error becuause of the access token expiration or something so refresh it
+	// may be the response has an error because of the access token expiration or something, so refresh it
 	async (error) => {
+		console.log("error in api config : ", error);
+
 		// originalRequest._retry: A custom flag to ensure the original request is retried only once.
 		const originalRequest = error.config;
 		// if the response status is 401 (unauthorized) and the request hasn't been retried
@@ -69,7 +71,6 @@ axiosInstance.interceptors.response.use(
 				// update the default authorization header with the new access token
 				axios.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
 				// resend the original request with the new access token
-
 				return axiosInstance(originalRequest);
 			} catch (refreshError) {
 				localStorage.removeItem("persist:root");
@@ -77,12 +78,24 @@ axiosInstance.interceptors.response.use(
 				return Promise.reject(refreshError); // handle the token refresh error
 			}
 		} else if (error.response.status === 403) {
-			console.log(`in 403`);
+			console.log(`in 403`, error);
 			localStorage.removeItem("persist:root");
-			window.location.href = "/authenticate";
-			return Promise.reject(error); // handle 403 error (forbidden)
+
+			if (error.response.data.blocked) {
+
+				setTimeout(() => {
+					window.location.href = "/authenticate";
+				}, 3000);
+				
+				return Promise.reject(error); // Don't propagate the 403 error further
+			} else {
+				window.location.href = "/authenticate";
+				return Promise.reject(error); // Handle non-blocked 403 as well
+			}
 		}
-		return Promise.reject(error); // handle other response error
+
+		// If error status isn't 401 or 403, propagate the error
+		return Promise.reject(error);
 	}
 );
 

@@ -7,4 +7,5 @@ export interface IUserRepository {
 	findUserByEmail(email: string): Promise<UserEntity | null>;
 	save(user: UserEntity): Promise<void>;
 	findAllUsers(): Promise<IUserDTO[]>;
+	updateUser(user: UserEntity): Promise<UserEntity | null>;
 }

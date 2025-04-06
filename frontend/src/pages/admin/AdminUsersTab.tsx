@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchAllUsers } from "@/api/admin/user.tab";
+import { fetchAllUsers, updateUseStatusApi } from "@/api/admin/user.tab";
 import { toast } from "sonner";
 import { IUserDTO } from "@/interfaces/IUserDTO";
 import { UserFilter } from "@/components/admin/user-tab/UserFilters";
@@ -15,6 +15,39 @@ export default function AdminUsersTab() {
 	const [loading, setLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage] = useState(10);
+
+	const filteredUsers = users.filter((user) => {
+		const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase());
+		const matchesRole = roleFilter === "all" || user.role === roleFilter;
+		const matchesStatus = statusFilter === "all" || user.status === statusFilter;
+		return matchesSearch && matchesRole && matchesStatus;
+	});
+
+	const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+	const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+	const handleStatusUpdate = async (userId: string) => {
+		try {
+			const response = await updateUseStatusApi(userId);
+			if (response.success) {
+				toast.success("User status updated successfully!");
+				setUsers((prevUsers: IUserDTO[]) => {
+					return prevUsers.map((user) => {
+						if (user.id === userId) {
+							return { ...user, status: response.user.status };
+						}
+						return user;
+					});
+				});
+			} else {
+				toast.error("Failed to update user status.");
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				toast.error(error.message);
+			}
+		}
+	};
 
 	useEffect(() => {
 		const fetchUsers = async () => {
@@ -35,16 +68,6 @@ export default function AdminUsersTab() {
 		fetchUsers();
 	}, []);
 
-	const filteredUsers = users.filter((user) => {
-		const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase());
-		const matchesRole = roleFilter === "all" || user.role === roleFilter;
-		const matchesStatus = statusFilter === "all" || user.status === statusFilter;
-		return matchesSearch && matchesRole && matchesStatus;
-	});
-
-	const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-	const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
 	return (
 		<div className="space-y-6">
 			<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -57,7 +80,7 @@ export default function AdminUsersTab() {
 
 			<UserFilter searchTerm={searchTerm} setSearchTerm={setSearchTerm} roleFilter={roleFilter} setRoleFilter={setRoleFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
 
-			<UserTable users={paginatedUsers} loading={loading} />
+			<UserTable users={paginatedUsers} loading={loading} handleStatusUpdate={handleStatusUpdate} />
 
 			<UserPagination currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} filteredUsersLength={filteredUsers.length} paginatedUsersLength={paginatedUsers.length} loading={loading} />
 		</div>

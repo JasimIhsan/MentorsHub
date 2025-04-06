@@ -57,4 +57,13 @@ export class UserRepositoryImpl implements IUserRepository {
 			return handleError(error, "Error fetching all users");
 		}
 	}
+
+	async updateUser(user: UserEntity): Promise<UserEntity | null> {
+		try {
+			const updatedUser = await UserModel.findByIdAndUpdate(user.getId(), user.getProfile(true), { new: true });
+			return updatedUser ? UserEntity.fromDBDocument(updatedUser) : null;
+		} catch (error) {
+			return handleError(error, "Error updating user");
+		}
+	}
 }

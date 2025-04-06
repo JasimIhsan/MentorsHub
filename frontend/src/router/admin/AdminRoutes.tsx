@@ -5,6 +5,7 @@ import { AdminProtectedRoute } from "./AdminProtectedRoute"; // Adjust the impor
 import AdminLoginPage from "@/pages/admin/AdminLoginPage";
 import AdminPageNotFound from "@/pages/admin/AdminPageNotFound";
 import AdminUsersTab from "@/pages/admin/AdminUsersTab";
+import { AdminAuthGuard } from "./AdminAuthGuard";
 
 const AdminRoutes = () => {
 	return (
@@ -13,9 +14,9 @@ const AdminRoutes = () => {
 			<Route
 				path="/login"
 				element={
-					<AdminProtectedRoute>
+					<AdminAuthGuard>
 						<AdminLoginPage />
-					</AdminProtectedRoute>
+					</AdminAuthGuard>
 				}
 			/>
 

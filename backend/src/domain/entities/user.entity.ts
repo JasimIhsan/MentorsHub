@@ -2,7 +2,7 @@ import { ObjectId } from "mongoose";
 import bcrypt from "bcrypt";
 import { IMentorDetails } from "./mentor.detailes.entity";
 
-type UserRole = "user" | "mentor";
+export type UserRole = "user" | "mentor";
 // interface IUserLocation {
 // 	city: string | null;
 // 	country: string | null;
@@ -18,7 +18,7 @@ export interface UserInterface {
 	password: string;
 	role?: UserRole;
 	avatar?: string | null;
-	status: 'blocked' | 'unblocked'
+	status: "blocked" | "unblocked";
 	bio?: string | null;
 	interests?: string[] | null;
 	skills?: string[] | null;
@@ -42,7 +42,7 @@ export class UserEntity {
 	private avatar?: string | null;
 	private bio?: string | null;
 	private interests?: string[] | null;
-	private status : 'blocked' | 'unblocked'
+	private status: "blocked" | "unblocked";
 	private skills?: string[] | null;
 	private badges?: ObjectId[] | null;
 	private sessionCompleted?: number;
@@ -59,7 +59,7 @@ export class UserEntity {
 		this.lastName = user.lastName;
 		this.password = user.password;
 		this.role = user.role || "user";
-		this.status = user.status || 'unblocked'
+		this.status = user.status || "unblocked";
 		this.avatar = user.avatar ?? null;
 		this.bio = user.bio ?? null;
 		this.interests = user.interests ?? null;
@@ -75,14 +75,15 @@ export class UserEntity {
 
 	// Static method to create a new user with hashed password
 
-	static async create(email: string, password: string, firstName: string, lastName: string): Promise<UserEntity> {
+	static async create(email: string, password: string, firstName: string, lastName: string, role: UserRole = "user"): Promise<UserEntity> {
 		const hashedPassword = await bcrypt.hash(password, 10);
 		return new UserEntity({
 			email,
 			password: hashedPassword,
 			firstName,
 			lastName,
-			status: 'unblocked',
+			status: "unblocked",
+			role,
 			sessionCompleted: 0,
 			createdAt: new Date(),
 		});
@@ -95,7 +96,7 @@ export class UserEntity {
 			password: hashedPassword,
 			firstName,
 			lastName,
-			status: 'unblocked',
+			status: "unblocked",
 			sessionCompleted: 0,
 			googleId: googleId ?? null,
 			avatar,
@@ -116,7 +117,7 @@ export class UserEntity {
 			bio: userDoc.bio ?? null,
 			interests: userDoc.interests ?? null,
 			skills: userDoc.skills ?? null,
-			status: userDoc.status || 'unblocked',
+			status: userDoc.status || "unblocked",
 			googleId: userDoc.googleId ?? null,
 			// location: userDoc.location ?? { city: null, country: null, timezone: null },
 			mentorDetailsId: userDoc.mentorDetails ?? {},
@@ -161,8 +162,8 @@ export class UserEntity {
 	}
 
 	// Toggle active status
-	toggleActiveStatus(status: boolean) {
-		this.updatedAt = new Date();
+	toggleStatus(status: "blocked" | "unblocked") {
+		this.status = status;
 	}
 
 	// Getters
@@ -180,6 +181,10 @@ export class UserEntity {
 
 	getName(): string {
 		return `${this.firstName} ${this.lastName}`;
+	}
+
+	getStatus(): "blocked" | "unblocked" {
+		return this.status;
 	}
 
 	getProfile(includePassword: boolean = false): Partial<UserInterface> {

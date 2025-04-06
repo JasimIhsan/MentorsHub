@@ -49,16 +49,12 @@ export default function AdminLoginPage() {
 				dispatch(logout());
 				dispatch(adminLogin(response.admin));
 				toast.success("Login successful!");
-			} else {
-				toast.error(response.message || "Login failed. Please try again.");
 			}
 		} catch (error) {
-			console.log("error: ", error);
-
 			if (error instanceof Error) {
+				console.log('error: ', error);
+				
 				toast.error(error.message);
-			} else {
-				toast.error("An unexpected error occurred. Please try again.");
 			}
 		} finally {
 			setIsLoading(false);

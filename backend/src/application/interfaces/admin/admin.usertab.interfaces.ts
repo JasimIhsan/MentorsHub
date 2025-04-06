@@ -5,5 +5,9 @@ export interface IFetchAllUsersUsecase {
 	execute(): Promise<IUserDTO[]>;
 }
 export interface ICreateUserUsecase {
-	execute(user: UserEntity): Promise<UserEntity>;
+	execute(firstName: string, lastName: string, email: string, role: string): Promise<IUserDTO>;
+}
+
+export interface IUpdateUserUsecase {
+	execute(userId: string): Promise<IUserDTO>;
 }

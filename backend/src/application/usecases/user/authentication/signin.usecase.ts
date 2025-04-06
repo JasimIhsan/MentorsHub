@@ -15,7 +15,7 @@ export class SigninUseCase implements ISignInUseCase {
 		if (!isPasswordValid) throw new Error("Invalid user credentials");
 		const userId = user.getId() as string;
 		const accessToken = this.tokenService.generateAccessToken(userId);
-		const refreshToken = this.tokenService.generateRefreshToken(userId);
+		const refreshToken = this.tokenService.generateRefreshToken(userId)
 		return { user, accessToken, refreshToken };
 	}
 }

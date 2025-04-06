@@ -5,13 +5,54 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { RoleBadge, StatusBadge } from "./UserBadges";
 import { IUserDTO } from "@/interfaces/IUserDTO";
+import { useState, useEffect } from "react";
 
 interface UserTableProps {
 	users: IUserDTO[];
 	loading: boolean;
+	handleStatusUpdate: (userId: string) => void;
 }
 
-export function UserTable({ users, loading }: UserTableProps) {
+export function UserTable({ users, loading, handleStatusUpdate }: UserTableProps) {
+	const [sortedUsers, setSortedUsers] = useState<IUserDTO[]>(users);
+	const [sortAsc, setSortAsc] = useState(true);
+	const [sortColumn, setSortColumn] = useState<"name" | "joinedDate">("name");
+
+	const handleSort = (column: "name" | "joinedDate") => {
+		// Check if we're sorting by the same column
+		const isSameColumn = sortColumn === column;
+
+		// Toggle sort direction if sorting by the same column
+		const newSortAsc = isSameColumn ? !sortAsc : true;
+		setSortAsc(newSortAsc);
+		setSortColumn(column); // Update the sort column to the clicked one
+
+		const sorted = [...sortedUsers].sort((a, b) => {
+			if (column === "name") {
+				const nameA = a.fullName.toLowerCase();
+				const nameB = b.fullName.toLowerCase();
+
+				if (nameA < nameB) return newSortAsc ? -1 : 1;
+				if (nameA > nameB) return newSortAsc ? 1 : -1;
+				return 0;
+			} else if (column === "joinedDate") {
+				const dateA = new Date(a.createdAt);
+				const dateB = new Date(b.createdAt);
+
+				if (dateA < dateB) return newSortAsc ? -1 : 1;
+				if (dateA > dateB) return newSortAsc ? 1 : -1;
+				return 0;
+			}
+			return 0;
+		});
+
+		setSortedUsers(sorted); // Set sorted array to state
+	};
+
+	useEffect(() => {
+		setSortedUsers(users); // Update when users prop changes
+	}, [users]);
+
 	return (
 		<div className="rounded-md border px-3 py-1">
 			<Table>
@@ -20,7 +61,7 @@ export function UserTable({ users, loading }: UserTableProps) {
 						<TableHead className="w-[250px]">
 							<div className="flex items-center">
 								Name
-								<Button variant="ghost" size="sm" className="ml-1 h-8 p-0">
+								<Button variant="ghost" size="sm" className="ml-1 h-8 p-0" onClick={() => handleSort("name")}>
 									<ArrowUpDown className="h-4 w-4" />
 								</Button>
 							</div>
@@ -32,7 +73,7 @@ export function UserTable({ users, loading }: UserTableProps) {
 						<TableHead>
 							<div className="flex items-center">
 								Join Date
-								<Button variant="ghost" size="sm" className="ml-1 h-8 p-0">
+								<Button variant="ghost" size="sm" className="ml-1 h-8 p-0" onClick={() => handleSort("joinedDate")}>
 									<ArrowUpDown className="h-4 w-4" />
 								</Button>
 							</div>
@@ -47,14 +88,14 @@ export function UserTable({ users, loading }: UserTableProps) {
 								Loading users...
 							</TableCell>
 						</TableRow>
-					) : users.length === 0 ? (
+					) : sortedUsers.length === 0 ? (
 						<TableRow>
 							<TableCell colSpan={7} className="h-24 text-center">
 								No users found
 							</TableCell>
 						</TableRow>
 					) : (
-						users.map((user) => (
+						sortedUsers.map((user) => (
 							<TableRow key={user.id}>
 								<TableCell>
 									<div className="flex items-center gap-3">
@@ -93,9 +134,9 @@ export function UserTable({ users, loading }: UserTableProps) {
 													Make mentor
 												</DropdownMenuItem>
 											)}
-											<DropdownMenuItem className="text-destructive">
+											<DropdownMenuItem className="text-destructive" onClick={() => handleStatusUpdate(user.id as string)}>
 												<ShieldOff className="mr-2 h-4 w-4" />
-												Block
+												{user.status === "blocked" ? "Unblock user" : "Block user"}
 											</DropdownMenuItem>
 											<DropdownMenuItem className="text-destructive">
 												<Trash className="mr-2 h-4 w-4" />

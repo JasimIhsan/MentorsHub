@@ -24,6 +24,7 @@ export class AdminRepositoryImpl implements IAdminRepository {
 		const adminModel = await AdminModel.findOne({ username });
 		if (adminModel) {
 			const adminEntity = AdminEntity.fromDBDocument(adminModel);
+			
 			return AdminDTO.fromEntity(adminEntity);
 		}
 		return null;
