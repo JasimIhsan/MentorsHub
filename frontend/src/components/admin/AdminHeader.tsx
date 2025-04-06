@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Bell, HelpCircle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -7,11 +7,32 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import Alert from "../custom-ui/alert";
+import { useDispatch } from "react-redux";
+import { logoutSession } from "@/api/user/authentication";
+import { toast } from "sonner";
+import { adminLogout } from "@/store/slices/adminAuthSlice";
 
 // import { ModeToggle } from "@/components/mode-toggle";
 
 export function AdminHeader() {
 	const admin = useSelector((state: RootState) => state.adminAuth.admin);
+	const dispatch = useDispatch();
+	const navigate = useNavigate()
+
+	const handleLogout = async () => {
+		try {
+			const response = await logoutSession();
+			if (response.success) {
+				localStorage.removeItem("persist:root");
+				dispatch(adminLogout());
+				navigate('/admin/login')
+				toast.success(response.message);
+			}
+		} catch (error) {
+			toast.error("Failed to log out");
+			console.error("Error logging out:", error);
+		}
+	};
 	return (
 		<header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6 justify-end lg:justify-between">
 			<Link to="/admin/dashboard" className="hidden lg:flex items-center gap-2 font-semibold">
@@ -58,9 +79,24 @@ export function AdminHeader() {
 							<Link to="/admin/settings">Settings</Link>
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem asChild>
-							<Link to="/admin/logout">Log out</Link>
-						</DropdownMenuItem>
+						{/* Logout Confirmation Alert */}
+						<Alert
+							triggerElement={
+								<div className="w-full">
+									<DropdownMenuItem
+										className="hover:bg-red-600 w-full"
+										onSelect={(e) => e.preventDefault()} // Prevent immediate invocation
+									>
+										<LogOut className="mr-2 h-4 w-4 hover:text-primary-foreground" />
+										<span className="hover:text-primary-foreground">Log out</span>
+									</DropdownMenuItem>
+								</div>
+							}
+							contentTitle="Confirm Logout"
+							contentDescription="Are you sure you want to log out? This will end your session."
+							actionText="Log Out"
+							onConfirm={handleLogout} // Only called when confirmed
+						/>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
