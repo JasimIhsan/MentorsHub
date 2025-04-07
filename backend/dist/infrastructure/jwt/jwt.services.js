@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TokenServices = void 0;
+exports.TokenServicesImpl = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -12,12 +12,12 @@ const JWT_REFRESH_TOKEN = process.env.JWT_REFRESH_TOKEN;
 if (!JWT_ACCESS_TOKEN || !JWT_REFRESH_TOKEN) {
     throw new Error("JWT secret keys are missing in .env file!");
 }
-class TokenServices {
-    generateAccessToken(payload) {
-        return jsonwebtoken_1.default.sign(Object.assign({}, payload), JWT_ACCESS_TOKEN, { expiresIn: "5m" });
+class TokenServicesImpl {
+    generateAccessToken(userId) {
+        return jsonwebtoken_1.default.sign({ userId }, JWT_ACCESS_TOKEN, { expiresIn: "5m" });
     }
-    generateRefreshToken(payload) {
-        return jsonwebtoken_1.default.sign(Object.assign({}, payload), JWT_REFRESH_TOKEN, { expiresIn: "15m" });
+    generateRefreshToken(userId) {
+        return jsonwebtoken_1.default.sign({ userId }, JWT_REFRESH_TOKEN, { expiresIn: "15m" });
     }
     validateAccessToken(token) {
         try {
@@ -36,4 +36,4 @@ class TokenServices {
         }
     }
 }
-exports.TokenServices = TokenServices;
+exports.TokenServicesImpl = TokenServicesImpl;

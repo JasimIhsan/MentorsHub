@@ -1,6 +1,26 @@
 import { ISignupData } from "@/interfaces/interfaces";
 import axiosInstance from "../api.config";
 
+export const loginApi = async (email: string, password: string) => {
+	try {
+		const response = await axiosInstance.post("/login", { email, password });
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error form login api : `, error);
+		throw new Error(error.response.data.message)
+	}
+};
+
+export const forgotPassword = async (email: string)=> {
+	try {
+		const response = await axiosInstance.post("/forgot-password", { email });
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error form forgotpassword api : `, error);
+		throw new Error(error.response.data.message);
+	}
+}
+
 export const verifyResetToken = async (token: string) => {
 	try {
 		const response = await axiosInstance(`/verify-reset-token/${token}`);

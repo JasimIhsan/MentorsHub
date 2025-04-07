@@ -6,6 +6,8 @@ export interface IUserDTO {
 	id?: string;
 	email: string;
 	fullName: string;
+	firstName: string;
+	lastName: string;
 	role: "user" | "mentor";
 	avatar?: string | null;
 	status: "blocked" | "unblocked";
@@ -23,6 +25,8 @@ export class UserDTO implements IUserDTO {
 	id?: string;
 	email: string;
 	fullName: string;
+	firstName: string;
+	lastName: string;
 	role: "user" | "mentor";
 	avatar?: string | null;
 	bio?: string | null;
@@ -39,6 +43,8 @@ export class UserDTO implements IUserDTO {
 		id: string | undefined,
 		email: string,
 		fullName: string,
+		firstName: string,
+		lastName: string,
 		role: "user" | "mentor",
 		avatar: string,
 		bio: string | null,
@@ -54,6 +60,8 @@ export class UserDTO implements IUserDTO {
 		this.id = id;
 		this.email = email;
 		this.fullName = fullName;
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.role = role;
 		this.avatar = avatar ?? "";
 		this.bio = bio;
@@ -73,7 +81,9 @@ export class UserDTO implements IUserDTO {
 		return new UserDTO(
 			user.getId(),
 			user.getEmail(),
-			user.getName(),
+			user.getFullName(),
+			user.getFirstName(),
+			user.getLastName(),
 			user.getRole(),
 			profile.avatar ?? "",
 			profile.bio ?? null,

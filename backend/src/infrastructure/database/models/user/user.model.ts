@@ -12,7 +12,7 @@ export interface IUsers extends Document {
 	interests: string[] | null;
 	updatedAt: Date;
 	skills: string[] | null;
-	isActive: boolean | null;
+	status: "blocked" | "unblocked";
 	location: {
 		city: string | null;
 		country: string | null;
@@ -35,12 +35,12 @@ const UsersSchema: Schema = new Schema(
 		password: { type: String, required: true },
 		firstName: { type: String, required: true },
 		role: { type: String, enum: ["user", "mentor"], required: true, default: "user" },
-		lastName: { type: String, required: true },
+		lastName: { type: String },
 		avatar: { type: String },
 		bio: { type: String },
 		interests: [{ type: String }],
 		skills: [{ type: String }],
-		isActive: { type: Boolean },
+		status: { type: String, enum: ["blocked", "unblocked"], default: "unblocked" },
 		location: {
 			city: { type: String },
 			country: { type: String },
@@ -57,8 +57,6 @@ const UsersSchema: Schema = new Schema(
 		sessionCompleted: { type: Number },
 		featuredMentor: { type: Boolean },
 		badges: [{ type: Schema.Types.ObjectId }],
-		resetPasswordToken: { type: String },
-		resetPasswordExpires: { type: Date },
 		googleId: { type: String },
 	},
 	{ timestamps: true }

@@ -15,7 +15,7 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
 		const token = crypto.randomBytes(32).toString("hex");
 		await this.tokenRepo.createToken(userId, token, 10);
 
-		let username = user.getName();
+		let username = user.getFullName();
 		await this.emailService.sendPasswordResetEmail(email, token, username);
 	}
 }

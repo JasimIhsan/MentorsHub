@@ -15,8 +15,8 @@ export class AdminLoginUsecase implements IAdminAuthUsecase {
 			const isPasswordValid = await comparePassword(password, admin.password);
 			if (!isPasswordValid) throw new Error("Invalid admin credentials");
 
-			const accessToken = this.tokenService.generateAccessToken(admin.id);
-			const refreshToken = this.tokenService.generateRefreshToken(admin.id);
+			const accessToken = this.tokenService.generateAccessToken(admin.id, true);
+			const refreshToken = this.tokenService.generateRefreshToken(admin.id, true);
 
 			return { admin, refreshToken, accessToken };
 		} catch (error) {

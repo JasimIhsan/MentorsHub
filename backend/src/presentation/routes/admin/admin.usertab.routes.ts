@@ -1,5 +1,14 @@
 import { Router } from "express";
-import { fetchAllUserController } from "../../controllers/admin/composer";
+import { createUserController, deleteUserController, fetchAllUserController, updateUserController, updateUserStatusController } from "../../controllers/admin/composer";
+import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 export const usertabRouter = Router();
 
-usertabRouter.get("/", (req, res) => fetchAllUserController.handle(req, res));
+usertabRouter.get("/", verifyAccessToken, (req, res) => fetchAllUserController.handle(req, res));
+
+usertabRouter.post("/create-user", verifyAccessToken, (req, res) => createUserController.handle(req, res));
+
+usertabRouter.put("/update-status/:userId", verifyAccessToken, (req, res) => updateUserStatusController.handle(req, res));
+
+usertabRouter.delete("/delete-user/:id", verifyAccessToken, (req, res) => deleteUserController.handle(req, res));
+
+usertabRouter.put("/update-user/:userId", verifyAccessToken, (req, res) => updateUserController.handle(req, res));

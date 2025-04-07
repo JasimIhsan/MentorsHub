@@ -6,7 +6,6 @@ import { LoginFormData, loginSchema } from "@/schema/auth.form";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login } from "@/store/slices/authSlice";
-import axiosInstance from "@/api/api.config";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import GoogleLoginButton from "./GoogleLoginButton";
+import { loginApi } from "@/api/user/authentication";
 // import { adminLogout } from "@/store/slices/adminAuthSlice";
 // import { RootState } from "@/store/store";
 
@@ -35,20 +35,21 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 
 	const onSubmit = async (data: LoginFormData) => {
 		try {
-			const response = await axiosInstance.post("/login", data);
-			if (response.data.success) {
+			const response = await loginApi(data.email, data.password);
+			if (response.success) {
 				// if (isAdminAuthenticated) {
 				// 	dispatch(adminLogout());
 				// }
-				dispatch(login(response.data.user));
+				dispatch(login(response.user));
 
 				form.reset();
 				navigate("/dashboard", { replace: true });
 				toast.success("Login successful");
 			}
 		} catch (error: any) {
-			console.error("Login error:", error);
-			toast.error(error.response.data.error);
+			console.log("Login error:", error);
+
+			toast.error(error.message || "Login failed. Please try again.");
 		}
 	};
 

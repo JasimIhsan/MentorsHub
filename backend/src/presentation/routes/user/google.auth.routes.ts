@@ -3,6 +3,7 @@ import { configurePassport } from "../../../infrastructure/services/passport/pas
 import { JwtPayload } from "jsonwebtoken";
 import passport from "passport";
 import { googleAuthController } from "../../controllers/user/composer";
+import { checkUserStatus } from "../../middlewares/auth.user.status.middleware";
 
 export const googleAuthRouter = Router();
 

@@ -5,7 +5,7 @@ import { Home, Search, Compass } from "lucide-react";
 
 export default function PageNotFound() {
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-background">
+		<div className="flex min-h-screen w-screen items-center justify-center bg-background">
 			<div className="text-center space-y-8 p-6 max-w-lg mx-auto">
 				{/* Icon/Illustration */}
 				<div className="flex justify-center">

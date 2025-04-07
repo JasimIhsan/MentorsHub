@@ -1,12 +1,7 @@
-// src/components/auth/SignupForm.tsx
 import { Loader2, LucideUserPlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignupFormData, signupSchema } from "@/schema/auth.form";
-// import { useNavigate } from "react-router-dom";
-// import { useDispatch } from "react-redux";
-// import { login } from "@/store/slices/authSlice";
-// import axiosInstance from "@/api/api.config";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -38,7 +33,7 @@ export default function SignupForm({ setFormState, setSignupData }: SignupFormPr
 			if (response.success) {
 				setSignupData({
 					firstName: data.firstName,
-					lastName: data.lastName,
+					lastName: data.lastName || "",
 					email: data.email,
 					password: data.password,
 				});
@@ -47,7 +42,7 @@ export default function SignupForm({ setFormState, setSignupData }: SignupFormPr
 			}
 		} catch (error) {
 			console.error("Signup error:", error);
-			if(error instanceof Error){
+			if (error instanceof Error) {
 				toast.error(error.message);
 			}
 		}

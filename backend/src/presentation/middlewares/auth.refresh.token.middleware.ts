@@ -24,7 +24,7 @@ export const verifyRefreshToken = (req: Request, res: Response, next: NextFuncti
 			return;
 		}
 
-		req.body = decoded;
+		req.user = decoded;
 		next();
 	} catch (error) {
 		res.status(500).json({ success: false, message: "Internal Server Error" });

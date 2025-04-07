@@ -13,15 +13,31 @@ exports.RedisCacheRepository = void 0;
 const redis_1 = require("redis");
 class RedisCacheRepository {
     constructor() {
-        this.client = (0, redis_1.createClient)({ url: "redis://localhost:6379" });
+        this.client = (0, redis_1.createClient)({ url: "redis://mentorshub_redis:6379" });
         this.client.on("error", (err) => {
-            console.error("Redis connected: ❌\n", err);
+            console.error("Redis connected: ❌❌❌\n", err);
         });
-        this.client.on("connect", () => console.log("Redis connected: ✅"));
+        this.connectRedis();
+        this.client.on("connect", () => console.log("Redis connected: ✅✅✅"));
+    }
+    connectRedis() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.client.connect();
+            }
+            catch (err) {
+                console.error("Failed to connect to Redis:", err);
+            }
+        });
     }
     getCachedData(key) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.client.get(key);
+            const data = yield this.client.get(key);
+            if (!data) {
+                console.warn(`Redis key "${key}" not found in cache`);
+                return null;
+            }
+            return data.toString();
         });
     }
     setCachedData(key, value, expiry) {

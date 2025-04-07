@@ -1,14 +1,14 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import axiosInstance from "@/api/api.config";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { forgotPassword } from "@/api/user/authentication";
 
 // Define the schema for the forgot password form
 const forgotPasswordSchema = z.object({
@@ -31,7 +31,7 @@ export default function ForgotPasswordForm({ setFormState }: ForgotPasswordFormP
 
 	const onSubmit = async (data: ForgotPasswordFormData) => {
 		try {
-			const response = await axiosInstance.post("/forgot-password", { email: data.email });
+			const response = await forgotPassword(data.email);
 			if (response.data.success) {
 				toast.success("Password reset link has been sent to your email");
 				form.reset();
@@ -39,7 +39,7 @@ export default function ForgotPasswordForm({ setFormState }: ForgotPasswordFormP
 			}
 		} catch (error: any) {
 			console.error("Forgot password error:", error);
-			toast.error(error.response?.data?.error || "Failed to send magic link. Please try again.");
+			toast.error(error.message || "Failed to send magic link. Please try again.");
 		}
 	};
 
@@ -47,7 +47,7 @@ export default function ForgotPasswordForm({ setFormState }: ForgotPasswordFormP
 		<>
 			<CardHeader className="mb-4">
 				<CardTitle className="text-xl">Forgot Password</CardTitle>
-				<CardDescription>Enter your email to receive a magic link to reset your password</CardDescription>
+				<CardDescription>Enter your email to receive a link to reset your password</CardDescription>
 			</CardHeader>
 			<form onSubmit={form.handleSubmit(onSubmit)}>
 				<div className="space-y-4 px-6">
@@ -59,7 +59,8 @@ export default function ForgotPasswordForm({ setFormState }: ForgotPasswordFormP
 				</div>
 				<CardFooter className="flex flex-col space-y-4 my-4 px-6">
 					<Button className="w-full" size="lg" type="submit" disabled={form.formState.isSubmitting}>
-						Send Magic Link
+						<Send />
+						Send Link
 					</Button>
 					<Button variant="link" className="w-full" onClick={() => setFormState("login")} disabled={form.formState.isSubmitting}>
 						<ArrowLeft className="mr-2 h-4 w-4" />

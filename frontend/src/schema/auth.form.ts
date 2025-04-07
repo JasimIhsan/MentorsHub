@@ -8,7 +8,7 @@ export const loginSchema = zode.object({
 export const signupSchema = zode
 	.object({
 		firstName: zode.string().min(1, "First Name is required"),
-		lastName: zode.string().min(1, "Last Name is required"),
+		lastName: zode.string().optional(),
 		email: zode.string().email("Invalid email address").min(1, "Email is required"),
 		password: zode.string().min(6, "Password must be at least 6 characters"),
 		confirmPassword: zode.string().min(6, "Confirm Password must be at least 6 characters"),
