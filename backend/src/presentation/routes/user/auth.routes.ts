@@ -8,13 +8,21 @@ const authRouter = Router();
 
 // Authentication Routes
 authRouter.post("/register", (req, res) => signupController.handle(req, res));
+
 authRouter.post("/login", checkUserStatusInLogin, (req, res) => signinController.handle(req, res));
+
 authRouter.post("/refresh-token", verifyRefreshToken, (req, res) => refreshController.handle(req, res));
+
 authRouter.post("/forgot-password", checkUserStatusInLogin, (req, res) => forgotPasswordController.handle(req, res));
+
 authRouter.get("/verify-reset-token/:token", (req, res) => verifyResetTokenController.handle(req, res));
+
 authRouter.post("/reset-password", (req, res) => resetPasswordController.handle(req, res));
+
 authRouter.post("/logout", verifyAccessToken, (req, res) => logoutController.handle(req, res));
+
 authRouter.post("/send-otp", (req, res) => sendOtpController.handle(req, res));
+
 authRouter.post("/resend-otp", (req, res) => sendOtpController.handle(req, res));
 
 // Test Route

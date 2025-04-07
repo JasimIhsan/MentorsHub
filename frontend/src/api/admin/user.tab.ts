@@ -14,7 +14,7 @@ export const fetchAllUsers = async () => {
 
 interface CreateUserData {
 	firstName: string;
-	lastName: string;
+	lastName?: string | undefined;
 	email: string;
 	role: string | undefined;
 	sendEmail: boolean;
@@ -46,6 +46,16 @@ export const deleteUserApi = async (userId: string) => {
 		return response.data;
 	} catch (error: any) {
 		console.log("Error from deleteUserApi: ", error);
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const updateUserApi = async (userId: string, data: CreateUserData) => {
+	try {
+		const response = await axiosInstance.put(`/admin/users/update-user/${userId}`, data);
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error from updateUserApi : `, error);
 		throw new Error(error.response.data.message);
 	}
 };

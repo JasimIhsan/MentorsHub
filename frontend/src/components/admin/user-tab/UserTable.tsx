@@ -1,4 +1,4 @@
-import { ArrowUpDown, MoreHorizontal, ShieldOff, Trash, } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, ShieldOff, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,6 +7,7 @@ import { RoleBadge, StatusBadge } from "./UserBadges";
 import { IUserDTO } from "@/interfaces/IUserDTO";
 import { useState, useEffect } from "react";
 import Alert from "@/components/custom-ui/alert";
+import { EditUserForm } from "./EditUserForm";
 
 interface UserTableProps {
 	users: IUserDTO[];
@@ -54,6 +55,10 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 	useEffect(() => {
 		setSortedUsers(users); // Update when users prop changes
 	}, [users]);
+
+	const updateUserInState = (updatedUser: IUserDTO) => {
+		setSortedUsers((prevUsers) => prevUsers.map((user) => (user.id === updatedUser.id ? { ...user, ...updatedUser } : user)));
+	};
 
 	return (
 		<div className="rounded-md border px-3 py-1">
@@ -128,7 +133,9 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 										<DropdownMenuContent align="end">
 											<DropdownMenuLabel className="font-bold">Actions</DropdownMenuLabel>
 											<DropdownMenuItem>View profile</DropdownMenuItem>
-											<DropdownMenuItem>Edit user</DropdownMenuItem>
+											<DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+												<EditUserForm user={user} updateUser={updateUserInState} />
+											</DropdownMenuItem>
 											<DropdownMenuSeparator />
 											{/* {user.role !== "mentor" && (
 												<DropdownMenuItem>

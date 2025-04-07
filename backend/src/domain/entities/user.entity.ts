@@ -143,12 +143,13 @@ export class UserEntity {
 
 	// Update user details
 	updateUserDetails(updatedData: Partial<UserInterface>) {
-		console.log("pasword before: ", this.password);
+		console.log("password before: ", this.password);
 
 		if (updatedData.password !== undefined) this.password = updatedData.password;
 		if (updatedData.email !== undefined) this.email = updatedData.email;
 		if (updatedData.firstName !== undefined) this.firstName = updatedData.firstName;
 		if (updatedData.lastName !== undefined) this.lastName = updatedData.lastName;
+		if (updatedData.role !== undefined) this.role = updatedData.role;
 		if (updatedData.avatar !== undefined) this.avatar = updatedData.avatar;
 		if (updatedData.bio !== undefined) this.bio = updatedData.bio;
 		if (updatedData.interests !== undefined) this.interests = updatedData.interests;
@@ -158,7 +159,7 @@ export class UserEntity {
 		if (updatedData.mentorDetailsId !== undefined) this.mentorDetailsId = updatedData.mentorDetailsId;
 
 		this.updatedAt = new Date();
-		console.log("pasword after : ", this.password);
+		console.log("password after : ", this.password);
 	}
 
 	// Toggle active status
@@ -179,8 +180,16 @@ export class UserEntity {
 		return this.role;
 	}
 
-	getName(): string {
+	getFullName(): string {
 		return `${this.firstName} ${this.lastName}`;
+	}
+
+	getFirstName(): string {
+		return this.firstName;
+	}
+
+	getLastName(): string {
+		return this.lastName;
 	}
 
 	getStatus(): "blocked" | "unblocked" {

@@ -1,17 +1,15 @@
-import { Plus } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { createUserApi } from "@/api/admin/user.tab";
-import { useState } from "react";
-
+import { updateUserApi } from "@/api/admin/user.tab";
 import { IUserDTO } from "@/interfaces/IUserDTO";
 
 const formSchema = z.object({
@@ -23,15 +21,21 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
-interface AddUserFormProps {
-	setUsers: React.Dispatch<React.SetStateAction<IUserDTO[]>>;
+
+interface EditUserFormProps {
+	user: IUserDTO;
+	updateUser: (updatedUser: IUserDTO) => void;
 }
 
-export function AddUserForm({ setUsers }: AddUserFormProps) {
+export function EditUserForm({ user, updateUser }: EditUserFormProps) {
+	const [isOpen, setIsOpen] = useState(false);
+
 	const {
 		register,
 		handleSubmit,
+		reset,
 		setValue,
+		control,
 		formState: { errors, isSubmitting },
 	} = useForm<FormData>({
 		resolver: zodResolver(formSchema),
@@ -43,16 +47,54 @@ export function AddUserForm({ setUsers }: AddUserFormProps) {
 			sendEmail: false,
 		},
 	});
-	const [isOpen, setIsOpen] = useState(false);
+
+	// Populate form with user data when dialog opens
+	useEffect(() => {
+		if (isOpen && user) {
+			const [firstName, ...lastNameParts] = user.fullName ? user.fullName.split(" ") : [user.firstName || "", user.lastName || ""];
+			reset({
+				firstName: firstName || "",
+				lastName: lastNameParts.join(" ") || "",
+				email: user.email || "",
+				role: (user.role as "user" | "mentor") || "user",
+				sendEmail: false,
+			});
+		}
+	}, [isOpen, user, reset]);
 
 	const onSubmit = async (data: FormData) => {
+		// Construct fullName for comparison and update
+		const fullName = `${data.firstName} ${data.lastName || ""}`.trim();
+
+		// Compare with initial user data
+		const hasChanges = data.firstName !== (user.fullName?.split(" ")[0] || user.firstName) || (data.lastName || "") !== (user.fullName?.split(" ").slice(1).join(" ") || user.lastName || "") || data.role !== user.role || data.sendEmail !== false;
+
+		if (!hasChanges) {
+			setIsOpen(false);
+			toast.info("No changes detected.");
+			return;
+		}
+
 		try {
-			console.log("Form submitted:", data);
-			const response = await createUserApi(data);
+			const updatedData = {
+				...data,
+				fullName, // Include fullName for consistency with IUserDTO
+			};
+
+			const response = await updateUserApi(user.id as string, updatedData);
 			if (response.success) {
 				setIsOpen(false);
-				setUsers((prevUsers) => [response.user, ...prevUsers]);
-				toast.success("User created successfully!");
+				const updatedUser: IUserDTO = {
+					...user,
+					fullName,
+					firstName: data.firstName,
+					lastName: data.lastName || "",
+					email: data.email, // Still included in updatedUser even though read-only
+					role: data.role,
+					...(response.user || {}),
+				};
+				updateUser(updatedUser);
+				toast.success("User updated successfully!");
 			}
 		} catch (error) {
 			if (error instanceof Error) {
@@ -64,15 +106,14 @@ export function AddUserForm({ setUsers }: AddUserFormProps) {
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogTrigger asChild>
-				<Button onClick={() => setIsOpen(true)}>
-					<Plus className="mr-2 h-4 w-4" />
-					Add User
-				</Button>
+				<button className="w-full text-left hover:cursor-pointer" onClick={() => setIsOpen(true)}>
+					Edit
+				</button>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Add New User</DialogTitle>
-					<DialogDescription>Create a new user account on the platform</DialogDescription>
+					<DialogTitle>Edit User</DialogTitle>
+					<DialogDescription>Update the user’s account details</DialogDescription>
 				</DialogHeader>
 				<form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
 					<div className="grid grid-cols-4 items-center gap-4">
@@ -84,7 +125,6 @@ export function AddUserForm({ setUsers }: AddUserFormProps) {
 							{errors.firstName && <p className="mt-1 text-sm text-red-500">{errors.firstName.message}</p>}
 						</div>
 					</div>
-
 					<div className="grid grid-cols-4 items-center gap-4">
 						<Label htmlFor="lastName" className="text-right">
 							Last Name
@@ -94,35 +134,44 @@ export function AddUserForm({ setUsers }: AddUserFormProps) {
 							{errors.lastName && <p className="mt-1 text-sm text-red-500">{errors.lastName.message}</p>}
 						</div>
 					</div>
-
 					<div className="grid grid-cols-4 items-center gap-4">
 						<Label htmlFor="email" className="text-right">
 							Email
 						</Label>
 						<div className="col-span-3">
-							<Input id="email" type="email" {...register("email")} className={errors.email ? "border-red-500" : ""} />
+							<Input
+								id="email"
+								type="email"
+								{...register("email")}
+								readOnly // Make email read-only
+								className={errors.email ? "border-red-500" : "bg-gray-100 cursor-not-allowed"}
+							/>
 							{errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
 						</div>
 					</div>
-
 					<div className="grid grid-cols-4 items-center gap-4">
 						<Label htmlFor="role" className="text-right">
 							Role
 						</Label>
 						<div className="col-span-3">
-							<Select onValueChange={(value) => setValue("role", value as "user" | "mentor")}>
-								<SelectTrigger className={errors.role ? "border-red-500" : ""}>
-									<SelectValue placeholder="Select role" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="user">User</SelectItem>
-									<SelectItem value="mentor">Mentor</SelectItem>
-								</SelectContent>
-							</Select>
+							<Controller
+								name="role"
+								control={control}
+								render={({ field }) => (
+									<Select onValueChange={field.onChange} value={field.value}>
+										<SelectTrigger className={errors.role ? "border-red-500" : ""}>
+											<SelectValue placeholder="Select role" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="user">User</SelectItem>
+											<SelectItem value="mentor">Mentor</SelectItem>
+										</SelectContent>
+									</Select>
+								)}
+							/>
 							{errors.role && <p className="mt-1 text-sm text-red-500">{errors.role.message}</p>}
 						</div>
 					</div>
-
 					<div className="grid grid-cols-4 items-center gap-4">
 						<Label htmlFor="send-email" className="text-right">
 							Notifications
@@ -130,14 +179,13 @@ export function AddUserForm({ setUsers }: AddUserFormProps) {
 						<div className="col-span-3 flex items-center space-x-2">
 							<Checkbox id="send-email" {...register("sendEmail")} onCheckedChange={(checked) => setValue("sendEmail", checked === true)} />
 							<label htmlFor="send-email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-								Send welcome email
+								Send update email
 							</label>
 						</div>
 					</div>
-
 					<DialogFooter>
 						<Button type="submit" disabled={isSubmitting}>
-							{isSubmitting ? "Creating..." : "Create User"}
+							{isSubmitting ? "Updating..." : "Update User"}
 						</Button>
 					</DialogFooter>
 				</form>

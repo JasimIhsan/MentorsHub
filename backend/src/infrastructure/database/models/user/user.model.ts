@@ -35,7 +35,7 @@ const UsersSchema: Schema = new Schema(
 		password: { type: String, required: true },
 		firstName: { type: String, required: true },
 		role: { type: String, enum: ["user", "mentor"], required: true, default: "user" },
-		lastName: { type: String, required: true },
+		lastName: { type: String },
 		avatar: { type: String },
 		bio: { type: String },
 		interests: [{ type: String }],
