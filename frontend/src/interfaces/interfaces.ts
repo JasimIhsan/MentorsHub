@@ -7,6 +7,7 @@ export interface UserInterface {
 	role?: "user" | "mentor";
 	avatar?: string | null;
 	bio?: string | null;
+	about?: string | null
 	interests?: string[] | null;
 	skills?: string[] | null;
 	isActive?: boolean | null;

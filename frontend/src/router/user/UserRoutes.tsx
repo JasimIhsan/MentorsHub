@@ -7,6 +7,7 @@ import PageNotFound from "@/pages/user/PageNotFound";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { AuthGuard } from "./AuthGuard";
 import { DashboardPage } from "@/pages/user/DashboardPage";
+import UserProfilePage from "@/pages/user/UserProfile";
 
 const UserRoutes = () => {
 	return (
@@ -27,6 +28,14 @@ const UserRoutes = () => {
 					element={
 						<ProtectedRoute>
 							<DashboardPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/profile"
+					element={
+						<ProtectedRoute>
+							<UserProfilePage />
 						</ProtectedRoute>
 					}
 				/>

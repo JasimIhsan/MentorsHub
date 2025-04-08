@@ -1,5 +1,6 @@
 import { UserInterface } from "@/interfaces/interfaces";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from "../store";
 
 interface AuthState {
 	isAuthenticated: boolean;
@@ -39,3 +40,10 @@ const authSlice = createSlice({
 
 export const { login, logout, updateUser, removeUserData, updateUserIsAuthenticated } = authSlice.actions;
 export default authSlice.reducer;
+
+export const getFullName = (state: RootState) => {
+	if (state.auth.user) {
+		return `${state.auth.user.firstName} ${state.auth.user.lastName}`;
+	}
+	return "";
+};
