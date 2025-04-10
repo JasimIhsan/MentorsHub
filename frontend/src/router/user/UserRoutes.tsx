@@ -8,6 +8,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { AuthGuard } from "./AuthGuard";
 import { DashboardPage } from "@/pages/user/DashboardPage";
 import UserProfilePage from "@/pages/user/UserProfilePage";
+import BrowseMentorsPage from "@/pages/user/BrowseMentors";
 
 const UserRoutes = () => {
 	return (
@@ -36,6 +37,14 @@ const UserRoutes = () => {
 					element={
 						<ProtectedRoute>
 							<UserProfilePage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/browse"
+					element={
+						<ProtectedRoute>
+							<BrowseMentorsPage />
 						</ProtectedRoute>
 					}
 				/>
