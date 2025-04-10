@@ -7,7 +7,7 @@ import PageNotFound from "@/pages/user/PageNotFound";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { AuthGuard } from "./AuthGuard";
 import { DashboardPage } from "@/pages/user/DashboardPage";
-import UserProfilePage from "@/pages/user/UserProfile";
+import UserProfilePage from "@/pages/user/UserProfilePage";
 
 const UserRoutes = () => {
 	return (

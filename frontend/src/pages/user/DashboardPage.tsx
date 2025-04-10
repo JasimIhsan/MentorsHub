@@ -9,7 +9,7 @@ import UpcomingSessions from "@/components/user/Dashboard/UpcomingSessions";
 import Notifications from "@/components/user/Dashboard/Notifications";
 import QuickLinks from "@/components/user/Dashboard/QuickLinks";
 import MentorsReadyNow from "@/components/user/Dashboard/MentorsReadyNow";
-import { fetchDashboardDatas } from "@/api/user/dashboard.services";
+import { fetchDashboardDatas } from "@/api/user/dashboard.api.service";
 import { toast } from "sonner";
 
 export const DashboardPage: React.FC = () => {

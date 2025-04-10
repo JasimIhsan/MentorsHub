@@ -7,21 +7,15 @@ export interface UserInterface {
 	role?: "user" | "mentor";
 	avatar?: string | null;
 	bio?: string | null;
-	about?: string | null
 	interests?: string[] | null;
 	skills?: string[] | null;
 	isActive?: boolean | null;
 	status: "blocked" | "unblocked";
-	location?: {
-		city: string | null;
-		country: string | null;
-		timezone: string | null;
-	};
 	createdAt?: Date;
 	updatedAt?: Date | null;
 	lastActive?: Date | null;
 	isVerified?: boolean | null;
-	mentorProfileId?: string | null; // Assuming ObjectId is a string in TS
+	mentorProfileId?: string | null; 
 	mentorRequestStatus?: string | null;
 	rating?: number | null;
 	sessionCompleted?: number | null;

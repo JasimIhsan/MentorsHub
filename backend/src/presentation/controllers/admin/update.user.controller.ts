@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { UpdateUserUsecase } from "../../../application/usecases/admin/users.tab.ts/update.user.usecase";
 import { IUserDTO } from "../../../application/dtos/user.dtos";
+import { IUpdateUserProfileUseCase } from "../../../application/interfaces/user/user.profile.usecase.interfaces";
 
 export class UpdateUserController {
-	constructor(private updateUserUsecase: UpdateUserUsecase) {}
+	constructor(private updateUserUsecase: IUpdateUserProfileUseCase) {}
 
 	async handle(req: Request, res: Response): Promise<void> {
 		try {

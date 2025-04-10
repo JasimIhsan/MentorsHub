@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IGoogleAuthUsecase } from "../../../application/interfaces/user/auth.usecases";
+import { IGoogleAuthUsecase } from "../../../application/interfaces/user/auth.usecases.interfaces";
 
 export class GoogleAuthController {
 	constructor(private googleAuthUsecase: IGoogleAuthUsecase) {}

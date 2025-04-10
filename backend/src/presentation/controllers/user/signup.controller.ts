@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ISignupUseCase } from "../../../application/interfaces/user/auth.usecases";
+import { ISignupUseCase } from "../../../application/interfaces/user/auth.usecases.interfaces";
 
 export class SignupController {
 	constructor(private signupUseCase: ISignupUseCase) {}

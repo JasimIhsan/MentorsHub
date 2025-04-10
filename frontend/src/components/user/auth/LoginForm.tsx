@@ -13,7 +13,7 @@ import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import GoogleLoginButton from "./GoogleLoginButton";
-import { loginApi } from "@/api/user/authentication";
+import { loginApi } from "@/api/user/authentication.api.service";
 // import { adminLogout } from "@/store/slices/adminAuthSlice";
 // import { RootState } from "@/store/store";
 

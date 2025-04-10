@@ -9,6 +9,7 @@ import { SendOtpUsecase } from "./authentication/send.otp.usecase";
 import { GoogleAuthUsecase } from "./authentication/google.auth.usecase";
 
 import { userRepository, forgotResetRepository, tokenInterface, emailService, redisService } from "../../../infrastructure/index";
+import { UpdateUserProfileUseCase } from "./user-profile/update.user.profile.usecase";
 
 // Initialize UseCases
 export const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
@@ -19,4 +20,5 @@ export const resetPasswordUseCase = new ResetPasswordUseCase(forgotResetReposito
 export const verifyOTPUsecase = new VerifyOtpUsecase(redisService);
 export const signupUseCase = new SignupUseCase(userRepository, tokenInterface, verifyOTPUsecase);
 export const sendOtpUseCase = new SendOtpUsecase(emailService, userRepository, redisService);
-export const googleAuthUsecase = new GoogleAuthUsecase(userRepository, tokenInterface)
+export const googleAuthUsecase = new GoogleAuthUsecase(userRepository, tokenInterface);
+export const updateUserProfileUsecase = new UpdateUserProfileUseCase(userRepository);

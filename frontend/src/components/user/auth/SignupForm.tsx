@@ -9,7 +9,7 @@ import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ISignupData } from "@/interfaces/interfaces";
-import { sendOtp } from "@/api/user/authentication";
+import { sendOtp } from "@/api/user/authentication.api.service";
 
 type FormState = "login" | "signup" | "forgot-password" | "otp-varification";
 

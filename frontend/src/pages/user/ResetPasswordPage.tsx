@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { resetPassword, verifyResetToken } from "@/api/user/authentication";
+import { resetPassword, verifyResetToken } from "@/api/user/authentication.api.service";
 // import { useToast } from "@/hooks/use-toast";
 
 // Define the schema for the reset password form

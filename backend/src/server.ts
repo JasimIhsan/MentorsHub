@@ -12,6 +12,7 @@ import { configurePassport } from "./infrastructure/services/passport/passport.c
 import { tokenInterface, userRepository } from "./infrastructure";
 import { adminAuthRouter } from "./presentation/routes/admin/admin.auth.routes";
 import { usertabRouter } from "./presentation/routes/admin/admin.usertab.routes";
+import { userProfileRoutes } from "./presentation/routes/user/user.profile.routes";
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use("/api", authRouter);
 app.use("/api/auth", googleAuthRouter);
 app.use("/api/admin", adminAuthRouter);
 app.use("/api/admin/users", usertabRouter);
+app.use("/api/user-profile", userProfileRoutes);
 
 app.listen(process.env.PORT, () => {
 	console.log(` Server is running  : ✅✅✅`);

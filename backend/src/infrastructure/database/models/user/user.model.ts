@@ -9,9 +9,9 @@ export interface IUsers extends Document {
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;
-	interests: string[] | null;
+	interests: object[] | null;
 	updatedAt: Date;
-	skills: string[] | null;
+	skills: object[] | null;
 	status: "blocked" | "unblocked";
 	location: {
 		city: string | null;

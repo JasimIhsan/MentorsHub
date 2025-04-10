@@ -1,7 +1,7 @@
 import { JwtPayload } from "jsonwebtoken";
 import { UserInterface } from "../../../../domain/entities/user.entity";
 import { ITokenService } from "../../../interfaces/user/token.service.interface";
-import { IRefreshTokenUsecase } from "../../../interfaces/user/auth.usecases";
+import { IRefreshTokenUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
 
 export class RefreshTokenUseCase implements IRefreshTokenUsecase {
 	constructor(private tokenServices: ITokenService) {}

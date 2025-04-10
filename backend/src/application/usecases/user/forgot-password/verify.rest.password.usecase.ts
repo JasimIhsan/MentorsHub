@@ -1,6 +1,6 @@
 import { IForgotPasswordTokensRepository } from "../../../../domain/dbrepository/forgot.password.token.respository";
 import { ForgotPasswordTokenEntity } from "../../../../domain/entities/forgot.password.token.entity";
-import { IVerifyResetTokenUseCase } from "../../../interfaces/user/auth.usecases";
+import { IVerifyResetTokenUseCase } from "../../../interfaces/user/auth.usecases.interfaces";
 
 export class VerifyResetTokenUseCase implements IVerifyResetTokenUseCase {
 	constructor(private resetRepo: IForgotPasswordTokensRepository) {}

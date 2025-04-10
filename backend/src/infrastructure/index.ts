@@ -16,7 +16,7 @@ export const userRepository: IUserRepository = new UserRepositoryImpl();
 export const forgotResetRepository: IForgotPasswordTokensRepository = new ForgotPasswordResetTokenImpl();
 export const adminRepository: IAdminRepository = new AdminRepositoryImpl();
 
-// Initialize Interfaces
+// Initialize services implementation
 export const tokenInterface: ITokenService = new TokenServicesImpl();
 export const emailService: IEmailService = new EmailServiceImpl();
 export const redisService: ICacheRepository = new RedisCacheRepository();

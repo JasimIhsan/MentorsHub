@@ -8,7 +8,9 @@ import { LogoutController } from "./logout.controller";
 import { SendOtpController } from "./send.otp.controller";
 import { GoogleAuthController } from "./google.auth.controller";
 
-import { signupUseCase, signinUseCase, refreshUseCase, forgotPasswordUseCase, verifyResetTokenUseCase, resetPasswordUseCase, sendOtpUseCase, googleAuthUsecase } from "../../../application/usecases/user/index";
+import { signupUseCase, signinUseCase, refreshUseCase, forgotPasswordUseCase, verifyResetTokenUseCase, resetPasswordUseCase, sendOtpUseCase, googleAuthUsecase, updateUserProfileUsecase } from "../../../application/usecases/user/index";
+import { UpdateUserController } from "../admin/update.user.controller";
+import { UpdateUserProfileController } from "./updateUserProfile.Controller";
 
 export const signupController = new SignupController(signupUseCase);
 export const signinController = new SigninController(signinUseCase);
@@ -19,3 +21,4 @@ export const resetPasswordController = new ResetPasswordController(resetPassword
 export const logoutController = new LogoutController();
 export const sendOtpController = new SendOtpController(sendOtpUseCase);
 export const googleAuthController = new GoogleAuthController(googleAuthUsecase);
+export const updateUseProfileController = new UpdateUserProfileController(updateUserProfileUsecase);

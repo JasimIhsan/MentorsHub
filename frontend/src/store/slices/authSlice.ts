@@ -26,6 +26,7 @@ const authSlice = createSlice({
 		},
 		updateUser(state, action: PayloadAction<UserInterface>) {
 			if (state.user) {
+				state.isAuthenticated = true;
 				state.user = { ...state.user, ...action.payload };
 			}
 		},
