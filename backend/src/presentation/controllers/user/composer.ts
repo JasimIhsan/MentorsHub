@@ -8,10 +8,22 @@ import { LogoutController } from "./auth/logout.controller";
 import { SendOtpController } from "./auth/send.otp.controller";
 import { GoogleAuthController } from "./auth/google.auth.controller";
 
-import { signupUseCase, signinUseCase, refreshUseCase, forgotPasswordUseCase, verifyResetTokenUseCase, resetPasswordUseCase, sendOtpUseCase, googleAuthUsecase, updateUserProfileUsecase } from "../../../application/usecases/user/composer";
+import {
+	signupUseCase,
+	signinUseCase,
+	refreshUseCase,
+	forgotPasswordUseCase,
+	verifyResetTokenUseCase,
+	resetPasswordUseCase,
+	sendOtpUseCase,
+	googleAuthUsecase,
+	updateUserProfileUsecase,
+	changePasswordUsecase,
+} from "../../../application/usecases/user/composer";
 import { UpdateUserController } from "../admin/update.user.controller";
-import { UpdateUserProfileController } from "./user-profile/updateUserProfile.Controller";
+import { UpdateUserProfileController } from "./user-profile/update.user.profile.controller";
 import { cloudinaryService } from "../../../infrastructure/composer";
+import { ChangePasswordController } from "./user-profile/change.password.controller";
 
 export const signupController = new SignupController(signupUseCase);
 export const signinController = new SigninController(signinUseCase);
@@ -23,3 +35,4 @@ export const logoutController = new LogoutController();
 export const sendOtpController = new SendOtpController(sendOtpUseCase);
 export const googleAuthController = new GoogleAuthController(googleAuthUsecase);
 export const updateUseProfileController = new UpdateUserProfileController(updateUserProfileUsecase, cloudinaryService);
+export const changePasswordController = new ChangePasswordController(changePasswordUsecase);

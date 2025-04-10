@@ -30,3 +30,13 @@ export const updateUserApi = async (userId: string, data: UpdateProfileFormData 
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const changePasswordApi = async (userId: string, oldPassword: string, newPassword: string) => {
+	try {
+		const response = await axiosInstance.put("/user-profile/change-password", { userId, oldPassword, newPassword });
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error from changePassword api: `, error);
+		throw new Error(error.response.data.message);
+	}
+};

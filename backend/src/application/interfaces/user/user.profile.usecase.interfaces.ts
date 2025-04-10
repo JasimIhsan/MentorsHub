@@ -7,3 +7,7 @@ export interface IUpdateUserProfileUseCase {
 export interface ICloudinaryService {
 	uploadProfilePicture(file: Express.Multer.File): Promise<string>;
 }
+
+export interface IChangePasswordUseCase {
+	execute(userId: string, oldPassword: string, newPassword: string): Promise<UserEntity | null>;
+}

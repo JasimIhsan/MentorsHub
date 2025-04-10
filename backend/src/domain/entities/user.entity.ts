@@ -135,9 +135,6 @@ export class UserEntity {
 
 	// Validate password
 	async isPasswordValid(plainPassword: string): Promise<boolean> {
-		console.log("plainPassword: ", plainPassword);
-		console.log("this.password: ", this.password);
-
 		return bcrypt.compare(plainPassword, this.password);
 	}
 

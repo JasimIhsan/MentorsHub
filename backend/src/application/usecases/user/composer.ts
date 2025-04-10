@@ -11,6 +11,7 @@ import { GoogleAuthUsecase } from "./authentication/google.auth.usecase";
 import { userRepository, forgotResetRepository, tokenInterface, emailService, redisService, cloudinaryService } from "../../../infrastructure/composer";
 import { UpdateUserProfileUseCase } from "./user-profile/update.user.profile.usecase";
 import { UploadAvatarUseCase } from "./user-profile/upload.avatar.usecase";
+import { ChangePasswordUsecase } from "./user-profile/change.password.usecase";
 
 // Initialize UseCases
 export const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
@@ -24,3 +25,4 @@ export const sendOtpUseCase = new SendOtpUsecase(emailService, userRepository, r
 export const googleAuthUsecase = new GoogleAuthUsecase(userRepository, tokenInterface);
 export const updateUserProfileUsecase = new UpdateUserProfileUseCase(userRepository);
 export const uploadImageCloudinaryUsecase = new UploadAvatarUseCase(cloudinaryService);
+export const changePasswordUsecase = new ChangePasswordUsecase(userRepository);

@@ -2,9 +2,12 @@ import { UserInterface } from "@/interfaces/interfaces";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 
+// Create a type that excludes password from UserInterface
+type UserWithoutPassword = Omit<UserInterface, "password">;
+
 interface AuthState {
 	isAuthenticated: boolean;
-	user: UserInterface | null;
+	user: Partial<UserWithoutPassword> | null;
 }
 
 const initialState: AuthState = {
@@ -16,7 +19,7 @@ const authSlice = createSlice({
 	name: "auth",
 	initialState,
 	reducers: {
-		login(state, action: PayloadAction<UserInterface>) {
+		login(state, action: PayloadAction<Partial<UserWithoutPassword>>) {
 			state.isAuthenticated = true;
 			state.user = action.payload;
 		},
@@ -24,7 +27,7 @@ const authSlice = createSlice({
 			state.isAuthenticated = false;
 			state.user = null;
 		},
-		updateUser(state, action: PayloadAction<UserInterface>) {
+		updateUser(state, action: PayloadAction<Partial<UserWithoutPassword>>) {
 			if (state.user) {
 				state.isAuthenticated = true;
 				state.user = { ...state.user, ...action.payload };
