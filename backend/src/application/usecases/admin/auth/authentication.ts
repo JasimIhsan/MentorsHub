@@ -1,6 +1,6 @@
 import { IAdminRepository } from "../../../../domain/dbrepository/admin.repository";
 import { AdminEntity } from "../../../../domain/entities/admin.entity";
-import { comparePassword } from "../../../../infrastructure/services/utils/compare.password";
+import { comparePassword } from "../../../../infrastructure/utils/compare.password";
 import { AdminDTO } from "../../../dtos/admin.dtos";
 import { IAdminAuthUsecase } from "../../../interfaces/admin/admin.auth.interface";
 import { ITokenService } from "../../../interfaces/user/token.service.interface";

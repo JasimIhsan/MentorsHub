@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ISendOtpUsecase } from "../../../application/interfaces/user/auth.usecases.interfaces";
+import { ISendOtpUsecase } from "../../../../application/interfaces/user/auth.usecases.interfaces";
 
 export class SendOtpController {
 	constructor(private sendOtpUseCase: ISendOtpUsecase) {}

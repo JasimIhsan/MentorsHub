@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { RefreshTokenUseCase } from "../../../application/usecases/user/authentication/refresh.token.usecase";
-import { Payload } from "../../../application/interfaces/user/token.service.interface";
+import { RefreshTokenUseCase } from "../../../../application/usecases/user/authentication/refresh.token.usecase";
+import { Payload } from "../../../../application/interfaces/user/token.service.interface";
 
 export class RefreshTokenController {
 	constructor(private refreshUsecase: RefreshTokenUseCase) {}

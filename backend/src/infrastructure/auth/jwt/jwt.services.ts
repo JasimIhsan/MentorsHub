@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { ITokenService, Payload } from "../../application/interfaces/user/token.service.interface";
+import { ITokenService, Payload } from "../../../application/interfaces/user/token.service.interface";
 
 dotenv.config();
 

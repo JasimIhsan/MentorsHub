@@ -16,199 +16,190 @@ import { updateProfileSchema, UpdateProfileFormData } from "@/schema/updateProfi
 import { z } from "zod";
 
 export default function UserProfilePage() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const user = useSelector((state: RootState) => state.auth.user as UserInterface);
-  const fullName = useSelector(getFullName);
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+	const [isEditing, setIsEditing] = useState(false);
+	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+	const user = useSelector((state: RootState) => state.auth.user as UserInterface);
+	const fullName = useSelector(getFullName);
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
 
-  const [formData, setFormData] = useState<UpdateProfileFormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    skills: [],
-    interests: [],
-    bio: "",
-  });
+	const [formData, setFormData] = useState<UpdateProfileFormData & { avatar?: string }>({
+		firstName: "",
+		lastName: "",
+		email: "",
+		skills: [],
+		interests: [],
+		bio: "",
+		avatar: "", // Add avatar field
+	});
 
-  const [originalFormData, setOriginalFormData] = useState<UpdateProfileFormData | null>(null); // Store original data
-  const [errors, setErrors] = useState<Record<keyof UpdateProfileFormData, string>>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    skills: "",
-    interests: "",
-    bio: "",
-  });
+	const [originalFormData, setOriginalFormData] = useState<(UpdateProfileFormData & { avatar?: string }) | null>(null);
+	const [errors, setErrors] = useState<Record<keyof UpdateProfileFormData, string>>({
+		firstName: "",
+		lastName: "",
+		email: "",
+		skills: "",
+		interests: "",
+		bio: "",
+	});
 
-  useEffect(() => {
-    if (user) {
-      const initialData = {
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.email || "",
-        skills: user.skills || [],
-        interests: user.interests || [],
-        bio: user.bio || "",
-      };
-      setFormData(initialData);
-      if (!originalFormData) {
-        setOriginalFormData(initialData); // Set original data only once
-      }
-    }
-  }, [user, originalFormData]);
+	useEffect(() => {
+		if (user) {
+			const initialData = {
+				firstName: user.firstName || "",
+				lastName: user.lastName || "",
+				email: user.email || "",
+				skills: user.skills || [],
+				interests: user.interests || [],
+				bio: user.bio || "",
+				avatar: user.avatar || "",
+			};
+			setFormData(initialData);
+			if (!originalFormData) {
+				setOriginalFormData(initialData);
+			}
+		}
+	}, [user, originalFormData]);
 
-  const pastSessions: any[] = [];
-  const upcomingSessions: any[] = [];
-  const isLoading = !user;
+	const handleInputChange = (field: keyof UpdateProfileFormData, value: any) => {
+		setFormData((prev) => ({
+			...prev,
+			[field]: value,
+		}));
+		setHasUnsavedChanges(true);
+		if (isEditing) {
+			validateField(field, value);
+		}
+	};
 
-  const handleInputChange = (field: keyof UpdateProfileFormData, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-    setHasUnsavedChanges(true);
-    if (isEditing) {
-      validateField(field, value);
-    }
-  };
+	const handleAvatarChange = (newAvatar: string) => {
+		setFormData((prev) => ({
+			...prev,
+			avatar: newAvatar,
+		}));
+		setHasUnsavedChanges(true);
+	};
 
-  const validateField = (field: keyof UpdateProfileFormData, value: any) => {
-    try {
-      updateProfileSchema.parse({ ...formData, [field]: value });
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const fieldError = error.errors.find((e) => e.path[0] === field);
-        setErrors((prev) => ({ ...prev, [field]: fieldError?.message || "Invalid input" }));
-      }
-    }
-  };
+	const validateField = (field: keyof UpdateProfileFormData, value: any) => {
+		try {
+			updateProfileSchema.parse({ ...formData, [field]: value });
+			setErrors((prev) => ({ ...prev, [field]: "" }));
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				const fieldError = error.errors.find((e) => e.path[0] === field);
+				setErrors((prev) => ({ ...prev, [field]: fieldError?.message || "Invalid input" }));
+			}
+		}
+	};
 
-  const validateForm = (): boolean => {
-    try {
-      updateProfileSchema.parse(formData);
-      setErrors({
-        firstName: "",
-        lastName: "",
-        email: "",
-        skills: "",
-        interests: "",
-        bio: "",
-      });
-      return true;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const formattedErrors = error.errors.reduce((acc, curr) => {
-          acc[curr.path[0] as keyof UpdateProfileFormData] = curr.message;
-          return acc;
-        }, {} as Record<keyof UpdateProfileFormData, string>);
-        setErrors(formattedErrors);
-        toast.error("Please fix the errors in the form before saving.");
-        return false;
-      }
-      return false;
-    }
-  };
+	const validateForm = (): boolean => {
+		try {
+			updateProfileSchema.parse(formData);
+			setErrors({
+				firstName: "",
+				lastName: "",
+				email: "",
+				skills: "",
+				interests: "",
+				bio: "",
+			});
+			return true;
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				const formattedErrors = error.errors.reduce((acc, curr) => {
+					acc[curr.path[0] as keyof UpdateProfileFormData] = curr.message;
+					return acc;
+				}, {} as Record<keyof UpdateProfileFormData, string>);
+				setErrors(formattedErrors);
+				toast.error("Please fix the errors in the form before saving.");
+				return false;
+			}
+			return false;
+		}
+	};
 
-  const handleSave = async () => {
-    if (!validateForm()) {
-      return;
-    }
+	const handleSave = async () => {
+		if (!validateForm()) {
+			return;
+		}
 
-    console.log("Saving data:", formData);
-    try {
-      const response = await updateUserApi(user.id as string, formData);
-      if (response.success) {
-        dispatch(updateUser(response.user));
-        setHasUnsavedChanges(false);
-        setIsEditing(false);
-        toast.success("Profile updated successfully!");
-        setOriginalFormData(formData); // Update original data after successful save
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      }
-    }
-  };
+		try {
+			const response = await updateUserApi(user.id as string, formData);
+			if (response.success) {
+				dispatch(updateUser(response.user));
+				setHasUnsavedChanges(false);
+				setIsEditing(false);
+				toast.success("Profile updated successfully!");
+				setOriginalFormData(formData);
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				toast.error(error.message);
+			}
+		}
+	};
 
-  const handleCancel = () => {
-    if (originalFormData) {
-      setFormData(originalFormData); // Revert to original data
-      setErrors({
-        firstName: "",
-        lastName: "",
-        email: "",
-        skills: "",
-        interests: "",
-        bio: "",
-      }); // Clear errors
-      setHasUnsavedChanges(false);
-    }
-    setIsEditing(false);
-  };
+	const handleCancel = () => {
+		if (originalFormData) {
+			setFormData(originalFormData);
+			setErrors({
+				firstName: "",
+				lastName: "",
+				email: "",
+				skills: "",
+				interests: "",
+				bio: "",
+			});
+			setHasUnsavedChanges(false);
+		}
+		setIsEditing(false);
+	};
 
-  const handleNavigation = (path: string) => {
-    if (hasUnsavedChanges) {
-      const confirmed = window.confirm("You have unsaved changes. Are you sure you want to leave without saving?");
-      if (confirmed) {
-        navigate(path);
-      }
-    } else {
-        navigate(path);
-    }
-  };
+	const handleNavigation = (path: string) => {
+		if (hasUnsavedChanges) {
+			const confirmed = window.confirm("You have unsaved changes. Are you sure you want to leave without saving?");
+			if (confirmed) {
+				navigate(path);
+			}
+		} else {
+			navigate(path);
+		}
+	};
 
-  if (isLoading) {
-    return (
-      <div className="container py-8 px-10 md:px-20 xl:px-25 flex justify-center items-center h-screen">
-        <p className="text-xl font-semibold text-muted-foreground animate-pulse">Loading your profile...</p>
-      </div>
-    );
-  }
+	if (!user) {
+		return (
+			<div className="container py-8 px-10 md:px-20 xl:px-25 flex justify-center items-center h-screen">
+				<p className="text-xl font-semibold text-muted-foreground animate-pulse">Loading your profile...</p>
+			</div>
+		);
+	}
 
-  return (
-    <div className="container py-8 px-10 md:px-20 xl:px-25">
-      <div className="flex flex-col gap-8">
-        <ProfileHeader
-          user={user}
-          fullName={fullName}
-          isEditing={isEditing}
-          hasUnsavedChanges={hasUnsavedChanges}
-          setIsEditing={setIsEditing}
-          handleSave={handleSave}
-          errors={errors}
-          handleCancel={handleCancel} // Pass cancel handler
-        />
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
-            <BioSection
-              bio={formData.bio}
-              isEditing={isEditing}
-              handleInputChange={handleInputChange}
-              errors={errors}
-            />
-            <SkillsInterestsSection
-              formData={formData}
-              isEditing={isEditing}
-              handleInputChange={handleInputChange}
-              errors={errors}
-            />
-            <SessionHistorySection user={user} pastSessions={pastSessions} upcomingSessions={upcomingSessions} />
-          </div>
-          <div className="space-y-6">
-            <PersonalInfoSection
-              formData={formData}
-              isEditing={isEditing}
-              handleInputChange={handleInputChange}
-              errors={errors}
-            />
-            <AccountSettingsSection handleNavigation={handleNavigation} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+	return (
+		<div className="container py-8 px-10 md:px-20 xl:px-25">
+			<div className="flex flex-col gap-8">
+				<ProfileHeader
+					user={user}
+					fullName={fullName}
+					isEditing={isEditing}
+					hasUnsavedChanges={hasUnsavedChanges}
+					setIsEditing={setIsEditing}
+					handleSave={handleSave}
+					errors={errors}
+					handleCancel={handleCancel}
+					onAvatarChange={handleAvatarChange} // Pass avatar change handler
+				/>
+				<div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+					<div className="space-y-6 lg:col-span-2">
+						<BioSection bio={formData.bio} isEditing={isEditing} handleInputChange={handleInputChange} errors={errors} />
+						<SkillsInterestsSection formData={formData} isEditing={isEditing} handleInputChange={handleInputChange} errors={errors} />
+						<SessionHistorySection user={user} pastSessions={[]} upcomingSessions={[]} />
+					</div>
+					<div className="space-y-6">
+						<PersonalInfoSection formData={formData} isEditing={isEditing} handleInputChange={handleInputChange} errors={errors} />
+						<AccountSettingsSection handleNavigation={handleNavigation} />
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 }

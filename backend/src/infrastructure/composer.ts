@@ -1,6 +1,6 @@
 import { UserRepositoryImpl } from "./database/implementation/user/user.repository.impl";
 import { ForgotPasswordResetTokenImpl } from "./database/implementation/user/forgot.password.token.impl";
-import { TokenServicesImpl } from "./jwt/jwt.services";
+import { TokenServicesImpl } from "./auth/jwt/jwt.services";
 import { EmailServiceImpl } from "./services/email-services/email.service";
 import { RedisCacheRepository } from "./cache/redis.cache.repository";
 import { IUserRepository } from "../domain/dbrepository/user.repository";
@@ -10,6 +10,8 @@ import { IEmailService } from "../application/interfaces/user/email.service.inte
 import { ICacheRepository } from "../domain/dbrepository/cache.respository";
 import { IAdminRepository } from "../domain/dbrepository/admin.repository";
 import { AdminRepositoryImpl } from "./database/implementation/admin/admin.repository.impl";
+import { ICloudinaryService } from "../application/interfaces/user/user.profile.usecase.interfaces";
+import { CloudinaryService } from "./cloud/cloudinary/cloudinary";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -20,3 +22,4 @@ export const adminRepository: IAdminRepository = new AdminRepositoryImpl();
 export const tokenInterface: ITokenService = new TokenServicesImpl();
 export const emailService: IEmailService = new EmailServiceImpl();
 export const redisService: ICacheRepository = new RedisCacheRepository();
+export const cloudinaryService: ICloudinaryService = new CloudinaryService();

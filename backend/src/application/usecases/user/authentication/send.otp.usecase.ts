@@ -1,6 +1,6 @@
 import { ICacheRepository } from "../../../../domain/dbrepository/cache.respository";
 import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
-import { generateOtp } from "../../../../infrastructure/services/utils/generate.otp";
+import { generateOtp } from "../../../../infrastructure/utils/generate.otp";
 import { ISendOtpUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { IEmailService } from "../../../interfaces/user/email.service.interface";
 

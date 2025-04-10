@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IResetPasswordUseCase } from "../../../application/interfaces/user/auth.usecases.interfaces";
+import { IResetPasswordUseCase } from "../../../../application/interfaces/user/auth.usecases.interfaces";
 
 export class ResetPasswordController {
 	constructor(private restPasswordUseCase: IResetPasswordUseCase) {}

@@ -2,7 +2,7 @@ import { IUserRepository } from "../../../../domain/dbrepository/user.repository
 import { UserEntity, UserRole } from "../../../../domain/entities/user.entity";
 import { IUserDTO, UserDTO } from "../../../dtos/user.dtos";
 import { ICreateUserUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
-import { generatePassword } from "../../../../infrastructure/services/utils/generate.password";
+import { generatePassword } from "../../../../infrastructure/utils/generate.password";
 
 export class CreateUserUsecase implements ICreateUserUsecase {
 	constructor(private userRepository: IUserRepository) {} // Replace 'any' with the actual type of userRepository
