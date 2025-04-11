@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Search, Calendar, GraduationCap, ArrowRight, Clock, Check } from "lucide-react";
 // import Image from "next/image";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -53,6 +53,7 @@ const testimonials = [
 ];
 
 export default function Home() {
+	const navigate = useNavigate();
 	return (
 		<div className="flex min-h-screen flex-col ">
 			{/* <header className="sticky top-0 z-40 border-b bg-background">
@@ -105,11 +106,11 @@ export default function Home() {
 							</h1>
 							<p className="text-xl text-muted-foreground">Connect with mentors, learn new skills, and grow your potential through personalized guidance.</p>
 							<div className="flex flex-col gap-4 sm:flex-row">
-								<Button size="lg" className="gap-2">
+								<Button size="lg" className="gap-2" onClick={() => navigate("/browse")}>
 									Find a Mentor
 									<ArrowRight className="h-4 w-4" />
 								</Button>
-								<Button size="lg" variant="outline">
+								<Button size="lg" variant="outline" className="gap-2" onClick={() => navigate("/become-mentor")}>
 									Become a Mentor
 								</Button>
 							</div>
