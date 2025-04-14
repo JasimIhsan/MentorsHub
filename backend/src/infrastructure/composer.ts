@@ -12,11 +12,14 @@ import { IAdminRepository } from "../domain/dbrepository/admin.repository";
 import { AdminRepositoryImpl } from "./database/implementation/admin/admin.repository.impl";
 import { ICloudinaryService } from "../application/interfaces/user/user.profile.usecase.interfaces";
 import { CloudinaryService } from "./cloud/cloudinary/cloudinary";
+import { IMentorProfileRepository } from "../domain/dbrepository/mentor.details.repository";
+import { MentorDetailsRepositoryImpl } from "./database/implementation/user/mentor.respository.impl";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
 export const forgotResetRepository: IForgotPasswordTokensRepository = new ForgotPasswordResetTokenImpl();
 export const adminRepository: IAdminRepository = new AdminRepositoryImpl();
+export const mentorRepository: IMentorProfileRepository = new MentorDetailsRepositoryImpl()
 
 // Initialize services implementation
 export const tokenInterface: ITokenService = new TokenServicesImpl();

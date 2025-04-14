@@ -19,11 +19,13 @@ import {
 	googleAuthUsecase,
 	updateUserProfileUsecase,
 	changePasswordUsecase,
+	becomeMentorUseCase,
 } from "../../../application/usecases/user/composer";
 import { UpdateUserController } from "../admin/update.user.controller";
 import { UpdateUserProfileController } from "./user-profile/update.user.profile.controller";
 import { cloudinaryService } from "../../../infrastructure/composer";
 import { ChangePasswordController } from "./user-profile/change.password.controller";
+import { BecomeMentorController } from "./user-profile/become.mentor.application.controller";
 
 export const signupController = new SignupController(signupUseCase);
 export const signinController = new SigninController(signinUseCase);
@@ -36,3 +38,4 @@ export const sendOtpController = new SendOtpController(sendOtpUseCase);
 export const googleAuthController = new GoogleAuthController(googleAuthUsecase);
 export const updateUseProfileController = new UpdateUserProfileController(updateUserProfileUsecase, cloudinaryService);
 export const changePasswordController = new ChangePasswordController(changePasswordUsecase);
+export const becomeMentorApplicationController = new BecomeMentorController(becomeMentorUseCase);	
