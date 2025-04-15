@@ -39,10 +39,15 @@ const authSlice = createSlice({
 		removeUserData(state) {
 			state.user = null;
 		},
+		updateRole(state, action: PayloadAction<"user" | "mentor">) {
+			if (state.user) {
+				state.user.role = action.payload;
+			}
+		},
 	},
 });
 
-export const { login, logout, updateUser, removeUserData, updateUserIsAuthenticated } = authSlice.actions;
+export const { login, logout, updateUser, removeUserData, updateUserIsAuthenticated , updateRole} = authSlice.actions;
 export default authSlice.reducer;
 
 export const getFullName = (state: RootState) => {

@@ -25,7 +25,7 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 	const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 	const [loading, setLoading] = useState(false);
 	const [resendLoading, setResendLoading] = useState(false);
-	const [timer, setTimer] = useState(5); //150 2:30 minutes in seconds
+	const [timer, setTimer] = useState(150); //150 2:30 minutes in seconds
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 	const dispatch = useDispatch();
 
@@ -61,7 +61,7 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 		newOtp[index] = value;
 		setOtp(newOtp);
 
-		if (value && index < 5) {
+		if (value && index < 150) {
 			const nextInput = document.getElementById(`otp-${index + 1}`);
 			if (nextInput) nextInput.focus();
 		}
@@ -73,7 +73,7 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 		if (/^\d{6}$/.test(pastedData)) {
 			const digits = pastedData.split("");
 			setOtp(digits);
-			inputRefs.current[5]?.focus();
+			inputRefs.current[150]?.focus();
 		}
 	};
 
@@ -120,7 +120,7 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 			// Simulate API call
 			const response = await resendOTP(signupData.email);
 			if (response.success) {
-				setTimer(5); // Reset timer
+				setTimer(150); // Reset timer
 				setOtp(["", "", "", "", "", ""]);
 				toast.success("New OTP sent successfully");
 			} else {
