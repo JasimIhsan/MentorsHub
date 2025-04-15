@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { TokenServicesImpl } from "../../infrastructure/jwt/jwt.services";
+import { TokenServicesImpl } from "../../infrastructure/auth/jwt/jwt.services";
 import { AuthenticatedRequest } from "../../types/express";
 import { UserRepositoryImpl } from "../../infrastructure/database/implementation/user/user.repository.impl";
 import { UserEntity } from "../../domain/entities/user.entity";

@@ -20,28 +20,24 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 	const [sortedUsers, setSortedUsers] = useState<IUserDTO[]>(users);
 	const [sortAsc, setSortAsc] = useState(true);
 	const [sortColumn, setSortColumn] = useState<"name" | "joinedDate">("name");
+	const [previewUserId, setPreviewUserId] = useState<string | null>(null); // Track the user ID for preview
 
 	const handleSort = (column: "name" | "joinedDate") => {
-		// Check if we're sorting by the same column
 		const isSameColumn = sortColumn === column;
-
-		// Toggle sort direction if sorting by the same column
 		const newSortAsc = isSameColumn ? !sortAsc : true;
 		setSortAsc(newSortAsc);
-		setSortColumn(column); // Update the sort column to the clicked one
+		setSortColumn(column);
 
 		const sorted = [...sortedUsers].sort((a, b) => {
 			if (column === "name") {
 				const nameA = a.fullName.toLowerCase();
 				const nameB = b.fullName.toLowerCase();
-
 				if (nameA < nameB) return newSortAsc ? -1 : 1;
 				if (nameA > nameB) return newSortAsc ? 1 : -1;
 				return 0;
 			} else if (column === "joinedDate") {
 				const dateA = new Date(a.createdAt);
 				const dateB = new Date(b.createdAt);
-
 				if (dateA < dateB) return newSortAsc ? -1 : 1;
 				if (dateA > dateB) return newSortAsc ? 1 : -1;
 				return 0;
@@ -49,7 +45,7 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 			return 0;
 		});
 
-		setSortedUsers(sorted); // Set sorted array to state
+		setSortedUsers(sorted);
 	};
 
 	useEffect(() => {
@@ -59,6 +55,9 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 	const updateUserInState = (updatedUser: IUserDTO) => {
 		setSortedUsers((prevUsers) => prevUsers.map((user) => (user.id === updatedUser.id ? { ...user, ...updatedUser } : user)));
 	};
+
+	// Find the user whose preview is being shown
+	const previewUser = sortedUsers.find((user) => user.id === previewUserId);
 
 	return (
 		<div className="rounded-md border px-3 py-1">
@@ -107,7 +106,11 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 								<TableCell>
 									<div className="flex items-center gap-3">
 										<Avatar className="h-8 w-8">
-											<AvatarImage src={user.avatar ?? ""} alt={user.fullName} />
+											<AvatarImage
+												src={user.avatar ?? ""}
+												alt={user.fullName}
+												onClick={() => setPreviewUserId(user.id as string)} // Set the specific user ID for preview
+											/>
 											<AvatarFallback>{user.fullName.slice(0, 1)}</AvatarFallback>
 										</Avatar>
 										<div className="font-medium">{user.fullName}</div>
@@ -137,13 +140,6 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 												<EditUserForm user={user} updateUser={updateUserInState} />
 											</DropdownMenuItem>
 											<DropdownMenuSeparator />
-											{/* {user.role !== "mentor" && (
-												<DropdownMenuItem>
-													<UserCog className="mr-2 h-4 w-4" />
-													Make mentor
-												</DropdownMenuItem>
-											)} */}
-											{/* Delete Confirmation Alert */}
 											<Alert
 												triggerElement={
 													<div className="w-full">
@@ -156,10 +152,8 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 												contentTitle="Confirm Delete User"
 												contentDescription={`Are you sure you want to delete "${user.fullName}"?`}
 												actionText="Delete"
-												onConfirm={() => handleDeleteUser(user.id as string)} // Only called when confirmed
+												onConfirm={() => handleDeleteUser(user.id as string)}
 											/>
-
-											{/* Status Update Confirmation Alert */}
 											<Alert
 												triggerElement={
 													<div className="w-full">
@@ -172,7 +166,7 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 												contentTitle={`Confirm ${user.status === "blocked" ? "Unblock" : "Block"} User`}
 												contentDescription={`Are you sure you want to ${user.status === "blocked" ? "Unblock" : "Block"} "${user.fullName}"?`}
 												actionText={`${user.status === "blocked" ? "Unblock" : "Block"}`}
-												onConfirm={() => handleStatusUpdate(user.id as string)} // Only called when confirmed
+												onConfirm={() => handleStatusUpdate(user.id as string)}
 											/>
 										</DropdownMenuContent>
 									</DropdownMenu>
@@ -182,6 +176,27 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 					)}
 				</TableBody>
 			</Table>
+
+			{/* Preview Modal - Only shown if previewUserId is set */}
+			{previewUserId && previewUser && (
+				<div
+					className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+					onClick={() => setPreviewUserId(null)} // Close preview when clicking outside
+				>
+					<div className="relative max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
+						{" "}
+						{/* Prevent closing when clicking inside */}
+						<img src={previewUser.avatar || ""} alt={`${previewUser.fullName}'s profile preview`} className="w-full h-auto rounded-lg" />
+						<Button
+							variant="outline"
+							className="absolute top-2 right-2"
+							onClick={() => setPreviewUserId(null)} // Close preview
+						>
+							X
+						</Button>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

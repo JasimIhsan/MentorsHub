@@ -1,6 +1,6 @@
 import { ObjectId } from "mongoose";
 import bcrypt from "bcrypt";
-import { IMentorDetails } from "./mentor.detailes.entity";
+// import { IMentorInterface } from "./mentor.detailes.entity";
 
 export type UserRole = "user" | "mentor";
 // interface IUserLocation {
@@ -26,6 +26,7 @@ export interface UserInterface {
 	sessionCompleted?: number;
 	// location?: IUserLocation;
 	mentorDetailsId?: ObjectId | null;
+	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
 	googleId?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date | null;
@@ -48,6 +49,7 @@ export class UserEntity {
 	private sessionCompleted?: number;
 	private location?: Location;
 	private mentorDetailsId?: ObjectId | null;
+	private mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
 	private googleId?: string | null;
 	private createdAt: Date;
 	private updatedAt?: Date | null;
@@ -55,7 +57,7 @@ export class UserEntity {
 	constructor(user: UserInterface) {
 		this.id = user.id;
 		this.email = user.email;
-		this.firstName = user.firstName;
+		this.firstName = user.firstName;	
 		this.lastName = user.lastName;
 		this.password = user.password;
 		this.role = user.role || "user";
@@ -68,6 +70,7 @@ export class UserEntity {
 		this.sessionCompleted = user.sessionCompleted ?? 0;
 		// this.location = user.location as IUserLocation ?? { city: null, country: null, timezone: null } as IUserLocation;
 		this.mentorDetailsId = user.mentorDetailsId ?? null;
+		this.mentorRequestStatus = user.mentorRequestStatus || "not-requested";
 		this.googleId = user.googleId ?? null;
 		this.createdAt = user.createdAt ?? new Date();
 		this.updatedAt = user.updatedAt ?? null;
@@ -83,6 +86,7 @@ export class UserEntity {
 			firstName,
 			lastName,
 			status: "unblocked",
+			mentorRequestStatus: "not-requested",
 			role,
 			sessionCompleted: 0,
 			createdAt: new Date(),
@@ -98,6 +102,7 @@ export class UserEntity {
 			lastName,
 			status: "unblocked",
 			sessionCompleted: 0,
+			mentorRequestStatus: "not-requested",
 			googleId: googleId ?? null,
 			avatar,
 			createdAt: new Date(),
@@ -119,6 +124,7 @@ export class UserEntity {
 			skills: userDoc.skills ?? null,
 			status: userDoc.status || "unblocked",
 			googleId: userDoc.googleId ?? null,
+			mentorRequestStatus: userDoc.mentorRequestStatus || "not-requested",
 			// location: userDoc.location ?? { city: null, country: null, timezone: null },
 			mentorDetailsId: userDoc.mentorDetails ?? {},
 			sessionCompleted: userDoc.sessionCompleted ?? 0,
@@ -135,9 +141,6 @@ export class UserEntity {
 
 	// Validate password
 	async isPasswordValid(plainPassword: string): Promise<boolean> {
-		console.log("plainPassword: ", plainPassword);
-		console.log("this.password: ", this.password);
-
 		return bcrypt.compare(plainPassword, this.password);
 	}
 
@@ -157,7 +160,10 @@ export class UserEntity {
 		if (updatedData.badges !== undefined) this.badges = updatedData.badges;
 		if (updatedData.sessionCompleted !== undefined) this.sessionCompleted = updatedData.sessionCompleted;
 		if (updatedData.mentorDetailsId !== undefined) this.mentorDetailsId = updatedData.mentorDetailsId;
-
+		if (updatedData.mentorRequestStatus !== undefined){
+			console.log('updatedData.mentorRequestStatus: ', updatedData.mentorRequestStatus);
+			this.mentorRequestStatus = updatedData.mentorRequestStatus
+		}
 		this.updatedAt = new Date();
 		console.log("password after : ", this.password);
 	}
@@ -210,10 +216,14 @@ export class UserEntity {
 			badges: this.badges,
 			sessionCompleted: this.sessionCompleted,
 			// location: this.location,
-			mentorDetailsId: this.mentorDetailsId,
 			createdAt: this.createdAt,
 			updatedAt: this.updatedAt,
+			mentorRequestStatus: this.mentorRequestStatus,
 			...(includePassword ? { password: this.password } : {}),
 		};
+	}
+
+	getMentorRequestStatus(): "pending" | "approved" | "rejected" | "not-requested" {
+		return this.mentorRequestStatus;
 	}
 }

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { forgotPassword } from "@/api/user/authentication";
+import { forgotPassword } from "@/api/user/authentication.api.service";
 
 // Define the schema for the forgot password form
 const forgotPasswordSchema = z.object({
@@ -35,11 +35,11 @@ export default function ForgotPasswordForm({ setFormState }: ForgotPasswordFormP
 			if (response.data.success) {
 				toast.success("Password reset link has been sent to your email");
 				form.reset();
-				setFormState("login"); // Return to login form after success
+				setFormState("login"); 
 			}
 		} catch (error: any) {
 			console.error("Forgot password error:", error);
-			toast.error(error.message || "Failed to send magic link. Please try again.");
+			toast.error(error.message || "Failed to send link. Please try again.");
 		}
 	};
 

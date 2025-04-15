@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 // import { useDispatch } from "react-redux";
-import { resendOTP, verifyOtpAndCompleteRegistration } from "@/api/user/authentication";
+import { resendOTP, verifyOtpAndCompleteRegistration } from "@/api/user/authentication.api.service";
 import { ISignupData } from "@/interfaces/interfaces";
 import { useDispatch } from "react-redux";
 import { login } from "@/store/slices/authSlice";

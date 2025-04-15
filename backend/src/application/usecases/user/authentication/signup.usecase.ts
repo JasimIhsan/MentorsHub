@@ -3,7 +3,7 @@ import { IUserRepository } from "../../../../domain/dbrepository/user.repository
 import bcrypt from "bcrypt";
 import { ITokenService } from "../../../interfaces/user/token.service.interface";
 import { ICacheRepository } from "../../../../domain/dbrepository/cache.respository";
-import { ISignupUseCase, IVerifyOtpUsecase } from "../../../interfaces/user/auth.usecases";
+import { ISignupUseCase, IVerifyOtpUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { emit } from "process";
 
 export class SignupUseCase implements ISignupUseCase {

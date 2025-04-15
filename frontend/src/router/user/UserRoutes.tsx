@@ -7,6 +7,9 @@ import PageNotFound from "@/pages/user/PageNotFound";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { AuthGuard } from "./AuthGuard";
 import { DashboardPage } from "@/pages/user/DashboardPage";
+import UserProfilePage from "@/pages/user/UserProfilePage";
+import BrowseMentorsPage from "@/pages/user/BrowseMentors";
+import { BecomeMentorPage } from "@/pages/user/BecomeMentorPage";
 
 const UserRoutes = () => {
 	return (
@@ -27,6 +30,31 @@ const UserRoutes = () => {
 					element={
 						<ProtectedRoute>
 							<DashboardPage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/profile"
+					element={
+						<ProtectedRoute>
+							<UserProfilePage />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/browse"
+					element={
+						<ProtectedRoute>
+							<BrowseMentorsPage />
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="/become-mentor"
+					element={
+						<ProtectedRoute>
+							<BecomeMentorPage />
 						</ProtectedRoute>
 					}
 				/>

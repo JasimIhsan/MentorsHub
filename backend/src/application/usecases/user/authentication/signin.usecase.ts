@@ -1,7 +1,7 @@
 import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
 import { ITokenService } from "../../../interfaces/user/token.service.interface";
 import { UserEntity } from "../../../../domain/entities/user.entity";
-import { ISignInUseCase } from "../../../interfaces/user/auth.usecases";
+import { ISignInUseCase } from "../../../interfaces/user/auth.usecases.interfaces";
 
 export class SigninUseCase implements ISignInUseCase {
 	constructor(private userRepo: IUserRepository, private tokenService: ITokenService) {}

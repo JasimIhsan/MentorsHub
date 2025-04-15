@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { TokenServicesImpl } from "../../infrastructure/jwt/jwt.services";
+import { TokenServicesImpl } from "../../infrastructure/auth/jwt/jwt.services";
 import { AuthenticatedRequest } from "../../types/express";
 
 const tokenService = new TokenServicesImpl();

@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import Alert from "../custom-ui/alert";
 import { useDispatch } from "react-redux";
-import { logoutSession } from "@/api/user/authentication";
+import { logoutSession } from "@/api/user/authentication.api.service";
 import { toast } from "sonner";
 import { adminLogout } from "@/store/slices/adminAuthSlice";
 

@@ -41,7 +41,7 @@ export default function MainLayout() {
 				</div>
 			</header>
 			{/* sm:px-6 lg:px-8 */}
-			<main className="flex">
+			<main className="flex ">
 				<Outlet />
 			</main>
 

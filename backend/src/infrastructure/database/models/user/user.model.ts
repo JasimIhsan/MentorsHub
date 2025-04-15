@@ -9,20 +9,14 @@ export interface IUsers extends Document {
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;
-	interests: string[] | null;
+	interests: object[] | null;
 	updatedAt: Date;
-	skills: string[] | null;
+	skills: object[] | null;
 	status: "blocked" | "unblocked";
-	location: {
-		city: string | null;
-		country: string | null;
-		timezone: string | null;
-	};
+	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
 	createdAt: Date;
 	lastActive: Date | null;
 	isVerified: boolean | null;
-	mentorProfileId: ObjectId | null;
-	mentorRequestStatus: "pending" | "approved" | "rejected" | null;
 	rating: number | null;
 	sessionCompleted: number | null;
 	featuredMentor: boolean | null;
@@ -41,17 +35,12 @@ const UsersSchema: Schema = new Schema(
 		interests: [{ type: String }],
 		skills: [{ type: String }],
 		status: { type: String, enum: ["blocked", "unblocked"], default: "unblocked" },
-		location: {
-			city: { type: String },
-			country: { type: String },
-			timezone: { type: String },
-		},
 		lastActive: { type: Date },
 		isVerified: { type: Boolean },
-		mentorProfileId: { type: Schema.Types.ObjectId, ref: "MentorProfile" },
 		mentorRequestStatus: {
 			type: String,
-			enum: ["pending", "approved", "rejected"],
+			enum: ["pending", "approved", "rejected", "not-requested"],
+			default: "not-requested",
 		},
 		rating: { type: Number },
 		sessionCompleted: { type: Number },

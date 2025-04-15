@@ -1,7 +1,7 @@
 import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
 import { IEmailService } from "../../../interfaces/user/email.service.interface";
 import crypto from "crypto";
-import { IForgotPasswordUseCase } from "../../../interfaces/user/auth.usecases";
+import { IForgotPasswordUseCase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { IForgotPasswordTokensRepository } from "../../../../domain/dbrepository/forgot.password.token.respository";
 
 export class ForgotPasswordUseCase implements IForgotPasswordUseCase {

@@ -1,5 +1,5 @@
 import { ICacheRepository } from "../../../../domain/dbrepository/cache.respository";
-import { IVerifyOtpUsecase } from "../../../interfaces/user/auth.usecases";
+import { IVerifyOtpUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
 
 export class VerifyOtpUsecase implements IVerifyOtpUsecase {
 	constructor(private redisService: ICacheRepository) {}

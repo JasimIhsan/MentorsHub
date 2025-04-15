@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Users, UserCog, Calendar, CreditCard, Settings, FileBarChart, Home, Menu , BookPlus} from "lucide-react";
+import { Users, Calendar, CreditCard, Settings, FileBarChart, Home, Menu, BookPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -61,7 +61,10 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
 		<div className="flex h-full w-[240px] flex-col overflow-hidden">
 			<nav className="flex flex-col gap-2 p-2 flex-1 overflow-hidden">
 				{routes.map((route) => (
-					<Link key={route.href} to={route.href} className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-secondary hover:text-accent", pathname === route.href && "bg-primary text-accent-foreground hover:bg-primary hover:text-accent-foreground")}>
+					<Link
+						key={route.href}
+						to={route.href}
+						className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-secondary hover:text-accent", pathname === route.href && "bg-primary text-accent-foreground hover:bg-primary hover:text-accent-foreground")}>
 						<route.icon className="h-4 w-4" />
 						{route.label}
 					</Link>
@@ -82,11 +85,11 @@ const routes = [
 		icon: Users,
 		href: "/admin/users",
 	},
-	{
-		label: "Mentors",
-		icon: UserCog,
-		href: "/admin/mentors",
-	},
+	// {
+	// 	label: "Mentors",
+	// 	icon: UserCog,
+	// 	href: "/admin/mentors",
+	// },
 	{
 		label: "Mentor Applications",
 		icon: BookPlus,

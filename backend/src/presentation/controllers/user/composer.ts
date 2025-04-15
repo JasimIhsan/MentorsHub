@@ -1,14 +1,31 @@
-import { SignupController } from "./signup.controller";
-import { SigninController } from "./signin.controller";
-import { RefreshTokenController } from "./refresh.token.controller";
-import { ForgotPasswrodController } from "./forgot.password.controller";
-import { VerifyResetTokenController } from "./verify.reset.token.controller";
-import { ResetPasswordController } from "./reset.password.controller";
-import { LogoutController } from "./logout.controller";
-import { SendOtpController } from "./send.otp.controller";
-import { GoogleAuthController } from "./google.auth.controller";
+import { SignupController } from "./auth/signup.controller";
+import { SigninController } from "./auth/signin.controller";
+import { RefreshTokenController } from "./auth/refresh.token.controller";
+import { ForgotPasswrodController } from "./auth/forgot.password.controller";
+import { VerifyResetTokenController } from "./auth/verify.reset.token.controller";
+import { ResetPasswordController } from "./auth/reset.password.controller";
+import { LogoutController } from "./auth/logout.controller";
+import { SendOtpController } from "./auth/send.otp.controller";
+import { GoogleAuthController } from "./auth/google.auth.controller";
 
-import { signupUseCase, signinUseCase, refreshUseCase, forgotPasswordUseCase, verifyResetTokenUseCase, resetPasswordUseCase, sendOtpUseCase, googleAuthUsecase } from "../../../application/usecases/user/index";
+import {
+	signupUseCase,
+	signinUseCase,
+	refreshUseCase,
+	forgotPasswordUseCase,
+	verifyResetTokenUseCase,
+	resetPasswordUseCase,
+	sendOtpUseCase,
+	googleAuthUsecase,
+	updateUserProfileUsecase,
+	changePasswordUsecase,
+	becomeMentorUseCase,
+} from "../../../application/usecases/user/composer";
+import { UpdateUserController } from "../admin/user-tab/update.user.controller";
+import { UpdateUserProfileController } from "./user-profile/update.user.profile.controller";
+import { cloudinaryService } from "../../../infrastructure/composer";
+import { ChangePasswordController } from "./user-profile/change.password.controller";
+import { BecomeMentorController } from "./user-profile/become.mentor.application.controller";
 
 export const signupController = new SignupController(signupUseCase);
 export const signinController = new SigninController(signinUseCase);
@@ -19,3 +36,6 @@ export const resetPasswordController = new ResetPasswordController(resetPassword
 export const logoutController = new LogoutController();
 export const sendOtpController = new SendOtpController(sendOtpUseCase);
 export const googleAuthController = new GoogleAuthController(googleAuthUsecase);
+export const updateUseProfileController = new UpdateUserProfileController(updateUserProfileUsecase, cloudinaryService);
+export const changePasswordController = new ChangePasswordController(changePasswordUsecase);
+export const becomeMentorApplicationController = new BecomeMentorController(becomeMentorUseCase);	

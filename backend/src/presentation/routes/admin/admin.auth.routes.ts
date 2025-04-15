@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { AdminLoginController } from "../../controllers/admin/admin.login.controller";
+import { AdminLoginController } from "../../controllers/admin/auth/admin.login.controller";
 import { adminLoginController } from "../../controllers/admin/composer";
 import { logoutController } from "../../controllers/user/composer";
 

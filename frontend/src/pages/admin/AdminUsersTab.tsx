@@ -14,7 +14,7 @@ export default function AdminUsersTab() {
 	const [users, setUsers] = useState<IUserDTO[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
-	const [itemsPerPage] = useState(7);
+	const [itemsPerPage] = useState(10);
 
 	const filteredUsers = users.filter((user) => {
 		const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase());
