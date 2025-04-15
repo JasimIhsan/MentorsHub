@@ -7,8 +7,8 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 	constructor(private mentorRepo: IMentorProfileRepository, private userRepo: IUserRepository) {}
 
 	async execute(userId: string, status: "approved" | "rejected", reason?: string): Promise<UserEntity> {
-		console.log('userId: ', userId);
-		console.log('status: ', status);
+		console.log("userId: ", userId);
+		console.log("status: ", status);
 
 		const user = await this.userRepo.findUserById(userId);
 		if (!user) throw new Error("User not found");
@@ -16,7 +16,11 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 		const profile = await this.mentorRepo.findByUserId(userId);
 		if (!profile) throw new Error("Mentor profile not found");
 
-		user.updateUserDetails({ role: "mentor", mentorRequestStatus: status });
+		if (status === "approved") {
+			user.updateUserDetails({ role: "mentor", mentorRequestStatus: status });
+		} else if (status === "rejected") {
+			user.updateUserDetails({ mentorRequestStatus: status });
+		}
 
 		// if(reason){
 		// 	profile.updateMentorDetails({ approvalReason: reason });
