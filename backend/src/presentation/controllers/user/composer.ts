@@ -21,7 +21,7 @@ import {
 	changePasswordUsecase,
 	becomeMentorUseCase,
 } from "../../../application/usecases/user/composer";
-import { UpdateUserController } from "../admin/update.user.controller";
+import { UpdateUserController } from "../admin/user-tab/update.user.controller";
 import { UpdateUserProfileController } from "./user-profile/update.user.profile.controller";
 import { cloudinaryService } from "../../../infrastructure/composer";
 import { ChangePasswordController } from "./user-profile/change.password.controller";

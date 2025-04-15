@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { IUserDTO } from "../../../application/dtos/user.dtos";
-import { IUpdateUserProfileUseCase } from "../../../application/interfaces/user/user.profile.usecase.interfaces";
+import { IUserDTO } from "../../../../application/dtos/user.dtos";
+import { IUpdateUserProfileUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
 
 export class UpdateUserController {
 	constructor(private updateUserUsecase: IUpdateUserProfileUseCase) {}

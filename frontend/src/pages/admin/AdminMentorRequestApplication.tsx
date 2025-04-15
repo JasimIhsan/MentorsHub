@@ -11,6 +11,7 @@ import { JSX, useEffect, useState } from "react";
 import { IMentorDTO } from "@/interfaces/mentor.application.dto";
 import axiosInstance from "@/api/api.config";
 import { toast } from "sonner";
+import Alert from "@/components/custom-ui/alert";
 
 // Utility to generate a unique key for objects
 const getUniqueKey = (item: any, index: number): string => {
@@ -42,7 +43,7 @@ export function AdminMentorApplicationsPage() {
 				const response = await axiosInstance.get("/mentor/all");
 				if (response.data.success) {
 					const data = response.data.mentors;
-					console.log('data: ', data);
+					console.log("data: ", data);
 
 					setMentors(data);
 					toast.success("Mentors fetched successfully!");
@@ -58,7 +59,7 @@ export function AdminMentorApplicationsPage() {
 	// Handle status update (approve/reject)
 	const updateMentorStatus = async (userId: string, status: "approved" | "rejected", rejectionReason?: string) => {
 		try {
-			const response = await axiosInstance.put(`/mentor/${userId}/status`, {
+			const response = await axiosInstance.put(`/admin/mentor-application/${userId}/verify`, {
 				mentorRequestStatus: status,
 				rejectionReason: status === "rejected" ? rejectionReason || "No reason provided" : undefined,
 			});
@@ -176,7 +177,7 @@ function ApplicationList({ applications, updateMentorStatus }: { applications: I
 
 function ApplicationCard({ application, updateMentorStatus }: { application: IMentorDTO; updateMentorStatus: (userId: string, status: "approved" | "rejected", rejectionReason?: string) => void }) {
 	const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
-	const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+	// const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
 	const [isDocumentsDialogOpen, setIsDocumentsDialogOpen] = useState(false);
 	const [rejectionReason, setRejectionReason] = useState("");
 
@@ -240,244 +241,6 @@ function ApplicationCard({ application, updateMentorStatus }: { application: IMe
 										<Eye className="mr-2 h-4 w-4" />
 										View Profile
 									</Button>
-									{/* <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
-										<DialogTrigger asChild>
-											<Button variant="outline" size="sm">
-												<Eye className="mr-2 h-4 w-4" />
-												View Profile
-											</Button>
-										</DialogTrigger>
-										<DialogContent className="sm:max-w-2xl">
-											<DialogHeader>
-												<DialogTitle>
-													{application.firstName} {application.lastName}'s Profile
-												</DialogTitle>
-												<DialogDescription>Full details of the mentor's application</DialogDescription>
-											</DialogHeader>
-											<div className="grid gap-4 max-h-[60vh] overflow-y-auto pr-4">
-												<div className="flex items-center gap-4">
-													<Avatar className="h-16 w-16">
-														<AvatarImage src={application.avatar || undefined} />
-														<AvatarFallback>{application.firstName?.charAt(0)}</AvatarFallback>
-													</Avatar>
-													<div>
-														<h3 className="font-bold text-lg">
-															{application.firstName} {application.lastName}
-														</h3>
-														<p className="text-sm text-muted-foreground">{application.professionalTitle}</p>
-													</div>
-												</div>
-												<div>
-													<h4 className="font-semibold">Email</h4>
-													<p className="text-sm">{application.email}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Bio</h4>
-													<p className="text-sm">{application.bio || "No bio provided"}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Role</h4>
-													<p className="text-sm capitalize">{application.role}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Status</h4>
-													<p className="text-sm capitalize">{application.status}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Mentor Request Status</h4>
-													<p className="text-sm capitalize">{application.mentorRequestStatus}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Is Verified</h4>
-													<p className="text-sm">{application.isVerified ? "Yes" : "No"}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Featured Mentor</h4>
-													<p className="text-sm">{application.featuredMentor ? "Yes" : "No"}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Created At</h4>
-													<p className="text-sm">{new Date(application.createdAt).toLocaleDateString()}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Updated At</h4>
-													<p className="text-sm">{new Date(application.updatedAt).toLocaleDateString()}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Last Active</h4>
-													LOCKED
-													<p className="text-sm">{application.lastActive ? new Date(application.lastActive).toLocaleDateString() : "Not active yet"}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Sessions Completed</h4>
-													<p className="text-sm">{application.sessionCompleted ?? "None"}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Primary Expertise</h4>
-													<p className="text-sm">{application.primaryExpertise || "Not specified"}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Years of Experience</h4>
-													<p className="text-sm">{application.yearsExperience || "Not specified"}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Skills</h4>
-													<div className="flex flex-wrap gap-2">
-														{application.skills?.length ? (
-															application.skills.map((skill, i) => (
-																<Badge key={getUniqueKey(skill, i)} variant="default">
-																	{renderItem(skill)}
-																</Badge>
-															))
-														) : (
-															<p className="text-sm text-muted-foreground">No skills listed</p>
-														)}
-													</div>
-												</div>
-												<div>
-													<h4 className="font-semibold">Interests</h4>
-													<div className="flex flex-wrap gap-2">
-														{application.interests?.length ? (
-															application.interests.map((interest, i) => (
-																<Badge key={getUniqueKey(interest, i)} variant="default">
-																	{renderItem(interest)}
-																</Badge>
-															))
-														) : (
-															<p className="text-sm text-muted-foreground">No interests listed</p>
-														)}
-													</div>
-												</div>
-												<div>
-													<h4 className="font-semibold">Languages</h4>
-													<div className="flex flex-wrap gap-2">
-														{application.languages?.length ? (
-															application.languages.map((lang, i) => (
-																<Badge key={getUniqueKey(lang, i)} variant="default">
-																	{lang}
-																</Badge>
-															))
-														) : (
-															<p className="text-sm text-muted-foreground">No languages listed</p>
-														)}
-													</div>
-												</div>
-												<div>
-													<h4 className="font-semibold">Work Experiences</h4>
-													{application.workExperiences?.length ? (
-														application.workExperiences.map((exp, i) => (
-															<div key={getUniqueKey(exp.jobTitle + exp.company, i)} className="mt-2">
-																<p className="text-sm font-medium">
-																	{exp.jobTitle} at {exp.company}
-																</p>
-																<p className="text-sm text-muted-foreground">
-																	{exp.startDate} - {exp.endDate || "Present"} {exp.currentJob && "(Current)"}
-																</p>
-																<p className="text-sm">{exp.description}</p>
-															</div>
-														))
-													) : (
-														<p className="text-sm text-muted-foreground">No work experiences listed</p>
-													)}
-												</div>
-												<div>
-													<h4 className="font-semibold">Education</h4>
-													{application.educations?.length ? (
-														application.educations.map((edu, i) => (
-															<p key={getUniqueKey(edu.degree + edu.institution, i)} className="text-sm">
-																{edu.degree} from {edu.institution} ({edu.startYear} - {edu.endYear})
-															</p>
-														))
-													) : (
-														<p className="text-sm text-muted-foreground">No education listed</p>
-													)}
-												</div>
-												<div>
-													<h4 className="font-semibold">Certifications</h4>
-													{application.certifications?.length ? (
-														application.certifications.map((cert, i) => (
-															<div key={getUniqueKey(cert.name + cert.issuingOrg, i)} className="mt-2">
-																<p className="text-sm font-medium">{cert.name}</p>
-																<p className="text-sm text-muted-foreground">
-																	Issued by {cert.issuingOrg} on {cert.issueDate}
-																	{cert.expiryDate && `, expires ${cert.expiryDate}`}
-																</p>
-															</div>
-														))
-													) : (
-														<p className="text-sm text-muted-foreground">No certifications listed</p>
-													)}
-												</div>
-												<div>
-													<h4 className="font-semibold">Session Format</h4>
-													<p className="text-sm capitalize">{application.sessionFormat || "Not specified"}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Session Types</h4>
-													<div className="flex flex-wrap gap-2">
-														{application.sessionTypes?.length ? (
-															application.sessionTypes.map((type, i) => (
-																<Badge key={getUniqueKey(type, i)} variant="default">
-																	{type}
-																</Badge>
-															))
-														) : (
-															<p className="text-sm text-muted-foreground">No session types listed</p>
-														)}
-													</div>
-												</div>
-												<div>
-													<h4 className="font-semibold">Pricing</h4>
-													<p className="text-sm capitalize">{application.pricing || "Not specified"}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Hourly Rate</h4>
-													<p className="text-sm">{application.hourlyRate || "Not specified"}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Availability</h4>
-													<div className="flex flex-wrap gap-2">
-														{application.availability?.length ? (
-															application.availability.map((slot, i) => (
-																<Badge key={getUniqueKey(slot, i)} variant="default">
-																	{slot}
-																</Badge>
-															))
-														) : (
-															<p className="text-sm text-muted-foreground">No availability listed</p>
-														)}
-													</div>
-												</div>
-												<div>
-													<h4 className="font-semibold">Rating</h4>
-													<p className="text-sm">{application.rating ? `${application.rating}/5` : "Not rated"}</p>
-												</div>
-												<div>
-													<h4 className="font-semibold">Badges</h4>
-													<div className="flex flex-wrap gap-2">
-														{application.badges?.length ? (
-															application.badges.map((badge, i) => (
-																<Badge key={getUniqueKey(badge, i)} variant="default">
-																	{badge}
-																</Badge>
-															))
-														) : (
-															<p className="text-sm text-muted-foreground">No badges earned</p>
-														)}
-													</div>
-												</div>
-												<div>
-													<h4 className="font-semibold">User ID</h4>
-													<p className="text-sm">{application.userId}</p>
-												</div>
-											</div>
-											<DialogFooter>
-												<Button variant="outline" onClick={() => setIsProfileDialogOpen(false)}>
-													Close
-												</Button>
-											</DialogFooter>
-										</DialogContent>
-									</Dialog> */}
 									<Dialog open={isDocumentsDialogOpen} onOpenChange={setIsDocumentsDialogOpen}>
 										<DialogTrigger asChild>
 											<Button variant="outline" size="sm">
@@ -518,10 +281,18 @@ function ApplicationCard({ application, updateMentorStatus }: { application: IMe
 									</Dialog>
 									{application.mentorRequestStatus === "pending" && (
 										<>
-											<Button variant="default" size="sm" onClick={handleApprove}>
-												<Check className="mr-2 h-4 w-4" />
-												Approve
-											</Button>
+											<Alert
+												triggerElement={
+													<Button variant="default" size="sm">
+														<Check className="mr-2 h-4 w-4" />
+														Approve
+													</Button>
+												}
+												contentTitle="Confirm Approval"
+												contentDescription="Are you sure you want to approve this item? This action cannot be undone."
+												actionText="Confirm"
+												onConfirm={handleApprove}
+											/>
 											<Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
 												<DialogTrigger asChild>
 													<Button variant="destructive" size="sm">

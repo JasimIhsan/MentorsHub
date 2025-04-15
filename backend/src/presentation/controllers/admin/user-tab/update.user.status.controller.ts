@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IUpdateUserStatusUsecase } from "../../../application/interfaces/admin/admin.usertab.interfaces";
+import { IUpdateUserStatusUsecase } from "../../../../application/interfaces/admin/admin.usertab.interfaces";
 
 export class UpdateUserStatusController {
 	constructor(private updateUserStatusUsecase: IUpdateUserStatusUsecase) {}

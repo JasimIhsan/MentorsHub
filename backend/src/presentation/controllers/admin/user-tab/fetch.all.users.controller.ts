@@ -1,4 +1,4 @@
-import { IFetchAllUsersUsecase } from "../../../application/interfaces/admin/admin.usertab.interfaces";
+import { IFetchAllUsersUsecase } from "../../../../application/interfaces/admin/admin.usertab.interfaces";
 
 export class FetchAllUsersController {
 	constructor(private fetchAllUsersUsecase: IFetchAllUsersUsecase) {}

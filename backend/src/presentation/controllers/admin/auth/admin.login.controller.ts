@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IAdminAuthUsecase } from "../../../application/interfaces/admin/admin.auth.interface";
+import { IAdminAuthUsecase } from "../../../../application/interfaces/admin/admin.auth.interface";
 
 export class AdminLoginController {
 	constructor(private adminLoginUsecase: IAdminAuthUsecase) {}

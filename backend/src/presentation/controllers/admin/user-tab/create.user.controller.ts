@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ICreateUserUsecase } from "../../../application/interfaces/admin/admin.usertab.interfaces";
+import { ICreateUserUsecase } from "../../../../application/interfaces/admin/admin.usertab.interfaces";
 
 export class CreateUserController {
 	constructor(private createUserUsecase: ICreateUserUsecase) {}

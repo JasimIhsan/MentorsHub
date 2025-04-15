@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IDeleteUserUsecase } from "../../../application/interfaces/admin/admin.usertab.interfaces";
+import { IDeleteUserUsecase } from "../../../../application/interfaces/admin/admin.usertab.interfaces";
 
 export class DeleteUserController {
 	constructor(private deleteUserUsecase: IDeleteUserUsecase) {}
