@@ -17,7 +17,6 @@ export interface IUsers extends Document {
 	createdAt: Date;
 	lastActive: Date | null;
 	isVerified: boolean | null;
-	mentorProfileId: ObjectId | null;
 	rating: number | null;
 	sessionCompleted: number | null;
 	featuredMentor: boolean | null;

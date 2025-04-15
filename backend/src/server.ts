@@ -13,6 +13,7 @@ import { tokenInterface, userRepository } from "./infrastructure/composer";
 import { adminAuthRouter } from "./presentation/routes/admin/admin.auth.routes";
 import { usertabRouter } from "./presentation/routes/admin/admin.usertab.routes";
 import { userProfileRoutes } from "./presentation/routes/user/user.profile.routes";
+import { mentorRouter } from "./presentation/routes/mentors/mentor.routes";
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use("/api/auth", googleAuthRouter);
 app.use("/api/admin", adminAuthRouter);
 app.use("/api/admin/users", usertabRouter);
 app.use("/api/user-profile", userProfileRoutes);
+app.use("/api/mentor", mentorRouter);
 
 app.listen(process.env.PORT, () => {
 	console.log(` Server is running  : ✅✅✅`);
