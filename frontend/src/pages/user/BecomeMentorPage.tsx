@@ -84,7 +84,6 @@ const validateFormData = (data: FormData): { isValid: boolean; errors: string[] 
 	if (!data.pricing) errors.push("Pricing preference is required");
 	if (data.pricing !== "free" && !data.hourlyRate) errors.push("Hourly rate is required for paid sessions");
 	if (data.availability.length === 0) errors.push("At least one availability option is required");
-	if (!data.hoursPerWeek) errors.push("Hours per week is required");
 	if (!data.terms) errors.push("You must confirm the accuracy of the information");
 	if (!data.guidelines) errors.push("You must agree to the Mentor Guidelines");
 	if (!data.interview) errors.push("You must acknowledge the interview possibility");
@@ -721,11 +720,6 @@ export function BecomeMentorPage() {
 													</div>
 												))}
 											</div>
-										</div>
-
-										<div className="space-y-2">
-											<Label htmlFor="hours-per-week">Hours Available Per Week</Label>
-											<Input id="hours-per-week" type="number" value={formData.hoursPerWeek} onChange={(e) => handleInputChange("hoursPerWeek", e.target.value)} placeholder="e.g. 10" required />
 										</div>
 									</div>
 								</>

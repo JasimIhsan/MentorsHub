@@ -6,6 +6,7 @@ import AdminLoginPage from "@/pages/admin/AdminLoginPage";
 import AdminPageNotFound from "@/pages/admin/AdminPageNotFound";
 import AdminUsersTab from "@/pages/admin/AdminUsersTab";
 import { AdminAuthGuard } from "./AdminAuthGuard";
+import { AdminMentorApplicationsPage } from "@/pages/admin/AdminMentorRequestApplication";
 
 const AdminRoutes = () => {
 	return (
@@ -35,6 +36,14 @@ const AdminRoutes = () => {
 					element={
 						<AdminProtectedRoute>
 							<AdminUsersTab />
+						</AdminProtectedRoute>
+					}
+				/>
+				<Route
+					path="mentor-applications"
+					element={
+						<AdminProtectedRoute>
+							<AdminMentorApplicationsPage />
 						</AdminProtectedRoute>
 					}
 				/>
