@@ -71,6 +71,8 @@ export const verifyOtpAndCompleteRegistration = async (otp: string, signupData: 
 	console.log("otp: ", otp);
 	try {
 		const response = await axiosInstance.post(`/register`, { otp, signupData });
+		console.log('response forgot: ', response);
+
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error form verifyOtpAndCompleteRegistration api : `, error);
