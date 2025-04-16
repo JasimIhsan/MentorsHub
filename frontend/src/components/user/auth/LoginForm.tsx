@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormData, loginSchema } from "@/schema/auth.form";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { login } from "@/store/slices/authSlice";
+import { login } from "@/store/slices/userSlice";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";

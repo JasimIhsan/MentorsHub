@@ -13,7 +13,7 @@ import axiosInstance from "@/api/api.config";
 import { toast } from "sonner";
 import Alert from "@/components/custom-ui/alert";
 import { useDispatch } from "react-redux";
-import { updateRole } from "@/store/slices/authSlice";
+import { updateRole } from "@/store/slices/userSlice";
 
 // Utility to generate a unique key for objects
 const getUniqueKey = (item: any, index: number): string => {

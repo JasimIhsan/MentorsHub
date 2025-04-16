@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
-import { getFullName, updateUser } from "@/store/slices/authSlice";
+import { getFullName, updateUser } from "@/store/slices/userSlice";
 import { UserInterface } from "@/interfaces/interfaces";
 import { updateUserApi } from "@/api/user/user.profile.api.service";
 import { toast } from "sonner";

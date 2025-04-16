@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { UserInterface } from "@/interfaces/interfaces";
-import { logout } from "@/store/slices/authSlice";
+import { logout } from "@/store/slices/userSlice";
 import { Bell, LogOut, Settings, User } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
@@ -15,6 +15,8 @@ interface UserProfileNavLinksProps {
 }
 
 export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
+	console.log("user: ", user);
+
 	const dispatch = useDispatch();
 
 	const handleLogout = async () => {

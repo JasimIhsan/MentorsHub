@@ -11,8 +11,8 @@ import { toast } from "sonner";
 import { adminLoginAPI } from "@/api/admin/authenticate";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { adminLogin } from "@/store/slices/adminAuthSlice";
-import { logout } from "@/store/slices/authSlice";
+import { adminLogin } from "@/store/slices/adminSlice";
+import { logout } from "@/store/slices/userSlice";
 
 // Define validation schema with Zod
 const loginSchema = z.object({

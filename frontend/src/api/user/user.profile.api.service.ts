@@ -40,3 +40,13 @@ export const changePasswordApi = async (userId: string, oldPassword: string, new
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const getUserProfileApi = async () => {
+	try {
+		const response = await axiosInstance.get(`/user-profile`);
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error from getUserProfile api: `, error);
+		throw new Error(error.response.data.message);
+	}
+};

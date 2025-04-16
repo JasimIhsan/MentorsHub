@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { BookOpen, BriefcaseBusiness, GraduationCap, Upload, Plus, X, CheckCircle2, ArrowRight, ArrowLeft, IndianRupee } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SKILL_OPTIONS } from "@/data/skill.option";
 import MultipleSelector from "@/components/ui/multiple-selector";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"; // Assuming you have a Dialog component
@@ -131,6 +131,19 @@ export function BecomeMentorPage() {
 	const totalSteps = 5;
 	const progress = (step / totalSteps) * 100;
 	const user = useSelector((state: RootState) => state.auth.user);
+	const navigate = useNavigate();
+
+	if (user?.role === "mentor") {
+		return (
+			<div className="min-h-screen min-w-screen flex items-center justify-center bg-gray-100">
+				<div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg text-center">
+					<h1 className="text-3xl font-bold tracking-tight text-gray-900">You are already a mentor</h1>
+					<p className="mt-4 text-gray-600">Thank you for your dedication! As a mentor, you're already making a difference. Continue to guide and inspire through your dashboard.</p>
+					<Button size="lg" onClick={() => navigate("/mentor/dashboard")}>Go to Mentor Dashboard</Button>
+				</div>
+			</div>
+		);
+	}
 
 	const [formData, setFormData] = useState<FormData>({
 		firstName: user?.firstName || "",

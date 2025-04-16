@@ -35,7 +35,7 @@
 import { googleAthentication } from "@/api/user/authentication.api.service";
 import { GoogleLogin } from "@react-oauth/google";
 import { useDispatch } from "react-redux";
-import { login } from "@/store/slices/authSlice";
+import { login } from "@/store/slices/userSlice";
 import { useNavigate } from "react-router-dom";
 
 const GoogleLoginButton = () => {

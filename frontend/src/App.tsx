@@ -6,6 +6,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import UserRoutes from "./router/user/UserRoutes";
 import AdminRoutes from "./router/admin/AdminRoutes";
+import MentorRoutes from "./router/mentor/MentorRoutes";
 
 // import PageNotFound from "./pages/PageNotFound";
 
@@ -19,6 +20,7 @@ function App() {
 						<Routes>
 							<Route path="/*" element={<UserRoutes />} />
 							<Route path="/admin/*" element={<AdminRoutes />} />
+							<Route path="/mentor/*" element={<MentorRoutes />} />
 							{/* <Route path="*" element={<PageNotFound />} /> */}
 						</Routes>
 					</BrowserRouter>

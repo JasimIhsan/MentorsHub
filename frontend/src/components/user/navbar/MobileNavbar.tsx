@@ -9,7 +9,7 @@ import { Menu } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { logoutSession } from "@/api/user/authentication.api.service";
-import { logout } from "@/store/slices/authSlice";
+import { logout } from "@/store/slices/userSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 
