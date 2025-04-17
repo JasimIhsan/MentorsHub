@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { UserInterface, Session, Notification, Mentor } from "@/interfaces/interfaces";
 import { AppDispatch, RootState } from "@/store/store";
-import axiosInstance from "@/api/api.config";
+import axiosInstance from "@/api/config/api.config";
 import WelcomeHeader from "@/components/user/Dashboard/WelcomeSection";
 import GamificationCard from "@/components/user/Dashboard/GamificationCard";
 import UpcomingSessions from "@/components/user/Dashboard/UpcomingSessions";

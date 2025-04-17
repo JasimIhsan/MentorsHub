@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { UserInterface } from "@/interfaces/interfaces";
 import { RootState } from "../store";
-import axiosInstance from "@/api/api.config";
+import axiosInstance from "@/api/config/api.config";
 
 // Type without password
 type UserWithoutPassword = Omit<UserInterface, "password">;

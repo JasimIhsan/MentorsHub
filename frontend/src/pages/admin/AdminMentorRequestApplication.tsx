@@ -9,11 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Search, Calendar, CheckCircle, XCircle, Clock, Eye, Download, Filter, BriefcaseBusiness, GraduationCap, Check, X } from "lucide-react";
 import { JSX, useEffect, useState } from "react";
 import { IMentorDTO } from "@/interfaces/mentor.application.dto";
-import axiosInstance from "@/api/api.config";
+import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import Alert from "@/components/custom-ui/alert";
 import { useDispatch } from "react-redux";
 import { updateRole } from "@/store/slices/userSlice";
+import { fetchAllMentors } from "@/api/mentors.api.service";
 
 // Utility to generate a unique key for objects
 const getUniqueKey = (item: any, index: number): string => {
@@ -43,9 +44,9 @@ export function AdminMentorApplicationsPage() {
 	useEffect(() => {
 		const fetchMentors = async () => {
 			try {
-				const response = await axiosInstance.get("/mentor/all");
-				if (response.data.success) {
-					const data = response.data.mentors;
+				const response = await fetchAllMentors();
+				if (response.success) {
+					const data = response.mentors;
 					console.log("data: ", data);
 					dispatch(updateRole("mentor"));
 					setMentors(data);

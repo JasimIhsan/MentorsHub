@@ -1,4 +1,4 @@
-import axiosInstance from "../api.config";
+import axiosInstance from "../config/api.config";
 import { Session, Mentor, Notification } from "@/interfaces/interfaces";
 
 export const fetchDashboardDatas = async () => {

@@ -1,4 +1,4 @@
-import axiosInstance from "../api.config";
+import axiosInstance from "../config/api.config";
 import { UpdateProfileFormData } from "@/schema/updateProfilePersonalInfo";
 
 export const updateUserApi = async (userId: string, data: UpdateProfileFormData & { avatar?: string }) => {

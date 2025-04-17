@@ -15,7 +15,7 @@ import { SKILL_OPTIONS } from "@/data/skill.option";
 import MultipleSelector from "@/components/ui/multiple-selector";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"; // Assuming you have a Dialog component
 import { toast } from "sonner";
-import axiosInstance from "@/api/api.config";
+import axiosInstance from "@/api/config/api.config";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 
