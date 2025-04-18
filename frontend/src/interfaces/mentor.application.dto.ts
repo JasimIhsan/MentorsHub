@@ -8,7 +8,7 @@ export interface IMentorDTO {
 	bio: string | null;
 	interests: object[] | null;
 	updatedAt: Date;
-	skills: object[] | null;
+	skills: string[] | null;
 	status: "blocked" | "unblocked";
 	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
 	createdAt: Date;
@@ -49,4 +49,11 @@ export interface IMentorDTO {
 	hourlyRate: string | null;
 	availability: string[];
 	documents: string[];
+	reviews: {
+		name: string;
+		avatar: string;
+		rating: number;
+		date: string;
+		comment: string;
+	}[];
 }

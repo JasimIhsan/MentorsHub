@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { UserInterface } from "@/interfaces/interfaces";
-import { logout } from "@/store/slices/authSlice";
+import { logout } from "@/store/slices/userSlice";
 import { Bell, LogOut, Settings, User } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
@@ -15,6 +15,7 @@ interface UserProfileNavLinksProps {
 }
 
 export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
+
 	const dispatch = useDispatch();
 
 	const handleLogout = async () => {
@@ -30,8 +31,6 @@ export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
 			console.error("Error logging out:", error);
 		}
 	};
-
-	console.log(user);
 
 	return (
 		<div className="flex items-center gap-4 pr-10 md:pr-20 xl:pr-25 justify-center">

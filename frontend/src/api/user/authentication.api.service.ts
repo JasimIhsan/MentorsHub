@@ -1,5 +1,5 @@
 import { ISignupData } from "@/interfaces/interfaces";
-import axiosInstance from "../api.config";
+import axiosInstance from "../config/api.config";
 
 export const loginApi = async (email: string, password: string) => {
 	try {

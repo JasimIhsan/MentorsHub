@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { resendOTP, verifyOtpAndCompleteRegistration } from "@/api/user/authentication.api.service";
 import { ISignupData } from "@/interfaces/interfaces";
 import { useDispatch } from "react-redux";
-import { login } from "@/store/slices/authSlice";
+import { login } from "@/store/slices/userSlice";
 // import { adminLogout } from "@/store/slices/adminAuthSlice";
 
 type FormState = "login" | "signup" | "forgot-password" | "reset-password" | "otp-varification";

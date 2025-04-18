@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { UserInterface, Session, Notification, Mentor } from "@/interfaces/interfaces";
-import { RootState } from "@/store/store";
-import axiosInstance from "@/api/api.config";
+import { AppDispatch, RootState } from "@/store/store";
+import axiosInstance from "@/api/config/api.config";
 import WelcomeHeader from "@/components/user/Dashboard/WelcomeSection";
 import GamificationCard from "@/components/user/Dashboard/GamificationCard";
 import UpcomingSessions from "@/components/user/Dashboard/UpcomingSessions";
@@ -11,6 +11,7 @@ import QuickLinks from "@/components/user/Dashboard/QuickLinks";
 import MentorsReadyNow from "@/components/user/Dashboard/MentorsReadyNow";
 import { fetchDashboardDatas } from "@/api/user/dashboard.api.service";
 import { toast } from "sonner";
+import { fetchUserProfile } from "@/store/slices/userSlice";
 
 export const DashboardPage: React.FC = () => {
 	const user = useSelector((state: RootState) => state.auth.user) as UserInterface | null;
@@ -18,6 +19,12 @@ export const DashboardPage: React.FC = () => {
 	const [notifications, setNotifications] = useState<Notification[]>([]);
 	const [readyNowMentors, setReadyNowMentors] = useState<Mentor[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
+	const dispatch = useDispatch<AppDispatch>();
+
+	useEffect(() => {
+		console.log(`askldjfalksd`);
+		dispatch(fetchUserProfile());
+	}, [dispatch]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -49,8 +56,8 @@ export const DashboardPage: React.FC = () => {
 			const response = await axiosInstance.get("/test");
 			console.log("test response : ", response);
 			toast.success(response.data.message);
-		} catch (error : any) {
-			toast.error(error.response.data.message)
+		} catch (error: any) {
+			toast.error(error.response.data.message);
 		}
 	};
 

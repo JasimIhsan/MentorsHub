@@ -24,3 +24,7 @@ export interface IBecomeMentorUseCase {
 		mentorProfile: MentorProfileEntity;
 	}>;
 }
+
+export interface IFetchUserProfileUseCase {
+	execute(userId: string): Promise<UserEntity | null>;
+}

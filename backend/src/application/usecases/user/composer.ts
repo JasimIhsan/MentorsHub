@@ -13,6 +13,7 @@ import { UpdateUserProfileUseCase } from "./user-profile/update.user.profile.use
 import { UploadAvatarUseCase } from "./user-profile/upload.avatar.usecase";
 import { ChangePasswordUsecase } from "./user-profile/change.password.usecase";
 import { BecomeMentorUseCase } from "./user-profile/become.mentor.application.usecase";
+import { FetchUserProfileUseCase } from "./user-profile/fetch.user.profile.usecase";
 
 // Initialize UseCases
 export const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
@@ -27,4 +28,5 @@ export const googleAuthUsecase = new GoogleAuthUsecase(userRepository, tokenInte
 export const updateUserProfileUsecase = new UpdateUserProfileUseCase(userRepository);
 export const uploadImageCloudinaryUsecase = new UploadAvatarUseCase(cloudinaryService);
 export const changePasswordUsecase = new ChangePasswordUsecase(userRepository);
-export const becomeMentorUseCase = new BecomeMentorUseCase(mentorRepository, userRepository)
+export const becomeMentorUseCase = new BecomeMentorUseCase(mentorRepository, userRepository);
+export const fetchUserProfileUsecase = new FetchUserProfileUseCase(userRepository);

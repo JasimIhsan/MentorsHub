@@ -6,4 +6,6 @@ export interface IMentorProfileRepository {
 	updateByUserId(userId: string, updatedData: Partial<MentorProfileEntity>): Promise<MentorProfileEntity>;
 	createMentorProfile(userId: string, data: MentorProfileEntity): Promise<MentorProfileEntity>;
 	findAllMentors(): Promise<IMentorDTO[]>;
+	findAllApprovedMentors(): Promise<IMentorDTO[]>;
+	findMentorByUserId(userId: string): Promise<IMentorDTO | null>;
 }

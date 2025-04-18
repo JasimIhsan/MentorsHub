@@ -1,7 +1,7 @@
 // src/store/store.ts
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "@/store/slices/authSlice";
-import adminAuthReducer from "@/store/slices/adminAuthSlice";
+import authReducer from "@/store/slices/userSlice";
+import adminAuthReducer from "@/store/slices/adminSlice";
 import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage
 

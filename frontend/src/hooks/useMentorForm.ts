@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
-import axiosInstance from "@/api/api.config";
+import axiosInstance from "@/api/config/api.config";
 import { validateFormData } from "@/schema/mentor.application.form";
 import { RootState } from "@/store/store";
 import { MentorApplication, FormErrors } from "@/types/mentor.application";

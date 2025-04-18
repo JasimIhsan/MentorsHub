@@ -10,7 +10,7 @@ import Alert from "../custom-ui/alert";
 import { useDispatch } from "react-redux";
 import { logoutSession } from "@/api/user/authentication.api.service";
 import { toast } from "sonner";
-import { adminLogout } from "@/store/slices/adminAuthSlice";
+import { adminLogout } from "@/store/slices/adminSlice";
 
 // import { ModeToggle } from "@/components/mode-toggle";
 

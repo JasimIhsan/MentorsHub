@@ -1,4 +1,4 @@
-import axiosInstance from "../api.config";
+import axiosInstance from "../config/api.config";
 
 export const adminLoginAPI = async (username: string, password: string) => {
 	try {

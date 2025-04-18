@@ -1,4 +1,4 @@
-import axiosInstance from "../api.config";
+import axiosInstance from "../config/api.config";
 import { UpdateProfileFormData } from "@/schema/updateProfilePersonalInfo";
 
 export const updateUserApi = async (userId: string, data: UpdateProfileFormData & { avatar?: string }) => {
@@ -37,6 +37,16 @@ export const changePasswordApi = async (userId: string, oldPassword: string, new
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error from changePassword api: `, error);
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const getUserProfileApi = async () => {
+	try {
+		const response = await axiosInstance.get(`/user-profile`);
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error from getUserProfile api: `, error);
 		throw new Error(error.response.data.message);
 	}
 };
