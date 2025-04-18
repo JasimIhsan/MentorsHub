@@ -10,7 +10,7 @@ export const fetchAllMentors = async () => {
 	}
 };
 
-export const fetchMentor = async (mentorId: string) => {
+export const fetchMentorAPI = async (mentorId: string) => {
 	try {
 		const response = await axiosInstance.get(`/mentor/${mentorId}`);
 		return response.data;

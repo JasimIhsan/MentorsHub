@@ -11,6 +11,9 @@ import UserProfilePage from "@/pages/user/UserProfilePage";
 import BrowseMentorsPage from "@/pages/user/BrowseMentorsPage";
 import { BecomeMentorPage } from "@/pages/user/BecomeMentorPage";
 import { MentorProfilePage } from "@/pages/user/MentorProfilePage";
+import { RequestSessionPage } from "@/pages/user/RequestSessionPage";
+import { CheckoutPage } from "@/pages/user/CheckoutPage";
+import { ConfirmationPage } from "@/pages/user/confirmationPage";
 
 const UserRoutes = () => {
 	return (
@@ -65,6 +68,33 @@ const UserRoutes = () => {
 					element={
 						<ProtectedRoute>
 							<BecomeMentorPage />
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="/request-session/:mentorId"
+					element={
+						<ProtectedRoute>
+							<RequestSessionPage />
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="/checkout"
+					element={
+						<ProtectedRoute>
+							<CheckoutPage />
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="/confirmation"
+					element={
+						<ProtectedRoute>
+							<ConfirmationPage />
 						</ProtectedRoute>
 					}
 				/>
