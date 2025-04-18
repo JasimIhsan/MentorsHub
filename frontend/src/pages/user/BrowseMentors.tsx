@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Search, Filter, Check, ChevronDown, X, CheckCircle, BadgeCheck } from "lucide-react";
+import { Star, Search, Filter, Check, ChevronDown, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -261,7 +261,7 @@ export default function BrowseMentorsPage() {
 												<div>
 													<h3 className="text-lg font-semibold text-gray-900 inline-flex items-center">
 														{mentor.name}
-														{mentor.isVerified && <img src={verified} alt=""  className="w-4 h-4 ml-2"/> }
+														{mentor.isVerified && <img src={verified} alt="" className="w-4 h-4 ml-2" />}
 													</h3>
 													<p className="text-sm text-gray-500">{mentor.title}</p>
 												</div>
@@ -288,7 +288,7 @@ export default function BrowseMentorsPage() {
 												<span className="text-base font-semibold text-primary">{mentor.rate === "0" ? "FREE" : mentor.rate ? `₹${mentor.rate}/-` : "N/A"}</span>
 											</div>
 											<Button variant="default" size="lg" className="mt-6" asChild>
-												<Link to={`/mentors/${mentor.id}`}>View Profile</Link>
+												<Link to={`/browse/mentor-profile/${mentor.id}`}>View Profile</Link>
 											</Button>
 										</CardContent>
 									</Card>

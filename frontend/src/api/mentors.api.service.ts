@@ -9,3 +9,13 @@ export const fetchAllMentors = async () => {
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const fetchMentor = async (mentorId: string) => {
+	try {
+		const response = await axiosInstance.get(`/mentor/${mentorId}`);
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error from fetchMetor api`, error);
+		throw new Error(error.response.data.message);
+	}
+};

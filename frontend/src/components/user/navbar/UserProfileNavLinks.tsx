@@ -15,7 +15,6 @@ interface UserProfileNavLinksProps {
 }
 
 export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
-	console.log("user: ", user);
 
 	const dispatch = useDispatch();
 
@@ -32,8 +31,6 @@ export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
 			console.error("Error logging out:", error);
 		}
 	};
-
-	console.log(user);
 
 	return (
 		<div className="flex items-center gap-4 pr-10 md:pr-20 xl:pr-25 justify-center">

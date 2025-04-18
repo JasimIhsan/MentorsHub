@@ -117,7 +117,7 @@ export function MentorSidebar() {
 	);
 }
 
-function MobileSidebar({ routes, pathname, setOpen }: { routes: Route[]; pathname: string; setOpen: (open: boolean) => void }) {
+function MobileSidebar({ routes, setOpen }: { routes: Route[]; pathname: string; setOpen: (open: boolean) => void }) {
 	return (
 		<div className="flex h-full flex-col">
 			<div className="flex items-center justify-between p-6 border-b">

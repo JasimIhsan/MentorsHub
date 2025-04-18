@@ -10,6 +10,7 @@ import { DashboardPage } from "@/pages/user/DashboardPage";
 import UserProfilePage from "@/pages/user/UserProfilePage";
 import BrowseMentorsPage from "@/pages/user/BrowseMentors";
 import { BecomeMentorPage } from "@/pages/user/BecomeMentorPage";
+import { MentorProfilePage } from "@/pages/user/MentorProfilePage";
 
 const UserRoutes = () => {
 	return (
@@ -46,6 +47,15 @@ const UserRoutes = () => {
 					element={
 						<ProtectedRoute>
 							<BrowseMentorsPage />
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="/browse/mentor-profile/:mentorId"
+					element={
+						<ProtectedRoute>
+							<MentorProfilePage />
 						</ProtectedRoute>
 					}
 				/>
