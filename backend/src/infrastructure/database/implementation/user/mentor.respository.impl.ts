@@ -2,7 +2,7 @@ import { IMentorDTO } from "../../../../application/dtos/mentor.dtos";
 import { IMentorProfileRepository } from "../../../../domain/dbrepository/mentor.details.repository";
 import { IMentorInterface, MentorProfileEntity } from "../../../../domain/entities/mentor.detailes.entity";
 import { MentorProfileModel } from "../../models/user/mentor.details.model";
-import { UserModel } from "../../models/user/user.model";
+import { IUsers, UserModel } from "../../models/user/user.model";
 
 // Error handler
 const handleError = (error: unknown, message: string): never => {
@@ -139,6 +139,57 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			return mentorDTOs;
 		} catch (error) {
 			throw handleError(error, "Error finding all approved mentors");
+		}
+	}
+
+	async findMentorByUserId(userId: string): Promise<IMentorDTO | null> {
+		try {
+			const mentor = await MentorProfileModel.findOne({ userId }).populate("userId");
+			if (!mentor || !mentor.userId) return null;
+
+			console.log("mentor: ", mentor);
+
+			const user = mentor.userId as any;
+
+			const mentorDTOs: IMentorDTO = {
+				email: user.email,
+				password: user.password,
+				firstName: user.firstName,
+				role: user.role,
+				lastName: user.lastName,
+				avatar: user.avatar,
+				bio: user.bio,
+				interests: user.interests,
+				updatedAt: user.updatedAt,
+				skills: user.skills,
+				status: user.status,
+				mentorRequestStatus: user.mentorRequestStatus,
+				isVerified: user.isVerified,
+				rating: user.rating,
+				sessionCompleted: user.sessionCompleted,
+				featuredMentor: user.featuredMentor,
+				badges: user.badges,
+				userId: user._id,
+				professionalTitle: mentor.professionalTitle,
+				languages: mentor.languages,
+				primaryExpertise: mentor.primaryExpertise,
+				yearsExperience: mentor.yearsExperience,
+				workExperiences: mentor.workExperiences,
+				educations: mentor.educations,
+				certifications: mentor.certifications,
+				sessionFormat: mentor.sessionFormat,
+				sessionTypes: mentor.sessionTypes,
+				pricing: mentor.pricing,
+				hourlyRate: mentor.hourlyRate,
+				availability: mentor.availability,
+				documents: mentor.documents,
+				createdAt: mentor.createdAt,
+				lastActive: user.lastActive,
+			};
+
+			return mentorDTOs;
+		} catch (error) {
+			throw handleError(error, "Error finding mentor by user ID");
 		}
 	}
 }

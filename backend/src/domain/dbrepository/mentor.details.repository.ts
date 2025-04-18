@@ -7,4 +7,5 @@ export interface IMentorProfileRepository {
 	createMentorProfile(userId: string, data: MentorProfileEntity): Promise<MentorProfileEntity>;
 	findAllMentors(): Promise<IMentorDTO[]>;
 	findAllApprovedMentors(): Promise<IMentorDTO[]>;
+	findMentorByUserId(userId: string): Promise<IMentorDTO | null>;
 }
