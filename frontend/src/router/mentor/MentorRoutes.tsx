@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 // import MainLayout from "@/layouts/UserLayout";
-import PageNotFound from "@/pages/user/PageNotFound";
+import PageNotFound from "@/pages/user/PageNotFoundPage";
 import { MentorDashboardPage } from "@/pages/mentor/MentorDashboardPage";
 import { MentorLayout } from "@/layouts/MentorLayout";
 import { MentorProtectedRoute } from "./ProtectedRoute";
