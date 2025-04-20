@@ -29,7 +29,7 @@ export interface IMentorProfileModel extends Document {
 	sessionFormat: "one-on-one" | "group" | "both";
 	sessionTypes: string[];
 	pricing: "free" | "paid" | "both-pricing";
-	hourlyRate: string | null;
+	hourlyRate: number | null;
 	availability: string[];
 	hoursPerWeek: string;
 	documents: string[]; // Array of S3 URLs

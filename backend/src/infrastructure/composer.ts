@@ -14,12 +14,15 @@ import { ICloudinaryService } from "../application/interfaces/user/user.profile.
 import { CloudinaryService } from "./cloud/cloudinary/cloudinary";
 import { IMentorProfileRepository } from "../domain/dbrepository/mentor.details.repository";
 import { MentorDetailsRepositoryImpl } from "./database/implementation/user/mentor.respository.impl";
+import { ISessionRepository } from "../domain/dbrepository/session.repository";
+import { SessionRepositoryImpl } from "./database/implementation/session/session.repository.impl";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
 export const forgotResetRepository: IForgotPasswordTokensRepository = new ForgotPasswordResetTokenImpl();
 export const adminRepository: IAdminRepository = new AdminRepositoryImpl();
 export const mentorRepository: IMentorProfileRepository = new MentorDetailsRepositoryImpl()
+export const sessionRepository: ISessionRepository = new SessionRepositoryImpl();
 
 // Initialize services implementation
 export const tokenInterface: ITokenService = new TokenServicesImpl();

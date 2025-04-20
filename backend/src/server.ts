@@ -15,6 +15,7 @@ import { usertabRouter } from "./presentation/routes/admin/admin.usertab.routes"
 import { userProfileRoutes } from "./presentation/routes/user/user.profile.routes";
 import { mentorRouter } from "./presentation/routes/mentors/mentor.routes";
 import { mentorApplicationRouter } from "./presentation/routes/admin/admin.mentor.application.routes";
+import { sessionRouter } from "./presentation/routes/user/session.routes";
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use("/api/admin/users", usertabRouter);
 app.use("/api/admin/mentor-application", mentorApplicationRouter);
 app.use("/api/user-profile", userProfileRoutes);
 app.use("/api/mentor", mentorRouter);
+app.use("/api/sessions", sessionRouter);
 
 app.listen(process.env.PORT, () => {
 	console.log(` Server is running  : ✅✅✅`);

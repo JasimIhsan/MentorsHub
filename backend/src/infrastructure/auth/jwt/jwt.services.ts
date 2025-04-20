@@ -21,9 +21,9 @@ export class TokenServicesImpl implements ITokenService {
 
 	generateRefreshToken(userId: string, isAdmin: boolean = false): string {
 		if (isAdmin) {
-			return jwt.sign({ userId, isAdmin }, JWT_REFRESH_TOKEN, { expiresIn: "15m" });
+			return jwt.sign({ userId, isAdmin }, JWT_REFRESH_TOKEN, { expiresIn: "1h" });
 		}
-		return jwt.sign({ userId }, JWT_REFRESH_TOKEN, { expiresIn: "15m" });
+		return jwt.sign({ userId }, JWT_REFRESH_TOKEN, { expiresIn: "1h" });
 	}
 
 	validateAccessToken(token: string): Payload | null {

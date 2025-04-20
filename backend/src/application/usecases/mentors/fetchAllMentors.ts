@@ -6,6 +6,8 @@ export class FetchAllMentorsUseCase {
 
 	async execute(): Promise<IMentorDTO[]> {
 		const mentors = await this.mentorRepo.findAllMentors();
+		// console.log('mentors: ', mentors);
+
 		return mentors;
 	}
 }

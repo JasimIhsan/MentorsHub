@@ -8,12 +8,14 @@ import { SignupUseCase } from "./authentication/signup.usecase";
 import { SendOtpUsecase } from "./authentication/send.otp.usecase";
 import { GoogleAuthUsecase } from "./authentication/google.auth.usecase";
 
-import { userRepository, forgotResetRepository, tokenInterface, emailService, redisService, cloudinaryService, mentorRepository } from "../../../infrastructure/composer";
+import { userRepository, forgotResetRepository, tokenInterface, emailService, redisService, cloudinaryService, mentorRepository, sessionRepository } from "../../../infrastructure/composer";
 import { UpdateUserProfileUseCase } from "./user-profile/update.user.profile.usecase";
 import { UploadAvatarUseCase } from "./user-profile/upload.avatar.usecase";
 import { ChangePasswordUsecase } from "./user-profile/change.password.usecase";
 import { BecomeMentorUseCase } from "./user-profile/become.mentor.application.usecase";
 import { FetchUserProfileUseCase } from "./user-profile/fetch.user.profile.usecase";
+import { RequestSessionUseCase } from "./session/create.session.usecase";
+import { FetchSessionsByUserUseCase } from "./session/fetch.sessions.by.user.usecase";
 
 // Initialize UseCases
 export const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
@@ -30,3 +32,5 @@ export const uploadImageCloudinaryUsecase = new UploadAvatarUseCase(cloudinarySe
 export const changePasswordUsecase = new ChangePasswordUsecase(userRepository);
 export const becomeMentorUseCase = new BecomeMentorUseCase(mentorRepository, userRepository);
 export const fetchUserProfileUsecase = new FetchUserProfileUseCase(userRepository);
+export const requestSessionUsecase = new RequestSessionUseCase(sessionRepository, mentorRepository);
+export const fetchSessionsByUserUsecase = new FetchSessionsByUserUseCase(sessionRepository);
