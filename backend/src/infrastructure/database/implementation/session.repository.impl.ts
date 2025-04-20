@@ -48,18 +48,18 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async fetchSessionRequestByMentor(mentorId: string): Promise<ISessionDTO[]> {
+	async fetchSessionRequestByMentor(mentorId: string): Promise<any[]> {
 		try {
 			const sessions = await SessionModel.find({ mentorId }).populate("userId", "firstName lastName avatar");
-			const sessionDTOs: ISessionDTO[] = sessions.map((session) => ({
+			const sessionDTOs = sessions.map((session) => ({
 				id: session._id.toString(),
-				mentor: {
-					_id: session.mentorId._id.toString(),
-					firstName: (session.mentorId as any).firstName,
-					lastName: (session.mentorId as any).lastName,
-					avatar: (session.mentorId as any).avatar,
+				mentor: session.mentorId.toString(),
+				userId: {
+					_id: session.userId._id.toString(),
+					firstName: (session.userId as any).firstName,
+					lastName: (session.userId as any).lastName,
+					avatar: (session.userId as any).avatar,
 				},
-				userId: session.userId.toString(),
 				topic: session.topic,
 				sessionType: session.sessionType,
 				sessionFormat: session.sessionFormat,
