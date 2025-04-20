@@ -4,42 +4,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
-import { Clock, MessageSquare, Star, Video, Users, MapPin, Briefcase, GraduationCap, Award, User, Heart } from "lucide-react";
+import { Clock, MessageSquare, Star, Users, Briefcase, GraduationCap, Award, User, Heart } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { fetchMentor } from "@/api/mentors.api.service";
-import { IMentorDTO } from "@/interfaces/mentor.application.dto";
-import { toast } from "sonner";
+import { useState } from "react"; // Removed unused useEffect
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useMentor } from "@/hooks/useMentor";
 
 const availableTimes: string[] = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM"];
 
 export function MentorProfilePage() {
-	const [mentor, setMentor] = useState<IMentorDTO | null>(null);
 	const [isAvatarOpen, setIsAvatarOpen] = useState(false);
 	const { mentorId } = useParams<{ mentorId: string }>();
+	const { mentor, loading } = useMentor(mentorId as string); // Removed unused error
 
-	useEffect(() => {
-		const fetch = async () => {
-			try {
-				if (mentorId) {
-					const response = await fetchMentor(mentorId);
-					if (response.success) {
-						setMentor(response.mentor);
-					} else {
-						toast.error("Failed to fetch mentor data");
-					}
-				}
-			} catch (error) {
-				if (error instanceof Error) {
-					toast.error(error.message || "Error fetching mentor profile");
-				}
-			}
-		};
-		fetch();
-	}, [mentorId]);
-
-	if (!mentor) {
+	if (loading) {
 		return (
 			<div className="container py-8 px-10 md:px-20 xl:px-25">
 				<Card>
@@ -47,6 +25,20 @@ export function MentorProfilePage() {
 						<User className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
 						<h2 className="text-xl font-semibold mb-2">Loading Profile...</h2>
 						<p className="text-muted-foreground">Please wait while we fetch the mentor's profile.</p>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
+
+	if (!mentor) {
+		return (
+			<div className="container py-8 px-10 md:px-20 xl:px-25">
+				<Card>
+					<CardContent className="pt-6 text-center">
+						<User className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+						<h2 className="text-xl font-semibold mb-2">Mentor Not Found</h2>
+						<p className="text-muted-foreground">The mentor profile could not be found.</p>
 					</CardContent>
 				</Card>
 			</div>
@@ -63,18 +55,12 @@ export function MentorProfilePage() {
 							<button className="focus:outline-none">
 								<Avatar className="h-32 w-32 border-4 border-primary/20 hover:opacity-80 transition-opacity cursor-pointer">
 									<AvatarImage src={mentor.avatar ?? ""} alt={`${mentor.firstName || "Mentor"} ${mentor.lastName || ""}`} />
-									<AvatarFallback>
-										{mentor.firstName?.charAt(0) || "U"}
-									</AvatarFallback>
+									<AvatarFallback>{mentor.firstName?.charAt(0) || "U"}</AvatarFallback>
 								</Avatar>
 							</button>
 						</DialogTrigger>
 						<DialogContent className="max-w-md">
-							<img
-								src={mentor.avatar ?? "https://via.placeholder.com/400"}
-								alt={`${mentor.firstName || "Mentor"} ${mentor.lastName || ""}`}
-								className="w-full h-auto rounded-lg"
-							/>
+							<img src={mentor.avatar ?? "https://via.placeholder.com/400"} alt={`${mentor.firstName || "Mentor"} ${mentor.lastName || ""}`} className="w-full h-auto rounded-lg" />
 						</DialogContent>
 					</Dialog>
 					<div className="flex flex-1 flex-col gap-4 text-center md:text-left">
@@ -105,7 +91,7 @@ export function MentorProfilePage() {
 					</div>
 					<div className="flex flex-col gap-3">
 						<Button className="w-full" asChild disabled={!mentor.userId}>
-							<Link to={`/request/${mentor.userId || ""}`}>Request Session</Link>
+							<Link to={`/request-session/${mentor.userId || ""}`}>Request Session</Link>
 						</Button>
 						<Button variant="outline" className="w-full">
 							<MessageSquare className="mr-2 h-4 w-4" />
@@ -139,9 +125,7 @@ export function MentorProfilePage() {
 												</div>
 												<div>
 													<h3 className="font-medium">Expertise</h3>
-													<p className="text-sm text-muted-foreground">
-														{mentor.skills && mentor.skills.length > 0 ? mentor.skills.join(", ") : "No skills listed"}
-													</p>
+													<p className="text-sm text-muted-foreground">{mentor.skills && mentor.skills.length > 0 ? mentor.skills.join(", ") : "No skills listed"}</p>
 												</div>
 											</div>
 											<div className="flex items-start gap-3">
@@ -160,7 +144,9 @@ export function MentorProfilePage() {
 												<div>
 													<h3 className="font-medium">Education</h3>
 													<p className="text-sm text-muted-foreground max-w-2xs">
-														{mentor.educations && mentor.educations.length > 0 ? mentor.educations.map((edu) => `${edu.degree || "Unknown"} from ${edu.institution || "Unknown"} (${edu.startYear || "N/A"}-${edu.endYear || "N/A"})`).join(", ") : "No education listed"}
+														{mentor.educations && mentor.educations.length > 0
+															? mentor.educations.map((edu) => `${edu.degree || "Unknown"} from ${edu.institution || "Unknown"} (${edu.startYear || "N/A"}-${edu.endYear || "N/A"})`).join(", ")
+															: "No education listed"}
 													</p>
 												</div>
 											</div>
@@ -179,9 +165,7 @@ export function MentorProfilePage() {
 												</div>
 												<div>
 													<h3 className="font-medium">Interests</h3>
-													<p className="text-sm text-muted-foreground">
-														{mentor.interests && mentor.interests.length > 0 ? mentor.interests.join(", ") : "No interests listed"}
-													</p>
+													<p className="text-sm text-muted-foreground">{mentor.interests && mentor.interests.length > 0 ? mentor.interests.join(", ") : "No interests listed"}</p>
 												</div>
 											</div>
 										</div>
@@ -206,15 +190,6 @@ export function MentorProfilePage() {
 											<div className="flex items-center justify-between">
 												<span className="font-medium">Session Type</span>
 												<div className="flex items-center gap-1">
-													{mentor.sessionTypes?.includes("video") ? (
-														<Video className="h-4 w-4" />
-													) : mentor.sessionTypes?.includes("text") ? (
-														<MessageSquare className="h-4 w-4" />
-													) : mentor.sessionTypes?.includes("in-person") ? (
-														<MapPin className="h-4 w-4" />
-													) : (
-														<span>-</span>
-													)}
 													<span>{mentor.sessionTypes?.join(", ") || "Not specified"}</span>
 												</div>
 											</div>
@@ -227,7 +202,7 @@ export function MentorProfilePage() {
 											</div>
 											<div className="pt-4">
 												<Button className="w-full" asChild disabled={!mentor.userId}>
-													<Link to={`/request/${mentor.userId || ""}`}>Request a Session</Link>
+													<Link to={`/request-session/${mentor.userId || ""}`}>Request a Session</Link>
 												</Button>
 											</div>
 										</div>
@@ -284,7 +259,7 @@ export function MentorProfilePage() {
 									<CardDescription>Choose a date to see available times</CardDescription>
 								</CardHeader>
 								<CardContent>
-									<Calendar mode="single" className="rounded-md border" />
+									<Calendar mode="single" className="rounded-md border w-auto" />
 								</CardContent>
 							</Card>
 
@@ -304,7 +279,7 @@ export function MentorProfilePage() {
 									</div>
 									<div className="mt-6">
 										<Button className="w-full" asChild disabled={!mentor.userId}>
-											<Link to={`/request/${mentor.userId || ""}`}>Request Session</Link>
+											<Link to={`/request-session/${mentor.userId}`}>Request Session</Link>
 										</Button>
 									</div>
 								</CardContent>

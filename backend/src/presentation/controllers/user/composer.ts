@@ -21,6 +21,8 @@ import {
 	changePasswordUsecase,
 	becomeMentorUseCase,
 	fetchUserProfileUsecase,
+	requestSessionUsecase,
+	fetchSessionsByUserUsecase,
 } from "../../../application/usecases/user/composer";
 import { UpdateUserController } from "../admin/user-tab/update.user.controller";
 import { UpdateUserProfileController } from "./user-profile/update.user.profile.controller";
@@ -28,6 +30,8 @@ import { cloudinaryService } from "../../../infrastructure/composer";
 import { ChangePasswordController } from "./user-profile/change.password.controller";
 import { BecomeMentorController } from "./user-profile/become.mentor.application.controller";
 import { FetchUserProfileController } from "./user-profile/fetch.user.profile.controller";
+import { RequestSessionController } from "./session/request.session.controller";
+import { FetchSessionByUserController } from "./session/fetch.session.by.user.controller";
 
 export const signupController = new SignupController(signupUseCase);
 export const signinController = new SigninController(signinUseCase);
@@ -42,3 +46,5 @@ export const updateUseProfileController = new UpdateUserProfileController(update
 export const changePasswordController = new ChangePasswordController(changePasswordUsecase);
 export const becomeMentorApplicationController = new BecomeMentorController(becomeMentorUseCase);
 export const fetchUserProfileController = new FetchUserProfileController(fetchUserProfileUsecase);
+export const createSessionController = new RequestSessionController(requestSessionUsecase);
+export const fetchSessionsByUserController = new FetchSessionByUserController(fetchSessionsByUserUsecase);

@@ -37,7 +37,7 @@ export interface IMentorInterface {
 	sessionFormat: SessionFormat;
 	sessionTypes: string[];
 	pricing: PricingType;
-	hourlyRate: string | null;
+	hourlyRate: number | null;
 	availability: string[];
 	documents: string[];
 	createdAt?: Date;
@@ -57,7 +57,7 @@ export class MentorProfileEntity {
 	private sessionFormat: SessionFormat;
 	private sessionTypes: string[];
 	private pricing: PricingType;
-	private hourlyRate: string | null;
+	private hourlyRate: number | null;
 	private availability: string[];
 	private documents: string[];
 	private createdAt: Date;
@@ -138,12 +138,12 @@ export class MentorProfileEntity {
 	getLanguages(): string[] {
 		return this.languages;
 	}
-	
+
 	getPricing(): PricingType {
 		return this.pricing;
 	}
 
-	getHourlyRate(): string | null {
+	getHourlyRate(): number | null {
 		return this.hourlyRate;
 	}
 

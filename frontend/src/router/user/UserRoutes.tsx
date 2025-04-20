@@ -1,16 +1,21 @@
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "@/layouts/UserLayout";
-import Home from "@/pages/user/Home";
-import Authentication from "@/pages/user/Authentication";
+import Home from "@/pages/user/HomePage";
+import Authentication from "@/pages/user/AuthenticationPage";
 import ResetPasswordPage from "@/pages/user/ResetPasswordPage";
-import PageNotFound from "@/pages/user/PageNotFound";
+import PageNotFound from "@/pages/user/PageNotFoundPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { AuthGuard } from "./AuthGuard";
 import { DashboardPage } from "@/pages/user/DashboardPage";
 import UserProfilePage from "@/pages/user/UserProfilePage";
-import BrowseMentorsPage from "@/pages/user/BrowseMentors";
+import BrowseMentorsPage from "@/pages/user/BrowseMentorsPage";
 import { BecomeMentorPage } from "@/pages/user/BecomeMentorPage";
 import { MentorProfilePage } from "@/pages/user/MentorProfilePage";
+import { RequestSessionPage } from "@/pages/user/RequestSessionPage";
+import { CheckoutPage } from "@/pages/user/CheckoutPage";
+import { PaymentConfirmationPage } from "@/pages/user/PaymentConfirmationPage";
+import { RequestConfirmationPage } from "@/pages/user/RequestConfirmationPage";
+import { SessionsPage } from "@/pages/user/SessionsPage";
 
 const UserRoutes = () => {
 	return (
@@ -68,6 +73,52 @@ const UserRoutes = () => {
 						</ProtectedRoute>
 					}
 				/>
+
+				<Route
+					path="/request-session/:mentorId"
+					element={
+						<ProtectedRoute>
+							<RequestSessionPage />
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="/checkout"
+					element={
+						<ProtectedRoute>
+							<CheckoutPage />
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="/request-confirmation"
+					element={
+						<ProtectedRoute>
+							<RequestConfirmationPage />
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="/payment-confirmation"
+					element={
+						<ProtectedRoute>
+							<PaymentConfirmationPage />
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="/sessions"
+					element={
+						<ProtectedRoute>
+							<SessionsPage />
+						</ProtectedRoute>
+					}
+				/>
+
 				<Route path="*" element={<PageNotFound />} />
 			</Route>
 		</Routes>
