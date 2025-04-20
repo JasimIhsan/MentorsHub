@@ -1,8 +1,8 @@
-import { IMentorDTO } from "../../../../application/dtos/mentor.dtos";
-import { IMentorProfileRepository } from "../../../../domain/dbrepository/mentor.details.repository";
-import { IMentorInterface, MentorProfileEntity } from "../../../../domain/entities/mentor.detailes.entity";
-import { MentorProfileModel } from "../../models/user/mentor.details.model";
-import { IUsers, UserModel } from "../../models/user/user.model";
+import { IMentorDTO } from "../../../application/dtos/mentor.dtos";
+import { IMentorProfileRepository } from "../../../domain/dbrepository/mentor.details.repository";
+import { IMentorInterface, MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
+import { MentorProfileModel } from "../models/user/mentor.details.model";
+import { IUsers, UserModel } from "../models/user/user.model";
 
 // Error handler
 const handleError = (error: unknown, message: string): never => {

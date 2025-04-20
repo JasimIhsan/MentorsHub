@@ -1,7 +1,7 @@
-import { AdminDTO } from "../../../../application/dtos/admin.dtos";
-import { IAdminRepository } from "../../../../domain/dbrepository/admin.repository";
-import { AdminEntity } from "../../../../domain/entities/admin.entity";
-import { AdminModel } from "../../models/admin/admin.model";
+import { AdminDTO } from "../../../application/dtos/admin.dtos";
+import { IAdminRepository } from "../../../domain/dbrepository/admin.repository";
+import { AdminEntity } from "../../../domain/entities/admin.entity";
+import { AdminModel } from "../models/admin/admin.model";
 
 export class AdminRepositoryImpl implements IAdminRepository {
 	async createAdmin(admin: AdminEntity): Promise<any> {
@@ -24,7 +24,6 @@ export class AdminRepositoryImpl implements IAdminRepository {
 		const adminModel = await AdminModel.findOne({ username });
 		if (adminModel) {
 			const adminEntity = AdminEntity.fromDBDocument(adminModel);
-			
 			return AdminDTO.fromEntity(adminEntity);
 		}
 		return null;

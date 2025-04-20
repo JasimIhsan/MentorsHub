@@ -1,9 +1,9 @@
-import { ForgotPasswordTokenDTO } from "../../../../application/dtos/forgot.token.dto";
-import { IForgotPasswordTokensRepository } from "../../../../domain/dbrepository/forgot.password.token.respository";
-import { ForgotPasswordTokenEntity, IForgotPasswordTokens } from "../../../../domain/entities/forgot.password.token.entity";
-import { UserEntity } from "../../../../domain/entities/user.entity";
-import { ForgotTokenModel } from "../../models/user/forgot.password.reset.token.model";
-import { handleError } from "../../implementation/user/user.repository.impl";
+import { ForgotPasswordTokenDTO } from "../../../application/dtos/forgot.token.dto";
+import { IForgotPasswordTokensRepository } from "../../../domain/dbrepository/forgot.password.token.respository";
+import { ForgotPasswordTokenEntity, IForgotPasswordTokens } from "../../../domain/entities/forgot.password.token.entity";
+import { UserEntity } from "../../../domain/entities/user.entity";
+import { ForgotTokenModel } from "../models/user/forgot.password.reset.token.model";
+import { handleError } from "./user.repository.impl";
 
 export class ForgotPasswordResetTokenImpl implements IForgotPasswordTokensRepository {
 	async createToken(userId: string, token: string, expiresInMinutes: number): Promise<IForgotPasswordTokens> {

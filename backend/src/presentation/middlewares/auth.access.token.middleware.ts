@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { TokenServicesImpl } from "../../infrastructure/auth/jwt/jwt.services";
 import { AuthenticatedRequest } from "../../types/express";
-import { UserRepositoryImpl } from "../../infrastructure/database/implementation/user/user.repository.impl";
+import { UserRepositoryImpl } from "../../infrastructure/database/implementation/user.repository.impl";
 import { UserEntity } from "../../domain/entities/user.entity";
 import { AdminEntity } from "../../domain/entities/admin.entity";
-import { AdminRepositoryImpl } from "../../infrastructure/database/implementation/admin/admin.repository.impl";
+import { AdminRepositoryImpl } from "../../infrastructure/database/implementation/admin.repository.impl";
 
 const tokenService = new TokenServicesImpl();
 const userRepo = new UserRepositoryImpl();
