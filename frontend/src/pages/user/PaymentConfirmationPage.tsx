@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { CheckCircle, CalendarDays, Clock, MessageSquare, ArrowRight, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export function ConfirmationPage() {
+export function PaymentConfirmationPage() {
 	return (
 		<div className="container py-8">
 			<div className="mx-auto max-w-lg">

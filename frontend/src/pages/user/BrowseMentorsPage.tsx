@@ -12,7 +12,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { INTEREST_OPTIONS } from "@/data/interest.option";
-import { fetchAllMentors } from "@/api/mentors.api.service";
+import { fetchAllApprovedMentors } from "@/api/mentors.api.service";
 import { IMentorDTO } from "@/interfaces/mentor.application.dto";
 import { toast } from "sonner";
 import verified from "../../assets/verify.png";
@@ -26,7 +26,7 @@ interface Mentor {
 	reviewCount: number | null;
 	joinDate: string;
 	interests: string[];
-	rate: string | null;
+	rate: number;
 	isVerified: boolean; // Added for verification status
 }
 
@@ -59,7 +59,7 @@ export default function BrowseMentorsPage() {
 					.includes(searchQuery.toLowerCase())
 			);
 
-		const mentorRate = mentor.rate ? Number.parseInt(mentor.rate, 10) || 0 : 0;
+		const mentorRate = mentor.rate ? mentor.rate : 0;
 		const matchesPrice = mentorRate >= priceRange[0] && mentorRate <= priceRange[1];
 
 		const matchesInterest = selectedInterests.length === 0 || mentor.interests.some((interest) => selectedInterests.includes(interest));
@@ -71,17 +71,19 @@ export default function BrowseMentorsPage() {
 
 	const sortedMentors = [...filteredMentors].sort((a: Mentor, b: Mentor) => {
 		if (sortBy === "price-low") {
-			const aRate = a.rate ? Number.parseInt(a.rate, 10) : 0;
-			const bRate = b.rate ? Number.parseInt(b.rate, 10) : 0;
+			const aRate = a.rate ?? 0;
+			const bRate = b.rate ?? 0;
+			console.log(`Sorting price-low: ${a.name} (${aRate}) vs ${b.name} (${bRate})`);
 			return aRate - bRate;
 		} else if (sortBy === "price-high") {
-			const aRate = a.rate ? Number.parseInt(a.rate, 10) : 0;
-			const bRate = b.rate ? Number.parseInt(b.rate, 10) : 0;
+			const aRate = a.rate ?? 0;
+			const bRate = b.rate ?? 0;
+			console.log(`Sorting price-high: ${a.name} (${aRate}) vs ${b.name} (${bRate})`);
 			return bRate - aRate;
 		} else if (sortBy === "rating") {
-			return (b.rating || 0) - (a.rating || 0);
+			return (b.rating ?? 0) - (a.rating ?? 0);
 		} else if (sortBy === "reviews") {
-			return (b.reviewCount || 0) - (a.reviewCount || 0);
+			return (b.reviewCount ?? 0) - (a.reviewCount ?? 0);
 		} else if (sortBy === "newest") {
 			return new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime();
 		}
@@ -160,7 +162,7 @@ export default function BrowseMentorsPage() {
 	useEffect(() => {
 		const fetchMentors = async () => {
 			try {
-				const response = await fetchAllMentors();
+				const response = await fetchAllApprovedMentors();
 				console.log("response:", response);
 
 				if (response.success) {
@@ -173,7 +175,7 @@ export default function BrowseMentorsPage() {
 						reviewCount: mentor.sessionCompleted ?? null,
 						joinDate: new Date(mentor.createdAt).toISOString(),
 						interests: Array.isArray(mentor.interests) ? mentor.interests : [],
-						rate: mentor.hourlyRate ?? null,
+						rate: mentor.hourlyRate,
 						isVerified: mentor.isVerified ?? false, // Map isVerified
 					}));
 					setMentors(mappedMentors);
@@ -285,7 +287,7 @@ export default function BrowseMentorsPage() {
 													<span className="text-base font-medium text-gray-900">{mentor.rating ?? "N/A"}</span>
 													<span className="text-sm text-gray-500">({mentor.reviewCount ?? 0})</span>
 												</div>
-												<span className="text-base font-semibold text-primary">{mentor.rate === "0" ? "FREE" : mentor.rate ? `₹${mentor.rate}/-` : "N/A"}</span>
+												<span className="text-base font-semibold text-primary">{mentor.rate === 0 ? "FREE" : `₹${mentor.rate}/-`}</span>
 											</div>
 											<Button variant="default" size="lg" className="mt-6" asChild>
 												<Link to={`/browse/mentor-profile/${mentor.id}`}>View Profile</Link>

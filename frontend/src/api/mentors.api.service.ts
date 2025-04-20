@@ -10,6 +10,16 @@ export const fetchAllMentors = async () => {
 	}
 };
 
+export const fetchAllApprovedMentors = async () => {
+	try {
+		const response = await axiosInstance.get("/mentor/approved");
+		return response.data;
+	} catch (error: any) {
+		console.log(`Error form fetchMentors api : `, error);
+		throw new Error(error.response.data.message);
+	}
+};
+
 export const fetchMentorAPI = async (mentorId: string) => {
 	try {
 		const response = await axiosInstance.get(`/mentor/${mentorId}`);

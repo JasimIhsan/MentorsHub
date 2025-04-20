@@ -15,17 +15,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useMentor } from "@/hooks/useMentor";
 import { IMentorDTO } from "@/interfaces/mentor.application.dto";
 import { format } from "date-fns";
-import logo from "@/assets/MentorsHub logo image.jpg";
+import axiosInstance from "@/api/config/api.config";
+import { toast } from "sonner";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
-declare global {
-	interface Window {
-		Razorpay: any;
-	}
+export interface SessionData {
+	mentorId: string;
+	userId: string;
+	topic: string;
+	sessionType: string;
+	sessionFormat: string;
+	date: Date;
+	time: string;
+	hours: number;
+	message: string;
+	totalAmount: number;
+	pricing: "free" | "paid" | "both-pricing";
 }
 
 export function RequestSessionPage() {
 	const [date, setDate] = useState<Date | undefined>(new Date());
 	const [time, setTime] = useState<string>("");
+	const [topic, setTopic] = useState<string>("");
 	const [sessionType, setSessionType] = useState<string>("video");
 	const [sessionFormat, setSessionFormat] = useState<string>("one-on-one");
 	const [message, setMessage] = useState<string>("");
@@ -35,6 +47,7 @@ export function RequestSessionPage() {
 	const { mentorId } = useParams<{ mentorId: string }>();
 	const { mentor, loading } = useMentor(mentorId as string) as { mentor: IMentorDTO | null; loading: boolean };
 	const navigate = useNavigate();
+	const user = useSelector((state: RootState) => state.auth.user);
 
 	if (loading) {
 		return <div className="container py-8">Loading...</div>;
@@ -51,108 +64,71 @@ export function RequestSessionPage() {
 		);
 	}
 
-	const requestData = { sessionType, sessionFormat, date, time, message, hours };
-
 	const isFormValid = () => {
 		return date && time && sessionType && sessionFormat && message.trim() && hours > 0;
 	};
 
 	const calculateTotal = () => {
 		const platformFee = 40;
-		const sessionFee = mentor.hourlyRate ? Number(mentor.hourlyRate) * hours : 0;
+		const sessionFee = mentor.pricing === "paid" && mentor.hourlyRate ? mentor.hourlyRate * hours : 0;
+		console.log("sessionFee: ",typeof mentor.hourlyRate);
 		return sessionFee + platformFee;
 	};
 
-	const handleFreeSessionConfirm = async () => {
+	const requestData: SessionData = {
+		mentorId: mentorId,
+		userId: user?.id as string,
+		topic: topic,
+		sessionType: sessionType,
+		sessionFormat: sessionFormat,
+		date: date as Date,
+		time: time,
+		hours: hours,
+		message: message,
+		totalAmount: calculateTotal(),
+		pricing: mentor.pricing,
+	};
+
+	const handleSubmit = () => {
+		if (!isFormValid()) {
+			toast.error("Please fill out all required fields correctly.");
+			return;
+		}
+		setIsConfirmationOpen(true);
+	};
+
+	const handleConfirmRequest = async () => {
 		setIsSubmitting(true);
 		setIsConfirmationOpen(false);
 		try {
-			console.log("Free session request:", requestData);
-			// Simulate API call or navigation
-			navigate("/confirmation", { state: { requestData } });
-		} catch (error) {
-			alert("An error occurred. Please try again.");
+			const response = await axiosInstance.post("/sessions/create-session", requestData);
+			if (response.data.success) {
+				toast.success(response.data.message || "Session request submitted successfully! Awaiting mentor approval.");
+				navigate("/request-confirmation", { state: { requestData } });
+			} else {
+				console.error("Session creation failed:", response.data);
+				toast.error(response.data.message || "Failed to submit session request. Please try again.");
+			}
+		} catch (error: any) {
+			console.error("Session creation error:", error);
+			const errorMessage = error.response?.data?.message || "An error occurred while submitting the request. Please try again.";
+			toast.error(errorMessage);
 		} finally {
 			setIsSubmitting(false);
 		}
 	};
 
-	const handlePaidSession = async () => {
-		setIsSubmitting(true);
-		try {
-			// Load Razorpay script dynamically
-			const script = document.createElement("script");
-			script.src = "https://checkout.razorpay.com/v1/checkout.js";
-			script.async = true;
-			document.body.appendChild(script);
-
-			script.onload = () => {
-				const totalAmount = calculateTotal() * 100;
-				const options = {
-					key: import.meta.env.VITE_RAZORPAY_KEY,
-					amount: totalAmount,
-					currency: "INR",
-					image: logo,
-					name: "Mentor Session Booking",
-					description: `Session with ${mentor.firstName} ${mentor.lastName}`,
-					handler: function (response: any) {
-						console.log("Payment successful:", response);
-						navigate("/confirmation", {
-							state: { requestData, paymentId: response.razorpay_payment_id },
-						});
-					},
-					prefill: {
-						name: `${mentor.firstName} ${mentor.lastName}`,
-						email: `${mentor.email}`,
-					},
-					theme: {
-						color: "#112d4e",
-					},
-					notes: {
-						sessionType,
-						sessionFormat,
-						hours,
-					},
-					modal: {
-						ondismiss: () => {
-							setIsSubmitting(false);
-						},
-					},
-				};
-
-				const rzp = new window.Razorpay(options);
-				rzp.open();
-			};
-
-			script.onerror = () => {
-				alert("Failed to load Razorpay SDK. Please try again.");
-				setIsSubmitting(false);
-			};
-		} catch (error) {
-			alert("An error occurred. Please try again.");
-			setIsSubmitting(false);
-		}
-	};
-
-	const handleSubmit = async (pricing: "free" | "paid" | "both-pricing") => {
-		if (pricing === "free") {
-			setIsConfirmationOpen(true);
-		} else {
-			await handlePaidSession();
-		}
-	};
-
 	return (
 		<div className="container py-8">
-			<div className="mx-auto max-w-4xl">
+			<div className="mx-auto max-w-5xl">
 				<div className="mb-8">
 					<h1 className="text-3xl font-bold tracking-tight">Request a Session</h1>
 					<p className="text-muted-foreground">
-						Schedule a mentoring session with {mentor.firstName} {mentor.lastName}. Provide your preferred details below, and refer to the mentor's preferences on the right.
+						Schedule a mentoring session with {mentor.firstName} {mentor.lastName}. Provide your preferred details below, and refer to the mentor's preferences on the right. Payment will be processed after the mentor accepts your request.
 					</p>
 				</div>
 
-				<div className="grid gap-8 md:grid-cols-[1fr_250px] lg:grid-cols-[1fr_300px]">
+				<div className="grid gap-4 md:grid-cols-[1fr_380px] lg:grid-cols-[1fr_300')], [1fr_300px]">
 					{/* Main Content */}
 					<div className="space-y-6">
 						<Card>
@@ -185,17 +161,17 @@ export function RequestSessionPage() {
 									<Label className="mb-2 block">Session Format</Label>
 									<RadioGroup value={sessionFormat} onValueChange={setSessionFormat} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 										<div className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 ${sessionFormat === "one-on-one" ? "border-primary bg-primary/5" : ""}`}>
-											<RadioGroupItem value="one-on-one" id="one-on-one" />
+											<RadioGroupItem value=" Wrote one-on-one" id="one-on-one" />
 											<Label htmlFor="one-on-one" className="flex cursor-pointer items-center gap-2 font-normal">
 												<Users className="h-5 w-5" />
 												One-on-One
 											</Label>
 										</div>
-										<div className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 ${sessionFormat === "group" ? "border-primary bg-primary/5" : ""}`}>
-											<RadioGroupItem value="group" id="group" />
-											<Label htmlFor="group" className="flex cursor-pointer items-center gap-2 font-normal">
+										<div className={`flex cursor-not-allowed items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 ${sessionFormat === "group" ? "border-primary bg-primary/5" : ""}`}>
+											<RadioGroupItem value="group" id="group" disabled={true} />
+											<Label htmlFor="group" className="flex cursor-not-allowed items-center gap-2 font-normal">
 												<Users className="h-5 w-5" />
-												Group Session
+												Group Session (coming soon)
 											</Label>
 										</div>
 									</RadioGroup>
@@ -208,6 +184,13 @@ export function RequestSessionPage() {
 									<div>
 										<Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border" disabled={(date) => date < new Date()} />
 									</div>
+								</div>
+
+								<div>
+									<Label htmlFor="time" className="mb-2 block">
+										Session Topic
+									</Label>
+									<Input id="topic" type="topic" value={topic} onChange={(e) => setTopic(e.target.value)} className="w-full" placeholder="Enter your topic" aria-label="Session topic" />
 								</div>
 
 								<div>
@@ -250,8 +233,8 @@ export function RequestSessionPage() {
 								</div>
 							</CardContent>
 							<CardFooter className="flex justify-end">
-								<Button onClick={() => handleSubmit(mentor.pricing)} className="gap-2" disabled={!isFormValid() || isSubmitting}>
-									{isSubmitting ? "Submitting..." : mentor.pricing === "free" ? "Submit Request" : "Proceed to Payment"}
+								<Button onClick={handleSubmit} className="gap-2" disabled={!isFormValid() || isSubmitting}>
+									{isSubmitting ? "Submitting..." : "Submit Request"}
 									<ArrowRight className="h-4 w-4" />
 								</Button>
 							</CardFooter>
@@ -292,7 +275,7 @@ export function RequestSessionPage() {
 											<span className="text-sm">Preferred Format</span>
 											<div className="flex items-center gap-1">
 												<Users className="h-4 w-4 text-muted-foreground" />
-												<span className="text-sm">{mentor.sessionFormat === "one-on-one" ? "One-on-One" : mentor.sessionFormat === "group" ? "Group" : "Both "}</span>
+												<span className="text-sm">{mentor.sessionFormat === "one-on-one" ? "One-on-One" : mentor.sessionFormat === "group" ? "Group" : "Both"}</span>
 											</div>
 										</div>
 										<div className="flex items-center justify-between">
@@ -301,7 +284,7 @@ export function RequestSessionPage() {
 										</div>
 										<div className="flex items-center justify-between">
 											<span className="text-sm">Rate</span>
-											<span className="text-sm font-medium">{mentor.pricing === "free" ? "Free" : mentor.hourlyRate ? `₹${mentor.hourlyRate}/hr` : "N/A"}</span>
+											<span className="text-sm font-medium">{Number()}</span>
 										</div>
 									</div>
 									<Separator className="my-4" />
@@ -316,6 +299,7 @@ export function RequestSessionPage() {
 							<Card>
 								<CardHeader className="pb-3">
 									<CardTitle>Order Summary</CardTitle>
+									<CardDescription>Pay after mentor approval</CardDescription>
 								</CardHeader>
 								<CardContent className="pb-2">
 									<div className="space-y-3">
@@ -348,7 +332,7 @@ export function RequestSessionPage() {
 											<span className="text-sm">
 												Session Fee ({hours} {hours === 1 ? "hour" : "hours"})
 											</span>
-											<span className="text-sm">₹{mentor.hourlyRate ? Number(mentor.hourlyRate) * hours : "N/A"}</span>
+											<span className="text-sm">{mentor.pricing === "free" ? "₹0" : mentor.hourlyRate ? `₹${(Number(mentor.hourlyRate) * hours).toFixed(2)}` : "N/A"}</span>
 										</div>
 										<div className="flex justify-between">
 											<span className="text-sm">Platform Fee</span>
@@ -356,8 +340,8 @@ export function RequestSessionPage() {
 										</div>
 										<Separator className="my-2" />
 										<div className="flex justify-between font-bold">
-											<span>Total</span>
-											<span>₹{mentor.hourlyRate ? calculateTotal() : "N/A"}</span>
+											<span>Total (after approval)</span>
+											<span>₹{calculateTotal().toFixed(2)}</span>
 										</div>
 									</div>
 								</CardContent>
@@ -366,21 +350,24 @@ export function RequestSessionPage() {
 					</div>
 				</div>
 
-				{/* Confirmation Modal for Free Sessions */}
+				{/* Confirmation Modal */}
 				<Dialog open={isConfirmationOpen} onOpenChange={setIsConfirmationOpen}>
 					<DialogContent>
 						<DialogHeader>
 							<DialogTitle>Confirm Session Request</DialogTitle>
 							<DialogDescription>
-								You're about to request a free {sessionType} session with {mentor.firstName} {mentor.lastName} for {hours} {hours === 1 ? "hour" : "hours"} on {date ? format(date, "MMMM d, yyyy") : "selected date"} at{" "}
-								{time || "selected time"}. Please confirm to proceed.
+								You're about to request a {sessionType} session with {mentor.firstName} {mentor.lastName} for {hours} {hours === 1 ? "hour" : "hours"} on {date ? format(date, "MMMM d, yyyy") : "selected date"} at {time || "selected time"}.
+								{mentor.pricing === "free"
+									? "A platform fee of ₹40 will be charged upon mentor approval."
+									: `A session fee of ₹${mentor.hourlyRate ? Number(mentor.hourlyRate) * hours : 0} plus a ₹40 platform fee will be charged upon mentor approval.`}
+								Please confirm to proceed.
 							</DialogDescription>
 						</DialogHeader>
 						<DialogFooter>
-							<Button variant="outline" onClick={() => setIsConfirmationOpen(false)}>
+							<Button variant="outline" onClick={() => setIsConfirmationOpen(false)} disabled={isSubmitting}>
 								Cancel
 							</Button>
-							<Button onClick={handleFreeSessionConfirm} disabled={isSubmitting}>
+							<Button onClick={handleConfirmRequest} disabled={isSubmitting}>
 								{isSubmitting ? "Submitting..." : "Confirm Request"}
 							</Button>
 						</DialogFooter>

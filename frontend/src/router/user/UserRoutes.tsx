@@ -13,7 +13,9 @@ import { BecomeMentorPage } from "@/pages/user/BecomeMentorPage";
 import { MentorProfilePage } from "@/pages/user/MentorProfilePage";
 import { RequestSessionPage } from "@/pages/user/RequestSessionPage";
 import { CheckoutPage } from "@/pages/user/CheckoutPage";
-import { ConfirmationPage } from "@/pages/user/confirmationPage";
+import { PaymentConfirmationPage } from "@/pages/user/PaymentConfirmationPage";
+import { RequestConfirmationPage } from "@/pages/user/RequestConfirmationPage";
+import { SessionsPage } from "@/pages/user/SessionsPage";
 
 const UserRoutes = () => {
 	return (
@@ -91,13 +93,32 @@ const UserRoutes = () => {
 				/>
 
 				<Route
-					path="/confirmation"
+					path="/request-confirmation"
 					element={
 						<ProtectedRoute>
-							<ConfirmationPage />
+							<RequestConfirmationPage />
 						</ProtectedRoute>
 					}
 				/>
+
+				<Route
+					path="/payment-confirmation"
+					element={
+						<ProtectedRoute>
+							<PaymentConfirmationPage />
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="/sessions"
+					element={
+						<ProtectedRoute>
+							<SessionsPage />
+						</ProtectedRoute>
+					}
+				/>
+
 				<Route path="*" element={<PageNotFound />} />
 			</Route>
 		</Routes>
