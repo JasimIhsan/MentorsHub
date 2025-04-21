@@ -21,7 +21,7 @@ export function MentorRequestsPage() {
 	useEffect(() => {
 		const fetch = async () => {
 			try {
-				const response = await axiosInstance.get(`/mentor/${user?.id}/requests`);
+				const response = await axiosInstance.get(`/mentor/sessions/${user?.id}/requests`);
 				setRequests(Array.isArray(response.data.requests) ? response.data.requests : []);
 			} catch (error) {
 				console.error("Failed to fetch requests:", error);

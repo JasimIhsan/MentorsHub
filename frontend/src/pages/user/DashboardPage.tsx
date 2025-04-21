@@ -53,7 +53,7 @@ export const DashboardPage: React.FC = () => {
 
 	const test = async () => {
 		try {
-			const response = await axiosInstance.get("/test");
+			const response = await axiosInstance.get("/user/test");
 			console.log("test response : ", response);
 			toast.success(response.data.message);
 		} catch (error: any) {
