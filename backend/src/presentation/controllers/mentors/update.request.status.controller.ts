@@ -7,6 +7,8 @@ export class UpdateRequestStatusController {
 		try {
 			const { requestId } = req.params;
 			const { status } = req.body;
+			console.log(`requestId : `, requestId);
+			console.log(`status : `, status);
 			await this.updateRequestStatusUsecase.execute(requestId, status);
 			res.status(200).json({ success: true, message: "Request status updated successfully" });
 		} catch (error) {

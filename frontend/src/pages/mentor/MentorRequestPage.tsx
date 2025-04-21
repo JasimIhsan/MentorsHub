@@ -12,11 +12,17 @@ import axiosInstance from "@/api/config/api.config";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { toast } from "sonner";
 
 export function MentorRequestsPage() {
 	const user = useSelector((state: RootState) => state.auth.user);
 	const [requests, setRequests] = useState<ISessionMentorDTO[]>([]);
 	const [selectedRequest, setSelectedRequest] = useState<ISessionMentorDTO | null>(null);
+	const [confirmationDialog, setConfirmationDialog] = useState<{
+		isOpen: boolean;
+		type: "approve" | "reject" | null;
+		requestId: string | null;
+	}>({ isOpen: false, type: null, requestId: null });
 
 	useEffect(() => {
 		const fetch = async () => {
@@ -31,21 +37,31 @@ export function MentorRequestsPage() {
 		if (user?.id) fetch();
 	}, [user?.id]);
 
-	const handleApprove = async (requestId: string) => {
-		try {
-			await axiosInstance.post(`/mentor/requests/${requestId}/approve`);
-			setRequests((prev) => prev.map((r) => (r.id === requestId ? { ...r, status: "approved" } : r)));
-		} catch (error) {
-			console.error("Failed to approve request", error);
-		}
+	const handleApprove = (requestId: string) => {
+		setConfirmationDialog({ isOpen: true, type: "approve", requestId });
 	};
 
-	const handleReject = async (requestId: string) => {
+	const handleReject = (requestId: string) => {
+		setConfirmationDialog({ isOpen: true, type: "reject", requestId });
+	};
+
+	const handleConfirmAction = async () => {
+		if (!confirmationDialog.requestId || !confirmationDialog.type) return;
+
 		try {
-			await axiosInstance.post(`/mentor/requests/${requestId}/reject`);
-			setRequests((prev) => prev.map((r) => (r.id === requestId ? { ...r, status: "rejected" } : r)));
+			if (confirmationDialog.type === "approve") {
+				const response = await axiosInstance.put(`/mentor/sessions/${confirmationDialog.requestId}/status`, { status: "approved" });
+				toast.success(response.data.message);
+				setRequests((prev) => prev.map((r) => (r.id === confirmationDialog.requestId ? { ...r, status: "approved" } : r)));
+			} else {
+				const response = await axiosInstance.put(`/mentor/sessions/${confirmationDialog.requestId}/status`, { status: "rejected" });
+				toast.success(response.data.message);
+				setRequests((prev) => prev.map((r) => (r.id === confirmationDialog.requestId ? { ...r, status: "rejected" } : r)));
+			}
 		} catch (error) {
-			console.error("Failed to reject request", error);
+			console.error(`Failed to ${confirmationDialog.type} request`, error);
+		} finally {
+			setConfirmationDialog({ isOpen: false, type: null, requestId: null });
 		}
 	};
 
@@ -227,6 +243,23 @@ export function MentorRequestsPage() {
 							) : (
 								<Button onClick={() => setSelectedRequest(null)}>Close</Button>
 							)}
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+
+				<Dialog open={confirmationDialog.isOpen} onOpenChange={() => setConfirmationDialog({ isOpen: false, type: null, requestId: null })}>
+					<DialogContent className="max-w-md">
+						<DialogHeader>
+							<DialogTitle>{confirmationDialog.type === "approve" ? "Confirm Approval" : "Confirm Rejection"}</DialogTitle>
+							<DialogDescription>{confirmationDialog.type === "approve" ? "Are you sure you want to approve this session request?" : "Are you sure you want to reject this session request?"}</DialogDescription>
+						</DialogHeader>
+						<DialogFooter>
+							<Button variant="outline" onClick={() => setConfirmationDialog({ isOpen: false, type: null, requestId: null })}>
+								Cancel
+							</Button>
+							<Button variant={confirmationDialog.type === "approve" ? "default" : "destructive"} onClick={handleConfirmAction}>
+								{confirmationDialog.type === "approve" ? "Approve" : "Reject"}
+							</Button>
 						</DialogFooter>
 					</DialogContent>
 				</Dialog>
