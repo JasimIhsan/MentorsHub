@@ -13,7 +13,7 @@ import { BecomeMentorPage } from "@/pages/user/BecomeMentorPage";
 import { MentorProfilePage } from "@/pages/user/MentorProfilePage";
 import { RequestSessionPage } from "@/pages/user/RequestSessionPage";
 import { CheckoutPage } from "@/pages/user/CheckoutPage";
-import { PaymentConfirmationPage } from "@/pages/user/PaymentConfirmationPage";
+// import { PaymentConfirmationPage } from "@/pages/user/PaymentConfirmationPage";
 import { RequestConfirmationPage } from "@/pages/user/RequestConfirmationPage";
 import { SessionsPage } from "@/pages/user/SessionsPage";
 
@@ -101,14 +101,14 @@ const UserRoutes = () => {
 					}
 				/>
 
-				<Route
+				{/* <Route
 					path="/payment-confirmation"
 					element={
 						<ProtectedRoute>
 							<PaymentConfirmationPage />
 						</ProtectedRoute>
 					}
-				/>
+				/> */}
 
 				<Route
 					path="/sessions"

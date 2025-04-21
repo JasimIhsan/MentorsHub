@@ -87,4 +87,12 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			return handleError(error, "Error updating session request status");
 		}
 	}
+
+	async paySession(sessionId: string, paymentId: string, paymentStatus: string, status: string): Promise<void> {
+		try {
+			await SessionModel.findByIdAndUpdate(sessionId, { paymentId, paymentStatus , status}, { new: true });
+		} catch (error) {
+			return handleError(error, "Error updating session payment status");
+		}
+	}
 }

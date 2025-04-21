@@ -8,8 +8,6 @@ export class RequestSessionController {
 			const requestData = req.body;
 
 			const session = await this.requestSessionUsecase.execute(requestData);
-			console.log("session: ", session);
-
 			res.status(200).json({ success: true, session, message: "Session requested successfully" });
 		} catch (error) {
 			if (error instanceof Error) {

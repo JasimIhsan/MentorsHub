@@ -13,3 +13,7 @@ export interface IFetchSessionsByUserUseCase{
 export interface IUpdateRequestStatusUseCase{
 	execute(sessionId: string, status: string): Promise<void>
 }
+
+export interface IPaySessionUseCase{
+	execute(sessionId: string, paymentId: string, paymentStatus: string, status: string): Promise<void>
+}
