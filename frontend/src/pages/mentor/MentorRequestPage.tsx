@@ -2,46 +2,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Filter, Calendar, Check, Clock, MessageSquare, X } from "lucide-react";
+import { Search, Filter, Calendar, Check, Clock, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/api/config/api.config";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-
-// Define interfaces
-interface Mentee {
-	_id: string;
-	firstName: string;
-	lastName: string;
-	avatar?: string;
-}
-
-interface Request {
-	id: string;
-	mentor: { _id: string };
-	userId: Mentee;
-	topic: string;
-	sessionType: string;
-	sessionFormat: string;
-	date: string;
-	time: string;
-	hours: number;
-	message: string;
-	status: "pending" | "approved" | "rejected";
-	paymentStatus: string;
-	pricing: string;
-	totalAmount: number;
-	createdAt: string;
-}
+import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
 
 export function MentorRequestsPage() {
 	const user = useSelector((state: RootState) => state.auth.user);
-	const [requests, setRequests] = useState<Request[]>([]);
-	const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+	const [requests, setRequests] = useState<ISessionMentorDTO[]>([]);
+	const [selectedRequest, setSelectedRequest] = useState<ISessionMentorDTO | null>(null);
 
 	useEffect(() => {
 		const fetch = async () => {
@@ -74,17 +49,17 @@ export function MentorRequestsPage() {
 		}
 	};
 
-	const renderSessionRequestsList = (filteredRequests: Request[], status: string) => {
+	const renderSessionRequestsList = (filteredRequests: ISessionMentorDTO[], status: string) => {
 		return (
 			<>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 					{filteredRequests.map((request) => {
 						const avatarSrc = request.userId.avatar;
 						return (
 							<Card key={request.id}>
-								<CardHeader className="pb-2">
+								<CardHeader>
 									<div className="flex justify-between items-start">
-										<div className="flex items-center gap-2">
+										<div className="flex items-center gap-3">
 											<Avatar className="h-12 w-12">
 												<AvatarImage src={avatarSrc} alt={`${request.userId.firstName} ${request.userId.lastName}`} />
 											</Avatar>
@@ -96,19 +71,30 @@ export function MentorRequestsPage() {
 										<Badge variant={request.pricing === "paid" ? "default" : "outline"}>{request.pricing}</Badge>
 									</div>
 								</CardHeader>
-								<CardContent className="pb-2">
-									<div className="space-y-2">
-										<div>
-											<div className="font-medium">Topic : {request.topic}</div>
-											<div className="text-sm text-muted-foreground">Format : {request.sessionType}</div>
+								<CardContent>
+									<div className="grid grid-cols-1 gap-1">
+										{/* Session Details */}
+										<div className="space-y-1">
+											<span className="text-sm font-medium text-muted-foreground">Topic</span>
+											<p className="font-medium">{request.topic}</p>
 										</div>
-										<div className="flex items-center gap-1 text-sm">
-											<Clock className="h-4 w-4 text-muted-foreground" />
-											<span className="text-muted-foreground">{`${new Date(request.date).toLocaleDateString()} ${request.time} (${request.hours} hours)`}</span>
+										<div className="grid grid-cols-2 gap-4">
+											<div className="space-y-1">
+												<span className="text-sm font-medium text-muted-foreground">Session Type</span>
+												<p className="text-sm">{request.sessionType}</p>
+											</div>
+											<div className="space-y-1">
+												<span className="text-sm font-medium text-muted-foreground">Format</span>
+												<p className="text-sm">{request.sessionFormat}</p>
+											</div>
 										</div>
-										<div className="flex items-start gap-1 text-sm">
-											<MessageSquare className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
-											<span className="text-muted-foreground line-clamp-2">{request.message}</span>
+										{/* Timing Details */}
+										<div className="space-y-1">
+											<span className="text-sm font-medium text-muted-foreground">Date & Time</span>
+											<div className="flex items-center gap-1 text-sm">
+												<Clock className="h-4 w-4 text-muted-foreground" />
+												<span>{`${new Date(request.date).toLocaleDateString()} ${request.time} (${request.hours} hour${request.hours > 1 ? "s" : ""})`}</span>
+											</div>
 										</div>
 									</div>
 								</CardContent>
@@ -171,7 +157,7 @@ export function MentorRequestsPage() {
 								{/* Session Details */}
 								<div className="space-y-2">
 									<h4 className="text-md font-semibold text-foreground">Session Details</h4>
-									<div className="grid grid-cols-1 gap-4">
+									<div className="grid grid-cols-1 gap-1">
 										<div>
 											<span className="text-sm font-medium text-muted-foreground">Topic</span>
 											<p className="text-sm">{selectedRequest.topic}</p>
@@ -204,9 +190,9 @@ export function MentorRequestsPage() {
 								</div>
 
 								{/* Payment Details */}
-								<div className="space-y-4 border-t pt-2">
+								<div className="space-y-2 border-t pt-2">
 									<h4 className="text-md font-semibold text-foreground">Payment Details</h4>
-									<div className="grid grid-cols-1 gap-4">
+									<div className="grid grid-cols-1 gap-2">
 										<div className="grid grid-cols-2 gap-4">
 											<div>
 												<span className="text-sm font-medium text-muted-foreground">Pricing</span>

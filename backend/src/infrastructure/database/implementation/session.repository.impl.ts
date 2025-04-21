@@ -3,7 +3,7 @@ import { ISessionRepository } from "../../../domain/dbrepository/session.reposit
 import { SessionModel } from "../models/session/session.model";
 import { SessionEntity } from "../../../domain/entities/session.entity";
 import { handleError } from "./user.repository.impl";
-import { ISessionDTO } from "../../../application/dtos/session.dto";
+import { ISessionUserDTO } from "../../../application/dtos/session.dto";
 
 export class SessionRepositoryImpl implements ISessionRepository {
 	async createSession(session: SessionEntity): Promise<SessionEntity> {
@@ -16,10 +16,10 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async fetchSessionsByUser(userId: string): Promise<ISessionDTO[]> {
+	async fetchSessionsByUser(userId: string): Promise<ISessionUserDTO[]> {
 		try {
 			const sessions = await SessionModel.find({ userId }).populate("mentorId", "firstName lastName avatar");
-			const sessionDTOs: ISessionDTO[] = sessions.map((session) => ({
+			const sessionDTOs: ISessionUserDTO[] = sessions.map((session) => ({
 				id: session._id.toString(),
 				mentor: {
 					_id: session.mentorId._id.toString(),

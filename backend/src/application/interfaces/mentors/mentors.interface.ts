@@ -1,5 +1,5 @@
 import { IMentorDTO } from "../../dtos/mentor.dtos";
-import { ISessionDTO } from "../../dtos/session.dto";
+import { ISessionMentorDTO, ISessionUserDTO } from "../../dtos/session.dto";
 
 export interface IFetchAllMentorsUsecase {
 	execute(): Promise<IMentorDTO[]>;
@@ -14,5 +14,5 @@ export interface IFetchMentorUsecase {
 }
 
 export interface IFetchSessionRequests {
-	execute(mentorId: string): Promise<ISessionDTO[]>
+	execute(mentorId: string): Promise<ISessionMentorDTO[]>
 }
