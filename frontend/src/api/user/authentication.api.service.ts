@@ -3,7 +3,7 @@ import axiosInstance from "../config/api.config";
 
 export const loginApi = async (email: string, password: string) => {
 	try {
-		const response = await axiosInstance.post("/login", { email, password });
+		const response = await axiosInstance.post("/user/login", { email, password });
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error form login api : `, error);
@@ -13,7 +13,7 @@ export const loginApi = async (email: string, password: string) => {
 
 export const forgotPassword = async (email: string)=> {
 	try {
-		const response = await axiosInstance.post("/forgot-password", { email });
+		const response = await axiosInstance.post("/user/forgot-password", { email });
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error form forgotpassword api : `, error);
@@ -23,7 +23,7 @@ export const forgotPassword = async (email: string)=> {
 
 export const verifyResetToken = async (token: string) => {
 	try {
-		const response = await axiosInstance(`/verify-reset-token/${token}`);
+		const response = await axiosInstance(`/user/verify-reset-token/${token}`);
 		return response.data;
 	} catch (error) {
 		console.log(`Error form verifyresettoken api : `, error);
@@ -35,7 +35,7 @@ export const verifyResetToken = async (token: string) => {
 
 export const resetPassword = async (token: string, newPassword: string) => {
 	try {
-		const response = await axiosInstance.post(`/reset-password`, { token, newPassword });
+		const response = await axiosInstance.post(`/user/reset-password`, { token, newPassword });
 		return response.data;
 	} catch (error: any) {
 		throw new Error(error?.response?.data?.message);
@@ -44,7 +44,7 @@ export const resetPassword = async (token: string, newPassword: string) => {
 
 export const logoutSession = async () => {
 	try {
-		const response = await axiosInstance.post(`/logout`);
+		const response = await axiosInstance.post(`/user/logout`);
 		return response.data;
 	} catch (error) {
 		console.log(`Error form logoutSession api : `, error);
@@ -57,7 +57,7 @@ export const logoutSession = async () => {
 export const sendOtp = async (email: string) => {
 	try {
 		console.log("email: ", email);
-		const response = await axiosInstance.post(`/send-otp`, { email: email });
+		const response = await axiosInstance.post(`/user/send-otp`, { email: email });
 		console.log(`response: `, response);
 		return response.data;
 	} catch (error: any) {
@@ -70,7 +70,7 @@ export const verifyOtpAndCompleteRegistration = async (otp: string, signupData: 
 	console.log("signupData: ", signupData);
 	console.log("otp: ", otp);
 	try {
-		const response = await axiosInstance.post(`/register`, { otp, signupData });
+		const response = await axiosInstance.post(`/user/register`, { otp, signupData });
 		console.log('response forgot: ', response);
 
 		return response.data;
@@ -82,7 +82,7 @@ export const verifyOtpAndCompleteRegistration = async (otp: string, signupData: 
 
 export const resendOTP = async (email: string) => {
 	try {
-		const response = await axiosInstance.post(`/resend-otp`, { email: email });
+		const response = await axiosInstance.post(`/user/resend-otp`, { email: email });
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error form resendOTP api : `, error);
@@ -93,7 +93,7 @@ export const resendOTP = async (email: string) => {
 export const googleAthentication = async (credential: any) => {
 	console.log("credential: ", credential);
 	try {
-		const response = await axiosInstance.post("/auth/google", { credential });
+		const response = await axiosInstance.post("/user/auth/google", { credential });
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error from googleAuthentication api : `, error);

@@ -5,222 +5,126 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar, Check, Clock, MessageSquare, X } from "lucide-react";
+import axiosInstance from "@/api/config/api.config";
 
-interface SessionRequestsListProps {
-	status: "pending" | "approved" | "rejected";
+interface Mentee {
+	_id: string;
+	firstName: string;
+	lastName: string;
+	avatar?: string;
 }
 
-export function SessionRequestsList({ status }: SessionRequestsListProps) {
-	const [selectedRequest, setSelectedRequest] = useState<any>(null);
+interface Request {
+	id: string;
+	mentor: { _id: string };
+	userId: Mentee;
+	topic: string;
+	sessionType: string;
+	sessionFormat: string;
+	date: string;
+	time: string;
+	hours: number;
+	message: string;
+	status: "pending" | "approved" | "rejected";
+	paymentStatus: string;
+	pricing: string;
+	totalAmount: number;
+	createdAt: string;
+}
 
-	// Sample data - in a real app, this would come from an API
-	const pendingRequests = [
-		{
-			id: "req-1",
-			mentee: {
-				name: "Alex Johnson",
-				avatar: "/placeholder.svg?height=40&width=40",
-				initials: "AJ",
-				bio: "Frontend Developer with 2 years of experience",
-				previousSessions: 3,
-			},
-			topic: "React Fundamentals",
-			goals: "Understand React hooks and component lifecycle",
-			proposedTime: "Today, 3:00 PM",
-			alternativeTimes: ["Tomorrow, 2:00 PM", "Jul 18, 10:00 AM"],
-			urgency: "high",
-			plan: "Pro Plan",
-			message: "I'm working on a project and struggling with useEffect. Would love your guidance on best practices.",
-		},
-		{
-			id: "req-2",
-			mentee: {
-				name: "Sarah Williams",
-				avatar: "/placeholder.svg?height=40&width=40",
-				initials: "SW",
-				bio: "UX Designer transitioning to development",
-				previousSessions: 1,
-			},
-			topic: "Career Guidance",
-			goals: "Create a transition plan from design to development",
-			proposedTime: "Tomorrow, 10:00 AM",
-			alternativeTimes: ["Jul 19, 1:00 PM"],
-			urgency: "medium",
-			plan: "Basic Plan",
-			message: "I've been a designer for 5 years and want to transition to frontend development. Need advice on skills to focus on.",
-		},
-		{
-			id: "req-3",
-			mentee: {
-				name: "Michael Chen",
-				avatar: "/placeholder.svg?height=40&width=40",
-				initials: "MC",
-				bio: "Computer Science student, final year",
-				previousSessions: 0,
-			},
-			topic: "Interview Preparation",
-			goals: "Practice technical interviews for frontend roles",
-			proposedTime: "Jul 18, 2:30 PM",
-			alternativeTimes: ["Jul 20, 11:00 AM", "Jul 21, 3:00 PM"],
-			urgency: "low",
-			plan: "Premium Plan",
-			message: "I have interviews coming up with major tech companies and would like to practice frontend technical questions.",
-		},
-		{
-			id: "req-4",
-			mentee: {
-				name: "Jessica Taylor",
-				avatar: "/placeholder.svg?height=40&width=40",
-				initials: "JT",
-				bio: "Backend developer learning frontend",
-				previousSessions: 2,
-			},
-			topic: "TypeScript in React",
-			goals: "Learn best practices for TypeScript with React",
-			proposedTime: "Jul 19, 4:00 PM",
-			alternativeTimes: [],
-			urgency: "medium",
-			plan: "Pro Plan",
-			message: "I'm comfortable with TypeScript on the backend but struggling to implement it properly in my React projects.",
-		},
-	];
+interface SessionRequestsListProps {
+	requests: Request[];
+	status: string;
+	setRequests: React.Dispatch<React.SetStateAction<Request[]>>;
+}
 
-	const approvedRequests = [
-		{
-			id: "req-5",
-			mentee: {
-				name: "David Lee",
-				avatar: "/placeholder.svg?height=40&width=40",
-				initials: "DL",
-				bio: "Junior developer at a startup",
-				previousSessions: 4,
-			},
-			topic: "Code Review",
-			goals: "Review authentication implementation",
-			proposedTime: "Jul 20, 1:00 PM",
-			alternativeTimes: [],
-			urgency: "medium",
-			plan: "Pro Plan",
-			message: "I've implemented authentication in my app and would like you to review it for security issues.",
-		},
-		{
-			id: "req-6",
-			mentee: {
-				name: "Emma Wilson",
-				avatar: "/placeholder.svg?height=40&width=40",
-				initials: "EW",
-				bio: "Self-taught developer",
-				previousSessions: 1,
-			},
-			topic: "Portfolio Review",
-			goals: "Get feedback on projects and resume",
-			proposedTime: "Jul 22, 11:00 AM",
-			alternativeTimes: [],
-			urgency: "low",
-			plan: "Basic Plan",
-			message: "I'm applying for my first developer job and would like feedback on my portfolio projects.",
-		},
-	];
+export function SessionRequestsList({ requests, status, setRequests }: SessionRequestsListProps) {
+	const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
 
-	const rejectedRequests = [
-		{
-			id: "req-7",
-			mentee: {
-				name: "Ryan Garcia",
-				avatar: "/placeholder.svg?height=40&width=40",
-				initials: "RG",
-				bio: "Marketing professional learning to code",
-				previousSessions: 0,
-			},
-			topic: "WordPress Development",
-			goals: "Learn custom WordPress theme development",
-			proposedTime: "Jul 17, 9:00 AM",
-			alternativeTimes: ["Jul 18, 9:00 AM"],
-			urgency: "high",
-			plan: "Basic Plan",
-			message: "I need help creating a custom WordPress theme for my portfolio.",
-			rejectionReason: "Topic outside expertise area",
-		},
-	];
+	const handleApprove = async (requestId: string) => {
+		try {
+			await axiosInstance.post(`/mentor/requests/${requestId}/approve`);
+			setRequests((prev) => prev.map((r) => (r.id === requestId ? { ...r, status: "approved" } : r)));
+		} catch (error) {
+			console.error("Failed to approve request", error);
+		}
+	};
 
-	let requests = [];
-	switch (status) {
-		case "pending":
-			requests = pendingRequests;
-			break;
-		case "approved":
-			requests = approvedRequests;
-			break;
-		case "rejected":
-			requests = rejectedRequests;
-			break;
-	}
+	const handleReject = async (requestId: string) => {
+		try {
+			await axiosInstance.post(`/mentor/requests/${requestId}/reject`);
+			setRequests((prev) => prev.map((r) => (r.id === requestId ? { ...r, status: "rejected" } : r)));
+		} catch (error) {
+			console.error("Failed to reject request", error);
+		}
+	};
+
+	const getInitials = (firstName: string, lastName: string) => {
+		return `${firstName[0]}${lastName[0]}`.toUpperCase();
+	};
 
 	return (
 		<>
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				{requests.map((request) => (
-					<Card key={request.id}>
-						<CardHeader className="pb-2">
-							<div className="flex justify-between items-start">
-								<div className="flex items-center gap-2">
-									<Avatar>
-										<AvatarImage src={request.mentee.avatar || "/placeholder.svg"} alt={request.mentee.name} />
-										<AvatarFallback>{request.mentee.initials}</AvatarFallback>
-									</Avatar>
+				{requests.map((request) => {
+					const avatarSrc = request.userId.avatar ?? "/placeholder.svg"; // Ensure string type
+					return (
+						<Card key={request.id}>
+							<CardHeader className="pb-2">
+								<div className="flex justify-between items-start">
+									<div className="flex items-center gap-2">
+										<Avatar>
+											<AvatarImage src={avatarSrc} alt={`${request.userId.firstName} ${request.userId.lastName}`} />
+											<AvatarFallback>{getInitials(request.userId.firstName, request.userId.lastName)}</AvatarFallback>
+										</Avatar>
+										<div>
+											<CardTitle className="text-lg">{`${request.userId.firstName} ${request.userId.lastName}`}</CardTitle>
+											<CardDescription>{request.sessionFormat}</CardDescription>
+										</div>
+									</div>
+									<Badge variant={request.pricing === "paid" ? "default" : "outline"}>{request.pricing}</Badge>
+								</div>
+							</CardHeader>
+							<CardContent className="pb-2">
+								<div className="space-y-2">
 									<div>
-										<CardTitle className="text-lg">{request.mentee.name}</CardTitle>
-										<CardDescription>{request.mentee.previousSessions > 0 ? `${request.mentee.previousSessions} previous sessions` : "First-time mentee"}</CardDescription>
+										<div className="font-medium">{request.topic}</div>
+										<div className="text-sm text-muted-foreground">{request.sessionType}</div>
+									</div>
+									<div className="flex items-center gap-1 text-sm">
+										<Clock className="h-4 w-4 text-muted-foreground" />
+										<span className="text-muted-foreground">{`${new Date(request.date).toLocaleDateString()} ${request.time} (${request.hours} hours)`}</span>
+									</div>
+									<div className="flex items-start gap-1 text-sm">
+										<MessageSquare className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+										<span className="text-muted-foreground line-clamp-2">{request.message}</span>
 									</div>
 								</div>
-								<Badge variant={request.urgency === "high" ? "destructive" : request.urgency === "medium" ? "default" : "outline"}>{request.plan}</Badge>
-							</div>
-						</CardHeader>
-						<CardContent className="pb-2">
-							<div className="space-y-2">
-								<div>
-									<div className="font-medium">{request.topic}</div>
-									<div className="text-sm text-muted-foreground line-clamp-2">{request.goals}</div>
-								</div>
-								<div className="flex items-center gap-1 text-sm">
-									<Clock className="h-4 w-4 text-muted-foreground" />
-									<span className="text-muted-foreground">{request.proposedTime}</span>
-								</div>
-								{request.alternativeTimes.length > 0 && (
-									<div className="text-xs text-muted-foreground">
-										+{request.alternativeTimes.length} alternative time{request.alternativeTimes.length > 1 ? "s" : ""}
+							</CardContent>
+							<CardFooter>
+								{status === "pending" ? (
+									<div className="flex items-center gap-2 w-full">
+										<Button variant="outline" className="flex-1" onClick={() => setSelectedRequest(request)}>
+											View Details
+										</Button>
+										<Button size="icon" variant="outline" className="h-9 w-9" onClick={() => handleApprove(request.id)}>
+											<Check className="h-4 w-4 text-green-500" />
+											<span className="sr-only">Approve</span>
+										</Button>
+										<Button size="icon" variant="outline" className="h-9 w-9" onClick={() => handleReject(request.id)}>
+											<X className="h-4 w-4 text-red-500" />
+											<span className="sr-only">Reject</span>
+										</Button>
 									</div>
-								)}
-								<div className="flex items-start gap-1 text-sm">
-									<MessageSquare className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
-									<span className="text-muted-foreground line-clamp-2">{request.message}</span>
-								</div>
-								{/* {status === "rejected" && request.rejectionReason && <div className="text-sm text-red-500">Reason: {request.rejectionReason}</div>} */}
-							</div>
-						</CardContent>
-						<CardFooter>
-							{status === "pending" ? (
-								<div className="flex items-center gap-2 w-full">
-									<Button variant="outline" className="flex-1" onClick={() => setSelectedRequest(request)}>
+								) : (
+									<Button variant="outline" className="w-full" onClick={() => setSelectedRequest(request)}>
 										View Details
 									</Button>
-									<Button size="icon" variant="outline" className="h-9 w-9">
-										<Check className="h-4 w-4 text-green-500" />
-										<span className="sr-only">Approve</span>
-									</Button>
-									<Button size="icon" variant="outline" className="h-9 w-9">
-										<X className="h-4 w-4 text-red-500" />
-										<span className="sr-only">Reject</span>
-									</Button>
-								</div>
-							) : (
-								<Button variant="outline" className="w-full" onClick={() => setSelectedRequest(request)}>
-									View Details
-								</Button>
-							)}
-						</CardFooter>
-					</Card>
-				))}
+								)}
+							</CardFooter>
+						</Card>
+					);
+				})}
 			</div>
 
 			{requests.length === 0 && (
@@ -233,7 +137,6 @@ export function SessionRequestsList({ status }: SessionRequestsListProps) {
 				</div>
 			)}
 
-			{/* Request Detail Dialog */}
 			<Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
@@ -245,12 +148,12 @@ export function SessionRequestsList({ status }: SessionRequestsListProps) {
 						<div className="space-y-4">
 							<div className="flex items-start gap-3">
 								<Avatar className="h-12 w-12">
-									<AvatarImage src={selectedRequest.mentee.avatar || "/placeholder.svg"} alt={selectedRequest.mentee.name} />
-									<AvatarFallback>{selectedRequest.mentee.initials}</AvatarFallback>
+									<AvatarImage src={selectedRequest.userId.avatar ?? "/placeholder.svg"} alt={`${selectedRequest.userId.firstName} ${selectedRequest.userId.lastName}`} />
+									<AvatarFallback>{getInitials(selectedRequest.userId.firstName, selectedRequest.userId.lastName)}</AvatarFallback>
 								</Avatar>
 								<div>
-									<h3 className="font-semibold">{selectedRequest.mentee.name}</h3>
-									<p className="text-sm text-muted-foreground">{selectedRequest.mentee.bio}</p>
+									<h3 className="font-semibold">{`${selectedRequest.userId.firstName} ${selectedRequest.userId.lastName}`}</h3>
+									<p className="text-sm text-muted-foreground">{selectedRequest.sessionFormat}</p>
 								</div>
 							</div>
 
@@ -261,8 +164,23 @@ export function SessionRequestsList({ status }: SessionRequestsListProps) {
 								</div>
 
 								<div>
-									<h4 className="text-sm font-semibold">Goals</h4>
-									<p className="text-sm">{selectedRequest.goals}</p>
+									<h4 className="text-sm font-semibold">Session Type</h4>
+									<p>{selectedRequest.sessionType}</p>
+								</div>
+
+								<div>
+									<h4 className="text-sm font-semibold">Session Format</h4>
+									<p>{selectedRequest.sessionFormat}</p>
+								</div>
+
+								<div>
+									<h4 className="text-sm font-semibold">Date & Time</h4>
+									<p>{`${new Date(selectedRequest.date).toLocaleDateString()} ${selectedRequest.time}`}</p>
+								</div>
+
+								<div>
+									<h4 className="text-sm font-semibold">Duration</h4>
+									<p>{`${selectedRequest.hours} hour${selectedRequest.hours > 1 ? "s" : ""}`}</p>
 								</div>
 
 								<div>
@@ -271,32 +189,19 @@ export function SessionRequestsList({ status }: SessionRequestsListProps) {
 								</div>
 
 								<div>
-									<h4 className="text-sm font-semibold">Proposed Time</h4>
-									<p className="text-sm">{selectedRequest.proposedTime}</p>
+									<h4 className="text-sm font-semibold">Pricing</h4>
+									<p>{selectedRequest.pricing}</p>
 								</div>
-
-								{selectedRequest.alternativeTimes.length > 0 && (
-									<div>
-										<h4 className="text-sm font-semibold">Alternative Times</h4>
-										<ul className="text-sm list-disc pl-5">
-											{selectedRequest.alternativeTimes.map((time: string, index: number) => (
-												<li key={index}>{time}</li>
-											))}
-										</ul>
-									</div>
-								)}
 
 								<div>
-									<h4 className="text-sm font-semibold">Plan</h4>
-									<p className="text-sm">{selectedRequest.plan}</p>
+									<h4 className="text-sm font-semibold">Total Amount</h4>
+									<p>${selectedRequest.totalAmount}</p>
 								</div>
 
-								{status === "rejected" && selectedRequest.rejectionReason && (
-									<div>
-										<h4 className="text-sm font-semibold">Rejection Reason</h4>
-										<p className="text-sm text-red-500">{selectedRequest.rejectionReason}</p>
-									</div>
-								)}
+								<div>
+									<h4 className="text-sm font-semibold">Payment Status</h4>
+									<p>{selectedRequest.paymentStatus}</p>
+								</div>
 							</div>
 						</div>
 					)}
@@ -304,14 +209,14 @@ export function SessionRequestsList({ status }: SessionRequestsListProps) {
 					<DialogFooter>
 						{status === "pending" ? (
 							<div className="flex w-full gap-2">
-								<Button variant="outline" className="flex-1">
+								<Button variant="outline" className="flex-1" onClick={() => console.log("Counter-propose")}>
 									Counter-Propose
 								</Button>
-								<Button variant="destructive" size="sm">
+								<Button variant="destructive" size="sm" onClick={() => handleReject(selectedRequest?.id as string)}>
 									<X className="h-4 w-4 mr-1" />
 									Reject
 								</Button>
-								<Button size="sm">
+								<Button size="sm" onClick={() => handleApprove(selectedRequest?.id as string)}>
 									<Check className="h-4 w-4 mr-1" />
 									Approve
 								</Button>

@@ -34,3 +34,4 @@ export const becomeMentorUseCase = new BecomeMentorUseCase(mentorRepository, use
 export const fetchUserProfileUsecase = new FetchUserProfileUseCase(userRepository);
 export const requestSessionUsecase = new RequestSessionUseCase(sessionRepository, mentorRepository);
 export const fetchSessionsByUserUsecase = new FetchSessionsByUserUseCase(sessionRepository);
+export const fetchSessionByMentorUsecase = new FetchSessionsByUserUseCase(sessionRepository);

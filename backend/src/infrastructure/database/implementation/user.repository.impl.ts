@@ -1,8 +1,8 @@
-import { UserEntity, UserInterface } from "../../../../domain/entities/user.entity";
-import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
-import { UserModel } from "../../models/user/user.model";
+import { UserEntity, UserInterface } from "../../../domain/entities/user.entity";
+import { IUserRepository } from "../../../domain/dbrepository/user.repository";
+import { UserModel } from "../models/user/user.model";
 import mongoose from "mongoose";
-import { IUserDTO, UserDTO } from "../../../../application/dtos/user.dtos";
+import { IUserDTO, UserDTO } from "../../../application/dtos/user.dtos";
 
 // Helper function for error handling
 export const handleError = (error: unknown, message: string): never => {

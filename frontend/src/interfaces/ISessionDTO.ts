@@ -1,16 +1,6 @@
-export interface MentorInfo {
-	_id: string;
-	firstName: string;
-	lastName: string;
-	avatar?: string;
-}
+export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected";
 
-export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending";
-
-export interface ISessionDTO {
-	id: string;
-	mentor: MentorInfo;
-	userId: string;
+interface BaseSession {
 	topic: string;
 	sessionType: string;
 	sessionFormat: string;
@@ -24,4 +14,26 @@ export interface ISessionDTO {
 	paymentId?: string;
 	totalAmount?: number;
 	createdAt: string;
+}
+
+interface Person {
+	_id: string;
+	firstName: string;
+	lastName: string;
+	avatar?: string;
+}
+
+export interface MentorInfo extends Person {}
+export interface Mentee extends Person {}
+
+export interface ISessionUserDTO extends BaseSession {
+	id: string;
+	mentor: MentorInfo;
+	userId: string;
+}
+
+export interface ISessionMentorDTO extends BaseSession {
+	id: string;
+	mentor: string;
+	userId: Mentee;
 }

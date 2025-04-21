@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { UserEntity } from "../../domain/entities/user.entity";
 import { userInfo } from "os";
-import { UserRepositoryImpl } from "../../infrastructure/database/implementation/user/user.repository.impl";
+import { UserRepositoryImpl } from "../../infrastructure/database/implementation/user.repository.impl";
 
 const userRepo = new UserRepositoryImpl();
 

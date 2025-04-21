@@ -1,5 +1,5 @@
-import { UserRepositoryImpl } from "./database/implementation/user/user.repository.impl";
-import { ForgotPasswordResetTokenImpl } from "./database/implementation/user/forgot.password.token.impl";
+import { UserRepositoryImpl } from "./database/implementation/user.repository.impl";
+import { ForgotPasswordResetTokenImpl } from "./database/implementation/forgot.password.token.impl";
 import { TokenServicesImpl } from "./auth/jwt/jwt.services";
 import { EmailServiceImpl } from "./services/email-services/email.service";
 import { RedisCacheRepository } from "./cache/redis.cache.repository";
@@ -9,13 +9,13 @@ import { ITokenService } from "../application/interfaces/user/token.service.inte
 import { IEmailService } from "../application/interfaces/user/email.service.interface";
 import { ICacheRepository } from "../domain/dbrepository/cache.respository";
 import { IAdminRepository } from "../domain/dbrepository/admin.repository";
-import { AdminRepositoryImpl } from "./database/implementation/admin/admin.repository.impl";
+import { AdminRepositoryImpl } from "./database/implementation/admin.repository.impl";
 import { ICloudinaryService } from "../application/interfaces/user/user.profile.usecase.interfaces";
 import { CloudinaryService } from "./cloud/cloudinary/cloudinary";
 import { IMentorProfileRepository } from "../domain/dbrepository/mentor.details.repository";
-import { MentorDetailsRepositoryImpl } from "./database/implementation/user/mentor.respository.impl";
+import { MentorDetailsRepositoryImpl } from "./database/implementation/mentor.respository.impl";
 import { ISessionRepository } from "../domain/dbrepository/session.repository";
-import { SessionRepositoryImpl } from "./database/implementation/session/session.repository.impl";
+import { SessionRepositoryImpl } from "./database/implementation/session.repository.impl";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();

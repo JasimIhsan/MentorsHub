@@ -13,9 +13,11 @@ import { tokenInterface, userRepository } from "./infrastructure/composer";
 import { adminAuthRouter } from "./presentation/routes/admin/admin.auth.routes";
 import { usertabRouter } from "./presentation/routes/admin/admin.usertab.routes";
 import { userProfileRoutes } from "./presentation/routes/user/user.profile.routes";
-import { mentorRouter } from "./presentation/routes/mentors/mentor.routes";
+import { mentorRouter } from "./presentation/routes/user/mentor.routes";
 import { mentorApplicationRouter } from "./presentation/routes/admin/admin.mentor.application.routes";
 import { sessionRouter } from "./presentation/routes/user/session.routes";
+import { mentorSessionRouter } from "./presentation/routes/mentors/mentor.session.routes";
+import { userSideMentorRouter } from "./presentation/routes/user/user.side.mentor.routes";
 
 dotenv.config();
 
@@ -39,14 +41,19 @@ app.use(
 connectDB();
 
 app.use(morgan("dev"));
-app.use("/api", authRouter);
-app.use("/api/auth", googleAuthRouter);
+
+app.use("/api/user", authRouter);
+app.use("/api/user/auth", googleAuthRouter);
+app.use("/api/user/user-profile", userProfileRoutes);
+app.use("/api/user/sessions", sessionRouter);
+app.use('/api/user/mentor', userSideMentorRouter)
+
 app.use("/api/admin", adminAuthRouter);
 app.use("/api/admin/users", usertabRouter);
 app.use("/api/admin/mentor-application", mentorApplicationRouter);
-app.use("/api/user-profile", userProfileRoutes);
+
 app.use("/api/mentor", mentorRouter);
-app.use("/api/sessions", sessionRouter);
+app.use('/api/mentor/sessions', mentorSessionRouter)
 
 app.listen(process.env.PORT, () => {
 	console.log(` Server is running  : ✅✅✅`);

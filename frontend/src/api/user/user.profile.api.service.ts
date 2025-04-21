@@ -19,7 +19,7 @@ export const updateUserApi = async (userId: string, data: UpdateProfileFormData 
 			formData.append("avatar", blob, "avatar.jpg");
 		}
 
-		const response = await axiosInstance.put("/user-profile/edit-profile", formData, {
+		const response = await axiosInstance.put("/user/user-profile/edit-profile", formData, {
 			headers: {
 				"Content-Type": "multipart/form-data",
 			},
@@ -33,7 +33,7 @@ export const updateUserApi = async (userId: string, data: UpdateProfileFormData 
 
 export const changePasswordApi = async (userId: string, oldPassword: string, newPassword: string) => {
 	try {
-		const response = await axiosInstance.put("/user-profile/change-password", { userId, oldPassword, newPassword });
+		const response = await axiosInstance.put("/user/user-profile/change-password", { userId, oldPassword, newPassword });
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error from changePassword api: `, error);
@@ -43,7 +43,7 @@ export const changePasswordApi = async (userId: string, oldPassword: string, new
 
 export const getUserProfileApi = async () => {
 	try {
-		const response = await axiosInstance.get(`/user-profile`);
+		const response = await axiosInstance.get(`/user/user-profile`);
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error from getUserProfile api: `, error);

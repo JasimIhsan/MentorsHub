@@ -2,7 +2,7 @@ import axiosInstance from "./config/api.config";
 
 export const fetchAllMentors = async () => {
 	try {
-		const response = await axiosInstance.get("/mentor/all");
+		const response = await axiosInstance.get("/admin/mentor-application/all");
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error form fetchAllMentors api : `, error);
@@ -12,7 +12,7 @@ export const fetchAllMentors = async () => {
 
 export const fetchAllApprovedMentors = async () => {
 	try {
-		const response = await axiosInstance.get("/mentor/approved");
+		const response = await axiosInstance.get("/user/mentor/approved");
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error form fetchMentors api : `, error);
@@ -22,7 +22,7 @@ export const fetchAllApprovedMentors = async () => {
 
 export const fetchMentorAPI = async (mentorId: string) => {
 	try {
-		const response = await axiosInstance.get(`/mentor/${mentorId}`);
+		const response = await axiosInstance.get(`./user/mentor/${mentorId}`);
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error from fetchMetor api`, error);

@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Loading } from "@/components/custom-ui/Loading";
-import { ISessionDTO } from "@/interfaces/ISessionDTO";
+import { ISessionUserDTO } from "@/interfaces/ISessionDTO";
 
 declare global {
 	interface Window {
@@ -20,7 +20,7 @@ declare global {
 }
 
 export function SessionsPage() {
-	const [sessions, setSessions] = useState<ISessionDTO[]>([]);
+	const [sessions, setSessions] = useState<ISessionUserDTO[]>([]);
 	const [selectedCategory, setSelectedCategory] = useState<"upcoming" | "approved" | "completed" | "canceled" | "all" | "pending">("all");
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -49,7 +49,7 @@ export function SessionsPage() {
 			}
 
 			try {
-				const response = await axiosInstance.get(`/sessions/all/${user.id}`);
+				const response = await axiosInstance.get(`/user/sessions/all/${user.id}`);
 				if (!response.data?.sessions) {
 					throw new Error("No sessions data received");
 				}
@@ -146,7 +146,7 @@ export function SessionsPage() {
 	);
 }
 
-function SessionCard({ session }: { session: ISessionDTO }) {
+function SessionCard({ session }: { session: ISessionUserDTO }) {
 	const [isPaying, setIsPaying] = useState(false);
 
 	const type = session.status;

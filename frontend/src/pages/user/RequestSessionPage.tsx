@@ -101,7 +101,7 @@ export function RequestSessionPage() {
 		setIsSubmitting(true);
 		setIsConfirmationOpen(false);
 		try {
-			const response = await axiosInstance.post("/sessions/create-session", requestData);
+			const response = await axiosInstance.post("/user/sessions/create-session", requestData);
 			if (response.data.success) {
 				toast.success(response.data.message || "Session request submitted successfully! Awaiting mentor approval.");
 				navigate("/request-confirmation", { state: { requestData } });
