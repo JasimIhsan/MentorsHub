@@ -7,10 +7,4 @@ import { UserModel } from "../../../infrastructure/database/models/user/user.mod
 
 export const mentorRouter = Router();
 
-mentorRouter.get("/all", verifyAccessToken, (req, res) => fetchAllMentorsController.handle(req, res));
-
-mentorRouter.get("/approved", verifyAccessToken, (req, res) => fetchAllApprovedMentorsController.handle(req, res));
-
-mentorRouter.get("/:mentorId", verifyAccessToken, (req, res) => fetchMentorController.handle(req, res));
-
-mentorRouter.get("/:mentorId/requests", async (req, res) => fetchSessionsRequestsController.handle(req, res));
+// mentorRouter.get("/:mentorId", verifyAccessToken, (req, res) => fetchMentorController.handle(req, res));

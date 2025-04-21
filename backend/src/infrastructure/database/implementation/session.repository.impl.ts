@@ -79,4 +79,12 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			return handleError(error, "Error fetching session requests by mentor");
 		}
 	}
+
+	async updateRequestStatus(sessionId: string, status: string): Promise<void> {
+		try {
+			await SessionModel.findByIdAndUpdate(sessionId, { status }, { new: true });
+		} catch (error) {
+			return handleError(error, "Error updating session request status");
+		}
+	}
 }
