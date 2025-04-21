@@ -23,6 +23,8 @@ export function MentorRequestsPage() {
 		type: "approve" | "reject" | null;
 		requestId: string | null;
 	}>({ isOpen: false, type: null, requestId: null });
+	const [searchQuery, setSearchQuery] = useState("");
+	const [filterOption, setFilterOption] = useState<"all" | "free" | "paid" | "today" | "week">("all");
 
 	useEffect(() => {
 		const fetch = async () => {
@@ -65,11 +67,45 @@ export function MentorRequestsPage() {
 		}
 	};
 
+	const filterRequests = (requests: ISessionMentorDTO[], status: string) => {
+		let filtered = requests.filter((req) => req.status === status);
+
+		// Apply search filter
+		if (searchQuery) {
+			const lowerQuery = searchQuery.toLowerCase();
+			filtered = filtered.filter((req) => `${req.userId.firstName} ${req.userId.lastName}`.toLowerCase().includes(lowerQuery) || req.topic.toLowerCase().includes(lowerQuery));
+		}
+
+		// Apply filter option
+		const today = new Date();
+		const startOfWeek = new Date(today);
+		startOfWeek.setDate(today.getDate() - today.getDay());
+
+		switch (filterOption) {
+			case "free":
+				return filtered.filter((req) => req.pricing.toLowerCase() === "free");
+			case "paid":
+				return filtered.filter((req) => req.pricing.toLowerCase() === "paid");
+			case "today":
+				return filtered.filter((req) => new Date(req.date).toDateString() === today.toDateString());
+			case "week":
+				return filtered.filter((req) => {
+					const reqDate = new Date(req.date);
+					return reqDate >= startOfWeek && reqDate <= new Date(today.getTime() + 6 * 24 * 60 * 60 * 1000);
+				});
+			case "all":
+			default:
+				return filtered;
+		}
+	};
+
 	const renderSessionRequestsList = (filteredRequests: ISessionMentorDTO[], status: string) => {
+		const processedRequests = filterRequests(filteredRequests, status);
+
 		return (
 			<>
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-					{filteredRequests.map((request) => {
+					{processedRequests.map((request) => {
 						const avatarSrc = request.userId.avatar;
 						return (
 							<Card key={request.id}>
@@ -140,7 +176,7 @@ export function MentorRequestsPage() {
 					})}
 				</div>
 
-				{filteredRequests.length === 0 && (
+				{processedRequests.length === 0 && (
 					<div className="text-center py-12">
 						<div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
 							<Calendar className="h-6 w-6 text-muted-foreground" />
@@ -287,34 +323,35 @@ export function MentorRequestsPage() {
 					<div className="flex items-center gap-2">
 						<div className="relative">
 							<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-							<Input type="search" placeholder="Search requests..." className="w-full sm:w-[200px] pl-8 bg-background" />
+							<Input type="search" placeholder="Search by name or topic..." className="w-full sm:w-[200px] pl-8 bg-background" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
 						</div>
 
-						<Select defaultValue="all">
-							<SelectTrigger className="w-[130px]">
+						<Select value={filterOption} onValueChange={(value) => setFilterOption(value as typeof filterOption)}>
+							<SelectTrigger className="w-[180px]">
 								<Filter className="h-4 w-4 mr-2" />
-								<SelectValue placeholder="Filter" />
+								<SelectValue placeholder="Filter by" />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="all">All Requests</SelectItem>
+								<SelectItem value="free">Free Sessions</SelectItem>
+								<SelectItem value="paid">Paid Sessions</SelectItem>
 								<SelectItem value="today">Today</SelectItem>
 								<SelectItem value="week">This Week</SelectItem>
-								<SelectItem value="premium">Premium Only</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
 				</div>
 
 				<TabsContent value="pending" className="space-y-4">
-					{renderSessionRequestsList(requests ? requests.filter((req) => req.status === "pending") : [], "pending")}
+					{renderSessionRequestsList(requests, "pending")}
 				</TabsContent>
 
 				<TabsContent value="approved" className="space-y-4">
-					{renderSessionRequestsList(requests ? requests.filter((req) => req.status === "approved") : [], "approved")}
+					{renderSessionRequestsList(requests, "approved")}
 				</TabsContent>
 
 				<TabsContent value="rejected" className="space-y-4">
-					{renderSessionRequestsList(requests ? requests.filter((req) => req.status === "rejected") : [], "rejected")}
+					{renderSessionRequestsList(requests, "rejected")}
 				</TabsContent>
 			</Tabs>
 		</div>
