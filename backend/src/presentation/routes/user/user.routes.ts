@@ -7,8 +7,5 @@ userRouter.get("/:userId", async (req: Request, res: Response) => {
 	const userId = req.params.userId;
 	const mentor = await MentorProfileModel.findOne({ userId }).populate("userId");
 	if (!mentor || !mentor.userId) null;
-
-	console.log("mentor: ", mentor);
-
 	res.status(200).json(mentor);
 });

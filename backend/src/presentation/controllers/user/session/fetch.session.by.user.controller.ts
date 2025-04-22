@@ -7,8 +7,6 @@ export class FetchSessionByUserController {
 		try {
 			const userId = req.params.userId;
 			const sessions = await this.fetchSessionByUserUsecase.execute(userId);
-			console.log('sessions by userId: ', sessions);
-
 			res.status(200).json({ success: true, sessions });
 		} catch (error) {
 			if (error instanceof Error) {

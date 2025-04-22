@@ -7,6 +7,7 @@ export class FetchSessionsByUserUseCase implements IFetchSessionsByUserUseCase {
 	async execute(userId: string) {
 		if (!userId) throw new Error("User not found");
 		const sessions = await this.sessionRepo.fetchSessionsByUser(userId);
+		console.log('sessions: ', sessions);
 		
 		return sessions;
 	}

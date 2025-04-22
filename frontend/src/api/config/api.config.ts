@@ -12,7 +12,7 @@ const axiosInstance = axios.create({
 //Function to refresh the access token
 const refreshAccessToken = async () => {
 	try {
-		const response = await axios.post(`${baseURL}/refresh-token`, null, {
+		const response = await axios.post(`${baseURL}/user/refresh-token`, null, {
 			withCredentials: true, // include cookies in the request
 		});
 

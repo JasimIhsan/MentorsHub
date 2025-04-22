@@ -13,6 +13,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 export function MentorRequestsPage() {
 	const user = useSelector((state: RootState) => state.auth.user);
@@ -22,7 +23,8 @@ export function MentorRequestsPage() {
 		isOpen: boolean;
 		type: "approve" | "reject" | null;
 		requestId: string | null;
-	}>({ isOpen: false, type: null, requestId: null });
+		rejectReason: string;
+	}>({ isOpen: false, type: null, requestId: null, rejectReason: "" });
 	const [searchQuery, setSearchQuery] = useState("");
 	const [filterOption, setFilterOption] = useState<"all" | "free" | "paid" | "today" | "week">("all");
 
@@ -40,11 +42,11 @@ export function MentorRequestsPage() {
 	}, [user?.id]);
 
 	const handleApprove = (requestId: string) => {
-		setConfirmationDialog({ isOpen: true, type: "approve", requestId });
+		setConfirmationDialog({ isOpen: true, type: "approve", requestId, rejectReason: "" });
 	};
 
 	const handleReject = (requestId: string) => {
-		setConfirmationDialog({ isOpen: true, type: "reject", requestId });
+		setConfirmationDialog({ isOpen: true, type: "reject", requestId, rejectReason: "" });
 	};
 
 	const handleConfirmAction = async () => {
@@ -56,14 +58,34 @@ export function MentorRequestsPage() {
 				toast.success(response.data.message);
 				setRequests((prev) => prev.map((r) => (r.id === confirmationDialog.requestId ? { ...r, status: "approved" } : r)));
 			} else {
-				const response = await axiosInstance.put(`/mentor/sessions/${confirmationDialog.requestId}/status`, { status: "rejected" });
+				// Log the payload to verify rejectReason
+				const payload = {
+					status: "rejected",
+					rejectReason: confirmationDialog.rejectReason,
+				};
+				console.log("Reject Payload:", payload);
+
+				// Ensure rejectReason is not empty
+				if (!confirmationDialog.rejectReason.trim()) {
+					toast.error("Please provide a reason for rejection.");
+					return;
+				}
+
+				const response = await axiosInstance.put(`/mentor/sessions/${confirmationDialog.requestId}/status`, payload);
 				toast.success(response.data.message);
-				setRequests((prev) => prev.map((r) => (r.id === confirmationDialog.requestId ? { ...r, status: "rejected" } : r)));
+				setRequests((prev) => prev.map((r) => (r.id === confirmationDialog.requestId ? { ...r, status: "rejected", rejectReason: confirmationDialog.rejectReason } : r)));
 			}
-		} catch (error) {
-			console.error(`Failed to ${confirmationDialog.type} request`, error);
+		} catch (error: any) {
+			// Log the error for debugging
+			console.error(`Failed to ${confirmationDialog.type} request:`, error.response?.data || error.message);
+			toast.error(`Failed to ${confirmationDialog.type} request: ${error.response?.data?.message || "Unknown error"}`);
 		} finally {
-			setConfirmationDialog({ isOpen: false, type: null, requestId: null });
+			setConfirmationDialog({
+				isOpen: false,
+				type: null,
+				requestId: null,
+				rejectReason: "",
+			});
 		}
 	};
 
@@ -283,17 +305,32 @@ export function MentorRequestsPage() {
 					</DialogContent>
 				</Dialog>
 
-				<Dialog open={confirmationDialog.isOpen} onOpenChange={() => setConfirmationDialog({ isOpen: false, type: null, requestId: null })}>
+				<Dialog open={confirmationDialog.isOpen} onOpenChange={() => setConfirmationDialog({ isOpen: false, type: null, requestId: null, rejectReason: "" })}>
 					<DialogContent className="max-w-md">
 						<DialogHeader>
 							<DialogTitle>{confirmationDialog.type === "approve" ? "Confirm Approval" : "Confirm Rejection"}</DialogTitle>
-							<DialogDescription>{confirmationDialog.type === "approve" ? "Are you sure you want to approve this session request?" : "Are you sure you want to reject this session request?"}</DialogDescription>
+							<DialogDescription>{confirmationDialog.type === "approve" ? "Are you sure you want to approve this session request?" : "Please provide a reason for rejecting this session request."}</DialogDescription>
 						</DialogHeader>
+						{confirmationDialog.type === "reject" && (
+							<div className="py-4">
+								<Textarea
+									placeholder="Enter reason for rejection"
+									value={confirmationDialog.rejectReason}
+									onChange={(e) =>
+										setConfirmationDialog((prev) => {
+											console.log("Updated rejectReason:", e.target.value); // Debug log
+											return { ...prev, rejectReason: e.target.value };
+										})
+									}
+									className="w-full"
+								/>
+							</div>
+						)}
 						<DialogFooter>
-							<Button variant="outline" onClick={() => setConfirmationDialog({ isOpen: false, type: null, requestId: null })}>
+							<Button variant="outline" onClick={() => setConfirmationDialog({ isOpen: false, type: null, requestId: null, rejectReason: "" })}>
 								Cancel
 							</Button>
-							<Button variant={confirmationDialog.type === "approve" ? "default" : "destructive"} onClick={handleConfirmAction}>
+							<Button variant={confirmationDialog.type === "approve" ? "default" : "destructive"} onClick={handleConfirmAction} disabled={confirmationDialog.type === "reject" && !confirmationDialog.rejectReason.trim()}>
 								{confirmationDialog.type === "approve" ? "Approve" : "Reject"}
 							</Button>
 						</DialogFooter>

@@ -11,6 +11,7 @@ interface BaseSession {
 	status: SessionStatus;
 	paymentStatus?: "pending" | "completed" | "failed";
 	pricing: "free" | "paid";
+	rejectReason?: string;
 	paymentId?: string;
 	totalAmount?: number;
 	createdAt: string;

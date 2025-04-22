@@ -14,6 +14,7 @@ export interface ISessionInterface {
 	status: "upcoming" | "completed" | "canceled" | "approved" | "pending";
 	paymentStatus?: "pending" | "completed" | "failed";
 	pricing: "free" | "paid" | "both-pricing";
+	rejectReason?: string;
 	paymentId?: string;
 	totalAmount?: number;
 	createdAt?: Date;
@@ -33,6 +34,7 @@ export class SessionEntity {
 	private status: "upcoming" | "completed" | "canceled" | "approved" | "pending";
 	private paymentStatus?: "pending" | "completed" | "failed";
 	private pricing: "free" | "paid" | "both-pricing";
+	private rejectReason?: string;
 	private paymentId?: string;
 	private totalAmount?: number;
 	private createdAt: Date;
@@ -52,6 +54,7 @@ export class SessionEntity {
 		this.paymentStatus = session.paymentStatus;
 		this.paymentId = session.paymentId;
 		this.pricing = session.pricing;
+		this.rejectReason = session.rejectReason;
 		this.totalAmount = session.totalAmount;
 		this.createdAt = session.createdAt || new Date();
 	}
@@ -79,6 +82,7 @@ export class SessionEntity {
 			message: doc.message,
 			status: doc.status,
 			pricing: doc.pricing,
+			rejectReason: doc.rejectReason,
 			paymentStatus: doc.paymentStatus,
 			paymentId: doc.paymentId,
 			totalAmount: doc.totalAmount,

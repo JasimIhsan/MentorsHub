@@ -16,6 +16,7 @@ import { BecomeMentorUseCase } from "./user-profile/become.mentor.application.us
 import { FetchUserProfileUseCase } from "./user-profile/fetch.user.profile.usecase";
 import { RequestSessionUseCase } from "./session/create.session.usecase";
 import { FetchSessionsByUserUseCase } from "./session/fetch.sessions.by.user.usecase";
+import { PaySessionUseCase } from "./session/pay.session.usecase";
 
 // Initialize UseCases
 export const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
@@ -35,3 +36,4 @@ export const fetchUserProfileUsecase = new FetchUserProfileUseCase(userRepositor
 export const requestSessionUsecase = new RequestSessionUseCase(sessionRepository, mentorRepository);
 export const fetchSessionsByUserUsecase = new FetchSessionsByUserUseCase(sessionRepository);
 export const fetchSessionByMentorUsecase = new FetchSessionsByUserUseCase(sessionRepository);
+export const paySessionUsecase = new PaySessionUseCase(sessionRepository);

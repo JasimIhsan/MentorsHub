@@ -104,7 +104,7 @@ export function RequestSessionPage() {
 			const response = await axiosInstance.post("/user/sessions/create-session", requestData);
 			if (response.data.success) {
 				toast.success(response.data.message || "Session request submitted successfully! Awaiting mentor approval.");
-				navigate("/request-confirmation", { state: { requestData } });
+				// navigate("/request-confirmation", { state: { requestData } });
 			} else {
 				console.error("Session creation failed:", response.data);
 				toast.error(response.data.message || "Failed to submit session request. Please try again.");
