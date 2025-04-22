@@ -7,8 +7,6 @@ const userRepo = new UserRepositoryImpl();
 
 export const checkUserStatus = (req: Request, res: Response, next: NextFunction) => {
 	const user = req.user as UserEntity;
-	console.log("user: ", user);
-
 	if (user.getStatus() === "blocked") {
 		console.log(`is blocked`);
 		res.status(403).json({ success: false, blocked: true, message: "Your account is blocked. Please contact support" });

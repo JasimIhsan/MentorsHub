@@ -115,7 +115,7 @@ export function SessionsPage() {
 		pending: "Pending Sessions",
 		rejected: "Rejected Sessions",
 	};
-
+	
 	return (
 		<div className="w-full py-8 px-10 md:px-20 xl:px-25">
 			<div className="flex flex-col gap-8">
@@ -397,7 +397,7 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 												</Button>
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="end" className="max-w-xs">
-												<div className="p-2 text-sm">{session.rejectReaseon || "No rejection reason provided."}</div>
+												<div className="p-2 text-sm">{session.rejectReason || "No rejection reason provided."}</div>
 											</DropdownMenuContent>
 										</DropdownMenu>
 										<Button variant="outline" asChild>

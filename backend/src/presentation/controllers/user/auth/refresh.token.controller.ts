@@ -7,6 +7,7 @@ export class RefreshTokenController {
 
 	async handle(req: Request, res: Response) {
 		const user = req.user as Payload;
+		console.log('user: ', user);
 		const newAccessToken = this.refreshUsecase.execute(user.userId, user.isAdmin as boolean);
 		res.clearCookie("access_token");
 		res.cookie("access_token", newAccessToken, { httpOnly: true, secure: true, sameSite: "strict", maxAge: 60 * 5 * 1000 });

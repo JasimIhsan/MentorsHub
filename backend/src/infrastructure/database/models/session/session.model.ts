@@ -13,6 +13,7 @@ export interface ISessionDocument extends Document {
 	message: string;
 	status: "upcoming" | "completed" | "canceled" | "approved" | "pending";
 	paymentStatus?: "pending" | "completed" | "failed";
+	rejectReason?: string;
 	pricing: "free" | "paid";
 	paymentId?: string;
 	totalAmount?: number;
@@ -45,6 +46,7 @@ const SessionRequestSchema: Schema = new Schema<ISessionDocument>(
 			enum: ["free", "paid"],
 			default: "free",
 		},
+		rejectReason: { type: String },
 		paymentId: { type: String },
 		totalAmount: { type: Number },
 	},

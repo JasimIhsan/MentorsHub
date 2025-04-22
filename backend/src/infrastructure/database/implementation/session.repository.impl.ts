@@ -37,6 +37,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 				message: session.message,
 				status: session.status,
 				paymentStatus: session.paymentStatus,
+				rejectReason: session.rejectReason,
 				pricing: session.pricing,
 				paymentId: session.paymentId,
 				totalAmount: session.totalAmount,
@@ -69,6 +70,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 				message: session.message,
 				status: session.status,
 				paymentStatus: session.paymentStatus,
+				rejectReason: session.rejectReason,
 				pricing: session.pricing,
 				paymentId: session.paymentId,
 				totalAmount: session.totalAmount,
@@ -80,9 +82,9 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async updateRequestStatus(sessionId: string, status: string): Promise<void> {
+	async updateRequestStatus(sessionId: string, status: string, rejectReason?: string): Promise<void> {
 		try {
-			await SessionModel.findByIdAndUpdate(sessionId, { status }, { new: true });
+			await SessionModel.findByIdAndUpdate(sessionId, { status, rejectReason }, { new: true });
 		} catch (error) {
 			return handleError(error, "Error updating session request status");
 		}
@@ -90,7 +92,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 
 	async paySession(sessionId: string, paymentId: string, paymentStatus: string, status: string): Promise<void> {
 		try {
-			await SessionModel.findByIdAndUpdate(sessionId, { paymentId, paymentStatus , status}, { new: true });
+			await SessionModel.findByIdAndUpdate(sessionId, { paymentId, paymentStatus, status }, { new: true });
 		} catch (error) {
 			return handleError(error, "Error updating session payment status");
 		}

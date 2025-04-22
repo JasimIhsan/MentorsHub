@@ -13,7 +13,7 @@ interface BaseSession {
 	pricing: "free" | "paid";
 	paymentId?: string;
 	totalAmount?: number;
-	rejectReaseon?: string;
+	rejectReason?: string;
 	createdAt: string;
 }
 

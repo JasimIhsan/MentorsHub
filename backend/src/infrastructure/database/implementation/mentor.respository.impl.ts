@@ -12,7 +12,6 @@ const handleError = (error: unknown, message: string): never => {
 
 export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 	async findByUserId(userId: string): Promise<MentorProfileEntity | null> {
-		console.log("userId in repository: ", userId);
 		try {
 			const result = await MentorProfileModel.findOne({ userId });
 			return result ? MentorProfileEntity.fromDBDocument(result) : null;
@@ -149,7 +148,6 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			const mentor = await MentorProfileModel.findOne({ userId }).populate("userId");
 			if (!mentor || !mentor.userId) return null;
 
-			console.log("mentor: ", mentor);
 
 			const user = mentor.userId as any;
 
