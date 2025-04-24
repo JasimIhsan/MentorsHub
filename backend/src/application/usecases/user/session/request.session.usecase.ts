@@ -1,21 +1,22 @@
 import { v4 as uuidv4 } from "uuid";
-import { IMentorProfileRepository } from "../../../../domain/dbrepository/mentor.details.repository";
 import { ISessionRepository } from "../../../../domain/dbrepository/session.repository";
-import { SessionEntity } from "../../../../domain/entities/session.entity";
+import { IMentorProfileRepository } from "../../../../domain/dbrepository/mentor.details.repository";
+import { ISessionParticipantDTO, SessionEntity } from "../../../../domain/entities/session.entity";
 import { IRequestSessionUseCase } from "../../../interfaces/session";
+import { SessionFormat, SessionPaymentStatus, PricingType, SessionStatus } from "../../../../infrastructure/database/models/session/session.model";
 
 export interface SessionDTO {
 	mentorId: string;
 	userId: string;
 	topic: string;
 	sessionType: string;
-	sessionFormat: string;
+	sessionFormat: SessionFormat;
 	date: Date;
 	time: string;
 	hours: number;
 	message: string;
 	totalAmount: number;
-	pricing: "free" | "paid" | "both-pricing";
+	pricing: PricingType;
 }
 
 export class RequestSessionUseCase implements IRequestSessionUseCase {
@@ -23,27 +24,31 @@ export class RequestSessionUseCase implements IRequestSessionUseCase {
 
 	async execute(data: SessionDTO) {
 		const mentor = await this.mentorRepo.findMentorByUserId(data.mentorId);
-		if (!mentor) throw new Error("Mentor not found");
-
-		let paymentStatus: "pending" | "completed" = "pending";
-		if (data.pricing === "free") {
-			paymentStatus = "completed";
+		if (!mentor) {
+			throw new Error("Mentor not found");
 		}
+		let userPaymentStatus: SessionPaymentStatus = data.pricing === "free" ? "completed" : "pending";
+
+		const participants = [
+			{
+				userId: data.userId,
+				paymentStatus: userPaymentStatus,
+			},
+		];
 
 		const sessionEntity = new SessionEntity({
+			participants: participants as ISessionParticipantDTO[],
 			mentorId: data.mentorId,
-			userId: data.userId,
 			topic: data.topic,
 			sessionType: data.sessionType,
-			sessionFormat: data.sessionFormat,
+			sessionFormat: "one-on-one",
 			date: data.date,
 			time: data.time,
 			hours: data.hours,
 			message: data.message,
 			status: "pending",
-			paymentStatus: paymentStatus,
-			totalAmount: data.totalAmount,
 			pricing: data.pricing,
+			totalAmount: data.totalAmount,
 			createdAt: new Date(),
 		});
 

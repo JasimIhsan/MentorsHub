@@ -1,6 +1,6 @@
 import { SessionEntity } from "../../domain/entities/session.entity";
 import { ISessionUserDTO } from "../dtos/session.dto";
-import { SessionDTO } from "../usecases/user/session/create.session.usecase";
+import { SessionDTO } from "../usecases/user/session/request.session.usecase";
 
 export interface IRequestSessionUseCase {
 	execute(data: SessionDTO): Promise<SessionEntity>;
@@ -15,5 +15,5 @@ export interface IUpdateRequestStatusUseCase {
 }
 
 export interface IPaySessionUseCase {
-	execute(sessionId: string, paymentId: string, paymentStatus: string, status: string): Promise<void>;
+	execute(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void>;
 }

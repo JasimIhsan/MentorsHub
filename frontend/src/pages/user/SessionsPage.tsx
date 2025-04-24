@@ -115,6 +115,8 @@ export function SessionsPage() {
 		pending: "Pending Sessions",
 		rejected: "Rejected Sessions",
 	};
+
+	console.log(`sessions  : `, sortedSessions);
 	
 	return (
 		<div className="w-full py-8 px-10 md:px-20 xl:px-25">
@@ -206,8 +208,10 @@ interface SessionCardProps {
 }
 
 function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayLoaded }: SessionCardProps) {
+	console.log('session in card: ', session);
 	const [isPaying, setIsPaying] = useState(false);
 	const [isReasonOpen, setIsReasonOpen] = useState(false); // State for hover dropdown
+	const user = useSelector((state: RootState) => state.auth.user);
 
 	const type = session.status;
 
@@ -232,6 +236,7 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 					try {
 						const paymentResponse = await axiosInstance.put("/user/sessions/pay", {
 							sessionId: session.id,
+							userId: user?.id,
 							paymentId: response.razorpay_payment_id,
 							paymentStatus: "completed",
 							status: "upcoming",

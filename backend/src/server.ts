@@ -18,10 +18,21 @@ import { mentorApplicationRouter } from "./presentation/routes/admin/admin.mento
 import { sessionRouter } from "./presentation/routes/user/session.routes";
 import { mentorSessionRouter } from "./presentation/routes/mentors/mentor.session.routes";
 import { userSideMentorRouter } from "./presentation/routes/user/user.side.mentor.routes";
+import { socketIoRouter } from "./presentation/routes/socket.io/socket.io.routes";
+import http from "http";
+import { Server } from "socket.io";
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+	cors: {
+		origin: "http://localhost:5173",
+		methods: ["GET", "POST"],
+		credentials: true
+	}
+})
 
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
@@ -46,14 +57,15 @@ app.use("/api/user", authRouter);
 app.use("/api/user/auth", googleAuthRouter);
 app.use("/api/user/user-profile", userProfileRoutes);
 app.use("/api/user/sessions", sessionRouter);
-app.use('/api/user/mentor', userSideMentorRouter)
+app.use("/api/user/mentor", userSideMentorRouter);
 
 app.use("/api/admin", adminAuthRouter);
 app.use("/api/admin/users", usertabRouter);
 app.use("/api/admin/mentor-application", mentorApplicationRouter);
 
 app.use("/api/mentor", mentorRouter);
-app.use('/api/mentor/sessions', mentorSessionRouter)
+app.use("/api/mentor/sessions", mentorSessionRouter);
+app.use("/socket.io", socketIoRouter);
 
 app.listen(process.env.PORT, () => {
 	console.log(` Server is running  : ✅✅✅`);

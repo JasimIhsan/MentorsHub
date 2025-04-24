@@ -16,6 +16,7 @@ import { CheckoutPage } from "@/pages/user/CheckoutPage";
 // import { PaymentConfirmationPage } from "@/pages/user/PaymentConfirmationPage";
 import { RequestConfirmationPage } from "@/pages/user/RequestConfirmationPage";
 import { SessionsPage } from "@/pages/user/SessionsPage";
+import { VideoCallPage } from "@/pages/user/VideoCallPage";
 
 const UserRoutes = () => {
 	return (
@@ -121,6 +122,8 @@ const UserRoutes = () => {
 
 				<Route path="*" element={<PageNotFound />} />
 			</Route>
+
+			<Route path="/video-call" element={<VideoCallPage />} />
 		</Routes>
 	);
 };

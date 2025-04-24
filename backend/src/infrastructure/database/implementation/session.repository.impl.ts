@@ -1,14 +1,21 @@
-import { session } from "passport";
 import { ISessionRepository } from "../../../domain/dbrepository/session.repository";
 import { SessionModel } from "../models/session/session.model";
 import { SessionEntity } from "../../../domain/entities/session.entity";
 import { handleError } from "./user.repository.impl";
-import { ISessionUserDTO } from "../../../application/dtos/session.dto";
+import { ISessionUserDTO, ISessionMentorDTO } from "../../../application/dtos/session.dto";
+import mongoose from "mongoose";
 
 export class SessionRepositoryImpl implements ISessionRepository {
 	async createSession(session: SessionEntity): Promise<SessionEntity> {
 		try {
-			const newSession = new SessionModel(session);
+			const newSession = new SessionModel({
+				...session,
+				participants: session.getParticipants().map((participant) => ({
+					userId: participant.userId,
+					paymentStatus: participant.paymentStatus,
+					paymentId: participant.paymentId,
+				})),
+			});
 			const savedSession = await newSession.save();
 			return SessionEntity.fromDBDocument(savedSession);
 		} catch (error) {
@@ -18,65 +25,18 @@ export class SessionRepositoryImpl implements ISessionRepository {
 
 	async fetchSessionsByUser(userId: string): Promise<ISessionUserDTO[]> {
 		try {
-			const sessions = await SessionModel.find({ userId }).populate("mentorId", "firstName lastName avatar");
-			const sessionDTOs: ISessionUserDTO[] = sessions.map((session) => ({
-				id: session._id.toString(),
-				mentor: {
-					_id: session.mentorId._id.toString(),
-					firstName: (session.mentorId as any).firstName,
-					lastName: (session.mentorId as any).lastName,
-					avatar: (session.mentorId as any).avatar,
-				},
-				userId: session.userId.toString(),
-				topic: session.topic,
-				sessionType: session.sessionType,
-				sessionFormat: session.sessionFormat,
-				date: session.date.toISOString(),
-				time: session.time,
-				hours: session.hours,
-				message: session.message,
-				status: session.status,
-				paymentStatus: session.paymentStatus,
-				rejectReason: session.rejectReason,
-				pricing: session.pricing,
-				paymentId: session.paymentId,
-				totalAmount: session.totalAmount,
-				createdAt: session.createdAt.toISOString(),
-			}));
-			return sessionDTOs;
+			const sessions = await SessionModel.find({ "participants.userId": userId }).populate("participants.userId", "firstName lastName avatar").populate("mentorId", "firstName lastName avatar");
+			return sessions.map((session) => this.mapSessionToUserDTO(session, userId));
 		} catch (error) {
 			return handleError(error, "Error fetching sessions by user");
 		}
 	}
 
-	async fetchSessionRequestByMentor(mentorId: string): Promise<any[]> {
+	async fetchSessionRequestByMentor(mentorId: string): Promise<ISessionMentorDTO[]> {
 		try {
-			const sessions = await SessionModel.find({ mentorId }).populate("userId", "firstName lastName avatar");
-			const sessionDTOs = sessions.map((session) => ({
-				id: session._id.toString(),
-				mentor: session.mentorId.toString(),
-				userId: {
-					_id: session.userId._id.toString(),
-					firstName: (session.userId as any).firstName,
-					lastName: (session.userId as any).lastName,
-					avatar: (session.userId as any).avatar,
-				},
-				topic: session.topic,
-				sessionType: session.sessionType,
-				sessionFormat: session.sessionFormat,
-				date: session.date.toISOString(),
-				time: session.time,
-				hours: session.hours,
-				message: session.message,
-				status: session.status,
-				paymentStatus: session.paymentStatus,
-				rejectReason: session.rejectReason,
-				pricing: session.pricing,
-				paymentId: session.paymentId,
-				totalAmount: session.totalAmount,
-				createdAt: session.createdAt.toISOString(),
-			}));
-			return sessionDTOs;
+			const sessions = await SessionModel.find({ mentorId }).populate("participants.userId", "firstName lastName avatar");
+
+			return sessions.map(this.mapSessionToMentorDTO);
 		} catch (error) {
 			return handleError(error, "Error fetching session requests by mentor");
 		}
@@ -84,17 +44,91 @@ export class SessionRepositoryImpl implements ISessionRepository {
 
 	async updateRequestStatus(sessionId: string, status: string, rejectReason?: string): Promise<void> {
 		try {
-			await SessionModel.findByIdAndUpdate(sessionId, { status, rejectReason }, { new: true });
+			const updatedSession = await SessionModel.findByIdAndUpdate(sessionId, { status, rejectReason }, { new: true });
+			if (!updatedSession) throw new Error("Session not found");
 		} catch (error) {
 			return handleError(error, "Error updating session request status");
 		}
 	}
 
-	async paySession(sessionId: string, paymentId: string, paymentStatus: string, status: string): Promise<void> {
+	async paySession(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void> {
+		console.log("status: ", status);
+		console.log("paymentStatus: ", paymentStatus);
+		console.log("paymentId: ", paymentId);
+		console.log("userId: ", userId);
+		console.log("sessionId: ", sessionId);
 		try {
-			await SessionModel.findByIdAndUpdate(sessionId, { paymentId, paymentStatus, status }, { new: true });
+			const updatedSession = await SessionModel.findOneAndUpdate(
+				{ _id: sessionId, "participants.userId": userId },
+				{
+					$set: {
+						"participants.$.paymentId": paymentId,
+						"participants.$.paymentStatus": paymentStatus,
+						status: status,
+					},
+				},
+				{ new: true }
+			);
+			console.log("updatedSession: ", updatedSession);
+			if (!updatedSession) throw new Error("Session or participant not found");
 		} catch (error) {
 			return handleError(error, "Error updating session payment status");
 		}
+	}
+
+	private mapSessionToUserDTO(session: any, userId: string): ISessionUserDTO {
+		const participant = session.participants.find((p: any) => p.userId._id?.toString?.() === userId || p.userId?.toString() === userId);
+
+		return {
+			id: session._id.toString(),
+			mentor: {
+				_id: session.mentorId._id.toString(),
+				firstName: session.mentorId.firstName,
+				lastName: session.mentorId.lastName,
+				avatar: session.mentorId.avatar,
+			},
+			userId: participant?.userId._id?.toString() || participant?.userId?.toString(),
+			topic: session.topic,
+			sessionType: session.sessionType,
+			sessionFormat: session.sessionFormat,
+			date: session.date.toISOString(),
+			time: session.time,
+			hours: session.hours,
+			message: session.message,
+			status: session.status,
+			paymentStatus: participant?.paymentStatus,
+			paymentId: participant?.paymentId,
+			rejectReason: session.rejectReason,
+			pricing: session.pricing,
+			totalAmount: session.totalAmount,
+			createdAt: session.createdAt.toISOString(),
+		};
+	}
+
+	private mapSessionToMentorDTO(session: any): ISessionMentorDTO {
+		return {
+			id: session._id.toString(),
+			mentor: session.mentorId.toString(),
+			userId: {
+				_id: session.participants?.userId._id?.toString() || session.participants?.userId.toString(),
+				firstName: session.participants?.userId.firstName,
+				lastName: session.participants?.userId.lastName,
+				avatar: session.participants?.userId.avatar,
+			},
+			topic: session.topic,
+			sessionType: session.sessionType,
+			sessionFormat: session.sessionFormat,
+			date: session.date.toISOString(),
+			time: session.time,
+			hours: session.hours,
+			message: session.message,
+			status: session.status,
+			paymentStatus: session.participants?.paymentStatus,
+			paymentId: session.participants?.paymentId,
+			rejectReason: session.rejectReason,
+			pricing: session.pricing,
+			totalAmount: session.totalAmount,
+			createdAt: session.createdAt.toISOString(),
+		};
 	}
 }
