@@ -9,10 +9,10 @@ interface BaseSession {
 	hours: number;
 	message: string;
 	status: SessionStatus;
-	paymentStatus?: "pending" | "completed" | "failed";
+	paymentStatus?: "pending" | "completed" | "failed"; // (can be removed if moved to participant level)
 	pricing: "free" | "paid";
 	rejectReason?: string;
-	paymentId?: string;
+	paymentId?: string; // (can be removed if moved to participant level)
 	totalAmount?: number;
 	createdAt: string;
 }
@@ -27,6 +27,11 @@ interface Person {
 export interface MentorInfo extends Person {}
 export interface Mentee extends Person {}
 
+export interface SessionParticipant extends Mentee {
+	paymentStatus?: "pending" | "completed" | "failed";
+	paymentId?: string;
+}
+
 export interface ISessionUserDTO extends BaseSession {
 	id: string;
 	mentor: MentorInfo;
@@ -36,5 +41,5 @@ export interface ISessionUserDTO extends BaseSession {
 export interface ISessionMentorDTO extends BaseSession {
 	id: string;
 	mentor: string;
-	userId: Mentee;
+	participants: SessionParticipant[];
 }

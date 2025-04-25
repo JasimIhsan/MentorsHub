@@ -6,7 +6,7 @@ export interface IMentorDTO {
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;
-	interests: object[] | null;
+	interests: string[] | null;
 	updatedAt: Date;
 	skills: string[] | null;
 	status: "blocked" | "unblocked";

@@ -16,6 +16,9 @@ import { fetchAllApprovedMentors } from "@/api/mentors.api.service";
 import { IMentorDTO } from "@/interfaces/mentor.application.dto";
 import { toast } from "sonner";
 import verified from "../../assets/verify.png";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { Loading } from "@/components/custom-ui/Loading";
 
 interface Mentor {
 	id: string;
@@ -39,6 +42,8 @@ export default function BrowseMentorsPage() {
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [mentors, setMentors] = useState<Mentor[]>([]);
+	const [loading, setLoading] = useState<boolean>(false);
+	const user = useSelector((state: RootState) => state.auth.user);
 	const mentorsPerPage = 6;
 
 	const handleInterestToggle = (value: string) => {
@@ -161,12 +166,12 @@ export default function BrowseMentorsPage() {
 
 	useEffect(() => {
 		const fetchMentors = async () => {
+			setLoading(true);
 			try {
 				const response = await fetchAllApprovedMentors();
-				console.log("response:", response);
-
 				if (response.success) {
-					const mappedMentors: Mentor[] = response.mentors.map((mentor: IMentorDTO) => ({
+					const fetchedMentors: IMentorDTO[] = response.mentors.filter((mentor: IMentorDTO) => mentor.userId !== user?.id);
+					const mappedMentors: Mentor[] = fetchedMentors.map((mentor: IMentorDTO) => ({
 						id: mentor.userId,
 						name: `${mentor.firstName} ${mentor.lastName}`,
 						title: mentor.professionalTitle,
@@ -174,21 +179,27 @@ export default function BrowseMentorsPage() {
 						rating: mentor.rating ?? null,
 						reviewCount: mentor.sessionCompleted ?? null,
 						joinDate: new Date(mentor.createdAt).toISOString(),
-						interests: Array.isArray(mentor.interests) ? mentor.interests : [],
-						rate: mentor.hourlyRate,
-						isVerified: mentor.isVerified ?? false, // Map isVerified
+						interests: Array.isArray(mentor.interests)
+							? mentor.interests.map(String) // Ensure all interests are strings
+							: [],
+						rate: Number(mentor.hourlyRate) || 0, // Convert to number
+						isVerified: mentor.isVerified ?? false,
 					}));
 					setMentors(mappedMentors);
 				}
 			} catch (error) {
 				console.error("Error fetching mentors:", error);
 				if (error instanceof Error) toast.error(error.message);
+			} finally {
+				setLoading(false);
 			}
 		};
 		fetchMentors();
-	}, []);
+	}, [user?.id]);
 
-	console.log("mentors:", mentors);
+	if (loading) {
+		return <Loading appName="Browse Mentors" loadingMessage="Loading mentors..." />;
+	}
 
 	return (
 		<div className="min-h-screen bg-background w-full px-10 md:px-20 xl:px-25 justify-center">

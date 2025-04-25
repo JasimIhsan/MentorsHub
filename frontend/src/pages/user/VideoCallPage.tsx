@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+// import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon, ScreenShareIcon, PhoneOffIcon, ListIcon, HandIcon, BrainIcon, StopCircleIcon, PinIcon, CrownIcon, X, CheckCircle, Circle, Disc } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import io, { Socket } from "socket.io-client";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { createPeerConnection } from "@/utility/webrtc";
+import { useParams } from "react-router-dom";
 
-// Participant interface for type safety
 interface Participant {
 	id: string;
 	name: string;
@@ -21,13 +23,13 @@ interface Participant {
 	peerConnection: RTCPeerConnection | null;
 }
 
-// WebRTC configuration
-const iceServers = [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }];
+// const iceServers = [
+//   { urls: "stun:stun.l.google.com:19302" },
+//   { urls: "stun:stun1.l.google.com:19302" },
+// ];
 
-// Mock Spinner component
 const Spinner = ({ size = "lg" }: { size?: "sm" | "md" | "lg" }) => <div className={`animate-spin rounded-full border-t-2 border-primary ${size === "lg" ? "h-12 w-12" : size === "md" ? "h-8 w-8" : "h-4 w-4"}`}></div>;
 
-// ControlBarProps interface
 interface ControlBarProps {
 	isMuted: boolean;
 	isVideoOn: boolean;
@@ -47,7 +49,6 @@ interface ControlBarProps {
 	onEndCall: () => void;
 }
 
-// ControlBar component
 function ControlBar({
 	isMuted,
 	isVideoOn,
@@ -81,7 +82,6 @@ function ControlBar({
 								<p>{isMuted ? "Unmute" : "Mute"}</p>
 							</TooltipContent>
 						</Tooltip>
-
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Button variant={isVideoOn ? "secondary" : "destructive"} size="icon" onClick={onToggleVideo} className="rounded-full h-12 w-12">
@@ -92,7 +92,6 @@ function ControlBar({
 								<p>{isVideoOn ? "Turn off camera" : "Turn on camera"}</p>
 							</TooltipContent>
 						</Tooltip>
-
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Button variant={isScreenSharing ? "destructive" : "secondary"} size="icon" onClick={onToggleScreenShare} className="rounded-full h-12 w-12">
@@ -104,9 +103,7 @@ function ControlBar({
 							</TooltipContent>
 						</Tooltip>
 					</div>
-
 					<div className="h-8 w-px bg-gray-200 mx-2"></div>
-
 					<div className="flex items-center gap-2">
 						<Tooltip>
 							<TooltipTrigger asChild>
@@ -118,7 +115,6 @@ function ControlBar({
 								<p>{isHandRaised ? "Lower hand" : "Raise hand"}</p>
 							</TooltipContent>
 						</Tooltip>
-
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Button variant={isSidebarOpen ? "default" : "secondary"} size="icon" onClick={onToggleSidebar} className="rounded-full h-10 w-10">
@@ -129,7 +125,6 @@ function ControlBar({
 								<p>{isSidebarOpen ? "Hide goals" : "Show goals"}</p>
 							</TooltipContent>
 						</Tooltip>
-
 						{isPremiumSession && (
 							<>
 								<Tooltip>
@@ -142,7 +137,6 @@ function ControlBar({
 										<p>{isAiNotesActive ? "Stop AI notes" : "Start AI notes"}</p>
 									</TooltipContent>
 								</Tooltip>
-
 								<Tooltip>
 									<TooltipTrigger asChild>
 										<Button variant={isRecording ? "destructive" : "secondary"} size="icon" onClick={onToggleRecording} className="rounded-full h-10 w-10">
@@ -156,9 +150,7 @@ function ControlBar({
 							</>
 						)}
 					</div>
-
 					<div className="h-8 w-px bg-gray-200 mx-2"></div>
-
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Button variant="destructive" size="icon" onClick={onEndCall} className="rounded-full h-12 w-12">
@@ -175,14 +167,12 @@ function ControlBar({
 	);
 }
 
-// GoalsSidebarProps interface
 interface GoalsSidebarProps {
 	goals: string[];
 	onClose: () => void;
 	isPremiumSession: boolean;
 }
 
-// GoalsSidebar component
 function GoalsSidebar({ goals, onClose, isPremiumSession }: GoalsSidebarProps) {
 	const [completedGoals, setCompletedGoals] = useState<number[]>([]);
 
@@ -201,7 +191,6 @@ function GoalsSidebar({ goals, onClose, isPremiumSession }: GoalsSidebarProps) {
 					<X className="h-4 w-4" />
 				</Button>
 			</div>
-
 			<div className="flex-1 overflow-y-auto p-4">
 				<ul className="space-y-3">
 					{goals.map((goal, index) => (
@@ -214,7 +203,6 @@ function GoalsSidebar({ goals, onClose, isPremiumSession }: GoalsSidebarProps) {
 					))}
 				</ul>
 			</div>
-
 			<div className="p-4 border-t border-gray-200">
 				<div className="text-sm text-gray-500">
 					{completedGoals.length} of {goals.length} goals completed
@@ -227,7 +215,6 @@ function GoalsSidebar({ goals, onClose, isPremiumSession }: GoalsSidebarProps) {
 	);
 }
 
-// VideoGridProps interface
 interface VideoGridProps {
 	participants: Participant[];
 	activeSpeakerId: string | null;
@@ -238,7 +225,6 @@ interface VideoGridProps {
 	userId: string;
 }
 
-// VideoGrid component
 function VideoGrid({ participants, activeSpeakerId, pinnedParticipantId, onPinParticipant, isPremiumSession, isMobile, userId }: VideoGridProps) {
 	const [gridLayout, setGridLayout] = useState<string>("");
 
@@ -291,7 +277,6 @@ function VideoGrid({ participants, activeSpeakerId, pinnedParticipantId, onPinPa
 						))}
 				</div>
 			)}
-
 			<div className={`grid ${gridLayout} ${pinnedParticipantId ? "h-[30vh]" : "h-full"}`}>
 				{sortedParticipants
 					.filter((p) => (pinnedParticipantId ? p.id !== pinnedParticipantId : true))
@@ -303,7 +288,6 @@ function VideoGrid({ participants, activeSpeakerId, pinnedParticipantId, onPinPa
 	);
 }
 
-// VideoTileProps interface
 interface VideoTileProps {
 	participant: Participant;
 	isPinned: boolean;
@@ -314,7 +298,6 @@ interface VideoTileProps {
 	className?: string;
 }
 
-// VideoTile component
 function VideoTile({ participant, isPinned, isActive, onPin, isPremiumSession, userId, className }: VideoTileProps) {
 	const [isHovered, setIsHovered] = useState(false);
 	const videoRef = useRef<HTMLVideoElement>(null);
@@ -340,7 +323,6 @@ function VideoTile({ participant, isPinned, isActive, onPin, isPremiumSession, u
 					</div>
 				)}
 			</div>
-
 			<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-3">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
@@ -348,7 +330,6 @@ function VideoTile({ participant, isPinned, isActive, onPin, isPremiumSession, u
 						{participant.isMuted && <MicOffIcon className="h-4 w-4 text-red-500" />}
 						{participant.isMentor && isPremiumSession && <CrownIcon className="h-4 w-4 text-yellow-400" />}
 					</div>
-
 					{(isHovered || isPinned) && (
 						<Button variant={isPinned ? "secondary" : "ghost"} size="icon" className="h-8 w-8 bg-black/40 hover:bg-black/60" onClick={onPin}>
 							<PinIcon className="h-4 w-4" />
@@ -360,10 +341,10 @@ function VideoTile({ participant, isPinned, isActive, onPin, isPremiumSession, u
 	);
 }
 
-// VideoCallInterface component
 function VideoCallInterface() {
+	const { sessionId } = useParams<{ sessionId: string }>();
 	const [participants, setParticipants] = useState<Participant[]>([]);
-	const [activeSpeakerId, setActiveSpeakerId] = useState<string | null>(null);
+	const [activeSpeakerId, _setActiveSpeakerId] = useState<string | null>(null);
 	const [pinnedParticipantId, setPinnedParticipantId] = useState<string | null>(null);
 	const [isMuted, setIsMuted] = useState(false);
 	const [isVideoOn, setIsVideoOn] = useState(true);
@@ -372,169 +353,200 @@ function VideoCallInterface() {
 	const [isRecording, setIsRecording] = useState(false);
 	const [isAiNotesActive, setIsAiNotesActive] = useState(false);
 	const [isHandRaised, setIsHandRaised] = useState(false);
-	const [sessionGoals, setSessionGoals] = useState<string[]>([]);
+	const [sessionGoals, _setSessionGoals] = useState<string[]>(["Discuss project goals", "Review timeline", "Assign tasks"]);
 	const [isMobile, setIsMobile] = useState(false);
-	const user = useSelector((state: RootState) => state.auth.user);
+	const [isJoined, setIsJoined] = useState(false);
+	const [isWaitingApproval, setIsWaitingApproval] = useState(false);
+	const [isSessionStarted, setIsSessionStarted] = useState(false);
 
+	const user = useSelector((state: RootState) => state.auth.user);
 	const localStreamRef = useRef<MediaStream | null>(null);
 	const socketRef = useRef<Socket | null>(null);
-	const roomId = "session-123"; // Replace with dynamic room ID (e.g., from URL or API)
-	const userId = user?.id || "";
+	const userId = user?.id || "user-" + Math.random().toString(36).substring(2, 9);
+	const userName = user?.firstName + " " + user?.lastName || "Guest";
 	const isPremiumSession = true;
 
 	useEffect(() => {
 		socketRef.current = io("http://localhost:5858", { withCredentials: true });
 
-		const initializeStream = async () => {
+		socketRef.current.on("connect", () => {
+			console.log("Connected to socket server:", socketRef.current?.id);
+		});
+
+		socketRef.current.on("session-started", ({ sessionId: startedSessionId }) => {
+			if (startedSessionId === sessionId) {
+				setIsSessionStarted(true);
+				toast.info("Session has started! Requesting to join...");
+				requestToJoin();
+			}
+		});
+
+		socketRef.current.on("approve-join", () => {
+			setIsWaitingApproval(false);
+			joinRoom();
+			toast.success("You have been approved to join the session!");
+		});
+
+		socketRef.current.on("reject-join", () => {
+			setIsWaitingApproval(false);
+			setIsJoined(false);
+			toast.error("Your join request was rejected.");
+		});
+
+		socketRef.current.on("user-joined", async (remoteUserId: string, userData: { name: string; isMentor: boolean }) => {
+			if (!localStreamRef.current || remoteUserId === socketRef.current?.id) return;
+
+			const pc = createPeerConnection(socketRef.current!, remoteUserId, localStreamRef.current, (id, stream) => {
+				setParticipants((prev) => prev.map((p) => (p.id === id ? { ...p, stream, isVideoOn: stream.getVideoTracks().length > 0 } : p)));
+			});
+
+			setParticipants((prev) => [
+				...prev,
+				{
+					id: remoteUserId,
+					name: userData.name,
+					isMuted: true,
+					isVideoOn: false,
+					isScreenSharing: false,
+					isMentor: userData.isMentor,
+					avatarUrl: "",
+					stream: null,
+					peerConnection: pc,
+				},
+			]);
+
 			try {
-				localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-					video: true,
-					audio: true,
-				});
-				setParticipants([
-					{
-						id: userId,
-						name: "You",
-						isMuted: false,
-						isVideoOn: true,
-						isScreenSharing: false,
-						isMentor: true,
-						avatarUrl: user?.avatar as string,
-						stream: localStreamRef.current,
-						peerConnection: null,
-					},
-				]);
+				const offer = await pc.createOffer();
+				await pc.setLocalDescription(offer);
+				socketRef.current?.emit("send-offer", { target: remoteUserId, offer });
 			} catch (error) {
-				console.error("Error accessing media devices:", error);
-				toast.error("Failed to access camera or microphone");
-			}
-		};
-
-		initializeStream();
-
-		socketRef.current.emit("join-room", { roomId, userId });
-
-		socketRef.current.on("user-connected", ({ userId: newUserId }) => {
-			if (newUserId !== userId) {
-				const peerConnection = createPeerConnection(newUserId);
-				addLocalStreamToPeerConnection(peerConnection);
-				setParticipants((prev) => [
-					...prev,
-					{
-						id: newUserId,
-						name: `User ${newUserId}`,
-						isMuted: false,
-						isVideoOn: true,
-						isScreenSharing: false,
-						isMentor: false,
-						avatarUrl: "/placeholder.svg",
-						stream: null,
-						peerConnection,
-					},
-				]);
-				createOffer(peerConnection, newUserId);
+				console.error("Error creating offer:", error);
+				toast.error("Failed to initiate connection with new user");
 			}
 		});
 
-		socketRef.current.on("room-users", ({ users }) => {
-			setParticipants((prev) =>
-				prev
-					.filter((p) => p.id === userId)
-					.concat(
-						users
-							.filter((id: string) => id !== userId)
-							.map((id: string) => ({
-								id,
-								name: `User ${id}`,
-								isMuted: false,
-								isVideoOn: true,
-								isScreenSharing: false,
-								isMentor: false,
-								avatarUrl: "/placeholder.svg",
-								stream: null,
-								peerConnection: null,
-							}))
-					)
-			);
-		});
+		socketRef.current.on("receive-offer", async ({ sender, offer }) => {
+			if (!localStreamRef.current) return;
 
-		socketRef.current.on("offer", async ({ offer, fromUserId }) => {
-			const peerConnection = createPeerConnection(fromUserId);
-			await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-			addLocalStreamToPeerConnection(peerConnection);
-			const answer = await peerConnection.createAnswer();
-			await peerConnection.setLocalDescription(answer);
-			socketRef.current?.emit("answer", { roomId, answer, toUserId: fromUserId });
-			setParticipants((prev) => prev.map((p) => (p.id === fromUserId ? { ...p, peerConnection } : p)));
-		});
+			const pc = createPeerConnection(socketRef.current!, sender, localStreamRef.current, (id, stream) => {
+				setParticipants((prev) => prev.map((p) => (p.id === id ? { ...p, stream, isVideoOn: stream.getVideoTracks().length > 0 } : p)));
+			});
 
-		socketRef.current.on("answer", async ({ answer }) => {
-			const participant = participants.find((p) => p.peerConnection?.localDescription);
-			if (participant?.peerConnection) {
-				await participant.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+			setParticipants((prev) => [
+				...prev,
+				{
+					id: sender,
+					name: `User退休 ${sender.slice(0, 4)}`,
+					isMuted: true,
+					isVideoOn: false,
+					isScreenSharing: false,
+					isMentor: false,
+					avatarUrl: "",
+					stream: null,
+					peerConnection: pc,
+				},
+			]);
+
+			try {
+				await pc.setRemoteDescription(new RTCSessionDescription(offer));
+				const answer = await pc.createAnswer();
+				await pc.setLocalDescription(answer);
+				socketRef.current?.emit("send-answer", { target: sender, answer });
+			} catch (error) {
+				console.error("Error handling offer:", error);
+				toast.error("Failed to process connection offer");
 			}
 		});
 
-		socketRef.current.on("ice-candidate", async ({ candidate }) => {
-			const participant = participants.find((p) => p.peerConnection);
-			if (participant?.peerConnection && candidate) {
-				await participant.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+		socketRef.current.on("receive-answer", async ({ sender, answer }) => {
+			const pc = participants.find((p) => p.id === sender)?.peerConnection;
+			if (pc) {
+				try {
+					await pc.setRemoteDescription(new RTCSessionDescription(answer));
+				} catch (error) {
+					console.error("Error setting remote description:", error);
+				}
 			}
 		});
 
-		socketRef.current.on("user-disconnected", ({ userId: disconnectedUserId }) => {
-			setParticipants((prev) => prev.filter((p) => p.id !== disconnectedUserId));
+		socketRef.current.on("receive-ice-candidate", ({ sender, candidate }) => {
+			const pc = participants.find((p) => p.id === sender)?.peerConnection;
+			if (pc && candidate) {
+				try {
+					pc.addIceCandidate(new RTCIceCandidate(candidate));
+				} catch (error) {
+					console.error("Error adding ICE candidate:", error);
+				}
+			}
 		});
 
-		setSessionGoals(["Review last week’s programming assignment", "Discuss career transition strategies", "Set goals for next week", "Address questions about the tech interview process"]);
-		setIsMobile(window.innerWidth < 768);
-
-		const speakerInterval = setInterval(() => {
-			const randomParticipant = participants[Math.floor(Math.random() * participants.length)];
-			setActiveSpeakerId(randomParticipant?.id || null);
-		}, 5000);
+		socketRef.current.on("user-left", (userId: string) => {
+			setParticipants((prev) => {
+				const participant = prev.find((p) => p.id === userId);
+				if (participant?.peerConnection) {
+					participant.peerConnection.close();
+				}
+				return prev.filter((p) => p.id !== userId);
+			});
+			toast.info(`User ${userId.slice(0, 4)} left the session`);
+		});
 
 		return () => {
-			clearInterval(speakerInterval);
 			socketRef.current?.disconnect();
-			localStreamRef.current?.getTracks().forEach((track) => track.stop());
-			participants.forEach((p) => p.peerConnection?.close());
 		};
-	}, [participants, userId]);
+	}, [participants, sessionId]);
 
-	const createPeerConnection = (remoteUserId: string) => {
-		const peerConnection = new RTCPeerConnection({ iceServers });
+	useEffect(() => {
+		const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+		checkMobile();
+		window.addEventListener("resize", checkMobile);
+		return () => window.removeEventListener("resize", checkMobile);
+	}, []);
 
-		peerConnection.onicecandidate = (event) => {
-			if (event.candidate) {
-				socketRef.current?.emit("ice-candidate", {
-					roomId,
-					candidate: event.candidate,
-					toUserId: remoteUserId,
-				});
-			}
-		};
-
-		peerConnection.ontrack = (event) => {
-			const remoteStream = event.streams[0];
-			setParticipants((prev) => prev.map((p) => (p.id === remoteUserId ? { ...p, stream: remoteStream } : p)));
-		};
-
-		return peerConnection;
-	};
-
-	const addLocalStreamToPeerConnection = (peerConnection: RTCPeerConnection) => {
-		if (localStreamRef.current) {
-			localStreamRef.current.getTracks().forEach((track) => {
-				peerConnection.addTrack(track, localStreamRef.current!);
-			});
+	const requestToJoin = async () => {
+		if (!sessionId) {
+			toast.error("Invalid session ID");
+			return;
 		}
+
+		setIsWaitingApproval(true);
+		socketRef.current?.emit("user-join-request", {
+			sessionId,
+			userId,
+			userName,
+		});
 	};
 
-	const createOffer = async (peerConnection: RTCPeerConnection, toUserId: string) => {
-		const offer = await peerConnection.createOffer();
-		await peerConnection.setLocalDescription(offer);
-		socketRef.current?.emit("offer", { roomId, offer, toUserId });
+	const joinRoom = async () => {
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+			localStreamRef.current = stream;
+			setIsVideoOn(true);
+			setIsMuted(false);
+
+			setParticipants((prev) => [
+				...prev,
+				{
+					id: userId,
+					name: userName,
+					isMuted: false,
+					isVideoOn: true,
+					isScreenSharing: false,
+					isMentor: false,
+					avatarUrl: "",
+					stream,
+					peerConnection: null,
+				},
+			]);
+
+			socketRef.current?.emit("join-room", sessionId, { name: userName, isMentor: false });
+			setIsJoined(true);
+			toast.success("Joined session successfully");
+		} catch (error) {
+			console.error("Error joining session:", error);
+			toast.error("Failed to join session. Please check your camera and microphone permissions.");
+			setIsWaitingApproval(false);
+		}
 	};
 
 	const toggleMute = () => {
@@ -543,6 +555,7 @@ function VideoCallInterface() {
 				track.enabled = !track.enabled;
 			});
 			setIsMuted(!isMuted);
+			setParticipants((prev) => prev.map((p) => (p.id === userId ? { ...p, isMuted: !isMuted } : p)));
 			toast.success(isMuted ? "Unmuted" : "Muted");
 		}
 	};
@@ -553,6 +566,7 @@ function VideoCallInterface() {
 				track.enabled = !track.enabled;
 			});
 			setIsVideoOn(!isVideoOn);
+			setParticipants((prev) => prev.map((p) => (p.id === userId ? { ...p, isVideoOn: !isVideoOn } : p)));
 			toast.success(isVideoOn ? "Camera turned off" : "Camera turned on");
 		}
 	};
@@ -560,10 +574,9 @@ function VideoCallInterface() {
 	const toggleScreenShare = async () => {
 		if (!isScreenSharing) {
 			try {
-				const screenStream = await navigator.mediaDevices.getDisplayMedia({
-					video: true,
-				});
+				const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
 				const screenTrack = screenStream.getVideoTracks()[0];
+
 				participants.forEach((p) => {
 					if (p.peerConnection) {
 						const sender = p.peerConnection.getSenders().find((s) => s.track?.kind === "video");
@@ -572,7 +585,12 @@ function VideoCallInterface() {
 						}
 					}
 				});
+
+				localStreamRef.current?.getVideoTracks().forEach((track) => track.stop());
+				localStreamRef.current = screenStream;
 				setIsScreenSharing(true);
+				setIsVideoOn(true);
+				setParticipants((prev) => prev.map((p) => (p.id === userId ? { ...p, isScreenSharing: true, isVideoOn: true } : p)));
 				toast.success("Screen sharing started");
 
 				screenTrack.onended = () => {
@@ -584,10 +602,9 @@ function VideoCallInterface() {
 			}
 		} else {
 			try {
-				const webcamStream = await navigator.mediaDevices.getUserMedia({
-					video: true,
-				});
+				const webcamStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 				const webcamTrack = webcamStream.getVideoTracks()[0];
+
 				participants.forEach((p) => {
 					if (p.peerConnection) {
 						const sender = p.peerConnection.getSenders().find((s) => s.track?.kind === "video");
@@ -596,9 +613,12 @@ function VideoCallInterface() {
 						}
 					}
 				});
-				localStreamRef.current?.getVideoTracks().forEach((track) => track.stop());
+
+				localStreamRef.current?.getTracks().forEach((track) => track.stop());
 				localStreamRef.current = webcamStream;
 				setIsScreenSharing(false);
+				setIsVideoOn(true);
+				setParticipants((prev) => prev.map((p) => (p.id === userId ? { ...p, isScreenSharing: false, isVideoOn: true } : p)));
 				toast.success("Screen sharing stopped");
 			} catch (error) {
 				console.error("Error reverting to webcam:", error);
@@ -635,17 +655,46 @@ function VideoCallInterface() {
 		localStreamRef.current?.getTracks().forEach((track) => track.stop());
 		participants.forEach((p) => p.peerConnection?.close());
 		setParticipants([]);
+		setIsJoined(false);
+		setIsWaitingApproval(false);
 		toast.success("Call ended");
 	};
+
+	if (!isSessionStarted) {
+		return (
+			<div className="h-screen w-screen flex flex-col items-center justify-center bg-white">
+				<Spinner size="lg" />
+				<h1 className="text-2xl font-semibold mt-4">Waiting for session to start...</h1>
+				<p className="text-sm text-gray-500 mt-2">You will be notified when the mentor starts the session.</p>
+			</div>
+		);
+	}
+
+	if (isWaitingApproval) {
+		return (
+			<div className="h-screen w-screen flex flex-col items-center justify-center bg-white">
+				<Spinner size="lg" />
+				<h1 className="text-2xl font-semibold mt-4">Waiting for Mentor Approval...</h1>
+				<p className="text-sm text-gray-500 mt-2">Your join request has been sent to the mentor.</p>
+			</div>
+		);
+	}
+
+	if (!isJoined) {
+		return (
+			<div className="h-screen w-screen flex flex-col items-center justify-center bg-white">
+				<h1 className="text-2xl font-semibold mb-4">Join Video Call</h1>
+				<Button onClick={requestToJoin}>Request to Join</Button>
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex h-full w-full overflow-hidden bg-white">
 			<div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? "mr-80" : ""}`}>
 				<VideoGrid participants={participants} activeSpeakerId={activeSpeakerId} pinnedParticipantId={pinnedParticipantId} onPinParticipant={pinParticipant} isPremiumSession={isPremiumSession} isMobile={isMobile} userId={userId} />
 			</div>
-
 			{isSidebarOpen && <GoalsSidebar goals={sessionGoals} onClose={toggleSidebar} isPremiumSession={isPremiumSession} />}
-
 			<ControlBar
 				isMuted={isMuted}
 				isVideoOn={isVideoOn}
@@ -668,7 +717,6 @@ function VideoCallInterface() {
 	);
 }
 
-// VideoCallLoading component
 function VideoCallLoading() {
 	return (
 		<div className="h-screen w-screen flex flex-col items-center justify-center bg-white">
@@ -679,7 +727,6 @@ function VideoCallLoading() {
 	);
 }
 
-// VideoCallPage component
 export function VideoCallPage() {
 	return (
 		<main className="h-screen w-screen overflow-hidden bg-white">

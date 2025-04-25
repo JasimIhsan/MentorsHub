@@ -7,4 +7,5 @@ export interface ISessionRepository {
 	fetchSessionRequestByMentor(mentorId: string): Promise<ISessionMentorDTO[]>;
 	updateRequestStatus(sessionId: string, status: string, rejectReason?: string): Promise<void>;
 	paySession(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void>;
+	fetchSessions(mentorId: string): Promise<ISessionMentorDTO[]>;
 }

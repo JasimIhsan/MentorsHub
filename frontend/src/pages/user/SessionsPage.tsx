@@ -117,7 +117,7 @@ export function SessionsPage() {
 	};
 
 	console.log(`sessions  : `, sortedSessions);
-	
+
 	return (
 		<div className="w-full py-8 px-10 md:px-20 xl:px-25">
 			<div className="flex flex-col gap-8">
@@ -208,7 +208,7 @@ interface SessionCardProps {
 }
 
 function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayLoaded }: SessionCardProps) {
-	console.log('session in card: ', session);
+	console.log("session in card: ", session);
 	const [isPaying, setIsPaying] = useState(false);
 	const [isReasonOpen, setIsReasonOpen] = useState(false); // State for hover dropdown
 	const user = useSelector((state: RootState) => state.auth.user);

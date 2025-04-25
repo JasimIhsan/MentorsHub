@@ -16,3 +16,11 @@ export interface IFetchMentorUsecase {
 export interface IFetchSessionRequests {
 	execute(mentorId: string): Promise<ISessionMentorDTO[]>
 }
+
+export interface IFetchAllMentorsUseCase {
+	execute(mentorId: string): Promise<IMentorDTO[]>
+}
+
+export interface IFetchSessionMentorUsecase {
+	execute(mentorId: string): Promise<ISessionMentorDTO[]>
+}

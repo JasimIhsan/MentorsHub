@@ -76,9 +76,18 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
+	async fetchSessions(mentorId: string): Promise<ISessionMentorDTO[]> {
+		try {
+			const sessions = await SessionModel.find({ mentorId }).populate("participants.userId", "firstName lastName avatar");
+			const mappedSessions = sessions.map(this.mapSessionToMentorDTO);
+			return mappedSessions
+		} catch (error) {
+			return handleError(error, "Error fetching sessions");
+		}
+	}
+
 	private mapSessionToUserDTO(session: any, userId: string): ISessionUserDTO {
 		const participant = session.participants.find((p: any) => p.userId._id?.toString?.() === userId || p.userId?.toString() === userId);
-
 		return {
 			id: session._id.toString(),
 			mentor: {
@@ -109,12 +118,14 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		return {
 			id: session._id.toString(),
 			mentor: session.mentorId.toString(),
-			userId: {
-				_id: session.participants?.userId._id?.toString() || session.participants?.userId.toString(),
-				firstName: session.participants?.userId.firstName,
-				lastName: session.participants?.userId.lastName,
-				avatar: session.participants?.userId.avatar,
-			},
+			participants: session.participants.map((p: any) => ({
+				_id: p.userId._id.toString(),
+				firstName: p.userId.firstName,
+				lastName: p.userId.lastName,
+				avatar: p.userId.avatar,
+				paymentStatus: p.paymentStatus,
+				paymentId: p.paymentId,
+			})),
 			topic: session.topic,
 			sessionType: session.sessionType,
 			sessionFormat: session.sessionFormat,
