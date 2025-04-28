@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { IAdminAuthUsecase } from "../../../../application/interfaces/admin/admin.auth.interface";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 
 export class AdminLoginController {
 	constructor(private adminLoginUsecase: IAdminAuthUsecase) {}
@@ -18,7 +19,7 @@ export class AdminLoginController {
 				res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: error.message });
 				return;
 			}
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
+			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: CommonStringMessage.SERVER_ERROR_MESSAGE});
 		}
 	}
 }

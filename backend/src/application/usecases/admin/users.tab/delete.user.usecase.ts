@@ -1,4 +1,5 @@
 import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IDeleteUserUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
 
 export class DeleteUserUseCase implements IDeleteUserUsecase {
@@ -7,13 +8,12 @@ export class DeleteUserUseCase implements IDeleteUserUsecase {
 		try {
 			const res = await this.userRepo.deleteUser(userId);
 			if (!res) {
-				throw new Error("User not found");
+				throw new Error(CommonStringMessage.USER_NOT_FOUND);
 			}
 		} catch (error) {
 			if (error instanceof Error) {
 				throw new Error(error.message);
 			}
-			throw new Error("Internal Server Error");
 		}
 	}
 }

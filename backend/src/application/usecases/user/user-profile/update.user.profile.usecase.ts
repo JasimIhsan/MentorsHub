@@ -1,5 +1,6 @@
 import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
 import { UserEntity, UserInterface } from "../../../../domain/entities/user.entity";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { ICloudinaryService, IUpdateUserProfileUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
 
 export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
@@ -8,7 +9,7 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
 	async execute(userId: string, data: Partial<UserInterface>, imageUrl?: string) {
 		const existingUser = await this.userRepo.findUserById(userId);
 		if (!existingUser) {
-			throw new Error("User not found");
+			throw new Error(CommonStringMessage.USER_NOT_FOUND);
 		}
 
 		if (imageUrl) {

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { TokenServicesImpl } from "../../infrastructure/auth/jwt/jwt.services";
 import { HttpStatusCode } from "../../shared/constants/http.status.codes";
+import { CommonStringMessage } from "../../shared/constants/string.messages";
 
 const tokenService = new TokenServicesImpl();
 
@@ -27,6 +28,6 @@ export const verifyRefreshToken = (req: Request, res: Response, next: NextFuncti
 		req.user = decoded;
 		next();
 	} catch (error) {
-		res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
+		res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: CommonStringMessage.SERVER_ERROR_MESSAGE });
 	}
 };

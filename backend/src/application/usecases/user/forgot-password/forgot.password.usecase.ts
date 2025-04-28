@@ -3,6 +3,7 @@ import { IEmailService } from "../../../interfaces/user/email.service.interface"
 import crypto from "crypto";
 import { IForgotPasswordUseCase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { IForgotPasswordTokensRepository } from "../../../../domain/dbrepository/forgot.password.token.respository";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 
 export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
 	constructor(private userRepo: IUserRepository, private emailService: IEmailService, private tokenRepo: IForgotPasswordTokensRepository) {}
@@ -11,7 +12,7 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
 		const user = await this.userRepo.findUserByEmail(email);
 		if (!user) throw new Error("User not found: ");
 		const userId = user.getId();
-		if(!userId) throw new Error("User not found");
+		if(!userId) throw new Error(CommonStringMessage.USER_NOT_FOUND);
 		const token = crypto.randomBytes(32).toString("hex");
 		await this.tokenRepo.createToken(userId, token, 10);
 
