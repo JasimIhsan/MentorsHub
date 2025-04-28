@@ -24,7 +24,7 @@ googleAuthRouter.post("/google", (req, res) => googleAuthController.handle(req, 
 // Google OAuth callback
 googleAuthRouter.get("/google/callback", passport.authenticate("google", { failureRedirect: "/login", session: false }), (req, res) => {
 	if (!req.user) {
-		res.status(401).json({ message: "Authentication failed" });
+		res.status(HttpStatusCode.UNAUTHORIZED).json({ message: "Authentication failed" });
 		return;
 	}
 	const { user, accessToken, refreshToken } = req.user as any;

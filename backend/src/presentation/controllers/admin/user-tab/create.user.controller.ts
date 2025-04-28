@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { ICreateUserUsecase } from "../../../../application/interfaces/admin/admin.usertab.interfaces";
+import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class CreateUserController {
 	constructor(private createUserUsecase: ICreateUserUsecase) {}
@@ -11,9 +12,9 @@ export class CreateUserController {
 			res.status(201).json({ success: true, user });
 		} catch (error) {
 			if (error instanceof Error) {
-				res.status(500).json({ message: error.message });
+				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: error.message });
 			} else {
-				res.status(500).json({ message: "An unexpected error occurred" });
+				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "An unexpected error occurred" });
 			}
 		}
 	}

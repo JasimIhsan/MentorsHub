@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { IUserDTO } from "../../../../application/dtos/user.dtos";
 import { IUpdateUserProfileUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
+import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class UpdateUserController {
 	constructor(private updateUserUsecase: IUpdateUserProfileUseCase) {}
@@ -11,12 +12,12 @@ export class UpdateUserController {
 			const userData: Partial<IUserDTO> = req.body;
 
 			const updatedUser = await this.updateUserUsecase.execute(userId, userData);
-			res.status(200).json({ success: true, user: updatedUser });
+			res.status(HttpStatusCode.OK).json({ success: true, user: updatedUser });
 		} catch (error) {
 			if (error instanceof Error) {
-				res.status(500).json({ message: error.message });
+				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: error.message });
 			} else {
-				res.status(500).json({ message: "An unexpected error occurred" });
+				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "An unexpected error occurred" });
 			}
 		}
 	}

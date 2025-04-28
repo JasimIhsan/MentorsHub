@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { UserEntity } from "../../domain/entities/user.entity";
 import { userInfo } from "os";
 import { UserRepositoryImpl } from "../../infrastructure/database/implementation/user.repository.impl";
+import { HttpStatusCode } from "../../shared/constants/http.status.codes";
 
 const userRepo = new UserRepositoryImpl();
 
@@ -9,7 +10,7 @@ export const checkUserStatus = (req: Request, res: Response, next: NextFunction)
 	const user = req.user as UserEntity;
 	if (user.getStatus() === "blocked") {
 		console.log(`is blocked`);
-		res.status(403).json({ success: false, blocked: true, message: "Your account is blocked. Please contact support" });
+		res.status(HttpStatusCode.FORBIDDEN).json({ success: false, blocked: true, message: "Your account is blocked. Please contact support" });
 		return;
 	}
 	next();
@@ -25,7 +26,7 @@ export const checkUserStatusInLogin = async (req: Request, res: Response, next: 
 
 	if (user.getStatus() === "blocked") {
 		console.log(`is blocked`);
-		res.status(403).json({ success: false, blocked: true, message: "Your account is blocked. Please contact support" });
+		res.status(HttpStatusCode.FORBIDDEN).json({ success: false, blocked: true, message: "Your account is blocked. Please contact support" });
 		return;
 	}
 	next();

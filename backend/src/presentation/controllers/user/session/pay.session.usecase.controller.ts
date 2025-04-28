@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { IPaySessionUseCase } from "../../../../application/interfaces/session";
+import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class PaySessionController {
 	constructor(private paySessionUsecase: IPaySessionUseCase) {}
@@ -12,14 +13,14 @@ export class PaySessionController {
 			console.log('sessionId: ', sessionId);
 
 			if(!sessionId || !paymentId || !paymentStatus || !status) {
-				res.status(400).json({ success: false, message: "All fields are required" });
+				res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: "All fields are required" });
 				return;
 			}
 			await this.paySessionUsecase.execute(sessionId, paymentId, paymentStatus, status);
-			res.status(200).json({ success: true, message: "Session paid successfully" });
+			res.status(HttpStatusCode.OK).json({ success: true, message: "Session paid successfully" });
 		} catch (error) {
 			if (error instanceof Error) {
-				res.status(500).json({ success: false, message: error.message });
+				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
 			}
 		}
 	}
