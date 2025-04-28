@@ -1,6 +1,7 @@
 import { IMentorProfileRepository } from "../../../../domain/dbrepository/mentor.details.repository";
 import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
 import { UserEntity } from "../../../../domain/entities/user.entity";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IVerifyMentorApplicationUsecase } from "../../../interfaces/admin/admin.mentor.application.interface";
 
 export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationUsecase {
@@ -11,7 +12,7 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 		console.log("status: ", status);
 
 		const user = await this.userRepo.findUserById(userId);
-		if (!user) throw new Error("User not found");
+		if (!user) throw new Error(CommonStringMessage.USER_NOT_FOUND);
 
 		const profile = await this.mentorRepo.findByUserId(userId);
 		if (!profile) throw new Error("Mentor profile not found");

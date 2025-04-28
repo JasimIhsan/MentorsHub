@@ -4,6 +4,7 @@ import { IMentorInterface, MentorProfileEntity } from "../../../../domain/entiti
 import { UserEntity, UserInterface } from "../../../../domain/entities/user.entity";
 import { uploadMentorDocument } from "../../../../infrastructure/cloud/S3 bucket/upload.mentor.documents.s3";
 import { IUsers } from "../../../../infrastructure/database/models/user/user.model";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IBecomeMentorUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
 
 export class BecomeMentorUseCase implements IBecomeMentorUseCase {
@@ -12,7 +13,7 @@ export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 	async execute(userId: string, data: IMentorInterface, userData: Partial<UserInterface>, documents: Express.Multer.File[]): Promise<{ savedUser: UserEntity; mentorProfile: MentorProfileEntity }> {
 
 		const existingUser = await this.userRepo.findUserById(userId);
-		if (!existingUser) throw new Error("User not found");
+		if (!existingUser) throw new Error(CommonStringMessage.USER_NOT_FOUND);
 		if (existingUser.getRole() === "mentor") {
 			throw new Error("You are already a mentor");
 		}

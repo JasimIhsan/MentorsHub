@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { IResetPasswordUseCase } from "../../../../application/interfaces/user/auth.usecases.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 
 export class ResetPasswordController {
 	constructor(private restPasswordUseCase: IResetPasswordUseCase) {}
@@ -16,7 +17,7 @@ export class ResetPasswordController {
 				res.status(HttpStatusCode.BAD_REQUEST).json({ message: error.message });
 				return;
 			}
-			res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Internal server error" });
+			res.status(HttpStatusCode.BAD_REQUEST).json({ message: CommonStringMessage.SERVER_ERROR_MESSAGE });
 		}
 	}
 }

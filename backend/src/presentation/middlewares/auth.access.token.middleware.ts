@@ -5,6 +5,7 @@ import { UserEntity } from "../../domain/entities/user.entity";
 import { AdminEntity } from "../../domain/entities/admin.entity";
 import { AdminRepositoryImpl } from "../../infrastructure/database/implementation/admin.repository.impl";
 import { HttpStatusCode } from "../../shared/constants/http.status.codes";
+import { CommonStringMessage } from "../../shared/constants/string.messages";
 
 const tokenService = new TokenServicesImpl();
 const userRepo = new UserRepositoryImpl();
@@ -35,13 +36,13 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 		} else {
 			const user = await userRepo.findUserById(decoded.userId);
 			if (!user) {
-				res.status(HttpStatusCode.UNAUTHORIZED).json({ success: false, message: "User not found" });
+				res.status(HttpStatusCode.UNAUTHORIZED).json({ success: false, message: CommonStringMessage.USER_NOT_FOUND });
 				return;
 			}
 			(req.user as UserEntity) = user;
 			return next();
 		}
 	} catch (error) {
-		res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
+		res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: CommonStringMessage.SERVER_ERROR_MESSAGE });
 	}
 };

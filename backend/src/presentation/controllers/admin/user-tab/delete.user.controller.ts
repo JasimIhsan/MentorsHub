@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { IDeleteUserUsecase } from "../../../../application/interfaces/admin/admin.usertab.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 
 export class DeleteUserController {
 	constructor(private deleteUserUsecase: IDeleteUserUsecase) {}
@@ -15,7 +16,7 @@ export class DeleteUserController {
 				res.status(HttpStatusCode.NOT_FOUND).json({ success: false, message: error.message });
 				return;
 			}
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
+			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: CommonStringMessage.SERVER_ERROR_MESSAGE });
 		}
 	}
 }

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { IVerifyResetTokenUseCase } from "../../../../application/interfaces/user/auth.usecases.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 
 export class VerifyResetTokenController {
 	constructor(private verifyTokenUseCase: IVerifyResetTokenUseCase) {}
@@ -21,7 +22,7 @@ export class VerifyResetTokenController {
 				res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: "Token is invalid" });
 			}
 		} catch (error) {
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
+			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: CommonStringMessage.SERVER_ERROR_MESSAGE });
 		}
 	}
 }
