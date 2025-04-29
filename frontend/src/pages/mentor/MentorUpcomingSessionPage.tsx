@@ -16,14 +16,14 @@ import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
-export function MentorSessionsPage() {
+export function MentorUpcomingSessionsPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
 	const [filteredSessions, setFilteredSessions] = useState<ISessionMentorDTO[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [joinRequests, setJoinRequests] = useState<{ userId: string; userName: string; sessionId: string }[]>([]);
 	const [showJoinRequestsModal, setShowJoinRequestsModal] = useState(false);
-	const [sortOption, setSortOption] = useState<"all" | "today" | "thisMonth">("all");
+	const [filterOption, setFilterOption] = useState<"all" | "today" | "thisMonth">("all"); // Changed from sortOption
 	const [currentPage, setCurrentPage] = useState(1);
 	const sessionsPerPage = 5;
 	const user = useSelector((state: RootState) => state.auth.user);
@@ -43,7 +43,7 @@ export function MentorSessionsPage() {
 					throw new Error("No sessions data received");
 				}
 				setSessions(response.data.sessions);
-				setFilteredSessions(response.data.sessions); // Initialize filtered sessions
+				setFilteredSessions(response.data.sessions);
 			} catch (err: any) {
 				const message = err.response?.data?.message || "Failed to load sessions.";
 				setError(message);
@@ -72,27 +72,27 @@ export function MentorSessionsPage() {
 		};
 	}, [user?.id]);
 
-	// Filter sessions based on sort option
+	// Filter sessions based on filter option
 	useEffect(() => {
 		const today = new Date();
 		today.setHours(0, 0, 0, 0); // Normalize to start of day
 		const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
 		let filtered = sessions;
-		if (sortOption === "today") {
+		if (filterOption === "today") {
 			filtered = sessions.filter((session) => {
 				const sessionDate = new Date(session.date);
 				return sessionDate.toDateString() === today.toDateString();
 			});
-		} else if (sortOption === "thisMonth") {
+		} else if (filterOption === "thisMonth") {
 			filtered = sessions.filter((session) => {
 				const sessionDate = new Date(session.date);
 				return sessionDate >= startOfMonth && sessionDate <= new Date(today.getFullYear(), today.getMonth() + 1, 0);
 			});
 		}
 		setFilteredSessions(filtered);
-		setCurrentPage(1); // Reset to first page when sorting changes
-	}, [sortOption, sessions]);
+		setCurrentPage(1); // Reset to first page when filtering changes
+	}, [filterOption, sessions]);
 
 	// Pagination logic
 	const totalPages = Math.ceil(filteredSessions.length / sessionsPerPage);
@@ -210,13 +210,13 @@ export function MentorSessionsPage() {
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button variant="outline" className="flex items-center gap-2">
-								<span>Sort: {sortOption.charAt(0).toUpperCase() + sortOption.slice(1)}</span>
+								<span>Filter: {filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}</span>
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
-							<DropdownMenuItem onClick={() => setSortOption("all")}>All</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setSortOption("today")}>Today</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setSortOption("thisMonth")}>This Month</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setFilterOption("all")}>All</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setFilterOption("today")}>Today</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setFilterOption("thisMonth")}>This Month</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
@@ -256,6 +256,7 @@ export function MentorSessionsPage() {
 	);
 }
 
+// MentorSessionCardDetailed and JoinRequestsModal components remain unchanged
 interface MentorSessionCardProps {
 	session: ISessionMentorDTO;
 	onStartSession: () => void;

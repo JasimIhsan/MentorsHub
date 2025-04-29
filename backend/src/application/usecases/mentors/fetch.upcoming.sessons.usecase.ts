@@ -6,6 +6,11 @@ export class FetchUpcomingSessionMentorUsecase implements IFetchUpcomingSessionM
 
 	async execute(mentorId: string) {
 		const sessions = await this.sessionRepo.fetchSessions(mentorId);
-		return sessions.filter((session) => session.status === "upcoming");
+		const now = new Date();
+		const upcoming = sessions.filter((session) => {
+			const sessionDateTime = new Date(`${session.date}T${session.time}`);
+			return session.status === "upcoming" && sessionDateTime > now;
+		});
+		return upcoming;
 	}
 }
