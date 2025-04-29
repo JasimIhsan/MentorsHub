@@ -11,8 +11,10 @@ import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/custom-ui/Loading";
+import { Loading } from "@/components/common/Loading";
 import { ISessionUserDTO } from "@/interfaces/ISessionDTO";
+import { SessionDetailsModal } from "@/components/common/SessionDetailsModal"; // Import the SessionDetailsModal
+import { formatDate, formatTime } from "@/utility/time-data-formater";
 
 declare global {
 	interface Window {
@@ -28,6 +30,7 @@ export function SessionsPage() {
 	const [showPaymentModal, setShowPaymentModal] = useState(false);
 	const [paidSession, setPaidSession] = useState<ISessionUserDTO | null>(null);
 	const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
+	const [selectedSession, setSelectedSession] = useState<ISessionUserDTO | null>(null); // State for modal
 	const user = useSelector((state: RootState) => state.auth.user);
 
 	// Load Razorpay script
@@ -59,7 +62,6 @@ export function SessionsPage() {
 
 		loadRazorpayScript();
 
-		// Cleanup script on component unmount
 		return () => {
 			if (script && document.body.contains(script)) {
 				console.log("Cleaning up Razorpay script");
@@ -116,8 +118,6 @@ export function SessionsPage() {
 		rejected: "Rejected Sessions",
 	};
 
-	console.log(`sessions  : `, sortedSessions);
-
 	return (
 		<div className="w-full py-8 px-10 md:px-20 xl:px-25">
 			<div className="flex flex-col gap-8">
@@ -152,7 +152,14 @@ export function SessionsPage() {
 					<CardContent className="pt-6">
 						<div className="space-y-4">
 							{sortedSessions.map((session) => (
-								<SessionCard key={session.id} session={session} setShowPaymentModal={setShowPaymentModal} setPaidSession={setPaidSession} isRazorpayLoaded={isRazorpayLoaded} />
+								<SessionCard
+									key={session.id}
+									session={session}
+									setShowPaymentModal={setShowPaymentModal}
+									setPaidSession={setPaidSession}
+									isRazorpayLoaded={isRazorpayLoaded}
+									setSelectedSession={setSelectedSession} // Pass setSelectedSession to open modal
+								/>
 							))}
 							{sortedSessions.length === 0 && (
 								<EmptyState
@@ -182,7 +189,6 @@ export function SessionsPage() {
 					onClose={() => {
 						setShowPaymentModal(false);
 						setPaidSession(null);
-						// Refresh sessions after payment
 						const fetchSessions = async () => {
 							try {
 								const response = await axiosInstance.get(`/user/sessions/all/${user?.id}`);
@@ -196,6 +202,7 @@ export function SessionsPage() {
 					session={paidSession}
 				/>
 			)}
+			{selectedSession && <SessionDetailsModal session={selectedSession} onClose={() => setSelectedSession(null)} />}
 		</div>
 	);
 }
@@ -205,12 +212,12 @@ interface SessionCardProps {
 	setShowPaymentModal: (value: boolean) => void;
 	setPaidSession: (session: ISessionUserDTO) => void;
 	isRazorpayLoaded: boolean;
+	setSelectedSession: (session: ISessionUserDTO) => void; // Add prop to set selected session
 }
 
-function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayLoaded }: SessionCardProps) {
-	console.log("session in card: ", session);
+function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayLoaded, setSelectedSession }: SessionCardProps) {
 	const [isPaying, setIsPaying] = useState(false);
-	const [isReasonOpen, setIsReasonOpen] = useState(false); // State for hover dropdown
+	const [isReasonOpen, setIsReasonOpen] = useState(false);
 	const user = useSelector((state: RootState) => state.auth.user);
 
 	const type = session.status;
@@ -304,16 +311,18 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 					<div className="p-6 flex-1">
 						<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 							<div>
-								<h3 className="font-bold text-lg">{session.topic}</h3>
+								<h3 className="font-bold text-lg cursor-pointer hover:underline" onClick={() => setSelectedSession(session)}>
+									{session.topic}
+								</h3>
 								<p className="text-muted-foreground">with {`${session.mentor.firstName} ${session.mentor.lastName}`}</p>
-								<div className="mt-2 flex flexrape-wrap items-center gap-4">
+								<div className="mt-2 flex flex-wrap items-center gap-4">
 									<div className="flex items-center gap-1">
 										<CalendarDays className="h-4 w-4 text-muted-foreground" />
-										<span className="text-sm">{session.date}</span>
+										<span className="text-sm">{formatDate(session.date)}</span>
 									</div>
 									<div className="flex items-center gap-1">
 										<Clock className="h-4 w-4 text-muted-foreground" />
-										<span className="text-sm">{session.time}</span>
+										<span className="text-sm">{formatTime(session.time)}</span>
 									</div>
 									<div className="flex items-center gap-1">
 										{session.sessionType === "video" ? <Video className="h-4 w-4 text-muted-foreground" /> : <MessageSquare className="h-4 w-4 text-muted-foreground" />}
@@ -339,6 +348,10 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 												</Button>
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="end">
+												<DropdownMenuItem onSelect={() => setSelectedSession(session)}>
+													<FileText className="mr-2 h-4 w-4" />
+													View Details
+												</DropdownMenuItem>
 												<DropdownMenuItem asChild>
 													<Link to={`/messages?mentor=${session.mentor._id}`} className="cursor-pointer">
 														<MessageSquare className="mr-2 h-4 w-4" />
@@ -373,9 +386,9 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 										<Button variant="outline" asChild>
 											<Link to={`/sessions/${session.id}/review`}>Leave Review</Link>
 										</Button>
-										<Button variant="ghost" size="icon">
+										<Button variant="ghost" size="icon" onClick={() => setSelectedSession(session)}>
 											<FileText className="h-4 w-4" />
-											<span className="sr-only">View Notes</span>
+											<span className="sr-only">View Details</span>
 										</Button>
 									</>
 								)}

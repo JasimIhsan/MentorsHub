@@ -11,7 +11,7 @@ import { JSX, useEffect, useState } from "react";
 import { IMentorDTO } from "@/interfaces/mentor.application.dto";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
-import Alert from "@/components/custom-ui/alert";
+import Alert from "@/components/common/alert";
 import { useDispatch } from "react-redux";
 import { updateRole } from "@/store/slices/userSlice";
 import { fetchAllMentors } from "@/api/mentors.api.service";

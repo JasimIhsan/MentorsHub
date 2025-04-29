@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import verified from "../../assets/verify.png";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/custom-ui/Loading";
+import { Loading } from "@/components/common/Loading";
 
 interface Mentor {
 	id: string;

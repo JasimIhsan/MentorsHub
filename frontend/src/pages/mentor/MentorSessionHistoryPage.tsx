@@ -2,17 +2,18 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, Video, Users, MessageSquare, IndianRupee } from "lucide-react";
+import { CalendarDays, Clock, Video, Users, MessageSquare, IndianRupee, FileText } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/custom-ui/Loading";
+import { Loading } from "@/components/common/Loading";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
 import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { SessionDetailsModal } from "@/components/common/SessionDetailsModal";
 
 export function MentorSessionHistoryPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
@@ -21,6 +22,7 @@ export function MentorSessionHistoryPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [filterOption, setFilterOption] = useState<"all" | "completed" | "canceled">("all");
 	const [currentPage, setCurrentPage] = useState(1);
+	const [selectedSession, setSelectedSession] = useState<ISessionMentorDTO | null>(null); // State for modal
 	const sessionsPerPage = 5;
 	const user = useSelector((state: RootState) => state.auth.user);
 
@@ -33,7 +35,7 @@ export function MentorSessionHistoryPage() {
 			}
 
 			try {
-				const response = await axiosInstance.get(`/mentor/sessions/history/${user.id}`);
+				const response = await axiosInstance.get(`/mentor/sessions/session-history/${user.id}`);
 				if (!response.data?.sessions) {
 					throw new Error("No session history data received");
 				}
@@ -81,12 +83,10 @@ export function MentorSessionHistoryPage() {
 		let startPage = Math.max(1, currentPage - 2);
 		let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
-		// Adjust startPage if endPage is at the maximum
 		if (endPage - startPage < maxPagesToShow - 1) {
 			startPage = Math.max(1, endPage - maxPagesToShow + 1);
 		}
 
-		// Always show first page
 		if (startPage > 1) {
 			items.push(
 				<PaginationItem key={1}>
@@ -102,7 +102,6 @@ export function MentorSessionHistoryPage() {
 			}
 		}
 
-		// Show page numbers in range
 		for (let page = startPage; page <= endPage; page++) {
 			items.push(
 				<PaginationItem key={page}>
@@ -113,7 +112,6 @@ export function MentorSessionHistoryPage() {
 			);
 		}
 
-		// Show last page and ellipsis if needed
 		if (endPage < totalPages) {
 			if (endPage < totalPages - 1) {
 				items.push(
@@ -163,7 +161,11 @@ export function MentorSessionHistoryPage() {
 					<CardContent className="p-0">
 						<div className="space-y-6">
 							{currentSessions.map((session) => (
-								<MentorSessionCardDetailed key={session.id} session={session} />
+								<MentorSessionCardDetailed
+									key={session.id}
+									session={session}
+									setSelectedSession={setSelectedSession} // Pass setSelectedSession to open modal
+								/>
 							))}
 							{currentSessions.length === 0 && (
 								<div className="text-center p-4">
@@ -171,7 +173,6 @@ export function MentorSessionHistoryPage() {
 								</div>
 							)}
 						</div>
-						{/* Pagination Controls */}
 						{totalPages > 0 && (
 							<div className="mt-6">
 								<Pagination>
@@ -190,19 +191,21 @@ export function MentorSessionHistoryPage() {
 					</CardContent>
 				</Card>
 			</div>
+			{selectedSession && <SessionDetailsModal session={selectedSession} onClose={() => setSelectedSession(null)} />}
 		</div>
 	);
 }
 
 interface MentorSessionCardProps {
 	session: ISessionMentorDTO;
+	setSelectedSession: (session: ISessionMentorDTO) => void; // Add prop to set selected session
 }
 
-function MentorSessionCardDetailed({ session }: MentorSessionCardProps) {
+function MentorSessionCardDetailed({ session, setSelectedSession }: MentorSessionCardProps) {
 	const formatTime = (time: string) => {
 		const [hour, minute] = time.split(":").map(Number);
 		const ampm = hour >= 12 ? "PM" : "AM";
-		const hour12 = hour % 12 || 12; // convert 0 to 12 for 12AM
+		const hour12 = hour % 12 || 12;
 		return `${hour12}:${minute.toString().padStart(2, "0")} ${ampm}`;
 	};
 
@@ -210,15 +213,14 @@ function MentorSessionCardDetailed({ session }: MentorSessionCardProps) {
 		<Card className="overflow-hidden p-0">
 			<CardContent className="p-6">
 				<div className="flex flex-col md:flex-row gap-6">
-					{/* Left Section: Session Details */}
 					<div className="flex-1">
 						<div className="flex justify-between items-center">
 							<div>
-								<h3 className="font-bold text-xl text-primary">{session.topic}</h3>
+								<h3 className="font-bold text-xl text-primary cursor-pointer hover:underline" onClick={() => setSelectedSession(session)}>
+									{session.topic}
+								</h3>
 							</div>
 						</div>
-
-						{/* Session Metadata */}
 						<div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
 							<div className="flex items-center gap-2">
 								<CalendarDays className="h-4 w-4 text-muted-foreground" />
@@ -228,7 +230,6 @@ function MentorSessionCardDetailed({ session }: MentorSessionCardProps) {
 									})}
 								</span>
 							</div>
-
 							<div className="flex items-center gap-2">
 								<Clock className="h-4 w-4 text-muted-foreground" />
 								<span className="text-sm">
@@ -249,12 +250,10 @@ function MentorSessionCardDetailed({ session }: MentorSessionCardProps) {
 							</div>
 						</div>
 					</div>
-
 					<div className="flex justify-center items-center gap-2">
 						<Badge variant={session.status === "completed" ? "outline" : "default"} className={`${session.status === "completed" ? "bg-primary/5 text-primary" : "bg-primary text-primary-foreground"} capitalize`}>
 							{session.status}
 						</Badge>
-						{/* Participants Dropdown */}
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button variant="outline" className="flex items-center gap-2">
@@ -283,6 +282,20 @@ function MentorSessionCardDetailed({ session }: MentorSessionCardProps) {
 										</DropdownMenuItem>
 									))
 								)}
+							</DropdownMenuContent>
+						</DropdownMenu>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="ghost" size="icon">
+									<FileText className="h-4 w-4" />
+									<span className="sr-only">More options</span>
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								<DropdownMenuItem onSelect={() => setSelectedSession(session)}>
+									<FileText className="mr-2 h-4 w-4" />
+									View Details
+								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</div>

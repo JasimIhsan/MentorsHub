@@ -177,17 +177,29 @@ export default function UserProfilePage() {
 	return (
 		<div className="container py-8 px-10 md:px-20 xl:px-25">
 			<div className="flex flex-col gap-8">
-				<ProfileHeader
-					user={user}
-					fullName={fullName}
-					isEditing={isEditing}
-					hasUnsavedChanges={hasUnsavedChanges}
-					setIsEditing={setIsEditing}
-					handleSave={handleSave}
-					errors={errors}
-					handleCancel={handleCancel}
-					onAvatarChange={handleAvatarChange} // Pass avatar change handler
-				/>
+				<div className="flex flex-col gap-8">
+					<ProfileHeader
+						user={user}
+						fullName={fullName}
+						isEditing={isEditing}
+						hasUnsavedChanges={hasUnsavedChanges}
+						setIsEditing={setIsEditing}
+						handleSave={handleSave}
+						errors={errors}
+						handleCancel={handleCancel}
+						onAvatarChange={handleAvatarChange} // Pass avatar change handler
+					/>
+					{user.mentorRequestStatus === "REJECTED" && (
+						<div className="bg-red-100 text-red-700 p-4 rounded-md">
+							<p className="font-semibold">Your request to become a mentor has been rejected.</p>
+							<p>Please check your email for further details and the reason for the rejection.</p>
+						</div>
+					)}
+					{/* <div className="bg-red-100 text-red-700 p-4 rounded-md">
+						<p className="font-semibold">Your request to become a mentor has been rejected.</p>
+						<p>Please check your email for further details and the reason for the rejection.</p>
+					</div> */}
+				</div>
 				<div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
 					<div className="space-y-6 lg:col-span-2">
 						<BioSection bio={formData.bio} isEditing={isEditing} handleInputChange={handleInputChange} errors={errors} />

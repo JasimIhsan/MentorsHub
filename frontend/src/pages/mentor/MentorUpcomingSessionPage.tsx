@@ -2,19 +2,20 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, Video, Users, MessageSquare, CheckCircle, XCircle, IndianRupee } from "lucide-react";
+import { CalendarDays, Clock, Video, Users, MessageSquare, CheckCircle, XCircle, IndianRupee, FileText } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/custom-ui/Loading";
+import { Loading } from "@/components/common/Loading";
 import { ISessionMentorDTO, SessionStatus } from "@/interfaces/ISessionDTO";
 import io, { Socket } from "socket.io-client";
 import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { SessionDetailsModal } from "@/components/common/SessionDetailsModal";
 
 export function MentorUpcomingSessionsPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
@@ -23,8 +24,9 @@ export function MentorUpcomingSessionsPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [joinRequests, setJoinRequests] = useState<{ userId: string; userName: string; sessionId: string }[]>([]);
 	const [showJoinRequestsModal, setShowJoinRequestsModal] = useState(false);
-	const [filterOption, setFilterOption] = useState<"all" | "today" | "thisMonth">("all"); // Changed from sortOption
+	const [filterOption, setFilterOption] = useState<"all" | "today" | "thisMonth">("all");
 	const [currentPage, setCurrentPage] = useState(1);
+	const [selectedSession, setSelectedSession] = useState<ISessionMentorDTO | null>(null); // State for modal
 	const sessionsPerPage = 5;
 	const user = useSelector((state: RootState) => state.auth.user);
 	const socketRef = useRef<Socket | null>(null);
@@ -55,7 +57,6 @@ export function MentorUpcomingSessionsPage() {
 
 		fetchSessions();
 
-		// Initialize socket
 		socketRef.current = io("http://localhost:5858", { withCredentials: true });
 		socketRef.current.on("connect", () => {
 			console.log("Mentor connected to socket:", socketRef.current?.id);
@@ -72,10 +73,9 @@ export function MentorUpcomingSessionsPage() {
 		};
 	}, [user?.id]);
 
-	// Filter sessions based on filter option
 	useEffect(() => {
 		const today = new Date();
-		today.setHours(0, 0, 0, 0); // Normalize to start of day
+		today.setHours(0, 0, 0, 0);
 		const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
 		let filtered = sessions;
@@ -91,10 +91,9 @@ export function MentorUpcomingSessionsPage() {
 			});
 		}
 		setFilteredSessions(filtered);
-		setCurrentPage(1); // Reset to first page when filtering changes
+		setCurrentPage(1);
 	}, [filterOption, sessions]);
 
-	// Pagination logic
 	const totalPages = Math.ceil(filteredSessions.length / sessionsPerPage);
 	const indexOfLastSession = currentPage * sessionsPerPage;
 	const indexOfFirstSession = indexOfLastSession - sessionsPerPage;
@@ -138,16 +137,14 @@ export function MentorUpcomingSessionsPage() {
 
 	const renderPaginationItems = () => {
 		const items = [];
-		const maxPagesToShow = 5; // Show up to 5 page numbers at a time
+		const maxPagesToShow = 5;
 		let startPage = Math.max(1, currentPage - 2);
 		let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
-		// Adjust startPage if endPage is at the maximum
 		if (endPage - startPage < maxPagesToShow - 1) {
 			startPage = Math.max(1, endPage - maxPagesToShow + 1);
 		}
 
-		// Always show first page
 		if (startPage > 1) {
 			items.push(
 				<PaginationItem key={1}>
@@ -163,7 +160,6 @@ export function MentorUpcomingSessionsPage() {
 			}
 		}
 
-		// Show page numbers in range
 		for (let page = startPage; page <= endPage; page++) {
 			items.push(
 				<PaginationItem key={page}>
@@ -174,7 +170,6 @@ export function MentorUpcomingSessionsPage() {
 			);
 		}
 
-		// Show last page and ellipsis if needed
 		if (endPage < totalPages) {
 			if (endPage < totalPages - 1) {
 				items.push(
@@ -224,7 +219,12 @@ export function MentorUpcomingSessionsPage() {
 					<CardContent className="p-0">
 						<div className="space-y-6">
 							{currentSessions.map((session) => (
-								<MentorSessionCardDetailed key={session.id} session={session} onStartSession={() => handleStartSession(session)} />
+								<MentorSessionCardDetailed
+									key={session.id}
+									session={session}
+									onStartSession={() => handleStartSession(session)}
+									setSelectedSession={setSelectedSession} // Pass setSelectedSession to open modal
+								/>
 							))}
 							{currentSessions.length === 0 && (
 								<div className="text-center p-4">
@@ -232,7 +232,6 @@ export function MentorUpcomingSessionsPage() {
 								</div>
 							)}
 						</div>
-						{/* Pagination Controls */}
 						{totalPages > 0 && (
 							<div className="mt-6">
 								<Pagination>
@@ -252,21 +251,22 @@ export function MentorUpcomingSessionsPage() {
 				</Card>
 			</div>
 			<JoinRequestsModal isOpen={showJoinRequestsModal} onClose={() => setShowJoinRequestsModal(false)} joinRequests={joinRequests} onApprove={handleApproveJoin} onReject={handleRejectJoin} />
+			{selectedSession && <SessionDetailsModal session={selectedSession} onClose={() => setSelectedSession(null)} />}
 		</div>
 	);
 }
 
-// MentorSessionCardDetailed and JoinRequestsModal components remain unchanged
 interface MentorSessionCardProps {
 	session: ISessionMentorDTO;
 	onStartSession: () => void;
+	setSelectedSession: (session: ISessionMentorDTO) => void; // Add prop to set selected session
 }
 
-function MentorSessionCardDetailed({ session, onStartSession }: MentorSessionCardProps) {
+function MentorSessionCardDetailed({ session, onStartSession, setSelectedSession }: MentorSessionCardProps) {
 	const formatTime = (time: string) => {
 		const [hour, minute] = time.split(":").map(Number);
 		const ampm = hour >= 12 ? "PM" : "AM";
-		const hour12 = hour % 12 || 12; // convert 0 to 12 for 12AM
+		const hour12 = hour % 12 || 12;
 		return `${hour12}:${minute.toString().padStart(2, "0")} ${ampm}`;
 	};
 
@@ -274,15 +274,14 @@ function MentorSessionCardDetailed({ session, onStartSession }: MentorSessionCar
 		<Card className="overflow-hidden p-0">
 			<CardContent className="p-6">
 				<div className="flex flex-col md:flex-row gap-6">
-					{/* Left Section: Session Details */}
 					<div className="flex-1">
 						<div className="flex justify-between items-center">
 							<div>
-								<h3 className="font-bold text-xl text-primary">{session.topic}</h3>
+								<h3 className="font-bold text-xl text-primary cursor-pointer hover:underline" onClick={() => setSelectedSession(session)}>
+									{session.topic}
+								</h3>
 							</div>
 						</div>
-
-						{/* Session Metadata */}
 						<div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
 							<div className="flex items-center gap-2">
 								<CalendarDays className="h-4 w-4 text-muted-foreground" />
@@ -292,7 +291,6 @@ function MentorSessionCardDetailed({ session, onStartSession }: MentorSessionCar
 									})}
 								</span>
 							</div>
-
 							<div className="flex items-center gap-2">
 								<Clock className="h-4 w-4 text-muted-foreground" />
 								<span className="text-sm">
@@ -313,12 +311,10 @@ function MentorSessionCardDetailed({ session, onStartSession }: MentorSessionCar
 							</div>
 						</div>
 					</div>
-
 					<div className="flex justify-center items-center gap-2">
 						<Badge variant={session.status === "completed" ? "outline" : "default"} className={`${session.status === "completed" ? "bg-primary/5 text-primary" : "bg-primary text-primary-foreground"} capitalize`}>
 							{session.status}
 						</Badge>
-						{/* Participants Dropdown */}
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button variant="outline" className="flex items-center gap-2">
@@ -349,15 +345,26 @@ function MentorSessionCardDetailed({ session, onStartSession }: MentorSessionCar
 								)}
 							</DropdownMenuContent>
 						</DropdownMenu>
-
-						{/* Action Buttons */}
 						{session.status === "upcoming" && (
 							<Button onClick={onStartSession} className="w-full md:w-auto">
 								Start Session
 							</Button>
 						)}
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="ghost" size="icon">
+									<FileText className="h-4 w-4" />
+									<span className="sr-only">More options</span>
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								<DropdownMenuItem onSelect={() => setSelectedSession(session)}>
+									<FileText className="mr-2 h-4 w-4" />
+									View Details
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
 					</div>
-					{/* Right Section: Participants Dropdown and Actions */}
 				</div>
 			</CardContent>
 		</Card>
