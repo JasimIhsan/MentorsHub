@@ -24,3 +24,7 @@ export interface IFetchAllMentorsUseCase {
 export interface IFetchUpcomingSessionMentorUsecase {
 	execute(mentorId: string): Promise<ISessionMentorDTO[]>
 }
+
+export interface IFetchSessionHistoryUsecase {
+	execute(mentorId: string): Promise<ISessionMentorDTO[]>
+}

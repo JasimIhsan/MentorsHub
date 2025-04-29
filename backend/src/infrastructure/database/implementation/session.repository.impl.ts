@@ -1,5 +1,5 @@
 import { ISessionRepository } from "../../../domain/dbrepository/session.repository";
-import { SessionModel } from "../models/session/session.model";
+import { ISessionDocument, SessionModel } from "../models/session/session.model";
 import { SessionEntity } from "../../../domain/entities/session.entity";
 import { handleError } from "./user.repository.impl";
 import { ISessionUserDTO, ISessionMentorDTO } from "../../../application/dtos/session.dto";
@@ -80,10 +80,21 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		try {
 			const sessions = await SessionModel.find({ mentorId }).populate("participants.userId", "firstName lastName avatar");
 			const mappedSessions = sessions.map(this.mapSessionToMentorDTO);
-			return mappedSessions
+			return mappedSessions;
 		} catch (error) {
 			return handleError(error, "Error fetching sessions");
 		}
+	}
+
+	async getSessionToExpire(): Promise<ISessionDocument[]> {
+		const sessions = await SessionModel.find({
+			status: { $in: ["pending", "approved", "upcoming"] },
+		});
+		return sessions;
+	}
+
+	async expireSession(sessionId: string): Promise<void> {
+		await SessionModel.findByIdAndDelete(sessionId, { status: "expired" });
 	}
 
 	private mapSessionToUserDTO(session: any, userId: string): ISessionUserDTO {
