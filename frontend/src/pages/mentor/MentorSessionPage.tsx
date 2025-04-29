@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, Video, Users, DollarSign, MessageSquare, CheckCircle, XCircle } from "lucide-react";
+import { CalendarDays, Clock, Video, Users, MessageSquare, CheckCircle, XCircle, IndianRupee } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import axiosInstance from "@/api/config/api.config";
@@ -12,6 +12,8 @@ import { RootState } from "@/store/store";
 import { Loading } from "@/components/custom-ui/Loading";
 import { ISessionMentorDTO, SessionStatus } from "@/interfaces/ISessionDTO";
 import io, { Socket } from "socket.io-client";
+import { Avatar } from "@radix-ui/react-avatar";
+import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function MentorSessionsPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
@@ -31,7 +33,7 @@ export function MentorSessionsPage() {
 			}
 
 			try {
-				const response = await axiosInstance.get(`/mentor/sessions/all/${user.id}`);
+				const response = await axiosInstance.get(`/mentor/sessions/upcoming/${user.id}`);
 				if (!response.data?.sessions) {
 					throw new Error("No sessions data received");
 				}
@@ -103,14 +105,11 @@ export function MentorSessionsPage() {
 	}
 
 	return (
-		<div className="w-full p-6">
+		<div className="w-full">
 			<div className="flex flex-col gap-8">
-				<h1 className="text-3xl font-bold tracking-tight">My Sessions</h1>
-				<Card>
-					<CardHeader>
-						<h2 className="text-lg font-semibold">All Sessions</h2>
-					</CardHeader>
-					<CardContent>
+				<h1 className="text-3xl font-bold tracking-tight">Upcoming Sessions</h1>
+				<Card className="p-0 border-none bg-background shadow-none">
+					<CardContent className="p-0">
 						<div className="space-y-6">
 							{sessions.map((session) => (
 								<MentorSessionCardDetailed key={session.id} session={session} onStartSession={() => handleStartSession(session)} />
@@ -135,6 +134,13 @@ interface MentorSessionCardProps {
 }
 
 function MentorSessionCardDetailed({ session, onStartSession }: MentorSessionCardProps) {
+	const formatTime = (time: string) => {
+		const [hour, minute] = time.split(":").map(Number);
+		const ampm = hour >= 12 ? "PM" : "AM";
+		const hour12 = hour % 12 || 12; // convert 0 to 12 for 12AM
+		return `${hour12}:${minute.toString().padStart(2, "0")} ${ampm}`;
+	};
+
 	return (
 		<Card className="overflow-hidden p-0">
 			<CardContent className="p-6">
@@ -151,12 +157,17 @@ function MentorSessionCardDetailed({ session, onStartSession }: MentorSessionCar
 						<div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
 							<div className="flex items-center gap-2">
 								<CalendarDays className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">{session.date}</span>
+								<span className="text-sm">
+									{new Date(session.date).toLocaleString("en-US", {
+										dateStyle: "medium",
+									})}
+								</span>
 							</div>
+
 							<div className="flex items-center gap-2">
 								<Clock className="h-4 w-4 text-muted-foreground" />
 								<span className="text-sm">
-									{session.time} ({session.hours} hours)
+									{formatTime(session.time)} ({session.hours} hours)
 								</span>
 							</div>
 							<div className="flex items-center gap-2">
@@ -164,8 +175,8 @@ function MentorSessionCardDetailed({ session, onStartSession }: MentorSessionCar
 								<span className="text-sm">{session.sessionFormat}</span>
 							</div>
 							<div className="flex items-center gap-2">
-								<DollarSign className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">{session.pricing === "free" ? "Free" : `$${session.totalAmount || 0}`}</span>
+								<IndianRupee className="h-4 w-4 text-muted-foreground" />
+								<span className="text-sm">{session.pricing === "free" ? "Free" : `${session.totalAmount?.toFixed(2) || 0}`}</span>
 							</div>
 							<div className="flex items-center gap-2">
 								<MessageSquare className="h-4 w-4 text-muted-foreground" />
@@ -183,44 +194,49 @@ function MentorSessionCardDetailed({ session, onStartSession }: MentorSessionCar
 						)}
 					</div>
 
-					<div className="flex justify-center items-center gap-7">
+					<div className="flex justify-center items-center gap-2">
 						<Badge variant={session.status === "completed" ? "outline" : "default"} className={`${session.status === "completed" ? "bg-primary/5 text-primary" : "bg-primary text-primary-foreground"} capitalize`}>
 							{session.status}
 						</Badge>
-						<div className="flex flex-col items-end justify-center gap-4">
-							{/* Participants Dropdown */}
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button variant="outline" className="flex items-center gap-2">
-										<Users className="h-4 w-4" />
-										<span>Participants ({session.participants.length})</span>
-									</Button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent align="end" className="w-64">
-									{session.participants.length === 0 ? (
-										<DropdownMenuItem disabled className="text-muted-foreground">
-											No participants
-										</DropdownMenuItem>
-									) : (
-										session.participants.map((participant) => (
-											<DropdownMenuItem key={participant._id} className="flex flex-col items-start">
+						{/* <div className="flex flex-col items-end justify-center gap-4"> */}
+						{/* Participants Dropdown */}
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="outline" className="flex items-center gap-2">
+									<Users className="h-4 w-4" />
+									<span>Participants ({session.participants.length})</span>
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end" className="w-64">
+								{session.participants.length === 0 ? (
+									<DropdownMenuItem disabled className="text-muted-foreground">
+										No participants
+									</DropdownMenuItem>
+								) : (
+									session.participants.map((participant) => (
+										<DropdownMenuItem key={participant._id} className="flex items-center gap-2">
+											<Avatar className="h-8 w-8">
+												<AvatarImage src={participant.avatar} alt={`${participant.firstName} ${participant.lastName}`} />
+												<AvatarFallback>{participant.firstName.charAt(0)}</AvatarFallback>
+											</Avatar>
+											<div className="flex flex-col">
 												<span className="font-medium">
 													{participant.firstName} {participant.lastName}
 												</span>
 												<span className="text-sm text-muted-foreground">Payment: {participant.paymentStatus || "N/A"}</span>
-											</DropdownMenuItem>
-										))
-									)}
-								</DropdownMenuContent>
-							</DropdownMenu>
+											</div>
+										</DropdownMenuItem>
+									))
+								)}
+							</DropdownMenuContent>
+						</DropdownMenu>
 
-							{/* Action Buttons */}
-							{session.status === "upcoming" && (
-								<Button onClick={onStartSession} className="w-full md:w-auto">
-									Start Session
-								</Button>
-							)}
-						</div>
+						{/* Action Buttons */}
+						{session.status === "upcoming" && (
+							<Button onClick={onStartSession} className="w-full md:w-auto">
+								Start Session
+							</Button>
+						)}
 					</div>
 					{/* Right Section: Participants Dropdown and Actions */}
 				</div>

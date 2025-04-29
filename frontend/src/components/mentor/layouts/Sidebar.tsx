@@ -31,6 +31,12 @@ export function MentorSidebar() {
 			active: pathname === "/mentor/requests",
 		},
 		{
+			title: "Upcoming Sessions",
+			icon: Users,
+			href: "/mentor/sessions",
+			active: pathname === "/mentor/sessions",
+		},
+		{
 			title: "Calendar",
 			icon: Calendar,
 			href: "/mentor/calendar",
@@ -48,12 +54,7 @@ export function MentorSidebar() {
 			href: "/mentor/plans",
 			active: pathname === "/mentor/plans",
 		},
-		{
-			title: "Sessions",
-			icon: Users,
-			href: "/mentor/sessions",
-			active: pathname === "/mentor/sessions",
-		},
+
 		{
 			title: "Reviews",
 			icon: Star,
