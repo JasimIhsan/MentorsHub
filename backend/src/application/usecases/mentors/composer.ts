@@ -1,4 +1,5 @@
 import { mentorRepository, sessionRepository } from "../../../infrastructure/composer";
+import { FetchSessionMentorUsecase } from "./fetch.sessons.usecase";
 import { FetchAllApprovedMentorsUsecase } from "./fetchAllApprovedMentors.usecase";
 import { FetchAllMentorsUseCase } from "./fetchAllMentors.usecase";
 import { FetchMentorUsecase } from "./fetchMentor.usecase";
@@ -10,3 +11,4 @@ export const fetchAllApprovedMentorsUsecase = new FetchAllApprovedMentorsUsecase
 export const fetchMentorUsecase = new FetchMentorUsecase(mentorRepository);
 export const fetchRequestUsecase = new FetchSessionRequests(sessionRepository);
 export const updateRequestStatusUsecase = new UpdateRequestStatusUsecase(sessionRepository);
+export const fetchSessionMentorUsecase = new FetchSessionMentorUsecase(sessionRepository);

@@ -25,13 +25,12 @@ export interface SessionData {
 	userId: string;
 	topic: string;
 	sessionType: string;
-	sessionFormat: string;
 	date: Date;
 	time: string;
 	hours: number;
 	message: string;
 	totalAmount: number;
-	pricing: "free" | "paid" | "both-pricing";
+	pricing: "free" | "paid";
 }
 
 export function RequestSessionPage() {
@@ -39,7 +38,6 @@ export function RequestSessionPage() {
 	const [time, setTime] = useState<string>("");
 	const [topic, setTopic] = useState<string>("");
 	const [sessionType, setSessionType] = useState<string>("video");
-	const [sessionFormat, setSessionFormat] = useState<string>("one-on-one");
 	const [message, setMessage] = useState<string>("");
 	const [hours, setHours] = useState<number>(1);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,13 +63,13 @@ export function RequestSessionPage() {
 	}
 
 	const isFormValid = () => {
-		return date && time && sessionType && sessionFormat && message.trim() && hours > 0;
+		return date && time && sessionType && topic && message.trim() && hours > 0;
 	};
 
 	const calculateTotal = () => {
 		const platformFee = 40;
 		const sessionFee = mentor.pricing === "paid" && mentor.hourlyRate ? mentor.hourlyRate * hours : 0;
-		console.log("sessionFee: ",typeof mentor.hourlyRate);
+		console.log("sessionFee: ", typeof mentor.hourlyRate);
 		return sessionFee + platformFee;
 	};
 
@@ -80,7 +78,6 @@ export function RequestSessionPage() {
 		userId: user?.id as string,
 		topic: topic,
 		sessionType: sessionType,
-		sessionFormat: sessionFormat,
 		date: date as Date,
 		time: time,
 		hours: hours,
@@ -137,6 +134,33 @@ export function RequestSessionPage() {
 								<CardDescription>Propose your preferred session details</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-6">
+								{/* <div>
+									<Label className="mb-2 block">Session Format</Label>
+									<RadioGroup value={sessionFormat} onValueChange={setSessionFormat} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+										<div className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 ${sessionFormat === "one-on-one" ? "border-primary bg-primary/5" : ""}`}>
+											<RadioGroupItem value=" Wrote one-on-one" id="one-on-one" />
+											<Label htmlFor="one-on-one" className="flex cursor-pointer items-center gap-2 font-normal">
+												<Users className="h-5 w-5" />
+												One-on-One
+											</Label>
+										</div>
+										<div className={`flex cursor-not-allowed items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 ${sessionFormat === "group" ? "border-primary bg-primary/5" : ""}`}>
+											<RadioGroupItem value="group" id="group" disabled={true} />
+											<Label htmlFor="group" className="flex cursor-not-allowed items-center gap-2 font-normal">
+												<Users className="h-5 w-5" />
+												Group Session (coming soon)
+											</Label>
+										</div>
+									</RadioGroup>
+								</div> */}
+
+								<div>
+									<Label htmlFor="time" className="mb-2 block">
+										Session Topic
+									</Label>
+									<Input id="topic" type="topic" value={topic} onChange={(e) => setTopic(e.target.value)} className="w-full" placeholder="Enter your topic" aria-label="Session topic" />
+								</div>
+
 								<div>
 									<Label className="mb-2 block">Session Type</Label>
 									<RadioGroup value={sessionType} onValueChange={setSessionType} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -155,42 +179,6 @@ export function RequestSessionPage() {
 											</Label>
 										</div>
 									</RadioGroup>
-								</div>
-
-								<div>
-									<Label className="mb-2 block">Session Format</Label>
-									<RadioGroup value={sessionFormat} onValueChange={setSessionFormat} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-										<div className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 ${sessionFormat === "one-on-one" ? "border-primary bg-primary/5" : ""}`}>
-											<RadioGroupItem value=" Wrote one-on-one" id="one-on-one" />
-											<Label htmlFor="one-on-one" className="flex cursor-pointer items-center gap-2 font-normal">
-												<Users className="h-5 w-5" />
-												One-on-One
-											</Label>
-										</div>
-										<div className={`flex cursor-not-allowed items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 ${sessionFormat === "group" ? "border-primary bg-primary/5" : ""}`}>
-											<RadioGroupItem value="group" id="group" disabled={true} />
-											<Label htmlFor="group" className="flex cursor-not-allowed items-center gap-2 font-normal">
-												<Users className="h-5 w-5" />
-												Group Session (coming soon)
-											</Label>
-										</div>
-									</RadioGroup>
-								</div>
-
-								<div>
-									<Label htmlFor="date" className="mb-2 block">
-										Preferred Date
-									</Label>
-									<div>
-										<Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border" disabled={(date) => date < new Date()} />
-									</div>
-								</div>
-
-								<div>
-									<Label htmlFor="time" className="mb-2 block">
-										Session Topic
-									</Label>
-									<Input id="topic" type="topic" value={topic} onChange={(e) => setTopic(e.target.value)} className="w-full" placeholder="Enter your topic" aria-label="Session topic" />
 								</div>
 
 								<div>
@@ -230,6 +218,14 @@ export function RequestSessionPage() {
 										value={message}
 										onChange={(e) => setMessage(e.target.value)}
 									/>
+								</div>
+								<div>
+									<Label htmlFor="date" className="mb-2 block">
+										Preferred Date
+									</Label>
+									<div>
+										<Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border" disabled={(date) => date < new Date()} />
+									</div>
 								</div>
 							</CardContent>
 							<CardFooter className="flex justify-end">
@@ -275,7 +271,7 @@ export function RequestSessionPage() {
 											<span className="text-sm">Preferred Format</span>
 											<div className="flex items-center gap-1">
 												<Users className="h-4 w-4 text-muted-foreground" />
-												<span className="text-sm">{mentor.sessionFormat === "one-on-one" ? "One-on-One" : mentor.sessionFormat === "group" ? "Group" : "Both"}</span>
+												<span className="text-sm">{mentor.sessionFormat === "one-on-one" ? "One-on-One" : mentor.sessionFormat === "group" ? "Group" : "One-on-One, Group"}</span>
 											</div>
 										</div>
 										<div className="flex items-center justify-between">
@@ -314,10 +310,6 @@ export function RequestSessionPage() {
 										<div className="flex items-center gap-2">
 											<MessageSquare className="h-4 w-4 text-muted-foreground" />
 											<span className="text-sm">{requestData.sessionType === "video" ? "Video Call" : "Chat"}</span>
-										</div>
-										<div className="flex items-center gap-2">
-											<MessageSquare className="h-4 w-4 text-muted-foreground" />
-											<span className="text-sm">{requestData.sessionFormat === "one-on-one" ? "One-on-One" : "Group Session"}</span>
 										</div>
 										<div className="flex items-center gap-2">
 											<Clock className="h-4 w-4 text-muted-foreground" />
@@ -372,7 +364,7 @@ export function RequestSessionPage() {
 							</Button>
 						</DialogFooter>
 					</DialogContent>
-				</Dialog>
+				</Dialog> 
 			</div>
 		</div>
 	);

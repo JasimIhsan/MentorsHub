@@ -1,29 +1,33 @@
-import { ISessionDocument } from "../../infrastructure/database/models/session/session.model"; // adjust path as needed
+import { ISessionDocument, ISessionParticipant, SessionFormat, SessionPaymentStatus, SessionStatus } from "../../infrastructure/database/models/session/session.model";
+
+export interface ISessionParticipantDTO {
+	userId: string;
+	paymentStatus: SessionPaymentStatus;
+	paymentId?: string;
+}
 
 export interface ISessionInterface {
 	id?: string;
+	participants: ISessionParticipantDTO[];
 	mentorId: string;
-	userId: string;
 	topic: string;
 	sessionType: string;
-	sessionFormat: string;
+	sessionFormat: SessionFormat;
 	date: Date;
 	time: string;
 	hours: number;
 	message: string;
-	status: "upcoming" | "completed" | "canceled" | "approved" | "pending";
-	paymentStatus?: "pending" | "completed" | "failed";
-	pricing: "free" | "paid" | "both-pricing";
-	rejectReason?: string;
-	paymentId?: string;
+	status: SessionStatus;
+	pricing: "free" | "paid";
 	totalAmount?: number;
+	rejectReason?: string;
 	createdAt?: Date;
 }
 
 export class SessionEntity {
 	private id?: string;
+	private participants: ISessionParticipantDTO[];
 	private mentorId: string;
-	private userId: string;
 	private topic: string;
 	private sessionType: string;
 	private sessionFormat: string;
@@ -31,18 +35,16 @@ export class SessionEntity {
 	private time: string;
 	private hours: number;
 	private message: string;
-	private status: "upcoming" | "completed" | "canceled" | "approved" | "pending";
-	private paymentStatus?: "pending" | "completed" | "failed";
-	private pricing: "free" | "paid" | "both-pricing";
-	private rejectReason?: string;
-	private paymentId?: string;
+	private status: string;
+	private pricing: string;
 	private totalAmount?: number;
+	private rejectReason?: string;
 	private createdAt: Date;
 
 	constructor(session: ISessionInterface) {
 		this.id = session.id;
+		this.participants = session.participants;
 		this.mentorId = session.mentorId;
-		this.userId = session.userId;
 		this.topic = session.topic;
 		this.sessionType = session.sessionType;
 		this.sessionFormat = session.sessionFormat;
@@ -51,28 +53,23 @@ export class SessionEntity {
 		this.hours = session.hours;
 		this.message = session.message;
 		this.status = session.status;
-		this.paymentStatus = session.paymentStatus;
-		this.paymentId = session.paymentId;
 		this.pricing = session.pricing;
-		this.rejectReason = session.rejectReason;
 		this.totalAmount = session.totalAmount;
+		this.rejectReason = session.rejectReason;
 		this.createdAt = session.createdAt || new Date();
 	}
 
-	static async createSession(session: Omit<ISessionInterface, "id" | "status" | "paymentStatus" | "createdAt">): Promise<SessionEntity> {
-		return new SessionEntity({
-			...session,
-			status: "pending",
-			paymentStatus: "pending",
-			createdAt: new Date(),
-		});
-	}
-
 	static fromDBDocument(doc: ISessionDocument): SessionEntity {
+		const participants = doc.participants.map((p: ISessionParticipant) => ({
+			userId: p.userId.toString(),
+			paymentStatus: p.paymentStatus,
+			paymentId: p.paymentId,
+		}));
+
 		return new SessionEntity({
 			id: doc._id.toString(),
+			participants,
 			mentorId: doc.mentorId.toString(),
-			userId: doc.userId.toString(),
 			topic: doc.topic,
 			sessionType: doc.sessionType,
 			sessionFormat: doc.sessionFormat,
@@ -82,69 +79,31 @@ export class SessionEntity {
 			message: doc.message,
 			status: doc.status,
 			pricing: doc.pricing,
-			rejectReason: doc.rejectReason,
-			paymentStatus: doc.paymentStatus,
-			paymentId: doc.paymentId,
 			totalAmount: doc.totalAmount,
+			rejectReason: doc.rejectReason,
 			createdAt: doc.createdAt,
 		});
 	}
 
-	// Getters
+	// You can add more getter methods if needed
 	getId(): string | undefined {
 		return this.id;
 	}
 
-	getMentorId(): string {
-		return this.mentorId;
+	getParticipants(): ISessionParticipantDTO[] {
+		return this.participants;
 	}
 
-	getUserId(): string {
-		return this.userId;
+	getPaidParticipants(): ISessionParticipantDTO[] {
+		return this.participants.filter((p) => p.paymentStatus === "completed");
 	}
 
 	getTopic(): string {
 		return this.topic;
 	}
 
-	getSessionType(): string {
-		return this.sessionType;
-	}
-
-	getSessionFormat(): string {
-		return this.sessionFormat;
-	}
-
-	getDate(): Date {
-		return this.date;
-	}
-
-	getTime(): string {
-		return this.time;
-	}
-
-	getHours(): number {
-		return this.hours;
-	}
-
-	getMessage(): string {
-		return this.message;
-	}
-
-	getStatus(): "upcoming" | "completed" | "canceled" | "approved" | "pending" {
+	getStatus(): string {
 		return this.status;
-	}
-
-	getPaymentStatus(): "pending" | "completed" | "failed" | undefined {
-		return this.paymentStatus;
-	}
-
-	getPaymentId(): string | undefined {
-		return this.paymentId;
-	}
-
-	getTotalAmount(): number | undefined {
-		return this.totalAmount;
 	}
 
 	getCreatedAt(): Date {

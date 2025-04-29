@@ -3,7 +3,7 @@ import { createSessionController, fetchSessionsByUserController, paySessionContr
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 export const sessionRouter = Router();
 
-sessionRouter.post("/create-session", verifyAccessToken, (req, res) => createSessionController.handle(req, res));
+sessionRouter.post("/create-session",  (req, res) => createSessionController.handle(req, res));
 
 sessionRouter.get("/all/:userId", verifyAccessToken, (req, res) => fetchSessionsByUserController.handle(req, res));
 

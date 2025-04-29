@@ -1,32 +1,59 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
+
+export type SessionFormat = "one-on-one" | "group";
+export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending";
+export type SessionPaymentStatus = "pending" | "completed" | "failed";
+export type PricingType = "free" | "paid";
+
+export interface ISessionParticipant {
+	userId: mongoose.Types.ObjectId;
+	paymentStatus: SessionPaymentStatus;
+	paymentId?: string;
+}
 
 export interface ISessionDocument extends Document {
 	_id: mongoose.Types.ObjectId;
+	participants: ISessionParticipant[];
 	mentorId: mongoose.Types.ObjectId;
-	userId: mongoose.Types.ObjectId;
 	topic: string;
 	sessionType: string;
-	sessionFormat: string;
+	sessionFormat: SessionFormat;
 	date: Date;
 	time: string;
 	hours: number;
 	message: string;
-	status: "upcoming" | "completed" | "canceled" | "approved" | "pending";
-	paymentStatus?: "pending" | "completed" | "failed";
-	rejectReason?: string;
-	pricing: "free" | "paid";
-	paymentId?: string;
+	status: SessionStatus;
+	pricing: PricingType;
 	totalAmount?: number;
+	rejectReason?: string;
 	createdAt: Date;
+	updatedAt: Date;
 }
 
-const SessionRequestSchema: Schema = new Schema<ISessionDocument>(
+const ParticipantSchema = new Schema<ISessionParticipant>(
 	{
-		mentorId: { type: Schema.Types.ObjectId, ref: "Users", required: true },
 		userId: { type: Schema.Types.ObjectId, ref: "Users", required: true },
+		paymentStatus: {
+			type: String,
+			enum: ["pending", "completed", "failed"],
+			default: "pending",
+		},
+		paymentId: { type: String },
+	},
+	{ _id: false }
+);
+
+const SessionSchema = new Schema<ISessionDocument>(
+	{
+		participants: { type: [ParticipantSchema], required: true },
+		mentorId: { type: Schema.Types.ObjectId, ref: "Users", required: true },
 		topic: { type: String, required: true },
 		sessionType: { type: String, required: true },
-		sessionFormat: { type: String, required: true },
+		sessionFormat: {
+			type: String,
+			enum: ["one-on-one", "group"],
+			required: true,
+		},
 		date: { type: Date, required: true },
 		time: { type: String, required: true },
 		hours: { type: Number, required: true },
@@ -36,21 +63,15 @@ const SessionRequestSchema: Schema = new Schema<ISessionDocument>(
 			enum: ["upcoming", "completed", "canceled", "approved", "pending"],
 			default: "pending",
 		},
-		paymentStatus: {
-			type: String,
-			enum: ["pending", "completed", "failed"],
-			default: "pending",
-		},
 		pricing: {
 			type: String,
-			enum: ["free", "paid"],
+			enum: ["free", "paid", "both-pricing"],
 			default: "free",
 		},
-		rejectReason: { type: String },
-		paymentId: { type: String },
 		totalAmount: { type: Number },
+		rejectReason: { type: String },
 	},
 	{ timestamps: true }
 );
 
-export const SessionModel = mongoose.model<ISessionDocument>("Sessions", SessionRequestSchema);
+export const SessionModel = mongoose.model<ISessionDocument>("Sessions", SessionSchema);
