@@ -21,6 +21,6 @@ export interface IFetchAllMentorsUseCase {
 	execute(mentorId: string): Promise<IMentorDTO[]>
 }
 
-export interface IFetchSessionMentorUsecase {
+export interface IFetchUpcomingSessionMentorUsecase {
 	execute(mentorId: string): Promise<ISessionMentorDTO[]>
 }
