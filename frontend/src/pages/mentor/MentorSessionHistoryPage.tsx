@@ -1,53 +1,48 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, Video, Users, MessageSquare, CheckCircle, XCircle, IndianRupee, FileText } from "lucide-react";
+import { CalendarDays, Clock, Video, Users, MessageSquare, IndianRupee, FileText } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Loading } from "@/components/common/Loading";
-import { ISessionMentorDTO, SessionStatus } from "@/interfaces/ISessionDTO";
-import io, { Socket } from "socket.io-client";
+import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
 import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { SessionDetailsModal } from "@/components/common/SessionDetailsModal";
 
-export function MentorUpcomingSessionsPage() {
+export function MentorSessionHistoryPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
 	const [filteredSessions, setFilteredSessions] = useState<ISessionMentorDTO[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [joinRequests, setJoinRequests] = useState<{ userId: string; userName: string; sessionId: string }[]>([]);
-	const [showJoinRequestsModal, setShowJoinRequestsModal] = useState(false);
-	const [filterOption, setFilterOption] = useState<"all" | "today" | "thisMonth">("all");
+	const [filterOption, setFilterOption] = useState<"all" | "completed" | "canceled">("all");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [selectedSession, setSelectedSession] = useState<ISessionMentorDTO | null>(null); // State for modal
 	const sessionsPerPage = 5;
 	const user = useSelector((state: RootState) => state.auth.user);
-	const socketRef = useRef<Socket | null>(null);
 
 	useEffect(() => {
 		const fetchSessions = async () => {
 			if (!user?.id) {
-				setError("User not authenticated. Please log in to view sessions.");
+				setError("User not authenticated. Please log in to view session history.");
 				setLoading(false);
 				return;
 			}
 
 			try {
-				const response = await axiosInstance.get(`/mentor/sessions/upcoming/${user.id}`);
+				const response = await axiosInstance.get(`/mentor/sessions/session-history/${user.id}`);
 				if (!response.data?.sessions) {
-					throw new Error("No sessions data received");
+					throw new Error("No session history data received");
 				}
 				setSessions(response.data.sessions);
 				setFilteredSessions(response.data.sessions);
 			} catch (err: any) {
-				const message = err.response?.data?.message || "Failed to load sessions.";
+				const message = err.response?.data?.message || "Failed to load session history.";
 				setError(message);
 				toast.error(message);
 			} finally {
@@ -56,44 +51,21 @@ export function MentorUpcomingSessionsPage() {
 		};
 
 		fetchSessions();
-
-		socketRef.current = io("http://localhost:5858", { withCredentials: true });
-		socketRef.current.on("connect", () => {
-			console.log("Mentor connected to socket:", socketRef.current?.id);
-		});
-
-		socketRef.current.on("user-join-request", (data: { userId: string; userName: string; sessionId: string }) => {
-			setJoinRequests((prev) => [...prev, data]);
-			setShowJoinRequestsModal(true);
-			toast.info(`${data.userName} requested to join the session.`);
-		});
-
-		return () => {
-			socketRef.current?.disconnect();
-		};
 	}, [user?.id]);
 
+	// Filter sessions based on filter option
 	useEffect(() => {
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
 		let filtered = sessions;
-		if (filterOption === "today") {
-			filtered = sessions.filter((session) => {
-				const sessionDate = new Date(session.date);
-				return sessionDate.toDateString() === today.toDateString();
-			});
-		} else if (filterOption === "thisMonth") {
-			filtered = sessions.filter((session) => {
-				const sessionDate = new Date(session.date);
-				return sessionDate >= startOfMonth && sessionDate <= new Date(today.getFullYear(), today.getMonth() + 1, 0);
-			});
+		if (filterOption === "completed") {
+			filtered = sessions.filter((session) => session.status === "completed");
+		} else if (filterOption === "canceled") {
+			filtered = sessions.filter((session) => session.status === "canceled");
 		}
 		setFilteredSessions(filtered);
-		setCurrentPage(1);
+		setCurrentPage(1); // Reset to first page when filtering changes
 	}, [filterOption, sessions]);
 
+	// Pagination logic
 	const totalPages = Math.ceil(filteredSessions.length / sessionsPerPage);
 	const indexOfLastSession = currentPage * sessionsPerPage;
 	const indexOfFirstSession = indexOfLastSession - sessionsPerPage;
@@ -105,39 +77,9 @@ export function MentorUpcomingSessionsPage() {
 		}
 	};
 
-	const handleStartSession = async (session: ISessionMentorDTO) => {
-		try {
-			await axiosInstance.put(`/mentor/sessions/start/${session.id}`);
-			socketRef.current?.emit("session-started", { sessionId: session.id });
-			setSessions((prev) => prev.map((s) => (s.id === session.id ? { ...s, status: "active" as SessionStatus } : s)));
-			setFilteredSessions((prev) => prev.map((s) => (s.id === session.id ? { ...s, status: "active" as SessionStatus } : s)));
-			toast.success("Session started!");
-		} catch (err: any) {
-			toast.error(err.response?.data?.message || "Failed to start session.");
-		}
-	};
-
-	const handleApproveJoin = (request: { userId: string; userName: string; sessionId: string }) => {
-		socketRef.current?.emit("approve-join", {
-			userId: request.userId,
-			sessionId: request.sessionId,
-		});
-		setJoinRequests((prev) => prev.filter((r) => r.userId !== request.userId));
-		toast.success(`Approved ${request.userName} to join the session.`);
-	};
-
-	const handleRejectJoin = (request: { userId: string; userName: string; sessionId: string }) => {
-		socketRef.current?.emit("reject-join", {
-			userId: request.userId,
-			sessionId: request.sessionId,
-		});
-		setJoinRequests((prev) => prev.filter((r) => r.userId !== request.userId));
-		toast.info(`Rejected ${request.userName}'s join request.`);
-	};
-
 	const renderPaginationItems = () => {
 		const items = [];
-		const maxPagesToShow = 5;
+		const maxPagesToShow = 5; // Show up to 5 page numbers at a time
 		let startPage = Math.max(1, currentPage - 2);
 		let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
@@ -189,7 +131,7 @@ export function MentorUpcomingSessionsPage() {
 	};
 
 	if (loading) {
-		return <Loading appName="Mentor Sessions" loadingMessage="Loading your sessions" />;
+		return <Loading appName="Mentor Session History" loadingMessage="Loading your session history" />;
 	}
 
 	if (error) {
@@ -201,7 +143,7 @@ export function MentorUpcomingSessionsPage() {
 		<div className="w-full">
 			<div className="flex flex-col gap-8">
 				<div className="flex justify-between items-center">
-					<h1 className="text-3xl font-bold tracking-tight">Upcoming Sessions</h1>
+					<h1 className="text-3xl font-bold tracking-tight">Session History</h1>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button variant="outline" className="flex items-center gap-2">
@@ -210,8 +152,8 @@ export function MentorUpcomingSessionsPage() {
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
 							<DropdownMenuItem onClick={() => setFilterOption("all")}>All</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setFilterOption("today")}>Today</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setFilterOption("thisMonth")}>This Month</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setFilterOption("completed")}>Completed</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setFilterOption("canceled")}>Canceled</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
@@ -222,7 +164,6 @@ export function MentorUpcomingSessionsPage() {
 								<MentorSessionCardDetailed
 									key={session.id}
 									session={session}
-									onStartSession={() => handleStartSession(session)}
 									setSelectedSession={setSelectedSession} // Pass setSelectedSession to open modal
 								/>
 							))}
@@ -250,7 +191,6 @@ export function MentorUpcomingSessionsPage() {
 					</CardContent>
 				</Card>
 			</div>
-			<JoinRequestsModal isOpen={showJoinRequestsModal} onClose={() => setShowJoinRequestsModal(false)} joinRequests={joinRequests} onApprove={handleApproveJoin} onReject={handleRejectJoin} />
 			{selectedSession && <SessionDetailsModal session={selectedSession} onClose={() => setSelectedSession(null)} />}
 		</div>
 	);
@@ -258,11 +198,10 @@ export function MentorUpcomingSessionsPage() {
 
 interface MentorSessionCardProps {
 	session: ISessionMentorDTO;
-	onStartSession: () => void;
 	setSelectedSession: (session: ISessionMentorDTO) => void; // Add prop to set selected session
 }
 
-function MentorSessionCardDetailed({ session, onStartSession, setSelectedSession }: MentorSessionCardProps) {
+function MentorSessionCardDetailed({ session, setSelectedSession }: MentorSessionCardProps) {
 	const formatTime = (time: string) => {
 		const [hour, minute] = time.split(":").map(Number);
 		const ampm = hour >= 12 ? "PM" : "AM";
@@ -345,11 +284,6 @@ function MentorSessionCardDetailed({ session, onStartSession, setSelectedSession
 								)}
 							</DropdownMenuContent>
 						</DropdownMenu>
-						{session.status === "upcoming" && (
-							<Button onClick={onStartSession} className="w-full md:w-auto">
-								Start Session
-							</Button>
-						)}
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button variant="ghost" size="icon">
@@ -368,47 +302,5 @@ function MentorSessionCardDetailed({ session, onStartSession, setSelectedSession
 				</div>
 			</CardContent>
 		</Card>
-	);
-}
-
-interface JoinRequestsModalProps {
-	isOpen: boolean;
-	onClose: () => void;
-	joinRequests: { userId: string; userName: string; sessionId: string }[];
-	onApprove: (request: { userId: string; userName: string; sessionId: string }) => void;
-	onReject: (request: { userId: string; userName: string; sessionId: string }) => void;
-}
-
-function JoinRequestsModal({ isOpen, onClose, joinRequests, onApprove, onReject }: JoinRequestsModalProps) {
-	return (
-		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>Join Requests</DialogTitle>
-				</DialogHeader>
-				<div className="space-y-4">
-					{joinRequests.length === 0 ? (
-						<p className="text-center text-sm text-muted-foreground">No pending join requests.</p>
-					) : (
-						joinRequests.map((request) => (
-							<div key={request.userId} className="flex items-center justify-between p-2 border-b">
-								<div>
-									<p className="font-medium">{request.userName}</p>
-									<p className="text-sm text-muted-foreground">Requested to join session {request.sessionId}</p>
-								</div>
-								<div className="flex gap-2">
-									<Button size="sm" onClick={() => onApprove(request)}>
-										<CheckCircle className="h-4 w-4 mr-1" /> Approve
-									</Button>
-									<Button size="sm" variant="destructive" onClick={() => onReject(request)}>
-										<XCircle className="h-4 w-4 mr-1" /> Reject
-									</Button>
-								</div>
-							</div>
-						))
-					)}
-				</div>
-			</DialogContent>
-		</Dialog>
 	);
 }

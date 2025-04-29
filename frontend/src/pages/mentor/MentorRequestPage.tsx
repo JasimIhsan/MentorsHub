@@ -6,6 +6,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Search, Filter, Calendar, Check, Clock, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/api/config/api.config";
@@ -54,6 +55,12 @@ export function MentorRequestsPage() {
 	}>({ isOpen: false, type: null, requestId: null, rejectReason: "" });
 	const [searchQuery, setSearchQuery] = useState("");
 	const [filterOption, setFilterOption] = useState<"all" | "free" | "paid" | "today" | "week">("all");
+	const [currentPage, setCurrentPage] = useState<{ pending: number; approved: number; rejected: number }>({
+		pending: 1,
+		approved: 1,
+		rejected: 1,
+	});
+	const itemsPerPage = 6;
 
 	useEffect(() => {
 		const fetch = async () => {
@@ -143,13 +150,30 @@ export function MentorRequestsPage() {
 		}
 	};
 
+	const getPaginatedRequests = (filteredRequests: ISessionMentorDTO[], status: string) => {
+		const page = currentPage[status as keyof typeof currentPage];
+		const startIndex = (page - 1) * itemsPerPage;
+		const endIndex = startIndex + itemsPerPage;
+		return filteredRequests.slice(startIndex, endIndex);
+	};
+
+	const getTotalPages = (filteredRequests: ISessionMentorDTO[]) => {
+		return Math.ceil(filteredRequests.length / itemsPerPage);
+	};
+
+	const handlePageChange = (status: string, page: number) => {
+		setCurrentPage((prev) => ({ ...prev, [status]: page }));
+	};
+
 	const renderSessionRequestsList = (filteredRequests: ISessionMentorDTO[], status: string) => {
 		const processedRequests = filterRequests(filteredRequests, status);
+		const paginatedRequests = getPaginatedRequests(processedRequests, status);
+		const totalPages = getTotalPages(processedRequests);
 
 		return (
 			<>
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-					{processedRequests.map((request) => {
+					{paginatedRequests.map((request) => {
 						const participant = request.participants[0]; // Assuming one participant for one-on-one sessions
 						return (
 							<Card key={request.id}>
@@ -175,9 +199,7 @@ export function MentorRequestsPage() {
 										</div>
 										<div className="grid grid-cols-2 gap-4">
 											<div className="space-y-1">
-												<span className="text-sm font-medium text-muted-foreground">
-													Session Type
-												</span>
+												<span className="text-sm font-medium text-muted-foreground">Session Type</span>
 												<p className="text-sm">{request.sessionType}</p>
 											</div>
 											<div className="space-y-1">
@@ -228,6 +250,32 @@ export function MentorRequestsPage() {
 						<h3 className="text-lg font-semibold">No {status} requests</h3>
 						<p className="text-muted-foreground">{status === "pending" ? "You're all caught up! No pending requests to review." : status === "approved" ? "No approved requests yet." : "No rejected requests."}</p>
 					</div>
+				)}
+
+				{processedRequests.length > 0 && (
+					<Pagination className="mt-6">
+						<PaginationContent>
+							<PaginationItem>
+								<PaginationPrevious
+									onClick={() => handlePageChange(status, currentPage[status as keyof typeof currentPage] - 1)}
+									className={currentPage[status as keyof typeof currentPage] === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+								/>
+							</PaginationItem>
+							{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+								<PaginationItem key={page}>
+									<PaginationLink onClick={() => handlePageChange(status, page)} isActive={currentPage[status as keyof typeof currentPage] === page} className="cursor-pointer">
+										{page}
+									</PaginationLink>
+								</PaginationItem>
+							))}
+							<PaginationItem>
+								<PaginationNext
+									onClick={() => handlePageChange(status, currentPage[status as keyof typeof currentPage] + 1)}
+									className={currentPage[status as keyof typeof currentPage] === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+								/>
+							</PaginationItem>
+						</PaginationContent>
+					</Pagination>
 				)}
 
 				<Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>

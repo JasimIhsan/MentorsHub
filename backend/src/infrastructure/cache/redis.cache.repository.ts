@@ -8,7 +8,7 @@ export class RedisCacheRepository implements ICacheRepository {
 			console.error("Redis connected: ❌❌❌\n", err);
 		});
 		this.connectRedis();
-		this.client.on("connect", () => console.log("Redis connected: ✅✅✅"));
+		this.client.on("connect", () => console.log(" Redis connected    : ✅✅✅"));
 	}
 
 	private async connectRedis() {

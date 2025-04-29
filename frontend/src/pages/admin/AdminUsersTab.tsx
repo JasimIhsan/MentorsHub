@@ -6,6 +6,7 @@ import { UserFilter } from "@/components/admin/user-tab/UserFilters";
 import { UserTable } from "@/components/admin/user-tab/UserTable";
 import { UserPagination } from "@/components/admin/pagination";
 import { AddUserForm } from "@/components/admin/user-tab/AddUserForm";
+import { UserDetailsModal } from "@/components/admin/user-tab/UserDetailsModal";
 
 export default function AdminUsersTab() {
 	const [searchTerm, setSearchTerm] = useState("");
@@ -15,6 +16,8 @@ export default function AdminUsersTab() {
 	const [loading, setLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage] = useState(10);
+	const [selectedUser, setSelectedUser] = useState<IUserDTO | null>(null);
+	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const filteredUsers = users.filter((user) => {
 		const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -69,6 +72,16 @@ export default function AdminUsersTab() {
 		}
 	};
 
+	const handleViewDetails = (user: IUserDTO) => {
+		setSelectedUser(user);
+		setIsModalOpen(true);
+	};
+
+	const handleCloseModal = () => {
+		setIsModalOpen(false);
+		setSelectedUser(null);
+	};
+
 	useEffect(() => {
 		const fetchUsers = async () => {
 			try {
@@ -95,14 +108,16 @@ export default function AdminUsersTab() {
 					<h1 className="text-3xl font-bold tracking-tight">Users</h1>
 					<p className="text-muted-foreground">Manage and monitor all users on the platform</p>
 				</div>
-				<AddUserForm setUsers={setUsers}/>
+				<AddUserForm setUsers={setUsers} />
 			</div>
 
 			<UserFilter searchTerm={searchTerm} setSearchTerm={setSearchTerm} roleFilter={roleFilter} setRoleFilter={setRoleFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
 
-			<UserTable users={paginatedUsers} loading={loading} handleStatusUpdate={handleStatusUpdate} handleDeleteUser={handleUserDelete} />
+			<UserTable users={paginatedUsers} loading={loading} handleStatusUpdate={handleStatusUpdate} handleDeleteUser={handleUserDelete} handleViewDetails={handleViewDetails} />
 
 			<UserPagination currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} filteredUsersLength={filteredUsers.length} paginatedUsersLength={paginatedUsers.length} loading={loading} />
+
+			{isModalOpen && selectedUser && <UserDetailsModal user={selectedUser} onClose={handleCloseModal} />}
 		</div>
 	);
 }
