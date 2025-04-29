@@ -14,13 +14,18 @@ import { ISessionMentorDTO, SessionStatus } from "@/interfaces/ISessionDTO";
 import io, { Socket } from "socket.io-client";
 import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 export function MentorSessionsPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
+	const [filteredSessions, setFilteredSessions] = useState<ISessionMentorDTO[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [joinRequests, setJoinRequests] = useState<{ userId: string; userName: string; sessionId: string }[]>([]);
 	const [showJoinRequestsModal, setShowJoinRequestsModal] = useState(false);
+	const [sortOption, setSortOption] = useState<"all" | "today" | "thisMonth">("all");
+	const [currentPage, setCurrentPage] = useState(1);
+	const sessionsPerPage = 5;
 	const user = useSelector((state: RootState) => state.auth.user);
 	const socketRef = useRef<Socket | null>(null);
 
@@ -38,6 +43,7 @@ export function MentorSessionsPage() {
 					throw new Error("No sessions data received");
 				}
 				setSessions(response.data.sessions);
+				setFilteredSessions(response.data.sessions); // Initialize filtered sessions
 			} catch (err: any) {
 				const message = err.response?.data?.message || "Failed to load sessions.";
 				setError(message);
@@ -66,11 +72,46 @@ export function MentorSessionsPage() {
 		};
 	}, [user?.id]);
 
+	// Filter sessions based on sort option
+	useEffect(() => {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0); // Normalize to start of day
+		const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+		let filtered = sessions;
+		if (sortOption === "today") {
+			filtered = sessions.filter((session) => {
+				const sessionDate = new Date(session.date);
+				return sessionDate.toDateString() === today.toDateString();
+			});
+		} else if (sortOption === "thisMonth") {
+			filtered = sessions.filter((session) => {
+				const sessionDate = new Date(session.date);
+				return sessionDate >= startOfMonth && sessionDate <= new Date(today.getFullYear(), today.getMonth() + 1, 0);
+			});
+		}
+		setFilteredSessions(filtered);
+		setCurrentPage(1); // Reset to first page when sorting changes
+	}, [sortOption, sessions]);
+
+	// Pagination logic
+	const totalPages = Math.ceil(filteredSessions.length / sessionsPerPage);
+	const indexOfLastSession = currentPage * sessionsPerPage;
+	const indexOfFirstSession = indexOfLastSession - sessionsPerPage;
+	const currentSessions = filteredSessions.slice(indexOfFirstSession, indexOfLastSession);
+
+	const handlePageChange = (page: number) => {
+		if (page >= 1 && page <= totalPages) {
+			setCurrentPage(page);
+		}
+	};
+
 	const handleStartSession = async (session: ISessionMentorDTO) => {
 		try {
 			await axiosInstance.put(`/mentor/sessions/start/${session.id}`);
 			socketRef.current?.emit("session-started", { sessionId: session.id });
 			setSessions((prev) => prev.map((s) => (s.id === session.id ? { ...s, status: "active" as SessionStatus } : s)));
+			setFilteredSessions((prev) => prev.map((s) => (s.id === session.id ? { ...s, status: "active" as SessionStatus } : s)));
 			toast.success("Session started!");
 		} catch (err: any) {
 			toast.error(err.response?.data?.message || "Failed to start session.");
@@ -95,6 +136,63 @@ export function MentorSessionsPage() {
 		toast.info(`Rejected ${request.userName}'s join request.`);
 	};
 
+	const renderPaginationItems = () => {
+		const items = [];
+		const maxPagesToShow = 5; // Show up to 5 page numbers at a time
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+		// Adjust startPage if endPage is at the maximum
+		if (endPage - startPage < maxPagesToShow - 1) {
+			startPage = Math.max(1, endPage - maxPagesToShow + 1);
+		}
+
+		// Always show first page
+		if (startPage > 1) {
+			items.push(
+				<PaginationItem key={1}>
+					<PaginationLink onClick={() => handlePageChange(1)}>{1}</PaginationLink>
+				</PaginationItem>
+			);
+			if (startPage > 2) {
+				items.push(
+					<PaginationItem key="start-ellipsis">
+						<PaginationEllipsis />
+					</PaginationItem>
+				);
+			}
+		}
+
+		// Show page numbers in range
+		for (let page = startPage; page <= endPage; page++) {
+			items.push(
+				<PaginationItem key={page}>
+					<PaginationLink onClick={() => handlePageChange(page)} isActive={currentPage === page}>
+						{page}
+					</PaginationLink>
+				</PaginationItem>
+			);
+		}
+
+		// Show last page and ellipsis if needed
+		if (endPage < totalPages) {
+			if (endPage < totalPages - 1) {
+				items.push(
+					<PaginationItem key="end-ellipsis">
+						<PaginationEllipsis />
+					</PaginationItem>
+				);
+			}
+			items.push(
+				<PaginationItem key={totalPages}>
+					<PaginationLink onClick={() => handlePageChange(totalPages)}>{totalPages}</PaginationLink>
+				</PaginationItem>
+			);
+		}
+
+		return items;
+	};
+
 	if (loading) {
 		return <Loading appName="Mentor Sessions" loadingMessage="Loading your sessions" />;
 	}
@@ -107,19 +205,49 @@ export function MentorSessionsPage() {
 	return (
 		<div className="w-full">
 			<div className="flex flex-col gap-8">
-				<h1 className="text-3xl font-bold tracking-tight">Upcoming Sessions</h1>
+				<div className="flex justify-between items-center">
+					<h1 className="text-3xl font-bold tracking-tight">Upcoming Sessions</h1>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="outline" className="flex items-center gap-2">
+								<span>Sort: {sortOption.charAt(0).toUpperCase() + sortOption.slice(1)}</span>
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent>
+							<DropdownMenuItem onClick={() => setSortOption("all")}>All</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setSortOption("today")}>Today</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setSortOption("thisMonth")}>This Month</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
 				<Card className="p-0 border-none bg-background shadow-none">
 					<CardContent className="p-0">
 						<div className="space-y-6">
-							{sessions.map((session) => (
+							{currentSessions.map((session) => (
 								<MentorSessionCardDetailed key={session.id} session={session} onStartSession={() => handleStartSession(session)} />
 							))}
-							{sessions.length === 0 && (
+							{currentSessions.length === 0 && (
 								<div className="text-center p-4">
-									<p className="text-sm text-muted-foreground">No sessions found.</p>
+									<p className="text-sm text-muted-foreground">No sessions found for the selected filter.</p>
 								</div>
 							)}
 						</div>
+						{/* Pagination Controls */}
+						{totalPages > 0 && (
+							<div className="mt-6">
+								<Pagination>
+									<PaginationContent>
+										<PaginationItem>
+											<PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} className={currentPage === 1 ? "pointer-events-none opacity-50" : ""} />
+										</PaginationItem>
+										{renderPaginationItems()}
+										<PaginationItem>
+											<PaginationNext onClick={() => handlePageChange(currentPage + 1)} className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""} />
+										</PaginationItem>
+									</PaginationContent>
+								</Pagination>
+							</div>
+						)}
 					</CardContent>
 				</Card>
 			</div>
@@ -183,22 +311,12 @@ function MentorSessionCardDetailed({ session, onStartSession }: MentorSessionCar
 								<span className="text-sm">{session.sessionType}</span>
 							</div>
 						</div>
-
-						{/* Rejection Reason (if applicable) */}
-						{session.rejectReason && session.status === "rejected" && (
-							<div className="mt-4 p-3 bg-destructive/10 rounded-md">
-								<p className="text-sm text-destructive">
-									<strong>Rejection Reason:</strong> {session.rejectReason}
-								</p>
-							</div>
-						)}
 					</div>
 
 					<div className="flex justify-center items-center gap-2">
 						<Badge variant={session.status === "completed" ? "outline" : "default"} className={`${session.status === "completed" ? "bg-primary/5 text-primary" : "bg-primary text-primary-foreground"} capitalize`}>
 							{session.status}
 						</Badge>
-						{/* <div className="flex flex-col items-end justify-center gap-4"> */}
 						{/* Participants Dropdown */}
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
