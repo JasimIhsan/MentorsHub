@@ -1,4 +1,4 @@
-export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected";
+export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected" | "expired";
 
 interface BaseSession {
 	topic: string;
