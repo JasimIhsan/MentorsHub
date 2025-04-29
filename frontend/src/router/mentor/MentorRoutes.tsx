@@ -7,6 +7,7 @@ import { MentorProtectedRoute } from "./ProtectedRoute";
 import { MentorRequestsPage } from "@/pages/mentor/MentorRequestPage";
 import { MentorCalendarPage } from "@/pages/mentor/MentorCalendarPage";
 import { MentorAvailabilityPage } from "@/pages/mentor/MentorAvailabilityPage";
+import { MentorSessionsPage } from "@/pages/mentor/MentorSessionPage";
 
 const MentorRoutes = () => {
 	return (
@@ -41,6 +42,15 @@ const MentorRoutes = () => {
 					element={
 						<MentorProtectedRoute>
 							<MentorAvailabilityPage />
+						</MentorProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="sessions"
+					element={
+						<MentorProtectedRoute>
+							<MentorSessionsPage />
 						</MentorProtectedRoute>
 					}
 				/>

@@ -11,9 +11,36 @@ import { useEffect, useState } from "react";
 import axiosInstance from "@/api/config/api.config";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+
+// Define the interface based on the JSON structure
+interface SessionParticipant {
+	_id: string;
+	firstName: string;
+	lastName: string;
+	avatar: string;
+	paymentStatus: string;
+	paymentId: string;
+}
+
+interface ISessionMentorDTO {
+	id: string;
+	mentor: string;
+	participants: SessionParticipant[];
+	topic: string;
+	sessionType: string;
+	sessionFormat: string;
+	date: string;
+	time: string;
+	hours: number;
+	message: string;
+	status: string;
+	pricing: string;
+	totalAmount: number;
+	createdAt: string;
+	rejectReason?: string;
+}
 
 export function MentorRequestsPage() {
 	const user = useSelector((state: RootState) => state.auth.user);
@@ -58,14 +85,12 @@ export function MentorRequestsPage() {
 				toast.success(response.data.message);
 				setRequests((prev) => prev.map((r) => (r.id === confirmationDialog.requestId ? { ...r, status: "approved" } : r)));
 			} else {
-				// Log the payload to verify rejectReason
 				const payload = {
 					status: "rejected",
 					rejectReason: confirmationDialog.rejectReason,
 				};
 				console.log("Reject Payload:", payload);
 
-				// Ensure rejectReason is not empty
 				if (!confirmationDialog.rejectReason.trim()) {
 					toast.error("Please provide a reason for rejection.");
 					return;
@@ -76,7 +101,6 @@ export function MentorRequestsPage() {
 				setRequests((prev) => prev.map((r) => (r.id === confirmationDialog.requestId ? { ...r, status: "rejected", rejectReason: confirmationDialog.rejectReason } : r)));
 			}
 		} catch (error: any) {
-			// Log the error for debugging
 			console.error(`Failed to ${confirmationDialog.type} request:`, error.response?.data || error.message);
 			toast.error(`Failed to ${confirmationDialog.type} request: ${error.response?.data?.message || "Unknown error"}`);
 		} finally {
@@ -92,13 +116,11 @@ export function MentorRequestsPage() {
 	const filterRequests = (requests: ISessionMentorDTO[], status: string) => {
 		let filtered = requests.filter((req) => req.status === status);
 
-		// Apply search filter
 		if (searchQuery) {
 			const lowerQuery = searchQuery.toLowerCase();
-			filtered = filtered.filter((req) => `${req.userId.firstName} ${req.userId.lastName}`.toLowerCase().includes(lowerQuery) || req.topic.toLowerCase().includes(lowerQuery));
+			filtered = filtered.filter((req) => req.participants.some((p) => `${p.firstName} ${p.lastName}`.toLowerCase().includes(lowerQuery) || req.topic.toLowerCase().includes(lowerQuery)));
 		}
 
-		// Apply filter option
 		const today = new Date();
 		const startOfWeek = new Date(today);
 		startOfWeek.setDate(today.getDate() - today.getDay());
@@ -128,17 +150,17 @@ export function MentorRequestsPage() {
 			<>
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 					{processedRequests.map((request) => {
-						const avatarSrc = request.userId.avatar;
+						const participant = request.participants[0]; // Assuming one participant for one-on-one sessions
 						return (
 							<Card key={request.id}>
 								<CardHeader>
 									<div className="flex justify-between items-start">
 										<div className="flex items-center gap-3">
 											<Avatar className="h-12 w-12">
-												<AvatarImage src={avatarSrc} alt={`${request.userId.firstName} ${request.userId.lastName}`} />
+												<AvatarImage src={participant.avatar} alt={`${participant.firstName} ${participant.lastName}`} />
 											</Avatar>
 											<div>
-												<CardTitle className="text-lg">{`${request.userId.firstName} ${request.userId.lastName}`}</CardTitle>
+												<CardTitle className="text-lg">{`${participant.firstName} ${participant.lastName}`}</CardTitle>
 												<CardDescription>{request.sessionFormat}</CardDescription>
 											</div>
 										</div>
@@ -147,14 +169,15 @@ export function MentorRequestsPage() {
 								</CardHeader>
 								<CardContent>
 									<div className="grid grid-cols-1 gap-1">
-										{/* Session Details */}
 										<div className="space-y-1">
 											<span className="text-sm font-medium text-muted-foreground">Topic</span>
 											<p className="font-medium">{request.topic}</p>
 										</div>
 										<div className="grid grid-cols-2 gap-4">
 											<div className="space-y-1">
-												<span className="text-sm font-medium text-muted-foreground">Session Type</span>
+												<span className="text-sm font-medium text-muted-foreground">
+													Session Type
+												</span>
 												<p className="text-sm">{request.sessionType}</p>
 											</div>
 											<div className="space-y-1">
@@ -162,7 +185,6 @@ export function MentorRequestsPage() {
 												<p className="text-sm">{request.sessionFormat}</p>
 											</div>
 										</div>
-										{/* Timing Details */}
 										<div className="space-y-1">
 											<span className="text-sm font-medium text-muted-foreground">Date & Time</span>
 											<div className="flex items-center gap-1 text-sm">
@@ -217,18 +239,16 @@ export function MentorRequestsPage() {
 
 						{selectedRequest && (
 							<div className="space-y-2">
-								{/* Mentee Information */}
 								<div className="flex items-center gap-4 border-b pb-3">
 									<Avatar className="h-14 w-14">
-										<AvatarImage src={selectedRequest.userId.avatar ?? "/placeholder.svg"} alt={`${selectedRequest.userId.firstName} ${selectedRequest.userId.lastName}`} />
+										<AvatarImage src={selectedRequest.participants[0].avatar ?? "/placeholder.svg"} alt={`${selectedRequest.participants[0].firstName} ${selectedRequest.participants[0].lastName}`} />
 									</Avatar>
 									<div>
-										<h3 className="text-lg font-semibold">{`${selectedRequest.userId.firstName} ${selectedRequest.userId.lastName}`}</h3>
+										<h3 className="text-lg font-semibold">{`${selectedRequest.participants[0].firstName} ${selectedRequest.participants[0].lastName}`}</h3>
 										<p className="text-sm text-muted-foreground">{selectedRequest.sessionFormat}</p>
 									</div>
 								</div>
 
-								{/* Session Details */}
 								<div className="space-y-2">
 									<h4 className="text-md font-semibold text-foreground">Session Details</h4>
 									<div className="grid grid-cols-1 gap-1">
@@ -263,7 +283,6 @@ export function MentorRequestsPage() {
 									</div>
 								</div>
 
-								{/* Payment Details */}
 								<div className="space-y-2 border-t pt-2">
 									<h4 className="text-md font-semibold text-foreground">Payment Details</h4>
 									<div className="grid grid-cols-1 gap-2">
@@ -279,7 +298,7 @@ export function MentorRequestsPage() {
 										</div>
 										<div>
 											<span className="text-sm font-medium text-muted-foreground">Payment Status</span>
-											<p className="text-sm">{selectedRequest.paymentStatus}</p>
+											<p className="text-sm">{selectedRequest.participants[0].paymentStatus}</p>
 										</div>
 									</div>
 								</div>
@@ -318,7 +337,7 @@ export function MentorRequestsPage() {
 									value={confirmationDialog.rejectReason}
 									onChange={(e) =>
 										setConfirmationDialog((prev) => {
-											console.log("Updated rejectReason:", e.target.value); // Debug log
+											console.log("Updated rejectReason:", e.target.value);
 											return { ...prev, rejectReason: e.target.value };
 										})
 									}

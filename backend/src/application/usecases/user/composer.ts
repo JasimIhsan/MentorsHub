@@ -14,7 +14,7 @@ import { UploadAvatarUseCase } from "./user-profile/upload.avatar.usecase";
 import { ChangePasswordUsecase } from "./user-profile/change.password.usecase";
 import { BecomeMentorUseCase } from "./user-profile/become.mentor.application.usecase";
 import { FetchUserProfileUseCase } from "./user-profile/fetch.user.profile.usecase";
-import { RequestSessionUseCase } from "./session/create.session.usecase";
+import { RequestSessionUseCase } from "./session/request.session.usecase";
 import { FetchSessionsByUserUseCase } from "./session/fetch.sessions.by.user.usecase";
 import { PaySessionUseCase } from "./session/pay.session.usecase";
 

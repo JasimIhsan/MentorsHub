@@ -6,7 +6,7 @@ export interface IMentorDTO {
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;
-	interests: object[] | null;
+	interests: string[] | null;
 	updatedAt: Date;
 	skills: string[] | null;
 	status: "blocked" | "unblocked";
@@ -43,9 +43,9 @@ export interface IMentorDTO {
 		issueDate: string;
 		expiryDate: string | null;
 	}[];
-	sessionFormat: "one-on-one" | "group" | "both";
+	sessionFormat: "one-on-one" | "group";
 	sessionTypes: string[];
-	pricing: "free" | "paid" | "both-pricing";
+	pricing: "free" | "paid";
 	hourlyRate: number | null;
 	availability: string[];
 	documents: string[];
