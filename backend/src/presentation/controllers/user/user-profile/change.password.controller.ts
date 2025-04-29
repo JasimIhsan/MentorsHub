@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { IChangePasswordUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
+import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 
 export class ChangePasswordController {
 	constructor(private changePasswordUsecase: IChangePasswordUseCase) {}
@@ -9,13 +11,13 @@ export class ChangePasswordController {
 
 			const user = await this.changePasswordUsecase.execute(userId, oldPassword, newPassword);
 
-			res.status(200).json({ success: true, user });
+			res.status(HttpStatusCode.OK).json({ success: true, user });
 		} catch (error) {
 			if (error instanceof Error) {
-				res.status(400).json({ message: error.message });
+				res.status(HttpStatusCode.BAD_REQUEST).json({ message: error.message });
 				return;
 			}
-			res.status(500).json({ message: "Internal Server Error" });
+			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: CommonStringMessage.SERVER_ERROR_MESSAGE });
 		}
 	}
 

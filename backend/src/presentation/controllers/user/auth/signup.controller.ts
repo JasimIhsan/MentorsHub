@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { ISignupUseCase } from "../../../../application/interfaces/user/auth.usecases.interfaces";
+import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class SignupController {
 	constructor(private signupUseCase: ISignupUseCase) {}
@@ -15,9 +16,9 @@ export class SignupController {
 			res.cookie("refresh_token", refreshToken, { httpOnly: true, sameSite: "strict", maxAge: 60 * 15 * 1000 });
 			res.cookie("access_token", accessToken, { httpOnly: true, sameSite: "strict", maxAge: 60 * 5 * 1000 });
 
-			res.status(201).json({ success: true, user });
+			res.status(HttpStatusCode.CREATED).json({ success: true, user });
 		} catch (error: any) {
-			res.status(400).json({ success: false, message: error.message });
+			res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: error.message });
 		}
 	}
 }

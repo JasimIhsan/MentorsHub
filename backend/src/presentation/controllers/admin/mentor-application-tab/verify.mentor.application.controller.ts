@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { IVerifyMentorApplicationUsecase } from "../../../../application/interfaces/admin/admin.mentor.application.interface";
+import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class VerifyMentorApplicationController {
 	constructor(private verifyMentorApplicationUsecase: IVerifyMentorApplicationUsecase) {}
@@ -9,10 +10,10 @@ export class VerifyMentorApplicationController {
 			const { mentorRequestStatus, rejectionReason } = req.body;
 
 			const user = await this.verifyMentorApplicationUsecase.execute(userId, mentorRequestStatus, rejectionReason);
-			res.status(200).json({ success: true, user });
+			res.status(HttpStatusCode.OK).json({ success: true, user });
 		} catch (error) {
 			if (error instanceof Error) {
-				res.status(500).json({ success: false, message: error.message });
+				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
 			}
 		}
 	}

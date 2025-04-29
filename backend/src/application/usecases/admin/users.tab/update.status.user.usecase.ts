@@ -1,4 +1,5 @@
 import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { UserDTO } from "../../../dtos/user.dtos";
 import { IUpdateUserStatusUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
 
@@ -8,7 +9,7 @@ export class UpdateUserStatusUsecase implements  IUpdateUserStatusUsecase{
 	async execute(userId: string): Promise<UserDTO> {
 		const user = await this.userRepository.findUserById(userId);
 		if (!user) {
-			throw new Error("User not found");
+			throw new Error(CommonStringMessage.USER_NOT_FOUND);
 		}
 
 		user.toggleStatus(user.getStatus() === "blocked" ? "unblocked" : "blocked");

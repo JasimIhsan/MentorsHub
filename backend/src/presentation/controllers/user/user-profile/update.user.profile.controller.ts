@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { ICloudinaryService, IUpdateUserProfileUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
+import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class UpdateUserProfileController {
 	constructor(private updateUserProfileUseCase: IUpdateUserProfileUseCase, private uploadAvatarUseCase: ICloudinaryService) {}
@@ -31,12 +32,12 @@ export class UpdateUserProfileController {
 				user = await this.updateUserProfileUseCase.execute(data.userId, data);
 			}
 
-			res.status(200).json({ success: true, user });
+			res.status(HttpStatusCode.OK).json({ success: true, user });
 		} catch (error) {
 			console.log("error from update profile controller:  ", error);
 
 			if (error instanceof Error) {
-				res.status(500).json({ error: error.message });
+				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ error: error.message });
 			}
 		}
 	}

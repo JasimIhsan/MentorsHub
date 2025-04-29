@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { IVerifyResetTokenUseCase } from "../../../../application/interfaces/user/auth.usecases.interfaces";
+import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 
 export class VerifyResetTokenController {
 	constructor(private verifyTokenUseCase: IVerifyResetTokenUseCase) {}
@@ -8,19 +10,19 @@ export class VerifyResetTokenController {
 		try {
 			const { token } = req.params;
 			if (!token) {
-				res.status(400).json({ success: false, message: "Token is required" });
+				res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: "Token is required" });
 				return;
 			}
 			const isValid = await this.verifyTokenUseCase.execute(token);
 			console.log('isValid: ', isValid);
 
 			if (isValid) {
-				res.status(200).json({ success: true, message: "Token is valid" });
+				res.status(HttpStatusCode.OK).json({ success: true, message: "Token is valid" });
 			} else {
-				res.status(400).json({ success: false, message: "Token is invalid" });
+				res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: "Token is invalid" });
 			}
 		} catch (error) {
-			res.status(500).json({ success: false, message: "Internal Server Error" });
+			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: CommonStringMessage.SERVER_ERROR_MESSAGE });
 		}
 	}
 }
