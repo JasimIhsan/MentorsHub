@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { RoleBadge, StatusBadge } from "./UserBadges";
 import { IUserDTO } from "@/interfaces/IUserDTO";
 import { useState, useEffect } from "react";
-import Alert from "@/components/custom-ui/alert";
+import Alert from "@/components/common/alert";
 import { EditUserForm } from "./EditUserForm";
 
 interface UserTableProps {
@@ -14,9 +14,10 @@ interface UserTableProps {
 	loading: boolean;
 	handleStatusUpdate: (userId: string) => void;
 	handleDeleteUser: (userId: string) => void;
+	handleViewDetails: (user: IUserDTO) => void;
 }
 
-export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser }: UserTableProps) {
+export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser, handleViewDetails }: UserTableProps) {
 	const [sortedUsers, setSortedUsers] = useState<IUserDTO[]>(users);
 	const [sortAsc, setSortAsc] = useState(true);
 	const [sortColumn, setSortColumn] = useState<"name" | "joinedDate">("name");
@@ -135,7 +136,7 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 										</DropdownMenuTrigger>
 										<DropdownMenuContent align="end">
 											<DropdownMenuLabel className="font-bold">Actions</DropdownMenuLabel>
-											<DropdownMenuItem>View profile</DropdownMenuItem>
+											<DropdownMenuItem onSelect={() => handleViewDetails(user)}>View profile</DropdownMenuItem>
 											<DropdownMenuItem onSelect={(e) => e.preventDefault()}>
 												<EditUserForm user={user} updateUser={updateUserInState} />
 											</DropdownMenuItem>
