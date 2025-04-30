@@ -7,14 +7,16 @@ import { CalendarDays, Clock, Video, MessageSquare, FileText, MoreHorizontal, Se
 import { Link } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Loading } from "@/components/common/Loading";
 import { ISessionUserDTO } from "@/interfaces/ISessionDTO";
-import { SessionDetailsModal } from "@/components/common/SessionDetailsModal"; // Import the SessionDetailsModal
+import { SessionDetailsModal } from "@/components/common/SessionDetailsModal";
 import { formatDate, formatTime } from "@/utility/time-data-formater";
+import { isSessionExpired } from "@/utility/is-session-expired";
 
 declare global {
 	interface Window {
@@ -30,7 +32,9 @@ export function SessionsPage() {
 	const [showPaymentModal, setShowPaymentModal] = useState(false);
 	const [paidSession, setPaidSession] = useState<ISessionUserDTO | null>(null);
 	const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
-	const [selectedSession, setSelectedSession] = useState<ISessionUserDTO | null>(null); // State for modal
+	const [selectedSession, setSelectedSession] = useState<ISessionUserDTO | null>(null);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage] = useState(5); // Number of sessions per page
 	const user = useSelector((state: RootState) => state.auth.user);
 
 	// Load Razorpay script
@@ -39,21 +43,15 @@ export function SessionsPage() {
 
 		const loadRazorpayScript = () => {
 			if (window.Razorpay) {
-				console.log("Razorpay already loaded");
 				setIsRazorpayLoaded(true);
 				return;
 			}
 
-			console.log("Loading Razorpay script...");
 			script = document.createElement("script");
 			script.src = "https://checkout.razorpay.com/v1/checkout.js";
 			script.async = true;
-			script.onload = () => {
-				console.log("Razorpay script loaded successfully");
-				setIsRazorpayLoaded(true);
-			};
+			script.onload = () => setIsRazorpayLoaded(true);
 			script.onerror = () => {
-				console.error("Failed to load Razorpay script");
 				toast.error("Failed to load payment gateway. Please try again later.");
 				setIsRazorpayLoaded(false);
 			};
@@ -64,7 +62,6 @@ export function SessionsPage() {
 
 		return () => {
 			if (script && document.body.contains(script)) {
-				console.log("Cleaning up Razorpay script");
 				document.body.removeChild(script);
 			}
 		};
@@ -107,6 +104,17 @@ export function SessionsPage() {
 
 	const filteredSessions = selectedCategory === "all" ? sessions : sessions.filter((session) => session.status === selectedCategory);
 	const sortedSessions = filteredSessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+	// Pagination calculations
+	const totalItems = sortedSessions.length;
+	const totalPages = Math.ceil(totalItems / itemsPerPage);
+	const indexOfLastItem = currentPage * itemsPerPage;
+	const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+	const currentSessions = sortedSessions.slice(indexOfFirstItem, indexOfLastItem);
+
+	const handlePageChange = (page: number) => {
+		setCurrentPage(page);
+	};
 
 	const categoryLabels: { [key in typeof selectedCategory]: string } = {
 		upcoming: "Upcoming Sessions",
@@ -151,17 +159,10 @@ export function SessionsPage() {
 					</CardHeader>
 					<CardContent className="pt-6">
 						<div className="space-y-4">
-							{sortedSessions.map((session) => (
-								<SessionCard
-									key={session.id}
-									session={session}
-									setShowPaymentModal={setShowPaymentModal}
-									setPaidSession={setPaidSession}
-									isRazorpayLoaded={isRazorpayLoaded}
-									setSelectedSession={setSelectedSession} // Pass setSelectedSession to open modal
-								/>
+							{currentSessions.map((session) => (
+								<SessionCard key={session.id} session={session} setShowPaymentModal={setShowPaymentModal} setPaidSession={setPaidSession} isRazorpayLoaded={isRazorpayLoaded} setSelectedSession={setSelectedSession} />
 							))}
-							{sortedSessions.length === 0 && (
+							{currentSessions.length === 0 && (
 								<EmptyState
 									title={`No ${selectedCategory === "all" ? "sessions" : selectedCategory + " sessions"}`}
 									description={`You don't have any ${selectedCategory === "all" ? "sessions" : selectedCategory + " sessions"}${
@@ -177,6 +178,27 @@ export function SessionsPage() {
 								/>
 							)}
 						</div>
+						{totalPages > 1 && (
+							<div className="mt-6">
+								<Pagination>
+									<PaginationContent>
+										<PaginationItem>
+											<PaginationPrevious onClick={currentPage > 1 ? () => handlePageChange(currentPage - 1) : undefined} className={currentPage === 1 ? "pointer-events-none opacity-50" : ""} />
+										</PaginationItem>
+										{Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+											<PaginationItem key={page}>
+												<PaginationLink onClick={() => handlePageChange(page)} isActive={currentPage === page}>
+													{page}
+												</PaginationLink>
+											</PaginationItem>
+										))}
+										<PaginationItem>
+											<PaginationNext onClick={currentPage < totalPages ? () => handlePageChange(currentPage + 1) : undefined} className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""} />
+										</PaginationItem>
+									</PaginationContent>
+								</Pagination>
+							</div>
+						)}
 						<div className="mt-6 rounded-lg border border-dashed p-4 text-center">
 							<p className="text-sm text-muted-foreground">Need to reschedule a session? Contact your mentor directly or reach out to our support team.</p>
 						</div>
@@ -212,7 +234,7 @@ interface SessionCardProps {
 	setShowPaymentModal: (value: boolean) => void;
 	setPaidSession: (session: ISessionUserDTO) => void;
 	isRazorpayLoaded: boolean;
-	setSelectedSession: (session: ISessionUserDTO) => void; // Add prop to set selected session
+	setSelectedSession: (session: ISessionUserDTO) => void;
 }
 
 function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayLoaded, setSelectedSession }: SessionCardProps) {
@@ -220,16 +242,15 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 	const [isReasonOpen, setIsReasonOpen] = useState(false);
 	const user = useSelector((state: RootState) => state.auth.user);
 
-	const type = session.status;
+	const isExpired = session.status === "upcoming" && isSessionExpired(session.date, session.time);
+	const type = isExpired ? "expired" : session.status;
 
 	const handlePayment = async () => {
 		if (!isRazorpayLoaded || !window.Razorpay) {
-			console.error("Razorpay not loaded, cannot initiate payment");
 			toast.error("Payment gateway not loaded. Please try again later.");
 			return;
 		}
 
-		console.log("Initiating payment for session:", session.id);
 		setIsPaying(true);
 		try {
 			const options = {
@@ -239,7 +260,6 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 				name: "Mentor Session Payment",
 				description: `Payment for session with ${session.mentor.firstName} ${session.mentor.lastName}`,
 				handler: async function (response: any) {
-					console.log("Payment successful, response:", response);
 					try {
 						const paymentResponse = await axiosInstance.put("/user/sessions/pay", {
 							sessionId: session.id,
@@ -249,16 +269,13 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 							status: "upcoming",
 						});
 						if (paymentResponse.data.success) {
-							console.log("Session updated to upcoming");
 							setPaidSession({ ...session, status: "upcoming" });
 							setShowPaymentModal(true);
 							toast.success("Payment successful! Session moved to upcoming.");
 						} else {
-							console.error("Payment processing failed:", paymentResponse.data.message);
 							toast.error(paymentResponse.data.message || "Payment processing failed.");
 						}
 					} catch (error: any) {
-						console.error("Error processing payment:", error);
 						toast.error(error.response?.data?.message || "Failed to process payment.");
 					}
 					setIsPaying(false);
@@ -274,23 +291,19 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 				},
 				modal: {
 					ondismiss: () => {
-						console.log("Payment modal dismissed");
 						setIsPaying(false);
 						toast.info("Payment cancelled.");
 					},
 				},
 			};
 
-			console.log("Opening Razorpay payment modal with options:", options);
 			const rzp = new window.Razorpay(options);
 			rzp.on("payment.failed", (response: any) => {
-				console.error("Payment failed:", response.error);
 				toast.error(`Payment failed: ${response.error.description || "Unknown error"}.`);
 				setIsPaying(false);
 			});
 			rzp.open();
 		} catch (error) {
-			console.error("Error initializing payment:", error);
 			toast.error("Failed to initialize payment. Please try again.");
 			setIsPaying(false);
 		}
@@ -420,6 +433,20 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 										</DropdownMenu>
 										<Button variant="outline" asChild>
 											<Link to={`/browse`}>Rebook</Link>
+										</Button>
+									</>
+								)}
+								{type === "expired" && (
+									<>
+										<Badge variant="outline" className="bg-gray-100 text-gray-800">
+											Expired
+										</Badge>
+										<Button variant="outline" asChild>
+											<Link to={`/browse`}>Rebook</Link>
+										</Button>
+										<Button variant="ghost" size="icon" onClick={() => setSelectedSession(session)}>
+											<FileText className="h-4 w-4" />
+											<span className="sr-only">View Details</span>
 										</Button>
 									</>
 								)}
