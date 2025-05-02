@@ -20,9 +20,9 @@ import {
 	updateUserProfileUsecase,
 	changePasswordUsecase,
 	becomeMentorUseCase,
-	fetchUserProfileUsecase,
+	getUserProfileUsecase,
 	requestSessionUsecase,
-	fetchSessionsByUserUsecase,
+	getSessionsByUserUsecase,
 	paySessionUsecase,
 } from "../../../application/usecases/user/composer";
 import { UpdateUserController } from "../admin/user-tab/update.user.controller";
@@ -30,9 +30,9 @@ import { UpdateUserProfileController } from "./user-profile/update.user.profile.
 import { cloudinaryService } from "../../../infrastructure/composer";
 import { ChangePasswordController } from "./user-profile/change.password.controller";
 import { BecomeMentorController } from "./user-profile/become.mentor.application.controller";
-import { FetchUserProfileController } from "./user-profile/fetch.user.profile.controller";
+import { GetUserProfileController } from "./user-profile/get.user.profile.controller";
 import { RequestSessionController } from "./session/request.session.controller";
-import { FetchSessionByUserController } from "./session/fetch.session.by.user.controller";
+import { GetSessionByUserController } from "./session/get.session.by.user.controller";
 import { PaySessionController } from "./session/pay.session.usecase.controller";
 
 export const signupController = new SignupController(signupUseCase);
@@ -47,7 +47,7 @@ export const googleAuthController = new GoogleAuthController(googleAuthUsecase);
 export const updateUseProfileController = new UpdateUserProfileController(updateUserProfileUsecase, cloudinaryService);
 export const changePasswordController = new ChangePasswordController(changePasswordUsecase);
 export const becomeMentorApplicationController = new BecomeMentorController(becomeMentorUseCase);
-export const fetchUserProfileController = new FetchUserProfileController(fetchUserProfileUsecase);
+export const getUserProfileController = new GetUserProfileController(getUserProfileUsecase);
 export const createSessionController = new RequestSessionController(requestSessionUsecase);
-export const fetchSessionsByUserController = new FetchSessionByUserController(fetchSessionsByUserUsecase);
+export const getSessionsByUserController = new GetSessionByUserController(getSessionsByUserUsecase);
 export const paySessionController = new PaySessionController(paySessionUsecase);

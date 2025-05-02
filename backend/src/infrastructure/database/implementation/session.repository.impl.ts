@@ -23,22 +23,22 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async fetchSessionsByUser(userId: string): Promise<ISessionUserDTO[]> {
+	async getSessionsByUser(userId: string): Promise<ISessionUserDTO[]> {
 		try {
 			const sessions = await SessionModel.find({ "participants.userId": userId }).populate("participants.userId", "firstName lastName avatar").populate("mentorId", "firstName lastName avatar");
 			return sessions.map((session) => this.mapSessionToUserDTO(session, userId));
 		} catch (error) {
-			return handleError(error, "Error fetching sessions by user");
+			return handleError(error, "Error geting sessions by user");
 		}
 	}
 
-	async fetchSessionRequestByMentor(mentorId: string): Promise<ISessionMentorDTO[]> {
+	async getSessionRequestByMentor(mentorId: string): Promise<ISessionMentorDTO[]> {
 		try {
 			const sessions = await SessionModel.find({ mentorId }).populate("participants.userId", "firstName lastName avatar");
 
 			return sessions.map(this.mapSessionToMentorDTO);
 		} catch (error) {
-			return handleError(error, "Error fetching session requests by mentor");
+			return handleError(error, "Error geting session requests by mentor");
 		}
 	}
 
@@ -76,13 +76,13 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async fetchSessions(mentorId: string): Promise<ISessionMentorDTO[]> {
+	async getSessions(mentorId: string): Promise<ISessionMentorDTO[]> {
 		try {
 			const sessions = await SessionModel.find({ mentorId }).populate("participants.userId", "firstName lastName avatar");
 			const mappedSessions = sessions.map(this.mapSessionToMentorDTO);
 			return mappedSessions;
 		} catch (error) {
-			return handleError(error, "Error fetching sessions");
+			return handleError(error, "Error geting sessions");
 		}
 	}
 

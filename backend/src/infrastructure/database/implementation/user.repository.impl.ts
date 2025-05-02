@@ -54,7 +54,7 @@ export class UserRepositoryImpl implements IUserRepository {
 			const usersData: UserEntity[] = userDocs.map((doc) => UserEntity.fromDBDocument(doc));
 			return usersData.map((user: UserEntity) => UserDTO.fromEntity(user));
 		} catch (error) {
-			return handleError(error, "Error fetching all users");
+			return handleError(error, "Error geting all users");
 		}
 	}
 

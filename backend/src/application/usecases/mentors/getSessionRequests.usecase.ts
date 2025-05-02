@@ -1,12 +1,12 @@
 import { ISessionRepository } from "../../../domain/dbrepository/session.repository";
 import { ISessionMentorDTO } from "../../dtos/session.dto";
-import { IFetchSessionRequests } from "../../interfaces/mentors/mentors.interface";
+import { IGetSessionRequests } from "../../interfaces/mentors/mentors.interface";
 
-export class FetchSessionRequests implements IFetchSessionRequests {
+export class GetSessionRequests implements IGetSessionRequests {
 	constructor(private sessionRepo: ISessionRepository) {}
 
 	async execute(mentorId: string): Promise<ISessionMentorDTO[]> {
-		const requests = await this.sessionRepo.fetchSessionRequestByMentor(mentorId);
+		const requests = await this.sessionRepo.getSessionRequestByMentor(mentorId);
 		return requests;
 	}
 }

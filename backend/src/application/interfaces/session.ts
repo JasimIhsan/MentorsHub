@@ -6,7 +6,7 @@ export interface IRequestSessionUseCase {
 	execute(data: SessionDTO): Promise<SessionEntity>;
 }
 
-export interface IFetchSessionsByUserUseCase {
+export interface IGetSessionsByUserUseCase {
 	execute(userId: string): Promise<ISessionUserDTO[]>;
 }
 

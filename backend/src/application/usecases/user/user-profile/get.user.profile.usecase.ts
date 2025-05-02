@@ -1,9 +1,9 @@
 import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
 import { UserEntity } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
-import { IFetchUserProfileUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
+import { IGetUserProfileUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
 
-export class FetchUserProfileUseCase implements IFetchUserProfileUseCase {
+export class GetUserProfileUseCase implements IGetUserProfileUseCase {
 	constructor(private userRepo: IUserRepository) {}
 
 	async execute(userId: string): Promise<UserEntity | null> {

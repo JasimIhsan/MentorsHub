@@ -1,11 +1,11 @@
 import { ISessionRepository } from "../../../domain/dbrepository/session.repository";
-import { IFetchUpcomingSessionMentorUsecase } from "../../interfaces/mentors/mentors.interface";
+import { IGetUpcomingSessionMentorUsecase } from "../../interfaces/mentors/mentors.interface";
 
-export class FetchUpcomingSessionMentorUsecase implements IFetchUpcomingSessionMentorUsecase {
+export class GetUpcomingSessionMentorUsecase implements IGetUpcomingSessionMentorUsecase {
 	constructor(private sessionRepo: ISessionRepository) {}
 
 	async execute(mentorId: string) {
-		const sessions = await this.sessionRepo.fetchSessions(mentorId);
+		const sessions = await this.sessionRepo.getSessions(mentorId);
 		console.log('sessions: ', sessions);
 		const now = new Date();
 		const upcoming = sessions.filter((session) => {

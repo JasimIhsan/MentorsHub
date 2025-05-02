@@ -13,9 +13,9 @@ import { UpdateUserProfileUseCase } from "./user-profile/update.user.profile.use
 import { UploadAvatarUseCase } from "./user-profile/upload.avatar.usecase";
 import { ChangePasswordUsecase } from "./user-profile/change.password.usecase";
 import { BecomeMentorUseCase } from "./user-profile/become.mentor.application.usecase";
-import { FetchUserProfileUseCase } from "./user-profile/fetch.user.profile.usecase";
+import { GetUserProfileUseCase } from "./user-profile/get.user.profile.usecase";
 import { RequestSessionUseCase } from "./session/request.session.usecase";
-import { FetchSessionsByUserUseCase } from "./session/fetch.sessions.by.user.usecase";
+import { GetSessionsByUserUseCase } from "./session/get.sessions.by.user.usecase";
 import { PaySessionUseCase } from "./session/pay.session.usecase";
 
 // Initialize UseCases
@@ -32,8 +32,8 @@ export const updateUserProfileUsecase = new UpdateUserProfileUseCase(userReposit
 export const uploadImageCloudinaryUsecase = new UploadAvatarUseCase(cloudinaryService);
 export const changePasswordUsecase = new ChangePasswordUsecase(userRepository);
 export const becomeMentorUseCase = new BecomeMentorUseCase(mentorRepository, userRepository);
-export const fetchUserProfileUsecase = new FetchUserProfileUseCase(userRepository);
+export const getUserProfileUsecase = new GetUserProfileUseCase(userRepository);
 export const requestSessionUsecase = new RequestSessionUseCase(sessionRepository, mentorRepository);
-export const fetchSessionsByUserUsecase = new FetchSessionsByUserUseCase(sessionRepository);
-export const fetchSessionByMentorUsecase = new FetchSessionsByUserUseCase(sessionRepository);
+export const getSessionsByUserUsecase = new GetSessionsByUserUseCase(sessionRepository);
+export const getSessionByMentorUsecase = new GetSessionsByUserUseCase(sessionRepository);
 export const paySessionUsecase = new PaySessionUseCase(sessionRepository);

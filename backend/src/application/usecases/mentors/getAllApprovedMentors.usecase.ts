@@ -1,8 +1,8 @@
 import { IMentorProfileRepository } from "../../../domain/dbrepository/mentor.details.repository";
 import { IMentorDTO } from "../../dtos/mentor.dtos";
-import { IFetchAllApprovedMentorsUsecase } from "../../interfaces/mentors/mentors.interface";
+import { IGetAllApprovedMentorsUsecase } from "../../interfaces/mentors/mentors.interface";
 
-export class FetchAllApprovedMentorsUsecase implements IFetchAllApprovedMentorsUsecase {
+export class GetAllApprovedMentorsUsecase implements IGetAllApprovedMentorsUsecase {
 	constructor(private mentorRepository: IMentorProfileRepository) {}
 
 	async execute(): Promise<IMentorDTO[]> {

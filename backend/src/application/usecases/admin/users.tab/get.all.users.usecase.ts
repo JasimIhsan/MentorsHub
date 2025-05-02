@@ -1,7 +1,7 @@
 import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
-import { IFetchAllUsersUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
+import { IGetAllUsersUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
 
-export class FetchAllUsersUsecase implements IFetchAllUsersUsecase{
+export class GetAllUsersUsecase implements IGetAllUsersUsecase{
 	constructor(private userRepository: IUserRepository) {}
 	async execute(): Promise<any> {
 		try {
@@ -11,7 +11,7 @@ export class FetchAllUsersUsecase implements IFetchAllUsersUsecase{
 			if (error instanceof Error) {
 				throw new Error(error.message);
 			}
-			throw new Error("An error occurred while fetching users");
+			throw new Error("An error occurred while geting users");
 		}
 	}
 }

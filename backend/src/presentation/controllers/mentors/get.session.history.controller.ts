@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
-import { IFetchSessionHistoryUsecase } from "../../../application/interfaces/mentors/mentors.interface";
+import { IGetSessionHistoryUsecase } from "../../../application/interfaces/mentors/mentors.interface";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 
-export class FetchSessionHistoryController {
-	constructor(private fetchSessionHistoryUsecase: IFetchSessionHistoryUsecase) {}
+export class GetSessionHistoryController {
+	constructor(private getSessionHistoryUsecase: IGetSessionHistoryUsecase) {}
 	async handle(req: Request, res: Response) {
 		try {
 			const { mentorId } = req.params;
-			const sessions = await this.fetchSessionHistoryUsecase.execute(mentorId);
+			const sessions = await this.getSessionHistoryUsecase.execute(mentorId);
 			res.status(HttpStatusCode.OK).json({ success: true, sessions });
 		} catch (error) {
 			if (error instanceof Error) {

@@ -8,9 +8,6 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 	constructor(private mentorRepo: IMentorProfileRepository, private userRepo: IUserRepository) {}
 
 	async execute(userId: string, status: "approved" | "rejected", reason?: string): Promise<UserEntity> {
-		console.log("userId: ", userId);
-		console.log("status: ", status);
-
 		const user = await this.userRepo.findUserById(userId);
 		if (!user) throw new Error(CommonStringMessage.USER_NOT_FOUND);
 

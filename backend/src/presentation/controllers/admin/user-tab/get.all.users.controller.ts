@@ -1,12 +1,12 @@
-import { IFetchAllUsersUsecase } from "../../../../application/interfaces/admin/admin.usertab.interfaces";
+import { IGetAllUsersUsecase } from "../../../../application/interfaces/admin/admin.usertab.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
-export class FetchAllUsersController {
-	constructor(private fetchAllUsersUsecase: IFetchAllUsersUsecase) {}
+export class GetAllUsersController {
+	constructor(private getAllUsersUsecase: IGetAllUsersUsecase) {}
 
 	async handle(req: any, res: any): Promise<void> {
 		try {
-			const users = await this.fetchAllUsersUsecase.execute();
+			const users = await this.getAllUsersUsecase.execute();
 			res.status(HttpStatusCode.OK).json({ success: true, users });
 		} catch (error) {
 			if (error instanceof Error) {

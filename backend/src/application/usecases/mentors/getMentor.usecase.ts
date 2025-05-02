@@ -1,8 +1,8 @@
 import { IMentorProfileRepository } from "../../../domain/dbrepository/mentor.details.repository";
 import { IMentorDTO } from "../../dtos/mentor.dtos";
-import { IFetchMentorUsecase } from "../../interfaces/mentors/mentors.interface";
+import { IGetMentorUsecase } from "../../interfaces/mentors/mentors.interface";
 
-export class FetchMentorUsecase implements IFetchMentorUsecase {
+export class GetMentorUsecase implements IGetMentorUsecase {
 	constructor(private mentorRepo: IMentorProfileRepository) {}
 
 	execute(userId: string): Promise<IMentorDTO | null> {

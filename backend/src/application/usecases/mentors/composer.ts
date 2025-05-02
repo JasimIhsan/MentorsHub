@@ -1,16 +1,16 @@
 import { mentorRepository, sessionRepository } from "../../../infrastructure/composer";
-import { FetchSessionHistoryUsecase } from "./fetch.session.history.usecase";
-import { FetchUpcomingSessionMentorUsecase } from "./fetch.upcoming.sessons.usecase";
-import { FetchAllApprovedMentorsUsecase } from "./fetchAllApprovedMentors.usecase";
-import { FetchAllMentorsUseCase } from "./fetchAllMentors.usecase";
-import { FetchMentorUsecase } from "./fetchMentor.usecase";
-import { FetchSessionRequests } from "./fetchSessionRequests.usecase";
+import { GetSessionHistoryUsecase } from "./get.session.history.usecase";
+import { GetUpcomingSessionMentorUsecase } from "./get.upcoming.sessions.usecase";
+import { GetAllApprovedMentorsUsecase } from "./getAllApprovedMentors.usecase";
+import { GetAllMentorsUseCase } from "./getAllMentors.usecase";
+import { GetMentorUsecase } from "./getMentor.usecase";
+import { GetSessionRequests } from "./getSessionRequests.usecase";
 import { UpdateRequestStatusUsecase } from "./update.request.status.usecase";
 
-export const fetchAllMentorsUsecase = new FetchAllMentorsUseCase(mentorRepository);
-export const fetchAllApprovedMentorsUsecase = new FetchAllApprovedMentorsUsecase(mentorRepository);
-export const fetchMentorUsecase = new FetchMentorUsecase(mentorRepository);
-export const fetchRequestUsecase = new FetchSessionRequests(sessionRepository);
+export const getAllMentorsUsecase = new GetAllMentorsUseCase(mentorRepository);
+export const getAllApprovedMentorsUsecase = new GetAllApprovedMentorsUsecase(mentorRepository);
+export const getMentorUsecase = new GetMentorUsecase(mentorRepository);
+export const getRequestUsecase = new GetSessionRequests(sessionRepository);
 export const updateRequestStatusUsecase = new UpdateRequestStatusUsecase(sessionRepository);
-export const fetchUpcomingSessionMentorUsecase = new FetchUpcomingSessionMentorUsecase(sessionRepository);
-export const fetchSessionHistoryUsecase = new FetchSessionHistoryUsecase(sessionRepository);
+export const getUpcomingSessionMentorUsecase = new GetUpcomingSessionMentorUsecase(sessionRepository);
+export const getSessionHistoryUsecase = new GetSessionHistoryUsecase(sessionRepository);
