@@ -5,7 +5,7 @@ interface AdminInterface {
 	name?: string;
 	username: string;
 	password: string;
-	isSuperAdmin: boolean;
+	role: "admin" | "super-admin";
 	avatar?: string;
 }
 
@@ -14,14 +14,14 @@ export class AdminEntity {
 	private name?: string;
 	private username: string;
 	private password: string;
-	private isSuperAdmin: boolean;
+	private role: "admin" | "super-admin";
 	private avatar?: string;
 	constructor(admin: AdminInterface) {
 		this.id = admin.id;
 		this.name = admin.name;
 		this.username = admin.username;
 		this.password = admin.password;
-		this.isSuperAdmin = admin.isSuperAdmin;
+		this.role = admin.role === "admin" ? "admin" : "super-admin";
 		this.avatar = admin.avatar;
 	}
 
@@ -40,7 +40,7 @@ export class AdminEntity {
 			avatar: doc.avatar,
 			username: doc.username,
 			password: doc.password,
-			isSuperAdmin: doc.isSuperAdmin,
+			role: doc.role,
 		});
 	}
 
@@ -55,7 +55,7 @@ export class AdminEntity {
 			avatar: this.avatar,
 			username: this.username,
 			password: this.password,
-			isSuperAdmin: this.isSuperAdmin,
+			role: this.role,
 		};
 	}
 
@@ -72,6 +72,6 @@ export class AdminEntity {
 	}
 
 	getIsSuperAdmin(): boolean {
-		return this.isSuperAdmin;
+		return this.role === "super-admin";
 	}
 }

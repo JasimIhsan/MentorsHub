@@ -21,22 +21,23 @@ import { userSideMentorRouter } from "./presentation/routes/user/user.side.mento
 import http from "http";
 import { Server } from "socket.io";
 import { handleSignaling } from "./infrastructure/socket/signaling";
+import { documentsRouter } from "./presentation/routes/common/view.documents.routes";
 
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
+	cors: {
+		origin: "http://localhost:5173",
+		methods: ["GET", "POST"],
+		credentials: true,
+	},
 });
 
 io.on("connection", (socket) => {
-  console.log("🔌 New user connected:", socket.id);
-  handleSignaling(io, socket);
+	console.log("🔌 New user connected:", socket.id);
+	handleSignaling(io, socket);
 });
 
 app.use(express.json({ limit: "10mb" }));
@@ -44,13 +45,13 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(passport.initialize());
 configurePassport(userRepository, tokenInterface);
--app.use(helmet());
+app.use(helmet());
 app.use(
-  cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  }),
+	cors({
+		origin: "http://localhost:5173",
+		methods: ["GET", "POST", "PUT", "DELETE"],
+		credentials: true,
+	})
 );
 
 connectDB();
@@ -70,6 +71,8 @@ app.use("/api/admin/mentor-application", mentorApplicationRouter);
 app.use("/api/mentor", mentorRouter);
 app.use("/api/mentor/sessions", mentorSessionRouter);
 
+app.use("/api/documents", documentsRouter);
+
 server.listen(process.env.PORT, () => {
-  console.log(` Server is running  : ✅✅✅`);
+	console.log(` Server is running  : ✅✅✅`);
 });
