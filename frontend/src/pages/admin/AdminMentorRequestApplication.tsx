@@ -20,7 +20,6 @@ import { fetchAllMentors } from "@/api/mentors.api.service";
 const getUniqueKey = (item: any, index: number): string => {
 	if (typeof item === "string") return `${item}-${index}`;
 	if (item && typeof item === "object") {
-		// Use index as primary differentiator to ensure uniqueness
 		return `obj-${index}-${JSON.stringify(item).replace(/[^a-zA-Z0-9]/g, "")}`;
 	}
 	return `item-${index}`;
@@ -47,7 +46,6 @@ export function AdminMentorApplicationsPage() {
 				const response = await fetchAllMentors();
 				if (response.success) {
 					const data = response.mentors;
-					console.log("data: ", data);
 					dispatch(updateRole("mentor"));
 					setMentors(data);
 					toast.success("Mentors fetched successfully!");
@@ -60,7 +58,6 @@ export function AdminMentorApplicationsPage() {
 		fetchMentors();
 	}, []);
 
-	// Handle status update (approve/reject)
 	const updateMentorStatus = async (userId: string, status: "approved" | "rejected", rejectionReason?: string) => {
 		try {
 			const response = await axiosInstance.put(`/admin/mentor-application/${userId}/verify`, {
@@ -77,7 +74,6 @@ export function AdminMentorApplicationsPage() {
 		}
 	};
 
-	// Filter mentors based on search query
 	const filteredMentors = mentors.filter((mentor) => {
 		const query = searchQuery.toLowerCase();
 		const fullName = `${mentor.firstName} ${mentor.lastName}`.toLowerCase();
@@ -91,7 +87,6 @@ export function AdminMentorApplicationsPage() {
 		return fullName.includes(query) || professionalTitle.includes(query) || skills.includes(query);
 	});
 
-	// Categorize filtered mentors
 	const pendingApplications = filteredMentors.filter((mentor) => mentor.mentorRequestStatus === "pending");
 	const approvedApplications = filteredMentors.filter((mentor) => mentor.mentorRequestStatus === "approved");
 	const rejectedApplications = filteredMentors.filter((mentor) => mentor.mentorRequestStatus === "rejected");
@@ -105,7 +100,6 @@ export function AdminMentorApplicationsPage() {
 				</div>
 
 				<div className="flex flex-col gap-6">
-					{/* Search and Filters */}
 					<div className="flex flex-col gap-4 sm:flex-row">
 						<div className="relative flex-1">
 							<Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -117,14 +111,12 @@ export function AdminMentorApplicationsPage() {
 						</Button>
 					</div>
 
-					{/* Stats Cards */}
 					<div className="grid gap-4 md:grid-cols-3">
 						<StatCard icon={<Clock className="h-5 w-5 text-blue-600" />} label="Pending" count={pendingApplications.length} bgColor="bg-blue-100" />
 						<StatCard icon={<CheckCircle className="h-5 w-5 text-green-600" />} label="Approved" count={approvedApplications.length} bgColor="bg-green-100" />
 						<StatCard icon={<XCircle className="h-5 w-5 text-red-600" />} label="Rejected" count={rejectedApplications.length} bgColor="bg-red-100" />
 					</div>
 
-					{/* Applications List */}
 					<Card>
 						<CardHeader className="pb-0">
 							<Tabs defaultValue="pending" className="w-full">
@@ -181,12 +173,30 @@ function ApplicationList({ applications, updateMentorStatus }: { applications: I
 
 function ApplicationCard({ application, updateMentorStatus }: { application: IMentorDTO; updateMentorStatus: (userId: string, status: "approved" | "rejected", rejectionReason?: string) => void }) {
 	const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
-	// const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
 	const [isDocumentsDialogOpen, setIsDocumentsDialogOpen] = useState(false);
 	const [rejectionReason, setRejectionReason] = useState("");
+	const [documentUrls, setDocumentUrls] = useState<string[]>([]);
+	const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
+
+	const fetchDocumentUrls = async () => {
+		setIsLoadingDocuments(true);
+		try {
+			const response = await axiosInstance.get(`/documents/${application.userId}/documents`);
+			if (response.data.success) {
+				setDocumentUrls(response.data.documents);
+				toast.success("Documents fetched successfully!");
+			} else {
+				toast.error("Failed to fetch documents.");
+			}
+		} catch (error) {
+			console.error("Error fetching document URLs:", error);
+			toast.error("Failed to fetch documents.");
+		} finally {
+			setIsLoadingDocuments(false);
+		}
+	};
 
 	const handleApprove = () => {
-		console.log("userId: ", application.userId);
 		updateMentorStatus(application.userId, "approved");
 	};
 
@@ -195,6 +205,12 @@ function ApplicationCard({ application, updateMentorStatus }: { application: IMe
 		setIsRejectDialogOpen(false);
 		setRejectionReason("");
 	};
+
+	useEffect(() => {
+		if (isDocumentsDialogOpen) {
+			fetchDocumentUrls();
+		}
+	}, [isDocumentsDialogOpen]);
 
 	return (
 		<Card className="overflow-hidden">
@@ -260,12 +276,14 @@ function ApplicationCard({ application, updateMentorStatus }: { application: IMe
 												</DialogDescription>
 											</DialogHeader>
 											<div className="grid gap-4">
-												{application.documents?.length ? (
-													application.documents.map((fileUrl, i) => (
-														<div key={getUniqueKey(fileUrl, i)} className="flex items-center justify-between">
-															<p className="text-sm">{fileUrl.split("/").pop() || `Document ${i + 1}`}</p>
+												{isLoadingDocuments ? (
+													<p className="text-sm text-muted-foreground">Loading documents...</p>
+												) : documentUrls.length > 0 ? (
+													documentUrls.map((url, i) => (
+														<div key={getUniqueKey(url, i)} className="flex items-center justify-between">
+															<p className="text-sm">{url.split("/").pop()?.split("?")[0] || `Document ${i + 1}`}</p>
 															<Button variant="outline" size="sm" asChild>
-																<a href={fileUrl} download target="_blank" rel="noopener noreferrer">
+																<a href={url} download target="_blank" rel="noopener noreferrer">
 																	<Download className="mr-2 h-4 w-4" />
 																	Download
 																</a>
@@ -273,7 +291,7 @@ function ApplicationCard({ application, updateMentorStatus }: { application: IMe
 														</div>
 													))
 												) : (
-													<p className="text-sm text-muted-foreground">No documents attached</p>
+													<p className="text-sm text-muted-foreground">No documents available</p>
 												)}
 											</div>
 											<DialogFooter>

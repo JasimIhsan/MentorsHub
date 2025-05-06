@@ -9,7 +9,7 @@ import { CommonStringMessage } from "../../shared/constants/string.messages";
 
 const tokenService = new TokenServicesImpl();
 const userRepo = new UserRepositoryImpl();
-const adminRepo = new AdminRepositoryImpl()
+const adminRepo = new AdminRepositoryImpl();
 
 export const verifyAccessToken = async (req: Request, res: Response, next: NextFunction) => {
 	try {
@@ -26,11 +26,15 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 		}
 
 		if (decoded.isAdmin) {
-			const admin = await adminRepo.findAdminById(decoded.userId);
-			if (!admin) {
+			const adminData = await adminRepo.findAdminById(decoded.userId);
+			if (!adminData) {
 				res.status(HttpStatusCode.UNAUTHORIZED).json({ success: false, message: "Admin not found" });
 				return;
 			}
+			const admin = new AdminEntity({
+				...adminData,
+				id: decoded.userId,
+			});
 			(req.user as AdminEntity) = admin;
 			return next();
 		} else {
@@ -39,6 +43,7 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 				res.status(HttpStatusCode.UNAUTHORIZED).json({ success: false, message: CommonStringMessage.USER_NOT_FOUND });
 				return;
 			}
+
 			(req.user as UserEntity) = user;
 			return next();
 		}

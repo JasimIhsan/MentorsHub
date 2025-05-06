@@ -73,7 +73,7 @@ const MentorProfileSchema: Schema = new Schema(
 		sessionFormat: { type: String, enum: ["one-on-one", "group", "both"], required: true },
 		sessionTypes: [{ type: String, required: true }],
 		pricing: { type: String, enum: ["free", "paid", "both-pricing"], required: true },
-		hourlyRate: { type: String },
+		hourlyRate: { type: Number },
 		availability: [{ type: String, required: true }],
 		documents: [{ type: String }],
 	},

@@ -6,6 +6,9 @@ export class RefreshTokenUseCase implements IRefreshTokenUsecase {
 
 	execute(userId: string, isAdmin: boolean): string {
 		const newAccessToken = this.tokenServices.generateAccessToken(userId, isAdmin);
+
+		console.log(`\n\nAccess token : `, newAccessToken);
+
 		return newAccessToken;
 	}
 }

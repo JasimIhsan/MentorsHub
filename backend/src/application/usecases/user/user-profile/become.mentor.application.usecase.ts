@@ -11,7 +11,6 @@ export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 	constructor(private mentorProfileRepo: IMentorProfileRepository, private userRepo: IUserRepository) {}
 
 	async execute(userId: string, data: IMentorInterface, userData: Partial<UserInterface>, documents: Express.Multer.File[]): Promise<{ savedUser: UserEntity; mentorProfile: MentorProfileEntity }> {
-
 		const existingUser = await this.userRepo.findUserById(userId);
 		if (!existingUser) throw new Error(CommonStringMessage.USER_NOT_FOUND);
 		if (existingUser.getRole() === "mentor") {
@@ -32,6 +31,7 @@ export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 
 		const updateData: IMentorInterface = {
 			...data,
+			hourlyRate: Number(data.hourlyRate),
 			documents: documentUrls,
 		};
 

@@ -28,8 +28,10 @@ documentsRouter.get("/:id/documents", verifyAccessToken, async (req: Request, re
 
 	const mentorId = req.params.id;
 	const customReq = req as CustomRequest;
+	console.log('customReq: ', customReq.user);
+
 	const loggedInUserId = customReq.user.getId();
-	const isAdmin = customReq.user.getProfile().role === "admin";
+	const isAdmin = customReq.user.getProfile().role === "admin" ? true : customReq.user.getProfile().role === "super-admin" ? true : false;
 
 	console.log("mentorId in documents: ", mentorId);
 	console.log("loggedInUserId: ", loggedInUserId);
@@ -68,3 +70,4 @@ documentsRouter.get("/:id/documents", verifyAccessToken, async (req: Request, re
 	);
 	res.json({ success: true, documents: signedUrls });
 });
+
