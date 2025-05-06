@@ -7,6 +7,8 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
 	constructor(private userRepo: IUserRepository) {}
 
 	async execute(userId: string, data: Partial<UserInterface>, imageUrl?: string) {
+		console.log('userId: ', userId);
+
 		const existingUser = await this.userRepo.findUserById(userId);
 		if (!existingUser) {
 			throw new Error(CommonStringMessage.USER_NOT_FOUND);

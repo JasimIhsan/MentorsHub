@@ -10,7 +10,6 @@ export class GetUserProfileController {
 	async handle(req: Request, res: Response) {
 		try {
 			const customReq = req as CustomRequest;
-			console.log("user id : ", customReq.user.getId());
 			const userId = customReq.user.getId();
 			const user = await this.getUserProfileUsecase.execute(userId as string);
 			res.status(HttpStatusCode.OK).json(user);

@@ -21,7 +21,6 @@ export class EmailServiceImpl implements IEmailService {
 	}
 
 	async sendPasswordResetEmail(email: string, token: string, username: string): Promise<void> {
-		console.log(`in sendPasswordResetEmail`);
 		const url = `http://localhost:5173/reset-password/${token}`;
 		let template = this.loadTemplate("reset.email.template");
 		template = template.replace("{{reset_link}}", url);
@@ -37,7 +36,6 @@ export class EmailServiceImpl implements IEmailService {
 	}
 
 	async sendOtpEmail(email: string, otp: string) {
-		console.log(`in sendOtpEmail`);
 		let template = this.loadTemplate("otp.email.template");
 		template = template.replace("{{otp_code}}", otp);
 		const mailOptions = {
@@ -46,7 +44,6 @@ export class EmailServiceImpl implements IEmailService {
 			subject: "One Time Password (OTP)",
 			html: template,
 		};
-		console.log("otp email sent");
 		await this.transporter.sendMail(mailOptions);
 	}
 }

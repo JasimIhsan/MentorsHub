@@ -52,11 +52,6 @@ export class SessionRepositoryImpl implements ISessionRepository {
 	}
 
 	async paySession(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void> {
-		console.log("status: ", status);
-		console.log("paymentStatus: ", paymentStatus);
-		console.log("paymentId: ", paymentId);
-		console.log("userId: ", userId);
-		console.log("sessionId: ", sessionId);
 		try {
 			const updatedSession = await SessionModel.findOneAndUpdate(
 				{ _id: sessionId, "participants.userId": userId },
@@ -69,7 +64,6 @@ export class SessionRepositoryImpl implements ISessionRepository {
 				},
 				{ new: true }
 			);
-			console.log("updatedSession: ", updatedSession);
 			if (!updatedSession) throw new Error("Session or participant not found");
 		} catch (error) {
 			return handleError(error, "Error updating session payment status");

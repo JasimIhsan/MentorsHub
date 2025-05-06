@@ -19,7 +19,7 @@ authRouter.get("/verify-reset-token/:token", (req, res) => verifyResetTokenContr
 
 authRouter.post("/reset-password", (req, res) => resetPasswordController.handle(req, res));
 
-authRouter.post("/logout", verifyAccessToken, (req, res) => logoutController.handle(req, res));
+authRouter.post("/logout", (req, res) => logoutController.handle(req, res));
 
 authRouter.post("/send-otp", (req, res) => sendOtpController.handle(req, res));
 

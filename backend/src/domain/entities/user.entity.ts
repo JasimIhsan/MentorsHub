@@ -146,8 +146,6 @@ export class UserEntity {
 
 	// Update user details
 	updateUserDetails(updatedData: Partial<UserInterface>) {
-		console.log("password before: ", this.password);
-
 		if (updatedData.password !== undefined) this.password = updatedData.password;
 		if (updatedData.email !== undefined) this.email = updatedData.email;
 		if (updatedData.firstName !== undefined) this.firstName = updatedData.firstName;
@@ -161,11 +159,9 @@ export class UserEntity {
 		if (updatedData.sessionCompleted !== undefined) this.sessionCompleted = updatedData.sessionCompleted;
 		if (updatedData.mentorDetailsId !== undefined) this.mentorDetailsId = updatedData.mentorDetailsId;
 		if (updatedData.mentorRequestStatus !== undefined){
-			console.log('updatedData.mentorRequestStatus: ', updatedData.mentorRequestStatus);
 			this.mentorRequestStatus = updatedData.mentorRequestStatus
 		}
 		this.updatedAt = new Date();
-		console.log("password after : ", this.password);
 	}
 
 	// Toggle active status

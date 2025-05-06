@@ -39,7 +39,6 @@ export class UserRepositoryImpl implements IUserRepository {
 			return handleError(error, "Error finding user by ID");
 		}
 	}
-
 	async save(user: UserEntity): Promise<void> {
 		try {
 			await UserModel.findByIdAndUpdate(user.getId(), user.getProfile(true), { upsert: true, new: true });

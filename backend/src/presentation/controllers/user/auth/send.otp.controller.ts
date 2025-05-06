@@ -8,7 +8,6 @@ export class SendOtpController {
 
 	async handle(req: Request, res: Response) {
 		try {
-			console.log(`in send`);
 			const { email } = req.body;
 
 			if (!email) {

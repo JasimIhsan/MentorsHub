@@ -13,7 +13,6 @@ export class ResetPasswordUseCase {
 		}
 
 		const isSamePassword = await user.isPasswordValid(newPassword);
-		console.log('isSamePassword: ', isSamePassword);
 		if (isSamePassword) {
 			throw new Error("Password cannot be the same as the old password");
 		}

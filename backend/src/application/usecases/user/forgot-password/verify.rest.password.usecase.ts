@@ -9,7 +9,6 @@ export class VerifyResetTokenUseCase implements IVerifyResetTokenUseCase {
 		// const user = await this.resetRepo.findUserByResetToken(token);
 		// const userDetails = user?.getProfile();
 		const tokenDoc = await this.resetRepo.findToken(token);
-		console.log('tokenDoc: ', tokenDoc);
 
 		if (!tokenDoc ||!tokenDoc.getToken() || tokenDoc.isExpired()) {
 			return false;

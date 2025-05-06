@@ -38,6 +38,7 @@ const userSlice = createSlice({
 	initialState,
 	reducers: {
 		login(state, action: PayloadAction<Partial<UserWithoutPassword>>) {
+			console.log("Dispatching login action with payload:", action.payload);
 			state.isAuthenticated = true;
 			state.user = action.payload;
 		},

@@ -9,7 +9,6 @@ const userRepo = new UserRepositoryImpl();
 export const checkUserStatus = (req: Request, res: Response, next: NextFunction) => {
 	const user = req.user as UserEntity;
 	if (user.getStatus() === "blocked") {
-		console.log(`is blocked`);
 		res.status(HttpStatusCode.FORBIDDEN).json({ success: false, blocked: true, message: "Your account is blocked. Please contact support" });
 		return;
 	}
@@ -19,13 +18,11 @@ export const checkUserStatus = (req: Request, res: Response, next: NextFunction)
 export const checkUserStatusInLogin = async (req: Request, res: Response, next: NextFunction) => {
 	const { email } = req.body;
 	const user = await userRepo.findUserByEmail(email);
-	console.log("user: ", user);
 	if (!user) {
 		return next();
 	}
 
 	if (user.getStatus() === "blocked") {
-		console.log(`is blocked`);
 		res.status(HttpStatusCode.FORBIDDEN).json({ success: false, blocked: true, message: "Your account is blocked. Please contact support" });
 		return;
 	}

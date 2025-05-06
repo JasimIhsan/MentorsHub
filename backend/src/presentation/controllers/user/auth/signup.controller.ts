@@ -7,9 +7,7 @@ export class SignupController {
 
 	async handle(req: Request, res: Response) {
 		try {
-			console.log(`in signup`);
 			const { otp, signupData } = req.body;
-			console.log("signupData: ", signupData);
 
 			const { user, refreshToken, accessToken } = await this.signupUseCase.execute(otp, signupData.firstName, signupData.lastName, signupData.email, signupData.password);
 
