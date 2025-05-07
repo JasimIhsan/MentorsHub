@@ -1,6 +1,5 @@
 import { Routes, Route } from "react-router-dom";
 // import MainLayout from "@/layouts/UserLayout";
-import PageNotFound from "@/pages/user/PageNotFoundPage";
 import { MentorDashboardPage } from "@/pages/mentor/MentorDashboardPage";
 import { MentorLayout } from "@/layouts/MentorLayout";
 import { MentorProtectedRoute } from "./ProtectedRoute";
@@ -9,6 +8,7 @@ import { MentorCalendarPage } from "@/pages/mentor/MentorCalendarPage";
 import { MentorAvailabilityPage } from "@/pages/mentor/MentorAvailabilityPage";
 import { MentorUpcomingSessionsPage } from "@/pages/mentor/MentorUpcomingSessionPage";
 import { MentorSessionHistoryPage } from "@/pages/mentor/MentorSessionHistoryPage";
+import { MentorPageNotFoundPage } from "@/pages/mentor/MentorPageNotFoundPage";
 
 const MentorRoutes = () => {
 	return (
@@ -64,7 +64,7 @@ const MentorRoutes = () => {
 						</MentorProtectedRoute>
 					}
 				/>
-				<Route path="*" element={<PageNotFound />} />
+				<Route path="*" element={<MentorPageNotFoundPage />} />
 			</Route>
 		</Routes>
 	);
