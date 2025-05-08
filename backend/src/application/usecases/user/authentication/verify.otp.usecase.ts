@@ -5,10 +5,7 @@ export class VerifyOtpUsecase implements IVerifyOtpUsecase {
 	constructor(private redisService: ICacheRepository) {}
 
 	async execute(email: string, enteredOtp: string): Promise<boolean> {
-		console.log("email in verify otp: ", email);
-
 		const cachedOtp = await this.redisService.getCachedData(`otp:${email}`);
-		console.log("cachedOtp: ", cachedOtp);
 		if (!cachedOtp) {
 			throw new Error("OTP not found");
 		}

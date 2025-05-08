@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import { IAdmin } from "@/interfaces/Iadmin";
+import { IAdmin } from "@/interfaces/IAdmin";
 
 interface AdminState {
 	isAuthenticated: boolean;

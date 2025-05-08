@@ -99,7 +99,7 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 			console.log("response: ", response);
 
 			if (response.success) {
-				// dispatch(adminLogout());
+				console.log(`response.user : `, response.user);
 				dispatch(login(response.user));
 				setFormState("login");
 				toast.success("Account created successfully");

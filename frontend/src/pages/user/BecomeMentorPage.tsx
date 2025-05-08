@@ -57,7 +57,7 @@ interface FormData {
 	certifications: Certification[];
 	sessionFormat: "one-on-one" | "group" | "both";
 	sessionTypes: string[];
-	pricing: "free" | "paid" | "both-pricing";
+	pricing: "free" | "paid";
 	hourlyRate: string;
 	availability: string[];
 	hoursPerWeek: string;
@@ -139,7 +139,9 @@ export function BecomeMentorPage() {
 				<div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg text-center">
 					<h1 className="text-3xl font-bold tracking-tight text-gray-900">You are already a mentor</h1>
 					<p className="mt-4 text-gray-600">Thank you for your dedication! As a mentor, you're already making a difference. Continue to guide and inspire through your dashboard.</p>
-					<Button size="lg" onClick={() => navigate("/mentor/dashboard")}>Go to Mentor Dashboard</Button>
+					<Button size="lg" onClick={() => navigate("/mentor/dashboard")}>
+						Go to Mentor Dashboard
+					</Button>
 				</div>
 			</div>
 		);
@@ -159,7 +161,7 @@ export function BecomeMentorPage() {
 		certifications: [{ name: "", issuingOrg: "", issueDate: "", expiryDate: "" }],
 		sessionFormat: "both",
 		sessionTypes: [],
-		pricing: "both-pricing",
+		pricing: "free",
 		hourlyRate: "",
 		availability: [],
 		hoursPerWeek: "",
@@ -278,7 +280,7 @@ export function BecomeMentorPage() {
 				for (const [key, value] of submissionData.entries()) {
 					console.log(`${key}: ${value}`);
 				}
-				const response = await axiosInstance.post("/user-profile/mentor-application", submissionData, {
+				const response = await axiosInstance.post("/user/user-profile/mentor-application", submissionData, {
 					headers: {
 						"Content-Type": "multipart/form-data",
 					},
@@ -697,12 +699,6 @@ export function BecomeMentorPage() {
 													<RadioGroupItem value="paid" id="paid" />
 													<Label htmlFor="paid" className="font-normal">
 														Paid Sessions
-													</Label>
-												</div>
-												<div className="flex items-center space-x-2">
-													<RadioGroupItem value="both-pricing" id="both-pricing" />
-													<Label htmlFor="both-pricing" className="font-normal">
-														Both Free and Paid Sessions
 													</Label>
 												</div>
 											</RadioGroup>

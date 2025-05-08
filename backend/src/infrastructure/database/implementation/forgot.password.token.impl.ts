@@ -44,8 +44,6 @@ export class ForgotPasswordResetTokenImpl implements IForgotPasswordTokensReposi
 	async findUserByResetToken(token: string): Promise<UserEntity | null> {
 		try {
 			const tokenDoc = await ForgotTokenModel.findOne({ token }).populate("userId");
-			// console.log("Token Document: ", tokenDoc);
-
 			if (!tokenDoc || !tokenDoc.userId) return null;
 
 			return UserEntity.fromDBDocument(tokenDoc.userId);

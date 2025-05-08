@@ -10,7 +10,6 @@ export class SignupUseCase implements ISignupUseCase {
 	constructor(private userRepository: IUserRepository, private tokenSerivice: ITokenService, private verifyOtp: IVerifyOtpUsecase) {}
 
 	async execute(otp: string, firstName: string, lastName: string, email: string, password: string) {
-		console.log("email in sinup: ", email);
 		const isOTPValid = await this.verifyOtp.execute(email, otp);
 		if (!isOTPValid) throw new Error("Invalid or expired OTP");
 
@@ -26,6 +25,7 @@ export class SignupUseCase implements ISignupUseCase {
 		if (!userId) throw new Error("User ID is undefined after saving");
 		const accessToken = this.tokenSerivice.generateAccessToken(userId);
 		const refreshToken = this.tokenSerivice.generateRefreshToken(userId);
-		return { user: newUser, refreshToken, accessToken };
+		return { user: savedUser, refreshToken, accessToken };
 	}
+	
 }

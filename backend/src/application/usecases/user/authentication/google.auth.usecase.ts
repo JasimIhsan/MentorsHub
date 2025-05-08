@@ -20,7 +20,6 @@ export class GoogleAuthUsecase implements IGoogleAuthUsecase {
 			throw new Error("Google token is required");
 		}
 		const response = await axios.get<GoogleUserData>(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${token}`);
-		console.log(`Google user data: `, response.data);
 		return response.data;
 	}
 
@@ -28,7 +27,6 @@ export class GoogleAuthUsecase implements IGoogleAuthUsecase {
 		try {
 			const data = await this.getGoogleUserData(googleToken);
 			const userEntity = await UserEntity.createWithGoogle(data.email, "", data.given_name, data.family_name, data.sub, data.picture);
-			console.log(userEntity);
 
 			const user = await this.userRepo.findUserByEmail(data.email);
 

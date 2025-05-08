@@ -9,24 +9,27 @@ import { Link, useParams } from "react-router-dom";
 import { useState } from "react"; // Removed unused useEffect
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useMentor } from "@/hooks/useMentor";
+import { motion } from "framer-motion";
 
 const availableTimes: string[] = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM"];
 
-export function MentorProfilePage() {
+export function MentorDetailsPage() {
 	const [isAvatarOpen, setIsAvatarOpen] = useState(false);
 	const { mentorId } = useParams<{ mentorId: string }>();
 	const { mentor, loading } = useMentor(mentorId as string); // Removed unused error
 
 	if (loading) {
 		return (
-			<div className="container py-8 px-10 md:px-20 xl:px-25">
-				<Card>
-					<CardContent className="pt-6 text-center">
-						<User className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-						<h2 className="text-xl font-semibold mb-2">Loading Profile...</h2>
-						<p className="text-muted-foreground">Please wait while we fetch the mentor's profile.</p>
-					</CardContent>
-				</Card>
+			<div className="flex items-center justify-center min-h-screen min-w-full bg-gray-50">
+				<div className="text-center flex flex-col gap-2">
+					<motion.div className="mx-auto text-muted-foreground" animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}>
+						<User className="h-16 w-16"/>
+					</motion.div>
+					<div>
+						<h2 className="text-2xl font-semibold text-gray-800">Loading Profile...</h2>
+						<p className="text-gray-500">Please wait while we fetch the mentor's profile.</p>
+					</div>
+				</div>
 			</div>
 		);
 	}

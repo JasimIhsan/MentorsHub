@@ -16,6 +16,8 @@ import { IMentorProfileRepository } from "../domain/dbrepository/mentor.details.
 import { MentorDetailsRepositoryImpl } from "./database/implementation/mentor.respository.impl";
 import { ISessionRepository } from "../domain/dbrepository/session.repository";
 import { SessionRepositoryImpl } from "./database/implementation/session.repository.impl";
+import { S3Service } from "./cloud/S3 bucket/s3.implementation";
+import { IS3Service } from "../domain/interface/s3.service.interface";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -29,3 +31,4 @@ export const tokenInterface: ITokenService = new TokenServicesImpl();
 export const emailService: IEmailService = new EmailServiceImpl();
 export const redisService: ICacheRepository = new RedisCacheRepository();
 export const cloudinaryService: ICloudinaryService = new CloudinaryService();
+export const s3BucketService: IS3Service = new S3Service();

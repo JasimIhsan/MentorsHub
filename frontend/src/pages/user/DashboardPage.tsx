@@ -22,7 +22,6 @@ export const DashboardPage: React.FC = () => {
 	const dispatch = useDispatch<AppDispatch>();
 
 	useEffect(() => {
-		console.log(`askldjfalksd`);
 		dispatch(fetchUserProfile());
 	}, [dispatch]);
 

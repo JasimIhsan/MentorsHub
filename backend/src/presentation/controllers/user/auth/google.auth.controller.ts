@@ -7,7 +7,6 @@ export class GoogleAuthController {
 	async handle(req: Request, res: Response) {
 		try {
 			const { credential } = req.body;
-			console.log('credentials: ', credential);
 
 			const { user, accessToken, refreshToken } = await this.googleAuthUsecase.execute(credential);
 			if (!user || !accessToken || !refreshToken) {

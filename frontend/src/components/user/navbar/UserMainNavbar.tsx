@@ -12,7 +12,7 @@ export function UserMainNavbar() {
 	};
 
 	return (
-		<div className="flex items-center gap-6 md:gap-10 pl-10 md:pl-20 xl:pl-25 justify-center">
+		<div className="flex items-center gap-6 md:gap-10 pl-10 md:pl-20 xl:pl-25 justify-center z-10">
 			<div onClick={handleLogoClick} className="flex items-center gap-2 cursor-pointer">
 				<div className="w-8">
 					<img src={Logo} alt="" className="w-full" />

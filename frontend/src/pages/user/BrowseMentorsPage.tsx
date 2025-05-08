@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { INTEREST_OPTIONS } from "@/data/interest.option";
 import { fetchAllApprovedMentors } from "@/api/mentors.api.service";
-import { IMentorDTO } from "@/interfaces/mentor.application.dto";
+import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import { toast } from "sonner";
 import verified from "../../assets/verify.png";
 import { useSelector } from "react-redux";

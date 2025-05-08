@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { IMentorDTO } from "@/interfaces/mentor.application.dto";
+import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import { fetchMentorAPI } from "@/api/mentors.api.service";
 
 function useMentor(mentorId: string) {
-	const [mentor, setMentor] = useState<IMentorDTO | null>(null);
+	const [mentor, setMentor] = useState<IMentorDTO>({} as IMentorDTO);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 

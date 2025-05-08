@@ -14,7 +14,6 @@ export class VerifyResetTokenController {
 				return;
 			}
 			const isValid = await this.verifyTokenUseCase.execute(token);
-			console.log('isValid: ', isValid);
 
 			if (isValid) {
 				res.status(HttpStatusCode.OK).json({ success: true, message: "Token is valid" });
