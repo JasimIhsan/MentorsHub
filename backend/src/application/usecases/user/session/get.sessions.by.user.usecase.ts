@@ -1,4 +1,4 @@
-import { ISessionRepository } from "../../../../domain/dbrepository/session.repository";
+import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IGetSessionsByUserUseCase } from "../../../interfaces/session";
 

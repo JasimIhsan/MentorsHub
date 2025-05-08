@@ -1,4 +1,4 @@
-import { ISessionRepository } from "../../domain/dbrepository/session.repository";
+import { ISessionRepository } from "../../domain/repositories/session.repository";
 
 export class ExpireOldSessions {
 	constructor(private sessionRepo: ISessionRepository) {}

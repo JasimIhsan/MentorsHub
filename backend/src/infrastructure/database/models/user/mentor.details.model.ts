@@ -1,5 +1,19 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
+enum WeekDay {
+	Monday = "Monday",
+	Tuesday = "Tuesday",
+	Wednesday = "Wednesday",
+	Thursday = "Thursday",
+	Friday = "Friday",
+	Saturday = "Saturday",
+	Sunday = "Sunday",
+}
+
+type Availability = {
+	[key in WeekDay]: string[];
+};
+
 export interface IMentorProfileModel extends Document {
 	userId: ObjectId;
 	professionalTitle: string;
@@ -28,9 +42,9 @@ export interface IMentorProfileModel extends Document {
 	}[];
 	sessionFormat: "one-on-one" | "group" | "both";
 	sessionTypes: string[];
-	pricing: "free" | "paid" | "both-pricing";
+	pricing: "free" | "paid";
 	hourlyRate: number | null;
-	availability: string[];
+	availability: Availability;
 	hoursPerWeek: string;
 	documents: string[]; // Array of S3 URLs
 	createdAt: Date;
@@ -72,9 +86,13 @@ const MentorProfileSchema: Schema = new Schema(
 		],
 		sessionFormat: { type: String, enum: ["one-on-one", "group", "both"], required: true },
 		sessionTypes: [{ type: String, required: true }],
-		pricing: { type: String, enum: ["free", "paid", "both-pricing"], required: true },
+		pricing: { type: String, enum: ["free", "paid"], required: true },
 		hourlyRate: { type: Number },
-		availability: [{ type: String, required: true }],
+		availability: {
+			type: Map,
+			of: [String],
+			default: {},
+		},
 		documents: [{ type: String }],
 	},
 	{ timestamps: true }

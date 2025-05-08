@@ -1,5 +1,5 @@
 import { ForgotPasswordTokenDTO } from "../../../application/dtos/forgot.token.dto";
-import { IForgotPasswordTokensRepository } from "../../../domain/dbrepository/forgot.password.token.respository";
+import { IForgotPasswordTokensRepository } from "../../../domain/repositories/forgot.password.token.respository";
 import { ForgotPasswordTokenEntity, IForgotPasswordTokens } from "../../../domain/entities/forgot.password.token.entity";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { ForgotTokenModel } from "../models/user/forgot.password.reset.token.model";

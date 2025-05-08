@@ -1,3 +1,4 @@
+import { IAvailabilityDTO } from "../../application/dtos/availability.dto";
 import { IMentorDTO } from "../../application/dtos/mentor.dtos";
 import { IMentorInterface, MentorProfileEntity } from "../entities/mentor.detailes.entity";
 
@@ -8,4 +9,5 @@ export interface IMentorProfileRepository {
 	findAllMentors(): Promise<IMentorDTO[]>;
 	findAllApprovedMentors(): Promise<IMentorDTO[]>;
 	findMentorByUserId(userId: string): Promise<IMentorDTO | null>;
+	getAvailability(userId: string): Promise<IAvailabilityDTO | null>;
 }

@@ -1,3 +1,5 @@
+import { Availability } from "../../domain/entities/mentor.detailes.entity";
+
 export interface IMentorDTO {
 	email: string;
 	password: string;
@@ -47,6 +49,6 @@ export interface IMentorDTO {
 	sessionTypes: string[];
 	pricing: "free" | "paid" | "both-pricing";
 	hourlyRate: number | null;
-	availability: string[];
+	availability: Availability;
 	documents: string[];
 }

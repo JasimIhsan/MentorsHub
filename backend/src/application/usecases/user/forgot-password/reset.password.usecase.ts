@@ -1,5 +1,5 @@
-import { IForgotPasswordTokensRepository } from "../../../../domain/dbrepository/forgot.password.token.respository";
-import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
+import { IForgotPasswordTokensRepository } from "../../../../domain/repositories/forgot.password.token.respository";
+import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { UserEntity } from "../../../../domain/entities/user.entity";
 
 export class ResetPasswordUseCase {

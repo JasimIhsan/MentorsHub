@@ -1,4 +1,4 @@
-import { ISessionRepository } from "../../../domain/dbrepository/session.repository";
+import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { IGetUpcomingSessionMentorUsecase } from "../../interfaces/mentors/mentors.interface";
 
 export class GetUpcomingSessionMentorUsecase implements IGetUpcomingSessionMentorUsecase {

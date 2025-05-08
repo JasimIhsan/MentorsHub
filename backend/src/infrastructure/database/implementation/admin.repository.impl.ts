@@ -1,5 +1,5 @@
 import { AdminDTO } from "../../../application/dtos/admin.dtos";
-import { IAdminRepository } from "../../../domain/dbrepository/admin.repository";
+import { IAdminRepository } from "../../../domain/repositories/admin.repository";
 import { AdminEntity } from "../../../domain/entities/admin.entity";
 import { AdminModel } from "../models/admin/admin.model";
 

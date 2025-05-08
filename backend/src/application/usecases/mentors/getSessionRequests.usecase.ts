@@ -1,4 +1,4 @@
-import { ISessionRepository } from "../../../domain/dbrepository/session.repository";
+import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { ISessionMentorDTO } from "../../dtos/session.dto";
 import { IGetSessionRequests } from "../../interfaces/mentors/mentors.interface";
 

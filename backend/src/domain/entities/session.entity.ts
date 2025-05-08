@@ -109,4 +109,32 @@ export class SessionEntity {
 	getCreatedAt(): Date {
 		return this.createdAt;
 	}
+
+	getTime(): string {
+		return this.time;
+	}
+
+	getHours(): number{
+		return this.hours;
+	}
+
+	toObject() {
+		return {
+			id: this.id,
+			participants: this.participants,
+			mentorId: this.mentorId,
+			topic: this.topic,
+			sessionType: this.sessionType,
+			sessionFormat: this.sessionFormat,
+			date: this.date,
+			time: this.time,
+			hours: this.hours,
+			message: this.message,
+			status: this.status,
+			pricing: this.pricing,
+			totalAmount: this.totalAmount,
+			rejectReason: this.rejectReason,
+			createdAt: this.createdAt,
+		};
+	}
 }

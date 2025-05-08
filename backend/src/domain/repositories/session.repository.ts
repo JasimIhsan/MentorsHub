@@ -11,4 +11,5 @@ export interface ISessionRepository {
 	getSessions(mentorId: string): Promise<ISessionMentorDTO[]>;
 	expireSession(sessionId: string): Promise<void>;
 	getSessionToExpire(): Promise<ISessionDocument[]>;
+	getSessionByDate(mentorId: string, date: Date): Promise<SessionEntity[] | null>;
 }

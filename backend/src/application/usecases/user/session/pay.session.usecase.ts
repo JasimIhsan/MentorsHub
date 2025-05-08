@@ -1,4 +1,4 @@
-import { ISessionRepository } from "../../../../domain/dbrepository/session.repository";
+import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { IPaySessionUseCase } from "../../../interfaces/session";
 
 export class PaySessionUseCase implements IPaySessionUseCase {

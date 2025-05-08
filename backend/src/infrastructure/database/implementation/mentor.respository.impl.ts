@@ -1,8 +1,9 @@
 import { IMentorDTO } from "../../../application/dtos/mentor.dtos";
-import { IMentorProfileRepository } from "../../../domain/dbrepository/mentor.details.repository";
-import { IMentorInterface, MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
+import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
+import { Availability, IMentorInterface, MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
 import { MentorProfileModel } from "../models/user/mentor.details.model";
 import { IUsers, UserModel } from "../models/user/user.model";
+import { IAvailabilityDTO } from "../../../application/dtos/availability.dto";
 
 // Error handler
 const handleError = (error: unknown, message: string): never => {
@@ -148,7 +149,6 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			const mentor = await MentorProfileModel.findOne({ userId }).populate("userId");
 			if (!mentor || !mentor.userId) return null;
 
-
 			const user = mentor.userId as any;
 
 			const mentorDTOs: IMentorDTO = {
@@ -190,6 +190,16 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			return mentorDTOs;
 		} catch (error) {
 			throw handleError(error, "Error finding mentor by user ID");
+		}
+	}
+
+	async getAvailability(userId: string): Promise<IAvailabilityDTO | null> {
+		try {
+			const result = await MentorProfileModel.findOne({ userId }, { availability: 1, _id: 0 }).lean();
+			if (!result) return null;
+			return { userId, availability: result.availability };
+		} catch (error) {
+			throw handleError(error, "Error finding mentor availability");
 		}
 	}
 }
