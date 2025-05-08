@@ -21,7 +21,7 @@ import { userSideMentorRouter } from "./presentation/routes/user/user.side.mento
 import http from "http";
 import { Server } from "socket.io";
 import { handleSignaling } from "./infrastructure/socket/signaling";
-import { documentsRouter } from "./presentation/routes/common/view.documents.routes";
+import { documentsRouter } from "./presentation/routes/common/documents.routes";
 
 dotenv.config();
 

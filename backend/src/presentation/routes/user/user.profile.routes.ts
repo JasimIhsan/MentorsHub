@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { becomeMentorApplicationController, changePasswordController, getUserProfileController, updateUseProfileController } from "../../controllers/user/composer";
 import { upload } from "../../../infrastructure/file-upload/multer/multer.config";
-import { uploadMentorDocument } from "../../../infrastructure/cloud/S3 bucket/upload.mentor.documents.s3";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 export const userProfileRoutes = Router();
 

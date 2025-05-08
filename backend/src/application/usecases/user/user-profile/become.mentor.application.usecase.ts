@@ -2,13 +2,12 @@ import { IMentorProfileRepository } from "../../../../domain/dbrepository/mentor
 import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
 import { IMentorInterface, MentorProfileEntity } from "../../../../domain/entities/mentor.detailes.entity";
 import { UserEntity, UserInterface } from "../../../../domain/entities/user.entity";
-import { uploadMentorDocument } from "../../../../infrastructure/cloud/S3 bucket/upload.mentor.documents.s3";
-import { IUsers } from "../../../../infrastructure/database/models/user/user.model";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
+import { IUploadMentorDocuments } from "../../../interfaces/documents";
 import { IBecomeMentorUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
 
 export class BecomeMentorUseCase implements IBecomeMentorUseCase {
-	constructor(private mentorProfileRepo: IMentorProfileRepository, private userRepo: IUserRepository) {}
+	constructor(private mentorProfileRepo: IMentorProfileRepository, private userRepo: IUserRepository, private uploadDocumentUseCase: IUploadMentorDocuments) {}
 
 	async execute(userId: string, data: IMentorInterface, userData: Partial<UserInterface>, documents: Express.Multer.File[]): Promise<{ savedUser: UserEntity; mentorProfile: MentorProfileEntity }> {
 		const existingUser = await this.userRepo.findUserById(userId);
@@ -26,7 +25,16 @@ export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 
 		let documentUrls: string[] = [];
 		if (documents.length > 0) {
-			documentUrls = await Promise.all(documents.map((document) => uploadMentorDocument(document.buffer, document.originalname, document.mimetype, userId)));
+			documentUrls = await Promise.all(
+				documents.map((document) =>
+					this.uploadDocumentUseCase.execute({
+						fileBuffer: document.buffer,
+						fileName: document.originalname,
+						mimeType: document.mimetype,
+						mentorId: userId,
+					})
+				)
+			);
 		}
 
 		const updateData: IMentorInterface = {
