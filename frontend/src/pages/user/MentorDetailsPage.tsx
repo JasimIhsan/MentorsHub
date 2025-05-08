@@ -13,7 +13,7 @@ import { motion } from "framer-motion";
 
 const availableTimes: string[] = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM"];
 
-export function MentorProfilePage() {
+export function MentorDetailsPage() {
 	const [isAvatarOpen, setIsAvatarOpen] = useState(false);
 	const { mentorId } = useParams<{ mentorId: string }>();
 	const { mentor, loading } = useMentor(mentorId as string); // Removed unused error

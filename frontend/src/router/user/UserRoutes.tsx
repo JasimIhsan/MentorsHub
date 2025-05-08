@@ -10,7 +10,7 @@ import { DashboardPage } from "@/pages/user/DashboardPage";
 import UserProfilePage from "@/pages/user/UserProfilePage";
 import BrowseMentorsPage from "@/pages/user/BrowseMentorsPage";
 import { BecomeMentorPage } from "@/pages/user/BecomeMentorPage";
-import { MentorProfilePage } from "@/pages/user/MentorProfilePage";
+import { MentorDetailsPage } from "@/pages/user/MentorDetailsPage";
 import { RequestSessionPage } from "@/pages/user/RequestSessionPage";
 import { CheckoutPage } from "@/pages/user/CheckoutPage";
 // import { PaymentConfirmationPage } from "@/pages/user/PaymentConfirmationPage";
@@ -63,7 +63,7 @@ const UserRoutes = () => {
 					path="/browse/mentor-profile/:mentorId"
 					element={
 						<ProtectedRoute>
-							<MentorProfilePage />
+							<MentorDetailsPage />
 						</ProtectedRoute>
 					}
 				/>

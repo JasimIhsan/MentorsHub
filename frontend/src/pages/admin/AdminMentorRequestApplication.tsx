@@ -8,13 +8,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Search, Calendar, CheckCircle, XCircle, Clock, Eye, Download, Filter, BriefcaseBusiness, GraduationCap, Check, X } from "lucide-react";
 import { JSX, useEffect, useState } from "react";
-import { IMentorDTO } from "@/interfaces/mentor.application.dto";
+import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import Alert from "@/components/common/alert";
 import { useDispatch } from "react-redux";
 import { updateRole } from "@/store/slices/userSlice";
 import { fetchAllMentors } from "@/api/mentors.api.service";
+import { extractDocumentName } from "@/utility/extractDocumentName";
+import { fetchDocumentUrlsAPI } from "@/api/admin/common/fetchDocuments";
 
 // Utility to generate a unique key for objects
 const getUniqueKey = (item: any, index: number): string => {
@@ -181,16 +183,14 @@ function ApplicationCard({ application, updateMentorStatus }: { application: IMe
 	const fetchDocumentUrls = async () => {
 		setIsLoadingDocuments(true);
 		try {
-			const response = await axiosInstance.get(`/documents/${application.userId}/documents`);
-			if (response.data.success) {
-				setDocumentUrls(response.data.documents);
+			const response = await fetchDocumentUrlsAPI(application.userId);
+			if (response.success) {
+				setDocumentUrls(response.documents);
 				toast.success("Documents fetched successfully!");
-			} else {
-				toast.error("Failed to fetch documents.");
 			}
 		} catch (error) {
 			console.error("Error fetching document URLs:", error);
-			toast.error("Failed to fetch documents.");
+			if (error instanceof Error) toast.error(error.message);
 		} finally {
 			setIsLoadingDocuments(false);
 		}
@@ -281,7 +281,7 @@ function ApplicationCard({ application, updateMentorStatus }: { application: IMe
 												) : documentUrls.length > 0 ? (
 													documentUrls.map((url, i) => (
 														<div key={getUniqueKey(url, i)} className="flex items-center justify-between">
-															<p className="text-sm">{url.split("/").pop()?.split("?")[0] || `Document ${i + 1}`}</p>
+															<p className="text-sm">{extractDocumentName(url)}</p>
 															<Button variant="outline" size="sm" asChild>
 																<a href={url} download target="_blank" rel="noopener noreferrer">
 																	<Download className="mr-2 h-4 w-4" />

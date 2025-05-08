@@ -13,7 +13,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMentor } from "@/hooks/useMentor";
-import { IMentorDTO } from "@/interfaces/mentor.application.dto";
+import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import { format } from "date-fns";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
