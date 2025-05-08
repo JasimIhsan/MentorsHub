@@ -17,3 +17,7 @@ export interface IUpdateRequestStatusUseCase {
 export interface IPaySessionUseCase {
 	execute(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void>;
 }
+
+export interface IStartSessionUseCase {
+	execute(sessionId: string): Promise<void>;
+}
