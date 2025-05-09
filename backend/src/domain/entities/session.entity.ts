@@ -114,6 +114,10 @@ export class SessionEntity {
 		return this.time;
 	}
 
+	getDate(): Date {
+		return this.date;
+	}
+
 	getHours(): number{
 		return this.hours;
 	}

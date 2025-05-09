@@ -11,32 +11,32 @@ dayjs.extend(customParseFormat);
 export class GetAvailabilityUseCase implements IGetAvailabilityUseCase {
 	constructor(private mentorRepo: IMentorProfileRepository, private sessionRepo: ISessionRepository) {}
 
-	async execute(userId: string, date: string): Promise<any> {
+	async execute(userId: string, date: Date): Promise<any> {
 		const dayName = dayjs(date).format("dddd") as WeekDay;
-
-		const parsedDate = new Date(date);
 
 		const allSlots = await this.mentorRepo.getAvailability(userId);
 		if (!allSlots) return [];
 
 		const slotsInDate = allSlots.availability[dayName];
 
-		const sessions = await this.sessionRepo.getSessionByDate(userId, parsedDate);
+		const sessions = await this.sessionRepo.getSessionByDate(userId, date);
 
 		const bookedSessions = sessions?.filter((s) => s.getStatus() !== "approved" || s.getStatus() !== "upcoming");
 
 		const bookedTimeSet = new Set<string>();
 
-		bookedSessions?.forEach((s) => {
-			const sessionStartTime = s.getTime();
-			const sessionHours = s.getHours();
+		if (bookedSessions) {
+			bookedSessions?.forEach((s) => {
+				const sessionStartTime = s.getTime();
+				const sessionHours = s.getHours();
 
-			for (let i = 0; i < sessionHours; i++) {
-				const slotTime = dayjs(sessionStartTime, "HH:mm").add(i, "hour").format("HH:mm");
-				bookedTimeSet.add(slotTime);
-			}
-		});
+				for (let i = 0; i < sessionHours; i++) {
+					const slotTime = dayjs(sessionStartTime, "HH:mm").add(i, "hour").format("HH:mm");
+					bookedTimeSet.add(slotTime);
+				}
+			});
+		}
 
-		return slotsInDate.filter((slot) => !bookedTimeSet.has(slot));
+		return bookedSessions ? slotsInDate.filter((slot) => !bookedTimeSet.has(slot)) : slotsInDate;
 	}
 }

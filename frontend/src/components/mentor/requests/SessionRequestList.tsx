@@ -209,9 +209,9 @@ export function SessionRequestsList({ requests, status, setRequests }: SessionRe
 					<DialogFooter>
 						{status === "pending" ? (
 							<div className="flex w-full gap-2">
-								<Button variant="outline" className="flex-1" onClick={() => console.log("Counter-propose")}>
+								{/* <Button variant="outline" className="flex-1" onClick={() => console.log("Counter-propose")}>
 									Counter-Propose
-								</Button>
+								</Button> */}
 								<Button variant="destructive" size="sm" onClick={() => handleReject(selectedRequest?.id as string)}>
 									<X className="h-4 w-4 mr-1" />
 									Reject

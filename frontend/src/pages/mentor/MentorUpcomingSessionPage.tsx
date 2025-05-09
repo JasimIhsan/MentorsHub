@@ -9,13 +9,13 @@ import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/common/Loading";
+import { Loading } from "@/components/custorm/Loading";
 import { ISessionMentorDTO, SessionStatus } from "@/interfaces/ISessionDTO";
 import io, { Socket } from "socket.io-client";
 import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { SessionDetailsModal } from "@/components/common/SessionDetailsModal";
+import { SessionDetailsModal } from "@/components/custorm/SessionDetailsModal";
 
 export function MentorUpcomingSessionsPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);

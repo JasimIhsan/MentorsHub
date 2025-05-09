@@ -7,14 +7,15 @@ export class GetMentorAvailabilityController {
 	async handle(req: Request, res: Response) {
 		try {
 			const { mentorId } = req.params;
-			const { date } = req.body;
-
+			const { dateString } = req.query;
+			const date = new Date(dateString as string);
 			if (!date) {
 				res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: "Date is required" });
 				return;
 			}
 
 			const availability = await this.getAvailabilityUsecase.execute(mentorId, date);
+			console.log('availability: ', availability);
 
 			res.status(HttpStatusCode.OK).json({ success: true, availability });
 		} catch (error) {

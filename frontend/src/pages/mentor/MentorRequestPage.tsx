@@ -96,7 +96,6 @@ export function MentorRequestsPage() {
 					status: "rejected",
 					rejectReason: confirmationDialog.rejectReason,
 				};
-				console.log("Reject Payload:", payload);
 
 				if (!confirmationDialog.rejectReason.trim()) {
 					toast.error("Please provide a reason for rejection.");

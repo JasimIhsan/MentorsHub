@@ -47,7 +47,6 @@ export function AddUserForm({ setUsers }: AddUserFormProps) {
 
 	const onSubmit = async (data: FormData) => {
 		try {
-			console.log("Form submitted:", data);
 			const response = await createUserApi(data);
 			if (response.success) {
 				setIsOpen(false);

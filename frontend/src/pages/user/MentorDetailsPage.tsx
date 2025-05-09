@@ -159,7 +159,7 @@ export function MentorDetailsPage() {
 												</div>
 												<div>
 													<h3 className="font-medium">Availability</h3>
-													<p className="text-sm text-muted-foreground">{mentor.availability?.join(", ") || "Not specified"}</p>
+													{/* <p className="text-sm text-muted-foreground">{mentor.availability?.join(", ") || "Not specified"}</p> */}
 												</div>
 											</div>
 											<div className="flex items-start gap-3">

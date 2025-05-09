@@ -57,15 +57,12 @@ axiosInstance.interceptors.response.use(
 	},
 	// may be the response has an error because of the access token expiration or something, so refresh it
 	async (error) => {
-		console.log("error in api config : ", error);
-
 		// originalRequest._retry: A custom flag to ensure the original request is retried only once.
 		const originalRequest = error.config;
 		// if the response status is 401 (unauthorized) and the request hasn't been retried
 		if (error.response.status === 401 && !originalRequest._retry) {
 			originalRequest._retry = true;
 			try {
-				console.log(`in 401`);
 				// refresh the access token
 				const newAccessToken = await refreshAccessToken();
 				// update the default authorization header with the new access token
@@ -78,7 +75,6 @@ axiosInstance.interceptors.response.use(
 				return Promise.reject(refreshError); // handle the token refresh error
 			}
 		} else if (error.response.status === 403) {
-			console.log(`in 403`, error);
 			localStorage.removeItem("persist:root");
 
 			if (error.response.data.blocked) {

@@ -9,8 +9,6 @@ export class UpdateUserProfileController {
 			const { userId, firstName, lastName, email, skills, interests, bio } = req.body;
 			const avatar = req.file;
 
-			console.log(`UserId in controller : `, userId);
-
 			const data = {
 				userId,
 				firstName,
@@ -28,8 +26,6 @@ export class UpdateUserProfileController {
 			} else {
 				user = await this.updateUserProfileUseCase.execute(data.userId, data);
 			}
-
-			console.log("user: ", user);
 
 			res.status(HttpStatusCode.OK).json({ success: true, user });
 		} catch (error) {
