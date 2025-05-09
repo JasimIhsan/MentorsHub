@@ -1,5 +1,5 @@
 import { UserEntity, UserInterface } from "../../../domain/entities/user.entity";
-import { IUserRepository } from "../../../domain/dbrepository/user.repository";
+import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { UserModel } from "../models/user/user.model";
 import mongoose from "mongoose";
 import { IUserDTO, UserDTO } from "../../../application/dtos/user.dtos";

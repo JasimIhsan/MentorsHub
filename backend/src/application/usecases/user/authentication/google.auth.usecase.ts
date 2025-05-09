@@ -1,6 +1,6 @@
 import axios from "axios";
 import { UserEntity } from "../../../../domain/entities/user.entity";
-import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
+import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { ITokenService } from "../../../interfaces/user/token.service.interface";
 import { IGoogleAuthUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
 

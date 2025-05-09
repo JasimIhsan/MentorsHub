@@ -1,4 +1,4 @@
-import { IMentorProfileRepository } from "../../../domain/dbrepository/mentor.details.repository";
+import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
 import { IMentorDTO } from "../../dtos/mentor.dtos";
 import { IGetMentorUsecase } from "../../interfaces/mentors/mentors.interface";
 

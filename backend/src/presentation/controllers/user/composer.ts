@@ -34,6 +34,8 @@ import { GetUserProfileController } from "./user-profile/get.user.profile.contro
 import { RequestSessionController } from "./session/request.session.controller";
 import { GetSessionByUserController } from "./session/get.session.by.user.controller";
 import { PaySessionController } from "./session/pay.session.usecase.controller";
+import { GetMentorAvailabilityController } from "./session/get.mentor.availability.controller";
+import { getAvailabilityUsecase } from "../../../application/usecases/mentors/composer";
 
 export const signupController = new SignupController(signupUseCase);
 export const signinController = new SigninController(signinUseCase);
@@ -51,3 +53,4 @@ export const getUserProfileController = new GetUserProfileController(getUserProf
 export const createSessionController = new RequestSessionController(requestSessionUsecase);
 export const getSessionsByUserController = new GetSessionByUserController(getSessionsByUserUsecase);
 export const paySessionController = new PaySessionController(paySessionUsecase);
+export const getAvailabilityController = new GetMentorAvailabilityController(getAvailabilityUsecase);

@@ -52,8 +52,6 @@ export function MentorProfilePage() {
 		}
 	}, [error]);
 
-	console.log(`documentUrls : `, documentUrls);
-
 	if (loading) return <div>Loading...</div>;
 
 	return (

@@ -1,4 +1,4 @@
-import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
+import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { IGetAllUsersUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
 
 export class GetAllUsersUsecase implements IGetAllUsersUsecase{

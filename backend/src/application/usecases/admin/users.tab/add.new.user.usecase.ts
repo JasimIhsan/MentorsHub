@@ -1,4 +1,4 @@
-import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
+import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { UserEntity, UserRole } from "../../../../domain/entities/user.entity";
 import { IUserDTO, UserDTO } from "../../../dtos/user.dtos";
 import { ICreateUserUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";

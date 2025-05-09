@@ -96,10 +96,8 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 
 		try {
 			const response = await verifyOtpAndCompleteRegistration(otpString, signupData);
-			console.log("response: ", response);
 
 			if (response.success) {
-				console.log(`response.user : `, response.user);
 				dispatch(login(response.user));
 				setFormState("login");
 				toast.success("Account created successfully");

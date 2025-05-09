@@ -11,7 +11,7 @@ import { JSX, useEffect, useState } from "react";
 import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
-import Alert from "@/components/common/alert";
+import Alert from "@/components/custorm/alert";
 import { useDispatch } from "react-redux";
 import { updateRole } from "@/store/slices/userSlice";
 import { fetchAllMentors } from "@/api/mentors.api.service";
@@ -31,7 +31,6 @@ const getUniqueKey = (item: any, index: number): string => {
 const renderItem = (item: any): string => {
 	if (typeof item === "string") return item;
 	if (item && typeof item === "object") {
-		console.warn("Encountered object in skills/interests:", item);
 		return JSON.stringify(item);
 	}
 	return "Unknown";

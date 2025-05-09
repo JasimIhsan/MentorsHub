@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { createSessionController, getSessionsByUserController, paySessionController } from "../../controllers/user/composer";
+import { createSessionController, getAvailabilityController, getSessionsByUserController, paySessionController } from "../../controllers/user/composer";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 export const sessionRouter = Router();
 

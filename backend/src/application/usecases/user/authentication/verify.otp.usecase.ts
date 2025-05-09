@@ -1,4 +1,4 @@
-import { ICacheRepository } from "../../../../domain/dbrepository/cache.respository";
+import { ICacheRepository } from "../../../../domain/repositories/cache.respository";
 import { IVerifyOtpUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
 
 export class VerifyOtpUsecase implements IVerifyOtpUsecase {

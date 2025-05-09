@@ -1,4 +1,4 @@
-import { ISessionRepository } from "../../../domain/dbrepository/session.repository";
+import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { ISessionDocument, SessionModel } from "../models/session/session.model";
 import { SessionEntity } from "../../../domain/entities/session.entity";
 import { handleError } from "./user.repository.impl";
@@ -89,6 +89,29 @@ export class SessionRepositoryImpl implements ISessionRepository {
 
 	async expireSession(sessionId: string): Promise<void> {
 		await SessionModel.findByIdAndDelete(sessionId, { status: "expired" });
+	}
+
+	async getSessionByDate(mentorId: string, date: Date): Promise<SessionEntity[] | null> {
+		try {
+			// Create start and end of the day for the given date
+			const startOfDay = new Date(date);
+			startOfDay.setUTCHours(0, 0, 0, 0); // Set to midnight UTC
+			const endOfDay = new Date(date);
+			endOfDay.setUTCHours(23, 59, 59, 999); // Set to end of day UTC
+
+			// Query sessions within the date range
+			const sessions = await SessionModel.find({
+				mentorId,
+				date: {
+					$gte: startOfDay,
+					$lte: endOfDay,
+				},
+			});
+
+			return sessions.length > 0 ? sessions.map((s) => SessionEntity.fromDBDocument(s)) : null;
+		} catch (error) {
+			return handleError(error, "Error getting session by date and status");
+		}
 	}
 
 	private mapSessionToUserDTO(session: any, userId: string): ISessionUserDTO {

@@ -1,5 +1,5 @@
-import { IMentorProfileRepository } from "../../../../domain/dbrepository/mentor.details.repository";
-import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
+import { IMentorProfileRepository } from "../../../../domain/repositories/mentor.details.repository";
+import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { IMentorInterface, MentorProfileEntity } from "../../../../domain/entities/mentor.detailes.entity";
 import { UserEntity, UserInterface } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";

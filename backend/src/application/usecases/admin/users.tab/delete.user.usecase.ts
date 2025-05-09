@@ -1,4 +1,4 @@
-import { IUserRepository } from "../../../../domain/dbrepository/user.repository";
+import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IDeleteUserUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
 

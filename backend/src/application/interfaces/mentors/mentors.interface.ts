@@ -1,3 +1,4 @@
+import { IAvailabilityDTO } from "../../dtos/availability.dto";
 import { IMentorDTO } from "../../dtos/mentor.dtos";
 import { ISessionMentorDTO, ISessionUserDTO } from "../../dtos/session.dto";
 
@@ -27,4 +28,8 @@ export interface IGetUpcomingSessionMentorUsecase {
 
 export interface IGetSessionHistoryUsecase {
 	execute(mentorId: string): Promise<ISessionMentorDTO[]>
+}
+
+export interface IGetAvailabilityUseCase {
+	execute(userId: string, dateStr: Date): Promise<string[]>
 }

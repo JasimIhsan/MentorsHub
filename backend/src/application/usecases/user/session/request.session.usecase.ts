@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
-import { ISessionRepository } from "../../../../domain/dbrepository/session.repository";
-import { IMentorProfileRepository } from "../../../../domain/dbrepository/mentor.details.repository";
+import { ISessionRepository } from "../../../../domain/repositories/session.repository";
+import { IMentorProfileRepository } from "../../../../domain/repositories/mentor.details.repository";
 import { ISessionParticipantDTO, SessionEntity } from "../../../../domain/entities/session.entity";
 import { IRequestSessionUseCase } from "../../../interfaces/session";
 import { SessionFormat, SessionPaymentStatus, PricingType, SessionStatus } from "../../../../infrastructure/database/models/session/session.model";

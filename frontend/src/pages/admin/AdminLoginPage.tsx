@@ -41,8 +41,6 @@ export default function AdminLoginPage() {
 		// setIsLoading(true);
 		try {
 			const response = await adminLoginAPI(data.username, data.password);
-			console.log("response from admin login : ", response);
-
 			if (response.success) {
 				// navigate('/admin/dashboard', { replace: true });
 				navigate("/admin/dashboard");

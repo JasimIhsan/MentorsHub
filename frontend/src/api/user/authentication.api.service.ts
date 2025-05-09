@@ -56,9 +56,7 @@ export const logoutSession = async () => {
 
 export const sendOtp = async (email: string) => {
 	try {
-		console.log("email: ", email);
 		const response = await axiosInstance.post(`/user/send-otp`, { email: email });
-		console.log(`response: `, response);
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error form sendOtp api : `, error);
@@ -67,12 +65,8 @@ export const sendOtp = async (email: string) => {
 };
 
 export const verifyOtpAndCompleteRegistration = async (otp: string, signupData: ISignupData) => {
-	console.log("signupData: ", signupData);
-	console.log("otp: ", otp);
 	try {
 		const response = await axiosInstance.post(`/user/register`, { otp, signupData });
-		console.log('response forgot: ', response);
-
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error form verifyOtpAndCompleteRegistration api : `, error);
@@ -91,7 +85,6 @@ export const resendOTP = async (email: string) => {
 };
 
 export const googleAthentication = async (credential: any) => {
-	console.log("credential: ", credential);
 	try {
 		const response = await axiosInstance.post("/user/auth/google", { credential });
 		return response.data;

@@ -1,4 +1,4 @@
-import { IForgotPasswordTokensRepository } from "../../../../domain/dbrepository/forgot.password.token.respository";
+import { IForgotPasswordTokensRepository } from "../../../../domain/repositories/forgot.password.token.respository";
 import { ForgotPasswordTokenEntity } from "../../../../domain/entities/forgot.password.token.entity";
 import { IVerifyResetTokenUseCase } from "../../../interfaces/user/auth.usecases.interfaces";
 

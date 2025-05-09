@@ -8,7 +8,7 @@ import { Bell, LogOut, Settings, User } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import Alert from "@/components/common/alert";
+import Alert from "@/components/custorm/alert";
 
 interface UserProfileNavLinksProps {
 	user: UserInterface;

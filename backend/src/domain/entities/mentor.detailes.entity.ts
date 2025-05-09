@@ -21,6 +21,20 @@ export interface Certification {
 	expiryDate: string | null;
 }
 
+export enum WeekDay {
+	Monday = "Monday",
+	Tuesday = "Tuesday",
+	Wednesday = "Wednesday",
+	Thursday = "Thursday",
+	Friday = "Friday",
+	Saturday = "Saturday",
+	Sunday = "Sunday",
+}
+
+export type Availability = {
+	[key in WeekDay]: string[];
+};
+
 export type SessionFormat = "one-on-one" | "group" | "both";
 export type PricingType = "free" | "paid" | "both-pricing";
 
@@ -38,7 +52,7 @@ export interface IMentorInterface {
 	sessionTypes: string[];
 	pricing: PricingType;
 	hourlyRate: number | null;
-	availability: string[];
+	availability: Availability;
 	documents: string[];
 	createdAt?: Date;
 	updatedAt?: Date;
@@ -58,7 +72,7 @@ export class MentorProfileEntity {
 	private sessionTypes: string[];
 	private pricing: PricingType;
 	private hourlyRate: number | null;
-	private availability: string[];
+	private availability: Availability;
 	private documents: string[];
 	private createdAt: Date;
 	private updatedAt?: Date;
@@ -77,7 +91,7 @@ export class MentorProfileEntity {
 		this.sessionTypes = mentor.sessionTypes;
 		this.pricing = mentor.pricing;
 		this.hourlyRate = mentor.hourlyRate;
-		this.availability = mentor.availability;
+		this.availability = mentor.availability ?? {};
 		this.documents = mentor.documents;
 		this.createdAt = mentor.createdAt ?? new Date();
 		this.updatedAt = mentor.updatedAt ?? new Date();

@@ -29,3 +29,13 @@ export const fetchMentorAPI = async (mentorId: string) => {
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const fetchMentorAvailabilityAPI = async (mentorId: string, date: Date) => {
+	try {
+		const response = await axiosInstance.get(`/mentor/availability/${mentorId}?dateString=${date}`);
+		return response.data;
+	} catch (error: any) {
+		console.error("Error fetching availability:", error);
+		throw new Error(error.response.data.message);
+	}
+};

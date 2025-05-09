@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -19,7 +18,9 @@ import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/common/Loading";
+import { Loading } from "@/components/custorm/Loading";
+import { fetchMentorAvailabilityAPI } from "@/api/mentors.api.service";
+import { CustomCalendar } from "@/components/custorm/CustomCalendar";
 
 export interface SessionData {
 	mentorId: string;
@@ -35,7 +36,7 @@ export interface SessionData {
 }
 
 export function RequestSessionPage() {
-	const [date, setDate] = useState<Date | undefined>(new Date());
+	const [date, setDate] = useState<Date | null>(new Date());
 	const [time, setTime] = useState<string>("");
 	const [topic, setTopic] = useState<string>("");
 	const [sessionType, setSessionType] = useState<string>("video");
@@ -43,13 +44,32 @@ export function RequestSessionPage() {
 	const [hours, setHours] = useState<number>(1);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+	const [availability, setAvailability] = useState<string[]>([]);
+	const [isSlotValid, setIsSlotValid] = useState<boolean>(true);
 	const { mentorId } = useParams<{ mentorId: string }>();
 	const { mentor, loading } = useMentor(mentorId as string) as { mentor: IMentorDTO | null; loading: boolean };
 	const navigate = useNavigate();
 	const user = useSelector((state: RootState) => state.auth.user);
 
+	useEffect(() => {
+		const fetchAvailability = async () => {
+			if (!date) return;
+			try {
+				const response = await fetchMentorAvailabilityAPI(mentorId as string, date);
+				setAvailability(response.availability);
+				setTime("");
+				setIsSlotValid(true);
+			} catch (error) {
+				console.error("Error fetching availability:", error);
+				toast.error("Failed to fetch mentor availability. Please try again.");
+				setAvailability([]);
+			}
+		};
+		fetchAvailability();
+	}, [date, mentorId]);
+
 	if (loading) {
-		return <Loading appName="Request Session" loadingMessage="Loading Mentor Preferences"/>;
+		return <Loading appName="Request Session" loadingMessage="Loading Mentor Preferences" />;
 	}
 
 	if (!mentor || !mentorId) {
@@ -64,14 +84,45 @@ export function RequestSessionPage() {
 	}
 
 	const isFormValid = () => {
-		return date && time && sessionType && topic && message.trim() && hours > 0;
+		return date && time && sessionType && topic && message.trim() && hours > 0 && isSlotValid;
 	};
 
 	const calculateTotal = () => {
 		const platformFee = 40;
 		const sessionFee = mentor.pricing === "paid" && mentor.hourlyRate ? mentor.hourlyRate * hours : 0;
-		console.log("sessionFee: ", typeof mentor.hourlyRate);
 		return sessionFee + platformFee;
+	};
+
+	// const validateSlot = (selectedTime: string, selectedHours: number) => {
+	// 	if (!selectedTime || !date) return false;
+	// 	const selectedDateTime = parse(selectedTime, "HH:mm", date);
+	// 	const selectedEndTime = new Date(selectedDateTime.getTime() + selectedHours * 60 * 60 * 1000);
+
+	// 	const isValid = availability.some((slot) => {
+	// 		const slotStart = parse(slot.startTime, "HH:mm", date);
+	// 		const slotEnd = new Date(slotStart.getTime() + slot.duration * 60 * 60 * 1000);
+	// 		return selectedDateTime >= slotStart && selectedEndTime <= slotEnd;
+	// 	});
+
+	// 	setIsSlotValid(isValid);
+	// 	return isValid;
+	// };
+
+	const handleTimeChange = (value: string) => {
+		setTime(value);
+		if (value) {
+			// validateSlot(value, hours);
+		} else {
+			setIsSlotValid(true);
+		}
+	};
+
+	const handleHoursChange = (value: string) => {
+		const newHours = Number(value);
+		setHours(newHours);
+		if (time) {
+			// validateSlot(time, newHours);
+		}
 	};
 
 	const requestData: SessionData = {
@@ -79,7 +130,7 @@ export function RequestSessionPage() {
 		userId: user?.id as string,
 		topic: topic,
 		sessionType: sessionType,
-		date: date as Date,
+		date: (date ? new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())) : date) as Date,
 		time: time,
 		hours: hours,
 		message: message,
@@ -89,7 +140,7 @@ export function RequestSessionPage() {
 
 	const handleSubmit = () => {
 		if (!isFormValid()) {
-			toast.error("Please fill out all required fields correctly.");
+			toast.error("Please fill out all required fields correctly and select a valid time slot.");
 			return;
 		}
 		setIsConfirmationOpen(true);
@@ -103,9 +154,6 @@ export function RequestSessionPage() {
 			if (response.data.success) {
 				toast.success(response.data.message || "Session request submitted successfully! Awaiting mentor approval.");
 				navigate("/request-confirmation", { state: { requestData } });
-			} else {
-				console.error("Session creation failed:", response.data);
-				toast.error(response.data.message || "Failed to submit session request. Please try again.");
 			}
 		} catch (error: any) {
 			console.error("Session creation error:", error);
@@ -122,11 +170,11 @@ export function RequestSessionPage() {
 				<div className="mb-8">
 					<h1 className="text-3xl font-bold tracking-tight">Request a Session</h1>
 					<p className="text-muted-foreground">
-						Schedule a mentoring session with {mentor.firstName} {mentor.lastName}. Provide your preferred details below, and refer to the mentor's preferences on the right. Payment will be processed after the mentor accepts your request.
+						Schedule a mentoring session with {mentor.firstName} {mentor.lastName}. Select an available time slot below, and refer to the mentor's preferences on the right. Payment will be processed after the mentor accepts your request.
 					</p>
 				</div>
 
-				<div className="grid gap-4 md:grid-cols-[1fr_380px] lg:grid-cols-[1fr_300')], [1fr_300px]">
+				<div className="grid gap-4 md:grid-cols-[1fr_380px] lg:grid-cols-[1fr_300px]">
 					{/* Main Content */}
 					<div className="space-y-6">
 						<Card>
@@ -135,36 +183,16 @@ export function RequestSessionPage() {
 								<CardDescription>Propose your preferred session details</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-6">
-								{/* <div>
-									<Label className="mb-2 block">Session Format</Label>
-									<RadioGroup value={sessionFormat} onValueChange={setSessionFormat} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-										<div className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 ${sessionFormat === "one-on-one" ? "border-primary bg-primary/5" : ""}`}>
-											<RadioGroupItem value=" Wrote one-on-one" id="one-on-one" />
-											<Label htmlFor="one-on-one" className="flex cursor-pointer items-center gap-2 font-normal">
-												<Users className="h-5 w-5" />
-												One-on-One
-											</Label>
-										</div>
-										<div className={`flex cursor-not-allowed items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 ${sessionFormat === "group" ? "border-primary bg-primary/5" : ""}`}>
-											<RadioGroupItem value="group" id="group" disabled={true} />
-											<Label htmlFor="group" className="flex cursor-not-allowed items-center gap-2 font-normal">
-												<Users className="h-5 w-5" />
-												Group Session (coming soon)
-											</Label>
-										</div>
-									</RadioGroup>
-								</div> */}
-
 								<div>
-									<Label htmlFor="time" className="mb-2 block">
+									<Label htmlFor="topic" className="mb-2 block">
 										Session Topic
 									</Label>
-									<Input id="topic" type="topic" value={topic} onChange={(e) => setTopic(e.target.value)} className="w-full" placeholder="Enter your topic" aria-label="Session topic" />
+									<Input id="topic" type="text" value={topic} onChange={(e) => setTopic(e.target.value)} className="w-full" placeholder="Enter your topic" aria-label="Session topic" />
 								</div>
 
 								<div>
 									<Label className="mb-2 block">Session Type</Label>
-									<RadioGroup value={sessionType} onValueChange={setSessionType} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+									<RadioGroup value={sessionType} onValueChange={setSessionType} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 										<div className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 ${sessionType === "video" ? "border-primary bg-primary/5" : ""}`}>
 											<RadioGroupItem value="video" id="video" />
 											<Label htmlFor="video" className="flex cursor-pointer items-center gap-2 font-normal">
@@ -183,22 +211,50 @@ export function RequestSessionPage() {
 								</div>
 
 								<div>
-									<Label htmlFor="time" className="mb-2 block">
-										Preferred Time
+									<Label htmlFor="date" className="mb-2 block">
+										Preferred Date
 									</Label>
-									<Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="w-full" placeholder="Select a time" aria-label="Preferred time" />
+									<CustomCalendar selectedDate={date} setSelectedDate={setDate} />
+								</div>
+
+								<div>
+									<Label htmlFor="time" className="mb-2 block">
+										Available Time Slots
+									</Label>
+									<Select value={time} onValueChange={handleTimeChange}>
+										<SelectTrigger id="time" className="w-full">
+											<SelectValue placeholder={availability.length ? "Select a time slot" : "No slots available"} />
+										</SelectTrigger>
+										<SelectContent>
+											{availability.length ? (
+												availability.map((slot, index) => {
+													const dateTime = new Date(`2025-05-05T${slot}:00`); // Use a fixed date or dynamically generate
+													return (
+														<SelectItem key={index} value={slot}>
+															{format(dateTime, "h:mm a")} {/* e.g., "10:00 AM" */}
+														</SelectItem>
+													);
+												})
+											) : (
+												<SelectItem value="none" disabled>
+													No slots available
+												</SelectItem>
+											)}
+										</SelectContent>
+									</Select>
+									{!isSlotValid && time && <p className="mt-2 text-sm text-red-500">The selected time and duration are not available. Please choose another slot or adjust the duration.</p>}
 								</div>
 
 								<div>
 									<Label htmlFor="hours" className="mb-2 block">
 										Duration (Hours)
 									</Label>
-									<Select value={hours.toString()} onValueChange={(value) => setHours(Number(value))}>
+									<Select value={hours.toString()} onValueChange={handleHoursChange}>
 										<SelectTrigger id="hours" className="w-full">
 											<SelectValue placeholder="Select hours" />
 										</SelectTrigger>
 										<SelectContent>
-											{[1, 2, 3, 4, 5].map((hour) => (
+											{[1, 2, 3, 4].map((hour) => (
 												<SelectItem key={hour} value={hour.toString()}>
 													{hour} {hour === 1 ? "hour" : "hours"}
 												</SelectItem>
@@ -219,14 +275,6 @@ export function RequestSessionPage() {
 										value={message}
 										onChange={(e) => setMessage(e.target.value)}
 									/>
-								</div>
-								<div>
-									<Label htmlFor="date" className="mb-2 block">
-										Preferred Date
-									</Label>
-									<div>
-										<Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border" disabled={(date) => date < new Date()} />
-									</div>
 								</div>
 							</CardContent>
 							<CardFooter className="flex justify-end">
@@ -276,12 +324,8 @@ export function RequestSessionPage() {
 											</div>
 										</div>
 										<div className="flex items-center justify-between">
-											<span className="text-sm">Availability</span>
-											<span className="text-sm">{mentor.availability.join(", ")}</span>
-										</div>
-										<div className="flex items-center justify-between">
 											<span className="text-sm">Rate</span>
-											<span className="text-sm font-medium">{Number()}</span>
+											<span className="text-sm font-medium">{mentor.pricing === "free" ? "Free" : mentor.hourlyRate ? `₹${mentor.hourlyRate}/hour` : "N/A"}</span>
 										</div>
 									</div>
 									<Separator className="my-4" />
@@ -365,7 +409,7 @@ export function RequestSessionPage() {
 							</Button>
 						</DialogFooter>
 					</DialogContent>
-				</Dialog> 
+				</Dialog>
 			</div>
 		</div>
 	);
