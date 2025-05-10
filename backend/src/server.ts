@@ -20,7 +20,6 @@ import { mentorSessionRouter } from "./presentation/routes/mentors/mentor.sessio
 import { userSideMentorRouter } from "./presentation/routes/user/user.side.mentor.routes";
 import http from "http";
 import { Server } from "socket.io";
-import { handleSignaling } from "./infrastructure/socket/signaling";
 import { documentsRouter } from "./presentation/routes/common/documents.routes";
 
 dotenv.config();
@@ -35,11 +34,45 @@ const io = new Server(server, {
 	},
 });
 
+// Socket.IO signaling for WebRTC
 io.on("connection", (socket) => {
-	console.log("🔌 New user connected:", socket.id);
-	handleSignaling(io, socket);
+	console.log(`🔌 User connected: ${socket.id}`);
+
+	// Join a session room
+	socket.on("join-session", ({ sessionId, userId }) => {
+		socket.join(sessionId);
+		console.log(`User ${userId} joined session ${sessionId}`);
+		// Notify others in the session
+		socket.to(sessionId).emit("user-joined", { userId, socketId: socket.id });
+	});
+
+	// Handle WebRTC offer
+	socket.on("offer", ({ sessionId, offer, to }) => {
+		socket.to(to).emit("offer", { offer, from: socket.id });
+	});
+
+	// Handle WebRTC answer
+	socket.on("answer", ({ sessionId, answer, to }) => {
+		socket.to(to).emit("answer", { answer, from: socket.id });
+	});
+
+	// Handle ICE candidate
+	socket.on("ice-candidate", ({ sessionId, candidate, to }) => {
+		socket.to(to).emit("ice-candidate", { candidate, from: socket.id });
+	});
+
+	// Handle user disconnection
+	socket.on("disconnect", () => {
+		console.log(`🔌 User disconnected: ${socket.id}`);
+		socket.rooms.forEach((room) => {
+			if (room !== socket.id) {
+				socket.to(room).emit("user-left", { socketId: socket.id });
+			}
+		});
+	});
 });
 
+// Middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
@@ -55,24 +88,21 @@ app.use(
 );
 
 connectDB();
-
 app.use(morgan("dev"));
 
+// Routes
 app.use("/api/user", authRouter);
 app.use("/api/user/auth", googleAuthRouter);
 app.use("/api/user/user-profile", userProfileRoutes);
 app.use("/api/user/sessions", sessionRouter);
 app.use("/api/user/mentor", userSideMentorRouter);
-
 app.use("/api/admin", adminAuthRouter);
 app.use("/api/admin/users", usertabRouter);
 app.use("/api/admin/mentor-application", mentorApplicationRouter);
-
 app.use("/api/mentor", mentorRouter);
 app.use("/api/mentor/sessions", mentorSessionRouter);
-
 app.use("/api/documents", documentsRouter);
 
 server.listen(process.env.PORT, () => {
-	console.log(` Server is running  : ✅✅✅`);
+	console.log(`Server is running on port ${process.env.PORT} : ✅✅✅`);
 });

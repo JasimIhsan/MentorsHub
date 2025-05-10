@@ -351,7 +351,7 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 								{type === "upcoming" && (
 									<>
 										<Button asChild>
-											<Link to={`/sessions/${session.id}`}>Join Session</Link>
+											<Link to={`/video-call/${session.id}`}>Join Session</Link>
 										</Button>
 										<DropdownMenu>
 											<DropdownMenuTrigger asChild>
