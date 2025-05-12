@@ -1,12 +1,14 @@
-import React, { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import Peer, { MediaConnection } from "peerjs";
 import { Button } from "@/components/ui/button"; // Assuming you have a UI library
-import { Mic, MicOff, Video, VideoOff, Phone } from "lucide-react";
-import { replace, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon, ScreenShareIcon, HandIcon, ListIcon, PhoneOffIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const VideoCallPage = () => {
 	const { sessionId } = useParams<{ sessionId: string }>();
@@ -20,6 +22,10 @@ export const VideoCallPage = () => {
 	const localStreamRef = useRef<MediaStream | null>(null);
 	const user = useSelector((state: RootState) => state.auth.user);
 	// const navigate = useNavigate();
+
+	const [isScreenSharing, setIsScreenSharing] = useState(false);
+	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+	const [isHandRaised, setIsHandRaised] = useState(false);
 
 	// Initialize Socket.IO and PeerJS
 	useEffect(() => {
@@ -128,6 +134,54 @@ export const VideoCallPage = () => {
 		}
 	};
 
+	// Toggle sidebar (placeholder)
+	const toggleSidebar = () => {
+		// TODO: Implement sidebar visibility logic
+		setIsSidebarOpen(!isSidebarOpen);
+		toast.info(isSidebarOpen ? "Sidebar hidden" : "Sidebar shown");
+	};
+
+	// Toggle raise hand (placeholder)
+	const toggleRaiseHand = () => {
+		// TODO: Implement raise hand logic (e.g., emit event via Socket.IO)
+		setIsHandRaised(!isHandRaised);
+		toast.info(isHandRaised ? "Hand lowered" : "Hand raised");
+	};
+
+	const toggleScreenShare = async () => {
+		if (!isScreenSharing) {
+			try {
+				const screenStream = await navigator.mediaDevices.getDisplayMedia({
+					video: true,
+					audio: true,
+				});
+				localStreamRef.current = screenStream;
+				if (localVideoRef.current) {
+					localVideoRef.current.srcObject = screenStream;
+				}
+				// TODO: Update PeerJS call with new stream
+				setIsScreenSharing(true);
+			} catch (error) {
+				console.error("Error starting screen share:", error);
+				toast.error("Failed to start screen sharing");
+			}
+		} else {
+			// Stop screen sharing
+			localStreamRef.current?.getTracks().forEach((track) => track.stop());
+			// Revert to camera stream
+			const cameraStream = await navigator.mediaDevices.getUserMedia({
+				video: true,
+				audio: true,
+			});
+			localStreamRef.current = cameraStream;
+			if (localVideoRef.current) {
+				localVideoRef.current.srcObject = cameraStream;
+			}
+			// TODO: Update PeerJS call with camera stream
+			setIsScreenSharing(false);
+		}
+	};
+
 	// End call
 	const endCall = () => {
 		if (call) {
@@ -157,21 +211,112 @@ export const VideoCallPage = () => {
 						<span className="absolute bottom-2 left-2 text-white">Remote</span>
 					</div>
 				</div>
-				<div className="flex justify-center gap-4">
-					<Button onClick={toggleMute} variant={isMuted ? "destructive" : "default"}>
-						{isMuted ? <MicOff className="mr-2" /> : <Mic className="mr-2" />}
-						{isMuted ? "Unmute" : "Mute"}
-					</Button>
-					<Button onClick={toggleVideo} variant={isVideoOn ? "default" : "destructive"}>
-						{isVideoOn ? <Video className="mr-2" /> : <VideoOff className="mr-2" />}
-						{isVideoOn ? "Video Off" : "Video On"}
-					</Button>
-					<Button onClick={endCall} variant="destructive">
-						<Phone className="mr-2" />
-						End Call
-					</Button>
-				</div>
+				<ControlBar
+					isMuted={isMuted}
+					isVideoOn={isVideoOn}
+					isScreenSharing={isScreenSharing}
+					isSidebarOpen={isSidebarOpen}
+					isHandRaised={isHandRaised}
+					onToggleMute={toggleMute}
+					onToggleVideo={toggleVideo}
+					onToggleScreenShare={toggleScreenShare}
+					onToggleSidebar={toggleSidebar}
+					onToggleRaiseHand={toggleRaiseHand}
+					onEndCall={endCall}
+				/>
 			</div>
 		</div>
 	);
 };
+
+interface ControlBarProps {
+	isMuted: boolean;
+	isVideoOn: boolean;
+	isScreenSharing: boolean;
+	isSidebarOpen: boolean;
+	isHandRaised: boolean;
+	onToggleMute: () => void;
+	onToggleVideo: () => void;
+	onToggleScreenShare: () => void;
+	onToggleSidebar: () => void;
+	onToggleRaiseHand: () => void;
+	onEndCall: () => void;
+}
+
+// ControlBar component (same as provided)
+function ControlBar({ isMuted, isVideoOn, isScreenSharing, isSidebarOpen, isHandRaised, onToggleMute, onToggleVideo, onToggleScreenShare, onToggleSidebar, onToggleRaiseHand, onEndCall }: ControlBarProps) {
+	return (
+		<div className="fixed bottom-0 left-0 right-0 flex justify-center p-4 z-10">
+			<div className="bg-white/95 backdrop-blur-sm rounded-full shadow-lg px-4 py-2 border border-gray-200 flex items-center gap-2">
+				<TooltipProvider>
+					<div className="flex items-center gap-2">
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant={isMuted ? "destructive" : "secondary"} size="icon" onClick={onToggleMute} className="rounded-full h-12 w-12">
+									{isMuted ? <MicOffIcon /> : <MicIcon />}
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>{isMuted ? "Unmute" : "Mute"}</p>
+							</TooltipContent>
+						</Tooltip>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant={isVideoOn ? "secondary" : "destructive"} size="icon" onClick={onToggleVideo} className="rounded-full h-12 w-12">
+									{isVideoOn ? <VideoIcon /> : <VideoOffIcon />}
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>{isVideoOn ? "Turn off camera" : "Turn on camera"}</p>
+							</TooltipContent>
+						</Tooltip>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant={isScreenSharing ? "destructive" : "secondary"} size="icon" onClick={onToggleScreenShare} className="rounded-full h-12 w-12">
+									<ScreenShareIcon />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>{isScreenSharing ? "Stop sharing" : "Share screen"}</p>
+							</TooltipContent>
+						</Tooltip>
+					</div>
+					<div className="h-8 w-px bg-gray-200 mx-2"></div>
+					<div className="flex items-center gap-2">
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant={isHandRaised ? "default" : "secondary"} size="icon" onClick={onToggleRaiseHand} className="rounded-full h-10 w-10">
+									<HandIcon className={cn("h-5 w-5", isHandRaised && "text-white")} />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>{isHandRaised ? "Lower hand" : "Raise hand"}</p>
+							</TooltipContent>
+						</Tooltip>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant={isSidebarOpen ? "default" : "secondary"} size="icon" onClick={onToggleSidebar} className="rounded-full h-10 w-10">
+									<ListIcon className={cn("h-5 w-5", isSidebarOpen && "text-white")} />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>{isSidebarOpen ? "Hide goals" : "Show goals"}</p>
+							</TooltipContent>
+						</Tooltip>
+					</div>
+					<div className="h-8 w-px bg-gray-200 mx-2"></div>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button variant="destructive" size="icon" onClick={onEndCall} className="rounded-full h-12 w-12">
+								<PhoneOffIcon />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<p>End call</p>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+			</div>
+		</div>
+	);
+}
