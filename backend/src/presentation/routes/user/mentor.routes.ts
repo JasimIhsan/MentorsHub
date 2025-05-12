@@ -8,6 +8,6 @@ import { getAvailabilityController } from "../../controllers/user/composer";
 
 export const mentorRouter = Router();
 
-// mentorRouter.get("/:mentorId", verifyAccessToken, (req, res) => getMentorController.handle(req, res));
+mentorRouter.get("/:mentorId", verifyAccessToken, (req, res) => getMentorController.handle(req, res));
 
 mentorRouter.get('/availability/:mentorId', (req, res) => getAvailabilityController.handle(req, res));

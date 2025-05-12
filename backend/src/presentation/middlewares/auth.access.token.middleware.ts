@@ -7,7 +7,7 @@ import { AdminRepositoryImpl } from "../../infrastructure/database/implementatio
 import { HttpStatusCode } from "../../shared/constants/http.status.codes";
 import { CommonStringMessage } from "../../shared/constants/string.messages";
 
-const tokenService = new TokenServicesImpl();
+export const tokenService = new TokenServicesImpl();
 const userRepo = new UserRepositoryImpl();
 const adminRepo = new AdminRepositoryImpl();
 

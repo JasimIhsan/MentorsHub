@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export type SessionFormat = "one-on-one" | "group";
-export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected" | "expired";
+export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected" | "expired" | "ongoing";
 export type SessionPaymentStatus = "pending" | "completed" | "failed";
 export type PricingType = "free" | "paid";
 
@@ -60,7 +60,7 @@ const SessionSchema = new Schema<ISessionDocument>(
 		message: { type: String, required: true },
 		status: {
 			type: String,
-			enum: ["upcoming", "completed", "canceled", "approved", "pending", "rejected", "expired"],
+			enum: ["upcoming", "completed", "canceled", "approved", "pending", "rejected", "expired", "ongoing"],
 			default: "pending",
 		},
 		pricing: {

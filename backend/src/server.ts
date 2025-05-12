@@ -4,6 +4,8 @@ import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import http from "http";
+import { Server, Socket } from "socket.io";
 import connectDB from "./infrastructure/database/database.config";
 import authRouter from "./presentation/routes/user/auth.routes";
 import passport from "passport";
@@ -16,11 +18,9 @@ import { userProfileRoutes } from "./presentation/routes/user/user.profile.route
 import { mentorRouter } from "./presentation/routes/user/mentor.routes";
 import { mentorApplicationRouter } from "./presentation/routes/admin/admin.mentor.application.routes";
 import { sessionRouter } from "./presentation/routes/user/session.routes";
-import { mentorSessionRouter } from "./presentation/routes/mentors/mentor.session.routes";
 import { userSideMentorRouter } from "./presentation/routes/user/user.side.mentor.routes";
-import http from "http";
-import { Server } from "socket.io";
 import { documentsRouter } from "./presentation/routes/common/documents.routes";
+import { mentorSessionRouter } from "./presentation/routes/mentors/mentor.session.routes";
 
 dotenv.config();
 
@@ -28,51 +28,59 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
 	cors: {
-		origin: "http://localhost:5173",
 		methods: ["GET", "POST"],
 		credentials: true,
 	},
 });
 
-// Socket.IO signaling for WebRTC
-io.on("connection", (socket) => {
-	console.log(`🔌 User connected: ${socket.id}`);
+const sessions: { [sessionId: string]: { userId: string; peerId: string; socketId: string }[] } = {};
 
-	// Join a session room
-	socket.on("join-session", ({ sessionId, userId }) => {
-		socket.join(sessionId);
-		console.log(`User ${userId} joined session ${sessionId}`);
-		// Notify others in the session
-		socket.to(sessionId).emit("user-joined", { userId, socketId: socket.id });
-	});
+// Socket.IO session management
+io.on("connection", (socket: Socket) => {
+	console.log(`✅ User connected: ${socket.id}`);
 
-	// Handle WebRTC offer
-	socket.on("offer", ({ sessionId, offer, to }) => {
-		socket.to(to).emit("offer", { offer, from: socket.id });
-	});
+	socket.on("join-session", ({ sessionId, userId, peerId }: { sessionId: string; userId: string; peerId: string }) => {
+		console.log(`Received join-session: sessionId=${sessionId}, userId=${userId}, socketId=${socket.id}, peerId=${peerId}`);
 
-	// Handle WebRTC answer
-	socket.on("answer", ({ sessionId, answer, to }) => {
-		socket.to(to).emit("answer", { answer, from: socket.id });
-	});
+		if (!sessions[sessionId]) {
+			sessions[sessionId] = [];
+		}
+		sessions[sessionId].push({ userId, peerId, socketId: socket.id });
+		socket.data.sessionId = sessionId;
+		socket.data.userId = userId;
 
-	// Handle ICE candidate
-	socket.on("ice-candidate", ({ sessionId, candidate, to }) => {
-		socket.to(to).emit("ice-candidate", { candidate, from: socket.id });
-	});
-
-	// Handle user disconnection
-	socket.on("disconnect", () => {
-		console.log(`🔌 User disconnected: ${socket.id}`);
-		socket.rooms.forEach((room) => {
-			if (room !== socket.id) {
-				socket.to(room).emit("user-left", { socketId: socket.id });
+		sessions[sessionId].forEach((participant) => {
+			if (participant.socketId !== socket.id) {
+				io.to(participant.socketId).emit("user-joined", { peerId });
 			}
 		});
 	});
+
+	socket.on("disconnect", (reason) => {
+		const sessionId = socket.data.sessionId;
+		const userId = socket.data.userId;
+
+		if (sessionId && sessions[sessionId]) {
+			sessions[sessionId] = sessions[sessionId].filter((participant) => participant.userId !== userId);
+			if (sessions[sessionId].length === 0) {
+				delete sessions[sessionId];
+			}
+		}
+
+		console.log(`❌ User disconnected: ${socket.id}`);
+	});
+
+	socket.on("error", (error) => {
+		console.error(`Socket error for ${socket.id}: ${error.message}`);
+		socket.emit("error", { message: error.message });
+	});
+
+	socket.on("connect_error", (error) => {
+		console.error(`Connect error for ${socket.id}: ${error.message}`);
+	});
 });
 
-// Middleware
+// Express Middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
@@ -81,7 +89,7 @@ configurePassport(userRepository, tokenInterface);
 app.use(helmet());
 app.use(
 	cors({
-		origin: "http://localhost:5173",
+		origin: ["http://localhost:5173", "http://192.168.58.180:5173"], // Relaxed for debugging; revert to "http://localhost:5173" in production
 		methods: ["GET", "POST", "PUT", "DELETE"],
 		credentials: true,
 	})
@@ -103,6 +111,8 @@ app.use("/api/mentor", mentorRouter);
 app.use("/api/mentor/sessions", mentorSessionRouter);
 app.use("/api/documents", documentsRouter);
 
-server.listen(process.env.PORT, () => {
-	console.log(`Server is running on port ${process.env.PORT} : ✅✅✅`);
+// Start the server
+const PORT = process.env.PORT || 5858;
+server.listen(PORT, () => {
+	console.log(`Server is running on port ${PORT} : ✅✅✅`);
 });

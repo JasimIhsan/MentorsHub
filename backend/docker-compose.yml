@@ -42,19 +42,19 @@ services:
       networks:
          - app-network
 
-   nginx: # Nginx container
-      container_name: mentorshub_nginx
-      image: nginx:latest
-      ports:
-         - "80:80"
-         - "443:443"
-      volumes:
-         - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-         - ./nginx/certs:/etc/nginx/certs
-      depends_on:
-         - mentorshub
-      networks:
-         - app-network
+   # nginx: # Nginx container
+   #    container_name: mentorshub_nginx
+   #    image: nginx:latest
+   #    ports:
+   #       - "80:80"
+   #       - "443:443"
+   #    volumes:
+   #       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+   #       - ./nginx/certs:/etc/nginx/certs
+   #    depends_on:
+   #       - mentorshub
+   #    networks:
+   #       - app-network
 
 networks:
    app-network:
