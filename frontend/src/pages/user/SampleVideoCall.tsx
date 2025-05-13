@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import Peer, { MediaConnection } from "peerjs";
-import { Button } from "@/components/ui/button"; // Assuming you have a UI library
+import { Button } from "@/components/ui/button";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
@@ -17,30 +17,30 @@ export const VideoCallPage = () => {
 	const [call, setCall] = useState<MediaConnection | null>(null);
 	const [isMuted, setIsMuted] = useState(false);
 	const [isVideoOn, setIsVideoOn] = useState(true);
+	const [isRemoteMuted, setIsRemoteMuted] = useState(false);
+	const [isRemoteVideoOn, setIsRemoteVideoOn] = useState(true);
+	const [isRemoteHandRaised, setIsRemoteHandRaised] = useState(false);
 	const localVideoRef = useRef<HTMLVideoElement>(null);
 	const remoteVideoRef = useRef<HTMLVideoElement>(null);
 	const localStreamRef = useRef<MediaStream | null>(null);
 	const user = useSelector((state: RootState) => state.auth.user);
-	// const navigate = useNavigate();
-
 	const [isScreenSharing, setIsScreenSharing] = useState(false);
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const [isHandRaised, setIsHandRaised] = useState(false);
+	const [activeSpeaker, setActiveSpeaker] = useState<"local" | "remote" | null>(null);
 
 	// Initialize Socket.IO and PeerJS
 	useEffect(() => {
 		if (!user) {
 			toast.error("Please login first. Redirecting...");
-			// navigate('/authenticate',{ replace = true});
 			return;
 		}
-		// Connect to your Socket.IO server
+
 		const newSocket = io("http://localhost:5858", {
 			withCredentials: true,
 			transports: ["websocket"],
 		});
 		setSocket(newSocket);
-		const userId = user?.id;
 
 		const newPeer = new Peer({
 			host: "0.peerjs.com",
@@ -49,19 +49,18 @@ export const VideoCallPage = () => {
 
 		newPeer.on("open", (peerId) => {
 			console.log(`PeerJS connected with ID: ${peerId}`);
-			newSocket.emit("join-session", { sessionId, userId, peerId });
+			newSocket.emit("join-session", { sessionId, userId: user.id, peerId });
 		});
 
 		setPeer(newPeer);
 
-		// Cleanup
 		return () => {
 			newSocket.disconnect();
 			newPeer.destroy();
 		};
-	}, [sessionId, user?.id]);
+	}, [sessionId, user]);
 
-	// Setup media stream
+	// Setup media stream and audio level detection
 	useEffect(() => {
 		navigator.mediaDevices
 			.getUserMedia({ video: true, audio: true })
@@ -70,13 +69,21 @@ export const VideoCallPage = () => {
 				if (localVideoRef.current) {
 					localVideoRef.current.srcObject = stream;
 				}
+				setupAudioLevelDetection(stream, "local");
 			})
 			.catch((error) => {
 				console.error("Error accessing media devices:", error);
+				toast.error("Failed to access camera or microphone");
 			});
+
+		return () => {
+			if (localStreamRef.current) {
+				localStreamRef.current.getTracks().forEach((track) => track.stop());
+			}
+		};
 	}, []);
 
-	// Handle incoming calls
+	// Handle incoming calls and remote status updates
 	useEffect(() => {
 		if (!peer || !socket) return;
 
@@ -89,11 +96,11 @@ export const VideoCallPage = () => {
 					if (remoteVideoRef.current) {
 						remoteVideoRef.current.srcObject = remoteStream;
 					}
+					setupAudioLevelDetection(remoteStream, "remote");
 				});
 			}
 		});
 
-		// Handle session join from other user
 		socket.on("user-joined", ({ peerId }: { peerId: string }) => {
 			if (peer && localStreamRef.current) {
 				const outgoingCall = peer.call(peerId, localStreamRef.current);
@@ -103,16 +110,56 @@ export const VideoCallPage = () => {
 					if (remoteVideoRef.current) {
 						remoteVideoRef.current.srcObject = remoteStream;
 					}
+					setupAudioLevelDetection(remoteStream, "remote");
 				});
 			}
 		});
 
+		socket.on("mute-status", ({ isMuted }: { isMuted: boolean }) => {
+			setIsRemoteMuted(isMuted);
+		});
+
+		socket.on("video-status", ({ isVideoOn }: { isVideoOn: boolean }) => {
+			setIsRemoteVideoOn(isVideoOn);
+		});
+
+		socket.on("hand-raise-status", ({ isHandRaised }: { isHandRaised: boolean }) => {
+			setIsRemoteHandRaised(isHandRaised);
+		});
+
 		return () => {
 			socket.off("user-joined");
+			socket.off("mute-status");
+			socket.off("video-status");
+			socket.off("hand-raise-status");
+			peer.off("call");
 		};
 	}, [peer, socket]);
 
-	// Toggle microphone
+	// Audio level detection for active speaker
+	const setupAudioLevelDetection = (stream: MediaStream, type: "local" | "remote") => {
+		const audioContext = new AudioContext();
+		const source = audioContext.createMediaStreamSource(stream);
+		const analyser = audioContext.createAnalyser();
+		analyser.fftSize = 512;
+		source.connect(analyser);
+
+		const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+		const detectAudioLevel = () => {
+			analyser.getByteFrequencyData(dataArray);
+			const average = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
+			if (average > 25) {
+				setActiveSpeaker(type);
+			} else if (activeSpeaker === type) {
+				setActiveSpeaker(null); // Fixed: Clear active speaker
+			}
+			requestAnimationFrame(detectAudioLevel);
+		};
+		detectAudioLevel();
+	};
+
+	// Toggle microphone and emit status
 	const toggleMute = () => {
 		if (localStreamRef.current) {
 			const audioTracks = localStreamRef.current.getAudioTracks();
@@ -120,10 +167,11 @@ export const VideoCallPage = () => {
 				track.enabled = !track.enabled;
 			});
 			setIsMuted(!isMuted);
+			socket?.emit("mute-status", { userId: user?.id, isMuted: !isMuted });
 		}
 	};
 
-	// Toggle video
+	// Toggle video and emit status
 	const toggleVideo = () => {
 		if (localStreamRef.current) {
 			const videoTracks = localStreamRef.current.getVideoTracks();
@@ -131,23 +179,24 @@ export const VideoCallPage = () => {
 				track.enabled = !track.enabled;
 			});
 			setIsVideoOn(!isVideoOn);
+			socket?.emit("video-status", { userId: user?.id, isVideoOn: !isVideoOn });
 		}
 	};
 
-	// Toggle sidebar (placeholder)
+	// Toggle hand-raise and emit status
+	const toggleRaiseHand = () => {
+		setIsHandRaised(!isHandRaised);
+		socket?.emit("hand-raise-status", { userId: user?.id, isHandRaised: !isHandRaised });
+		// toast.info(isHandRaised ? "Hand lowered" : "Hand raised");
+	};
+
+	// Toggle sidebar
 	const toggleSidebar = () => {
-		// TODO: Implement sidebar visibility logic
 		setIsSidebarOpen(!isSidebarOpen);
 		toast.info(isSidebarOpen ? "Sidebar hidden" : "Sidebar shown");
 	};
 
-	// Toggle raise hand (placeholder)
-	const toggleRaiseHand = () => {
-		// TODO: Implement raise hand logic (e.g., emit event via Socket.IO)
-		setIsHandRaised(!isHandRaised);
-		toast.info(isHandRaised ? "Hand lowered" : "Hand raised");
-	};
-
+	// Toggle screen sharing
 	const toggleScreenShare = async () => {
 		if (!isScreenSharing) {
 			try {
@@ -159,30 +208,39 @@ export const VideoCallPage = () => {
 				if (localVideoRef.current) {
 					localVideoRef.current.srcObject = screenStream;
 				}
-				// TODO: Update PeerJS call with new stream
+				if (call && peer && localStreamRef.current) {
+					const outgoingCall = peer.call(call.peer, localStreamRef.current);
+					setCall(outgoingCall);
+				}
 				setIsScreenSharing(true);
 			} catch (error) {
 				console.error("Error starting screen share:", error);
 				toast.error("Failed to start screen sharing");
 			}
 		} else {
-			// Stop screen sharing
 			localStreamRef.current?.getTracks().forEach((track) => track.stop());
-			// Revert to camera stream
-			const cameraStream = await navigator.mediaDevices.getUserMedia({
-				video: true,
-				audio: true,
-			});
-			localStreamRef.current = cameraStream;
-			if (localVideoRef.current) {
-				localVideoRef.current.srcObject = cameraStream;
+			try {
+				const cameraStream = await navigator.mediaDevices.getUserMedia({
+					video: true,
+					audio: true,
+				});
+				localStreamRef.current = cameraStream;
+				if (localVideoRef.current) {
+					localVideoRef.current.srcObject = cameraStream;
+				}
+				if (call && peer && localStreamRef.current) {
+					const outgoingCall = peer.call(call.peer, localStreamRef.current);
+					setCall(outgoingCall);
+				}
+				setIsScreenSharing(false);
+			} catch (error) {
+				console.error("Error reverting to camera:", error);
+				toast.error("Failed to revert to camera");
 			}
-			// TODO: Update PeerJS call with camera stream
-			setIsScreenSharing(false);
 		}
 	};
 
-	// End call
+	// End call and cleanup
 	const endCall = () => {
 		if (call) {
 			call.close();
@@ -198,19 +256,50 @@ export const VideoCallPage = () => {
 		}
 	};
 
+	// Placeholder for remote user when video is off
+	const renderRemotePlaceholder = () => {
+		if (isRemoteVideoOn) return null;
+		return (
+			<div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-primary/50 to-primary/80 rounded-2xl">
+				<div className="w-24 h-24 rounded-full bg-primary/90 flex items-center justify-center text-white text-4xl">{"U"}</div>
+			</div>
+		);
+	};
+
 	return (
-		<div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
-			<div className="w-full max-w-4xl">
-				<div className="grid grid-cols-2 gap-4 mb-4">
-					<div className="relative aspect-video bg-black rounded-lg overflow-hidden">
-						<video ref={localVideoRef} autoPlay muted className="w-full h-full object-cover" />
-						<span className="absolute bottom-2 left-2 text-white">You</span>
+		<div className="min-h-screen bg-gray-100 flex flex-col">
+			<div className="flex-1 relative">
+				<div className="flex justify-center items-center h-[calc(100vh-6rem)] space-x-4 p-8">
+					{/* Remote Video Container */}
+					<div className="relative flex-1 max-w-[50%]">
+						<video ref={remoteVideoRef} autoPlay className="object-contain rounded-2xl w-full h-auto" />
+						{renderRemotePlaceholder()}
+						<span className="absolute bottom-2 left-2 text-white bg-black/60 px-2 py-1 rounded text-sm flex items-center gap-2">
+							Remote
+							{isRemoteMuted ? <MicOffIcon className="inline h-4 w-4" /> : <MicIcon className="inline h-4 w-4" />}
+						</span>
+						{isRemoteHandRaised && (
+							<span className={`absolute bottom-2 right-2  p-1.5 rounded-full animate-bounce ${isRemoteVideoOn ? "bg-primary text-white" : "bg-white"}`}>
+								<HandIcon className="h-5 w-5" />
+							</span>
+						)}
 					</div>
-					<div className="relative aspect-video bg-black rounded-lg overflow-hidden">
-						<video ref={remoteVideoRef} autoPlay className="w-full h-full object-cover" />
-						<span className="absolute bottom-2 left-2 text-white">Remote</span>
+
+					{/* Local Video Container */}
+					<div className="relative flex-1 max-w-[50%]">
+						<video ref={localVideoRef} autoPlay muted className="object-cover rounded-2xl w-full h-auto" />
+						<span className="absolute bottom-2 left-2 text-white bg-black/60 px-2 py-1 rounded text-sm flex items-center gap-2">
+							{user?.firstName || "You"}
+							{isMuted ? <MicOffIcon className="inline h-4 w-4" /> : <MicIcon className="inline h-4 w-4" />}
+						</span>
+						{isHandRaised && (
+							<span className={`absolute bottom-2 right-2  p-1.5 rounded-full animate-bounce ${isVideoOn ? "bg-primary text-white" : "bg-white"}`}>
+								<HandIcon className="h-5 w-5" />
+							</span>
+						)}
 					</div>
 				</div>
+
 				<ControlBar
 					isMuted={isMuted}
 					isVideoOn={isVideoOn}
@@ -243,7 +332,6 @@ interface ControlBarProps {
 	onEndCall: () => void;
 }
 
-// ControlBar component (same as provided)
 function ControlBar({ isMuted, isVideoOn, isScreenSharing, isSidebarOpen, isHandRaised, onToggleMute, onToggleVideo, onToggleScreenShare, onToggleSidebar, onToggleRaiseHand, onEndCall }: ControlBarProps) {
 	return (
 		<div className="fixed bottom-0 left-0 right-0 flex justify-center p-4 z-10">

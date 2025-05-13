@@ -56,6 +56,18 @@ io.on("connection", (socket: Socket) => {
 		});
 	});
 
+	socket.on("mute-status", ({ userId, isMuted }) => {
+		socket.broadcast.emit("mute-status", { userId, isMuted });
+	});
+
+	socket.on("video-status", ({ userId, isVideoOn }) => {
+		socket.broadcast.emit("video-status", { userId, isVideoOn });
+	});
+
+	socket.on("hand-raise-status", ({ userId, isHandRaised }) => {
+		socket.broadcast.emit("hand-raise-status", { userId, isHandRaised }); // Broadcast hand-raise status
+	});
+
 	socket.on("disconnect", (reason) => {
 		const sessionId = socket.data.sessionId;
 		const userId = socket.data.userId;
@@ -89,7 +101,7 @@ configurePassport(userRepository, tokenInterface);
 app.use(helmet());
 app.use(
 	cors({
-		origin: ["http://localhost:5173", "http://192.168.58.180:5173"], // Relaxed for debugging; revert to "http://localhost:5173" in production
+		origin: ["http://localhost:5173"],
 		methods: ["GET", "POST", "PUT", "DELETE"],
 		credentials: true,
 	})
@@ -104,11 +116,14 @@ app.use("/api/user/auth", googleAuthRouter);
 app.use("/api/user/user-profile", userProfileRoutes);
 app.use("/api/user/sessions", sessionRouter);
 app.use("/api/user/mentor", userSideMentorRouter);
+
 app.use("/api/admin", adminAuthRouter);
 app.use("/api/admin/users", usertabRouter);
 app.use("/api/admin/mentor-application", mentorApplicationRouter);
+
 app.use("/api/mentor", mentorRouter);
 app.use("/api/mentor/sessions", mentorSessionRouter);
+
 app.use("/api/documents", documentsRouter);
 
 // Start the server
