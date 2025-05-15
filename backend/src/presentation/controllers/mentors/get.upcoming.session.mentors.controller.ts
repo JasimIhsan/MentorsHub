@@ -8,6 +8,7 @@ export class GetUpcomingSessionMentorController {
 		try {
 			const { mentorId } = req.params;
 			const sessions = await this.getUpcomingSessionMentorUsecase.execute(mentorId);
+			
 			res.status(HttpStatusCode.OK).json({ success: true, sessions });
 		} catch (error) {
 			if (error instanceof Error) {

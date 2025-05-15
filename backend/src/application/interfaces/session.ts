@@ -10,7 +10,7 @@ export interface IGetSessionsByUserUseCase {
 	execute(userId: string): Promise<ISessionUserDTO[]>;
 }
 
-export interface IUpdateRequestStatusUseCase {
+export interface IUpdateSessionStatusUseCase {
 	execute(sessionId: string, status: string, rejectReason?: string): Promise<void>;
 }
 

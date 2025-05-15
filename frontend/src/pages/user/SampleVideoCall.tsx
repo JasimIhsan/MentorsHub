@@ -38,6 +38,9 @@ export const VideoCallPage = () => {
 	const [isUserWaiting, setIsUserWaiting] = useState(false);
 	const [isRejected, setIsRejected] = useState(false);
 	const [role, setRole] = useState<"mentor" | "user" | null>(null);
+	const [hasRequestedJoin, setHasRequestedJoin] = useState(false);
+	const [rejectionMessage, setRejectionMessage] = useState<string | null>(null);
+
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -47,9 +50,14 @@ export const VideoCallPage = () => {
 				localStreamRef.current = stream;
 				if (isUserWaiting && waitingVideoRef.current) {
 					waitingVideoRef.current.srcObject = stream;
-				}
-				if (!isUserWaiting && localVideoRef.current) {
+					waitingVideoRef.current.play().catch((err) => console.error("Error playing waiting video:", err));
+					stream.getAudioTracks().forEach((track) => (track.enabled = !isMuted));
+					stream.getVideoTracks().forEach((track) => (track.enabled = isVideoOn)); // Note: Changed to isVideoOn
+				} else if (!isUserWaiting && localVideoRef.current) {
 					localVideoRef.current.srcObject = stream;
+					localVideoRef.current.play().catch((err) => console.error("Error playing local video:", err));
+					stream.getAudioTracks().forEach((track) => (track.enabled = !isMuted));
+					stream.getVideoTracks().forEach((track) => (track.enabled = isVideoOn));
 				}
 				setupAudioLevelDetection(stream, "local");
 			})
@@ -64,7 +72,7 @@ export const VideoCallPage = () => {
 				localStreamRef.current = null;
 			}
 		};
-	}, []);
+	}, [isUserWaiting, isMuted, isVideoOn]);
 
 	useEffect(() => {
 		if (!isUserWaiting && localStreamRef.current && localVideoRef.current) {
@@ -75,7 +83,7 @@ export const VideoCallPage = () => {
 	useEffect(() => {
 		if (!user) {
 			toast.error("Please login first. Redirecting...");
-			navigate("/authenticate");
+			navigate("/authenticate", { replace: true });
 			return;
 		}
 
@@ -100,7 +108,7 @@ export const VideoCallPage = () => {
 			} catch (error) {
 				console.error("Error determining role:", error);
 				toast.error("Failed to verify session role");
-				navigate("/sessions");
+				navigate("/sessions" , { replace: true });
 				return null;
 			}
 		};
@@ -125,14 +133,16 @@ export const VideoCallPage = () => {
 
 			newPeer.on("open", (peerId) => {
 				console.log(`PeerJS connected with ID: ${peerId}`);
-				console.log("Emitting join-session with:", { sessionId, userId: user.id, peerId, role: determinedRole });
-				newSocket?.emit("join-session", {
-					sessionId,
-					userId: user.id,
-					peerId,
-					role: determinedRole,
-				});
-				setConnectionStatus("connected");
+				// console.log("Emitting join-session with:", { sessionId, userId: user.id, peerId, role: determinedRole });
+				if (determinedRole === "mentor") {
+					newSocket?.emit("join-session", {
+						sessionId,
+						userId: user.id,
+						peerId,
+						role: determinedRole,
+					});
+					setConnectionStatus("connected");
+				}
 			});
 
 			newPeer.on("error", (error) => {
@@ -213,13 +223,13 @@ export const VideoCallPage = () => {
 
 		socket.on("join-rejected", ({ message }: { message: string }) => {
 			setIsUserWaiting(false);
-			console.log("Received join-rejected:", message);
+			setHasRequestedJoin(false);
 			setIsRejected(true);
+			setRejectionMessage(message);
 			toast.error(message);
 			setTimeout(() => {
-				console.log("Attempting navigation to /sessions");
 				navigate("/sessions", { replace: true });
-			}, 3000);
+			}, 5000);
 		});
 
 		socket.on("user-disconnected", ({ userId }: { userId: string }) => {
@@ -243,7 +253,7 @@ export const VideoCallPage = () => {
 
 		socket.on("error", ({ message }: { message: string }) => {
 			toast.error(message);
-			navigate("/dashboard");
+			navigate("/dashboard", { replace: true });
 		});
 
 		socket.on("join-request", ({ userId, sessionId: requestSessionId, peerId }: { userId: string; sessionId: string; peerId: string }) => {
@@ -451,7 +461,7 @@ export const VideoCallPage = () => {
 		}
 		if (socket) socket.disconnect();
 		if (peer) peer.destroy();
-		navigate("/sessions");
+		navigate("/sessions", { replace: true });
 	};
 
 	const handleJoinRequest = (request: { userId: string; sessionId: string; peerId: string }, approve: boolean) => {
@@ -473,17 +483,56 @@ export const VideoCallPage = () => {
 		toast.info(approve ? `Approved join request for user ${request.userId}` : `Rejected join request for user ${request.userId}`);
 	};
 
+	const handleAskToJoin = () => {
+		if (hasRequestedJoin) {
+			toast.info("Join request already sent");
+			return;
+		}
+		if (socket && peer && user) {
+			console.log(`Asking user ${user.id} to join session ${sessionId}`);
+			socket.emit("join-session", {
+				sessionId,
+				userId: user.id,
+				peerId: peer.id,
+				role,
+			});
+			setHasRequestedJoin(true);
+			toast.info(`Sent join request to session ${sessionId}`);
+		}
+	};
+
 	const renderRemotePlaceholder = () => {
 		if (isRemoteVideoOn) return null;
 		return (
-			<div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-primary/50 to-primary/80 rounded-2xl">
+			<div className="absolute flex items-center justify-center bg-gradient-to-b from-primary/50 to-primary/80 rounded-2xl">
 				<div className="w-24 h-24 rounded-full bg-primary/90 flex items-center justify-center text-white text-4xl">{"U"}</div>
 			</div>
 		);
 	};
 
+	const renderLocalPlaceholder = () => {
+		if (isVideoOn) return null;
+		return (
+			<div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-primary/50 to-primary/80 rounded-2xl">
+				<div className="w-24 h-24 rounded-full bg-primary/90 flex items-center justify-center text-white text-4xl">{"You"}</div>
+			</div>
+		);
+	};
+
 	if (isUserWaiting) {
-		return <WaitingRoom isRejected={isRejected} videoRef={waitingVideoRef} isMuted={isMuted} isVideoOn={isVideoOn} onToggleMute={toggleMute} onToggleVideo={toggleVideo} />;
+		return (
+			<WaitingRoom
+				isRejected={isRejected}
+				rejectionMessage={rejectionMessage}
+				videoRef={waitingVideoRef}
+				isMuted={isMuted}
+				isVideoOn={isVideoOn}
+				hasRequestedJoin={hasRequestedJoin}
+				onToggleMute={toggleMute}
+				onToggleVideo={toggleVideo}
+				onAskToJoin={handleAskToJoin}
+			/>
+		);
 	}
 
 	return (
@@ -510,6 +559,7 @@ export const VideoCallPage = () => {
 
 					<div className="relative flex-1 max-w-[50%]">
 						<video ref={localVideoRef} autoPlay muted className="object-cover rounded-2xl w-full h-auto" />
+						{renderLocalPlaceholder()}
 						<span className="absolute bottom-2 left-2 text-white bg-black/60 px-2 py-1 rounded text-sm flex items-center gap-2">
 							{user?.firstName || "You"}
 							{isMuted ? <MicOffIcon className="inline h-4 w-4" /> : <MicIcon className="inline h-4 w-4" />}
@@ -555,47 +605,77 @@ export const VideoCallPage = () => {
 
 interface WaitingRoomProps {
 	isRejected: boolean;
+	rejectionMessage: string | null;
 	videoRef: React.RefObject<HTMLVideoElement | null>;
 	isMuted: boolean;
 	isVideoOn: boolean;
+	hasRequestedJoin: boolean;
 	onToggleMute: () => void;
 	onToggleVideo: () => void;
+	onAskToJoin: () => void;
 }
 
-const WaitingRoom = ({ isRejected, videoRef, isMuted, isVideoOn, onToggleMute, onToggleVideo }: WaitingRoomProps) => {
+const WaitingRoom = ({ isRejected, rejectionMessage, videoRef, isMuted, isVideoOn, hasRequestedJoin, onToggleMute, onToggleVideo, onAskToJoin }: WaitingRoomProps) => {
 	return (
-		<div className="min-h-screen bg-gray-100 flex items-center justify-center">
-			<div className="bg-white p-8 rounded-2xl shadow-md text-center max-w-md w-full">
+		<div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+			<div className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full transform transition-all hover:scale-[1.02]">
 				{isRejected ? (
-					<>
-						<h2 className="text-2xl font-semibold text-red-600">Join Request Rejected</h2>
-						<p className="mt-4 text-gray-600">The mentor has rejected your join request. You will be redirected shortly.</p>
-					</>
+					<div className="text-center">
+						<h2 className="text-3xl font-bold text-red-600 mb-4">Join Request Rejected</h2>
+						<p className="text-gray-700 mb-4">{rejectionMessage || "The mentor has rejected your join request."}</p>
+						<p className="text-gray-500">You will be redirected to the sessions page in a few seconds.</p>
+					</div>
 				) : (
 					<>
-						<div className="relative mb-6">
-							<video ref={videoRef} autoPlay muted className={cn("rounded-2xl w-full h-auto", !isVideoOn && "hidden")} />
-							{!isVideoOn && (
-								<div className="absolute inset-0 flex items-center justify-center bg-gray-200 rounded-2xl">
-									<div className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-4xl">{"U"}</div>
+						<h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Prepare to Join Session</h2>
+						<div className="relative mb-6 rounded-2xl overflow-hidden shadow-inner aspect-video">
+							{isVideoOn ? (
+								<video ref={videoRef} autoPlay muted className="w-full h-full object-cover" onError={(e) => console.error("Video error:", e)} />
+							) : (
+								<div className="absolute inset-0 flex items-center justify-center bg-gray-300 rounded-2xl">
+									<div className="w-32 h-32 rounded-full bg-gray-400 flex items-center justify-center text-white text-5xl font-semibold">U</div>
 								</div>
 							)}
-							<span className="absolute bottom-2 left-2 text-white bg-black/60 px-2 py-1 rounded text-sm flex items-center gap-2">
+							<span className="absolute bottom-2 left-2 text-white bg-black/70 px-3 py-1 rounded-lg text-sm flex items-center gap-2">
 								You
-								{isMuted ? <MicOffIcon className="inline h-4 w-4" /> : <MicIcon className="inline h-4 w-4" />}
+								{isMuted ? <MicOffIcon className="h-4 w-4" /> : <MicIcon className="h-4 w-4" />}
 							</span>
 						</div>
-						<Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
-						<h2 className="text-2xl font-semibold mt-4 text-gray-900">Waiting for Mentor Approval</h2>
-						<p className="mt-4 text-gray-600">Please wait while the mentor reviews your request to join the session.</p>
-						<div className="mt-6 flex justify-center gap-4">
-							<Button variant={isMuted ? "destructive" : "secondary"} size="icon" onClick={onToggleMute} className="rounded-full h-12 w-12 bg-gray-100 hover:bg-gray-200">
-								{isMuted ? <MicOffIcon className="text-gray-900" /> : <MicIcon className="text-gray-900" />}
-							</Button>
-							<Button variant={isVideoOn ? "secondary" : "destructive"} size="icon" onClick={onToggleVideo} className="rounded-full h-12 w-12 bg-gray-100 hover:bg-gray-200">
-								{isVideoOn ? <VideoIcon className="text-gray-900" /> : <VideoOffIcon className="text-gray-900" />}
-							</Button>
+						<div className="flex justify-center gap-4 mb-6">
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button variant={isMuted ? "destructive" : "secondary"} size="icon" onClick={onToggleMute} className="rounded-full h-12 w-12 bg-gray-100 hover:bg-gray-200">
+											{isMuted ? <MicOffIcon className="text-gray-900" /> : <MicIcon className="text-gray-900" />}
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>
+										<p>{isMuted ? "Unmute" : "Mute"}</p>
+									</TooltipContent>
+								</Tooltip>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button variant={isVideoOn ? "secondary" : "destructive"} size="icon" onClick={onToggleVideo} className="rounded-full h-12 w-12 bg-gray-100 hover:bg-gray-200">
+											{isVideoOn ? <VideoIcon className="text-gray-900" /> : <VideoOffIcon className="text-gray-900" />}
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>
+										<p>{isVideoOn ? "Turn off camera" : "Turn on camera"}</p>
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
 						</div>
+						{hasRequestedJoin ? (
+							<div className="text-center">
+								<Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
+								<p className="text-gray-700 text-lg">Waiting for mentor approval...</p>
+								<p className="text-gray-500 text-sm mt-2">Please wait while the mentor reviews your request.</p>
+							</div>
+						) : (
+							<Button onClick={onAskToJoin} className="w-full text-white py-3 rounded-lg text-lg font-semibold" disabled={hasRequestedJoin}>
+								Ask to Join Session
+							</Button>
+						)}
 					</>
 				)}
 			</div>

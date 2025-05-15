@@ -39,3 +39,13 @@ export const fetchMentorAvailabilityAPI = async (mentorId: string, date: Date) =
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const updateSessionStatatusAPI = async ( sessionId: string, status: string) => {
+	try {
+		const response = await axiosInstance.put(`/mentor/sessions/${sessionId}/status`, { status });
+		return response.data;
+	} catch (error: any) {
+		console.error("Error updating session status:", error);
+		throw new Error(error.response.data.message);
+	}
+};

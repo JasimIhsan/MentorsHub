@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { getSessionHistoryController, getSessionsRequestsController, getUpcomingSessionMentorController, updateRequestStatusController } from "../../controllers/mentors/composer";
+import { getSessionHistoryController, getSessionsRequestsController, getUpcomingSessionMentorController, updateSessionStatusController } from "../../controllers/mentors/composer";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 
 export const mentorSessionRouter = Router();
 
 mentorSessionRouter.get("/:mentorId/requests", async (req, res) => getSessionsRequestsController.handle(req, res));
 
-mentorSessionRouter.put("/:requestId/status", (req, res) => updateRequestStatusController.handle(req, res));
+mentorSessionRouter.put("/:requestId/status", (req, res) => updateSessionStatusController.handle(req, res));
 
 mentorSessionRouter.get("/upcoming/:mentorId", (req, res) => getUpcomingSessionMentorController.handle(req, res));
 

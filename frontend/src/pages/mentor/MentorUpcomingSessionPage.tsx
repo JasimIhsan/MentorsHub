@@ -16,6 +16,8 @@ import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { SessionDetailsModal } from "@/components/custorm/SessionDetailsModal";
+import Alert from "@/components/custorm/alert";
+import { updateSessionStatatusAPI } from "@/api/mentors.api.service";
 
 export function MentorUpcomingSessionsPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
@@ -97,6 +99,19 @@ export function MentorUpcomingSessionsPage() {
 			toast.success(`Approved ${request.userName} to join session.`);
 		} catch (err: any) {
 			toast.error(err.response?.data?.message || "Failed to approve join request.");
+		}
+	};
+
+	const handleUpdateSession = async (sessionId: string) => {
+		console.log(`Confirming session with ID: ${filteredSessions}`);
+		try {
+			const response = await updateSessionStatatusAPI(sessionId, "completed");
+			if (response.success) {
+				setSessions((prev) => prev.filter((session) => session.id !== sessionId));
+				toast.success("Session completed successfully!");
+			}
+		} catch (error) {
+			if (error instanceof Error) toast.error(error.message);
 		}
 	};
 
@@ -199,6 +214,7 @@ export function MentorUpcomingSessionsPage() {
 									session={session}
 									onStartSession={() => handleStartSession(session)} // Pass session-specific handler
 									setSelectedSession={setSelectedSession}
+									handleUpdateSession={handleUpdateSession}
 								/>
 							))}
 							{currentSessions.length === 0 && (
@@ -248,9 +264,10 @@ interface MentorSessionCardProps {
 	session: ISessionMentorDTO;
 	onStartSession: () => void;
 	setSelectedSession: (session: ISessionMentorDTO) => void;
+	handleUpdateSession: (sessionId: string) => void;
 }
 
-function MentorSessionCardDetailed({ session, onStartSession, setSelectedSession }: MentorSessionCardProps) {
+function MentorSessionCardDetailed({ session, onStartSession, setSelectedSession, handleUpdateSession }: MentorSessionCardProps) {
 	const formatTime = (time: string) => {
 		const [hour, minute] = time.split(":").map(Number);
 		const ampm = hour >= 12 ? "PM" : "AM";
@@ -334,9 +351,22 @@ function MentorSessionCardDetailed({ session, onStartSession, setSelectedSession
 							</DropdownMenuContent>
 						</DropdownMenu>
 						{session.status === "upcoming" && (
-							<Button onClick={onStartSession} className="w-full md:w-auto">
-								Start Session
-							</Button>
+							<div className="flex flex-col gap-2">
+								<Button onClick={onStartSession} className="w-full md:w-auto">
+									Start Session
+								</Button>
+								<Alert
+									triggerElement={
+										<Button variant="outline" className="w-full md:w-auto">
+											Mark as Completed
+										</Button>
+									}
+									contentTitle="Are you sure?"
+									contentDescription="This action will mark the session as completed. You can't undo this."
+									actionText="Yes, mark it"
+									onConfirm={() => handleUpdateSession(session.id)}
+								/>
+							</div>
 						)}
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
