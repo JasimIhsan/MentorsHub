@@ -234,8 +234,8 @@ export function MentorUpcomingSessionsPage() {
 	async function handleStartSession(session: ISessionMentorDTO) {
 		try {
 			// Update session status to "ongoing"
-			await axiosInstance.put(`/mentor/sessions/${session.id}/start`, { status: "ongoing" });
-			toast.success("Session started!");
+			// await axiosInstance.put(`/mentor/sessions/${session.id}/start`, { status: "ongoing" });
+			// toast.success("Session started!");
 			// Navigate to video call page
 			navigate(`/video-call/${session.id}`);
 		} catch (err: any) {
