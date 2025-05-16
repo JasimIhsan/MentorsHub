@@ -189,7 +189,7 @@ export default function UserProfilePage() {
 						handleCancel={handleCancel}
 						onAvatarChange={handleAvatarChange} // Pass avatar change handler
 					/>
-					{user.mentorRequestStatus === "REJECTED" && (
+					{user.mentorRequestStatus === "rejected" && (
 						<div className="bg-red-100 text-red-700 p-4 rounded-md">
 							<p className="font-semibold">Your request to become a mentor has been rejected.</p>
 							<p>Please check your email for further details and the reason for the rejection.</p>
