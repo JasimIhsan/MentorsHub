@@ -18,7 +18,7 @@ import { RequestConfirmationPage } from "@/pages/user/RequestConfirmationPage";
 import { SessionsPage } from "@/pages/user/SessionsPage";
 // import { VideoCallPage } from "@/pages/user/VideoCallPage";
 // import { SampleVideoCall } from "@/pages/user/SampleVideoCall";
-import { VideoCallPage } from "@/pages/user/VideoCallPage";
+import { VideoCallPage } from "@/pages/user/cv";
 
 const UserRoutes = () => {
 	return (

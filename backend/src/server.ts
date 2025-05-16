@@ -43,6 +43,8 @@ const sessions: {
 		socketId: string;
 		role: "mentor" | "user";
 		isApproved?: boolean;
+		name: string;
+		avatar?: string;
 	}[];
 } = {};
 
@@ -52,7 +54,7 @@ const activeCalls: { [sessionId: string]: string } = {};
 io.on("connection", (socket: Socket) => {
 	console.log(`✅ User connected: ${socket.id}`);
 
-	socket.on("join-session", async ({ sessionId, userId, peerId, role }: { sessionId: string; userId: string; peerId: string; role: "mentor" | "user" }) => {
+	socket.on("join-session", async ({ sessionId, userId, peerId, role, name, avatar }: { sessionId: string; userId: string; peerId: string; role: "mentor" | "user"; name: string; avatar?: string }) => {
 		console.log(`Received join-session: sessionId=${sessionId}, userId=${userId}, socketId=${socket.id}, peerId=${peerId}`);
 
 		try {
@@ -71,28 +73,37 @@ io.on("connection", (socket: Socket) => {
 				sessions[sessionId] = [];
 			}
 
-			// Prevent duplicate joins
-			// const isUserAlreadyJoined = sessions[sessionId].some((participant) => participant.userId === userId);
-			// if (isUserAlreadyJoined) {
-			// 	socket.emit("error", { message: "You are already in this session" });
-			// 	return;
-			// }
-
 			if (role === "mentor") {
 				if (session.mentorId.toString() !== userId) {
 					socket.emit("error", { message: "You are not the mentor for this session" });
 					return;
 				}
 
-				activeCalls[sessionId] = socket.id;
-				sessions[sessionId].push({
-					userId,
-					peerId,
-					socketId: socket.id,
-					role,
-					isApproved: true,
-				});
+				// Update or add mentor's data
+				const mentorIndex = sessions[sessionId].findIndex((p) => p.userId === userId && p.role === "mentor");
+				if (mentorIndex !== -1) {
+					// Update existing mentor's socketId and peerId
+					sessions[sessionId][mentorIndex] = {
+						...sessions[sessionId][mentorIndex],
+						socketId: socket.id,
+						peerId,
+						name,
+						avatar,
+					};
+				} else {
+					// Add new mentor
+					sessions[sessionId].push({
+						userId,
+						peerId,
+						socketId: socket.id,
+						role,
+						isApproved: true,
+						name,
+						avatar,
+					});
+				}
 
+				activeCalls[sessionId] = socket.id;
 				socket.join(sessionId);
 				socket.data.sessionId = sessionId;
 				socket.data.userId = userId;
@@ -100,24 +111,44 @@ io.on("connection", (socket: Socket) => {
 
 				console.log(`👩‍🎓 Mentor ${userId} joined session ${sessionId}`);
 			} else {
-				sessions[sessionId].push({
-					userId,
-					peerId,
-					socketId: socket.id,
-					role,
-					isApproved: false,
-				});
+				// Handle user join request
+				const userIndex = sessions[sessionId].findIndex((p) => p.userId === userId);
+				if (userIndex !== -1) {
+					// Update existing user's socketId and peerId
+					sessions[sessionId][userIndex] = {
+						...sessions[sessionId][userIndex],
+						socketId: socket.id,
+						peerId,
+						name,
+						avatar,
+					};
+				} else {
+					// Add new user
+					sessions[sessionId].push({
+						userId,
+						peerId,
+						socketId: socket.id,
+						role,
+						isApproved: false,
+						name,
+						avatar,
+					});
+				}
 
 				socket.data.sessionId = sessionId;
 				socket.data.userId = userId;
 				socket.data.role = role;
 
 				const mentor = sessions[sessionId].find((p) => p.role === "mentor");
+				console.log(`\n\nMentor: `, mentor?.socketId);
 				if (mentor) {
+					// console.log(`Sending join request to mentor: ${mentor.socketId}`);
 					io.to(mentor.socketId).emit("join-request", {
 						userId,
 						sessionId,
 						peerId,
+						name,
+						avatar,
 					});
 				} else {
 					socket.emit("error", { message: "Mentor not available. Please wait." });
@@ -156,16 +187,15 @@ io.on("connection", (socket: Socket) => {
 			if (userSocket) {
 				userSocket.join(sessionId);
 			}
-			io.to(sessionId).emit("user-joined", { peerId: user.peerId });
+			io.to(sessionId).emit("user-joined", { peerId: user.peerId, name: user.name, avatar: user.avatar });
 			console.log(`User ${userId} approved for session ${sessionId}`);
 		} else {
 			const userSocket = io.sockets.sockets.get(user.socketId);
 			if (userSocket) {
-				console.log(`🫴❌ User ${userId} rejected for session ${sessionId}`);
 				io.to(user.socketId).emit("join-rejected", { message: "Mentor rejected your join request" });
 			}
 			sessions[sessionId] = sessionParticipants.filter((p) => p.userId !== userId);
-			// console.log(`🫴❌ User ${userId} rejected for session ${sessionId}`);
+			console.log(`🫴❌ User ${userId} rejected for session ${sessionId}`);
 		}
 	});
 
@@ -185,6 +215,7 @@ io.on("connection", (socket: Socket) => {
 		const { sessionId, userId, role } = socket.data;
 
 		if (sessionId && sessions[sessionId]) {
+			const user = sessions[sessionId].find((participant) => participant.userId === userId);
 			sessions[sessionId] = sessions[sessionId].filter((participant) => participant.userId !== userId);
 
 			if (role === "mentor" && activeCalls[sessionId]) {
@@ -195,12 +226,12 @@ io.on("connection", (socket: Socket) => {
 				delete sessions[sessionId];
 			}
 
-			socket.to(sessionId).emit("user-disconnected", { userId });
+			socket.to(sessionId).emit("user-disconnected", { name: user?.name, avatar: user?.avatar });
 		}
 		console.log(`❌ User disconnected: ${socket.id}, reason: ${reason}`);
 	});
 
-	socket.on("reconnect-session", async ({ sessionId, userId, peerId, role }) => {
+	socket.on("reconnect-session", async ({ sessionId, userId, peerId, role, name, avatar }) => {
 		try {
 			const session = await SessionModel.findById(sessionId);
 			if (!session) {
@@ -213,20 +244,41 @@ io.on("connection", (socket: Socket) => {
 				return;
 			}
 
-			sessions[sessionId].push({
-				userId,
-				peerId,
-				socketId: socket.id,
-				role,
-				isApproved: role === "mentor" ? true : false,
-			});
+			// Check for existing participant to avoid duplicates
+			const existingParticipantIndex = sessions[sessionId].findIndex((p) => p.userId === userId);
+			if (existingParticipantIndex !== -1) {
+				// Update existing participant's data
+				sessions[sessionId][existingParticipantIndex] = {
+					...sessions[sessionId][existingParticipantIndex],
+					peerId,
+					socketId: socket.id,
+					name,
+					avatar,
+				};
+			} else {
+				// Add new participant
+				sessions[sessionId].push({
+					userId,
+					peerId,
+					socketId: socket.id,
+					role,
+					isApproved: role === "mentor" ? true : false,
+					name,
+					avatar,
+				});
+			}
 
 			socket.data.sessionId = sessionId;
 			socket.data.userId = userId;
 			socket.data.role = role;
 
-			if (role === "mentor" && !activeCalls[sessionId]) {
+			if (role === "mentor") {
 				activeCalls[sessionId] = socket.id;
+				// Notify users of mentor's new peerId
+				const users = sessions[sessionId].filter((p) => p.role === "user" && p.isApproved);
+				for (const user of users) {
+					io.to(user.socketId).emit("join-approved", { sessionId, mentorPeerId: peerId });
+				}
 			}
 
 			socket.join(sessionId);

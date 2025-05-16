@@ -7,7 +7,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import UserRoutes from "./router/user/UserRoutes";
 import AdminRoutes from "./router/admin/AdminRoutes";
 import MentorRoutes from "./router/mentor/MentorRoutes";
-import { VideoCallPage } from "./pages/user/SampleVideoCall";
+import { VideoCallPage } from "./pages/user/VideoCallPage";
 
 // import PageNotFound from "./pages/PageNotFound";
 
