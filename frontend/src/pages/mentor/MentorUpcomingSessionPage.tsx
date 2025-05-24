@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Added for navigation
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,12 +11,13 @@ import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Loading } from "@/components/custorm/Loading";
-import { ISessionMentorDTO, SessionStatus } from "@/interfaces/ISessionDTO";
-import io, { Socket } from "socket.io-client";
+import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
 import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { SessionDetailsModal } from "@/components/custorm/SessionDetailsModal";
+import Alert from "@/components/custorm/alert";
+import { updateSessionStatatusAPI } from "@/api/mentors.api.service";
 
 export function MentorUpcomingSessionsPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
@@ -26,10 +28,10 @@ export function MentorUpcomingSessionsPage() {
 	const [showJoinRequestsModal, setShowJoinRequestsModal] = useState(false);
 	const [filterOption, setFilterOption] = useState<"all" | "today" | "thisMonth">("all");
 	const [currentPage, setCurrentPage] = useState(1);
-	const [selectedSession, setSelectedSession] = useState<ISessionMentorDTO | null>(null); // State for modal
+	const [selectedSession, setSelectedSession] = useState<ISessionMentorDTO | null>(null);
 	const sessionsPerPage = 5;
 	const user = useSelector((state: RootState) => state.auth.user);
-	const socketRef = useRef<Socket | null>(null);
+	const navigate = useNavigate(); // Added for navigation
 
 	useEffect(() => {
 		const fetchSessions = async () => {
@@ -56,21 +58,6 @@ export function MentorUpcomingSessionsPage() {
 		};
 
 		fetchSessions();
-
-		socketRef.current = io("http://localhost:5858", { withCredentials: true });
-		socketRef.current.on("connect", () => {
-			console.log("Mentor connected to socket:", socketRef.current?.id);
-		});
-
-		socketRef.current.on("user-join-request", (data: { userId: string; userName: string; sessionId: string }) => {
-			setJoinRequests((prev) => [...prev, data]);
-			setShowJoinRequestsModal(true);
-			toast.info(`${data.userName} requested to join the session.`);
-		});
-
-		return () => {
-			socketRef.current?.disconnect();
-		};
 	}, [user?.id]);
 
 	useEffect(() => {
@@ -105,34 +92,37 @@ export function MentorUpcomingSessionsPage() {
 		}
 	};
 
-	const handleStartSession = async (session: ISessionMentorDTO) => {
+	const handleApproveJoin = async (request: { userId: string; userName: string; sessionId: string }) => {
 		try {
-			await axiosInstance.put(`/mentor/sessions/start/${session.id}`);
-			socketRef.current?.emit("session-started", { sessionId: session.id });
-			setSessions((prev) => prev.map((s) => (s.id === session.id ? { ...s, status: "active" as SessionStatus } : s)));
-			setFilteredSessions((prev) => prev.map((s) => (s.id === session.id ? { ...s, status: "active" as SessionStatus } : s)));
-			toast.success("Session started!");
+			await axiosInstance.put(`/mentor/sessions/${request.sessionId}/approve`, { userId: request.userId });
+			setJoinRequests((prev) => prev.filter((req) => req.userId !== request.userId));
+			toast.success(`Approved ${request.userName} to join session.`);
 		} catch (err: any) {
-			toast.error(err.response?.data?.message || "Failed to start session.");
+			toast.error(err.response?.data?.message || "Failed to approve join request.");
 		}
 	};
 
-	const handleApproveJoin = (request: { userId: string; userName: string; sessionId: string }) => {
-		socketRef.current?.emit("approve-join", {
-			userId: request.userId,
-			sessionId: request.sessionId,
-		});
-		setJoinRequests((prev) => prev.filter((r) => r.userId !== request.userId));
-		toast.success(`Approved ${request.userName} to join the session.`);
+	const handleUpdateSession = async (sessionId: string) => {
+		console.log(`Confirming session with ID: ${filteredSessions}`);
+		try {
+			const response = await updateSessionStatatusAPI(sessionId, "completed");
+			if (response.success) {
+				setSessions((prev) => prev.filter((session) => session.id !== sessionId));
+				toast.success("Session completed successfully!");
+			}
+		} catch (error) {
+			if (error instanceof Error) toast.error(error.message);
+		}
 	};
 
-	const handleRejectJoin = (request: { userId: string; userName: string; sessionId: string }) => {
-		socketRef.current?.emit("reject-join", {
-			userId: request.userId,
-			sessionId: request.sessionId,
-		});
-		setJoinRequests((prev) => prev.filter((r) => r.userId !== request.userId));
-		toast.info(`Rejected ${request.userName}'s join request.`);
+	const handleRejectJoin = async (request: { userId: string; userName: string; sessionId: string }) => {
+		try {
+			await axiosInstance.put(`/mentor/sessions/${request.sessionId}/reject`, { userId: request.userId });
+			setJoinRequests((prev) => prev.filter((req) => req.userId !== request.userId));
+			toast.success(`Rejected ${request.userName}'s join request.`);
+		} catch (err: any) {
+			toast.error(err.response?.data?.message || "Failed to reject join request.");
+		}
 	};
 
 	const renderPaginationItems = () => {
@@ -222,8 +212,9 @@ export function MentorUpcomingSessionsPage() {
 								<MentorSessionCardDetailed
 									key={session.id}
 									session={session}
-									onStartSession={() => handleStartSession(session)}
-									setSelectedSession={setSelectedSession} // Pass setSelectedSession to open modal
+									onStartSession={() => handleStartSession(session)} // Pass session-specific handler
+									setSelectedSession={setSelectedSession}
+									handleUpdateSession={handleUpdateSession}
 								/>
 							))}
 							{currentSessions.length === 0 && (
@@ -254,15 +245,29 @@ export function MentorUpcomingSessionsPage() {
 			{selectedSession && <SessionDetailsModal session={selectedSession} onClose={() => setSelectedSession(null)} />}
 		</div>
 	);
+
+	// Moved handleStartSession here and made it session-specific
+	async function handleStartSession(session: ISessionMentorDTO) {
+		try {
+			// Update session status to "ongoing"
+			// await axiosInstance.put(`/mentor/sessions/${session.id}/start`, { status: "ongoing" });
+			// toast.success("Session started!");
+			// Navigate to video call page
+			navigate(`/video-call/${session.id}`);
+		} catch (err: any) {
+			toast.error(err.response?.data?.message || "Failed to start session.");
+		}
+	}
 }
 
 interface MentorSessionCardProps {
 	session: ISessionMentorDTO;
 	onStartSession: () => void;
-	setSelectedSession: (session: ISessionMentorDTO) => void; // Add prop to set selected session
+	setSelectedSession: (session: ISessionMentorDTO) => void;
+	handleUpdateSession: (sessionId: string) => void;
 }
 
-function MentorSessionCardDetailed({ session, onStartSession, setSelectedSession }: MentorSessionCardProps) {
+function MentorSessionCardDetailed({ session, onStartSession, setSelectedSession, handleUpdateSession }: MentorSessionCardProps) {
 	const formatTime = (time: string) => {
 		const [hour, minute] = time.split(":").map(Number);
 		const ampm = hour >= 12 ? "PM" : "AM";
@@ -346,9 +351,22 @@ function MentorSessionCardDetailed({ session, onStartSession, setSelectedSession
 							</DropdownMenuContent>
 						</DropdownMenu>
 						{session.status === "upcoming" && (
-							<Button onClick={onStartSession} className="w-full md:w-auto">
-								Start Session
-							</Button>
+							<div className="flex flex-col gap-2">
+								<Button onClick={onStartSession} className="w-full md:w-auto">
+									Start Session
+								</Button>
+								<Alert
+									triggerElement={
+										<Button variant="outline" className="w-full md:w-auto">
+											Mark as Completed
+										</Button>
+									}
+									contentTitle="Are you sure?"
+									contentDescription="This action will mark the session as completed. You can't undo this."
+									actionText="Yes, mark it"
+									onConfirm={() => handleUpdateSession(session.id)}
+								/>
+							</div>
 						)}
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>

@@ -7,6 +7,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import UserRoutes from "./router/user/UserRoutes";
 import AdminRoutes from "./router/admin/AdminRoutes";
 import MentorRoutes from "./router/mentor/MentorRoutes";
+import { VideoCallPage } from "./pages/user/VideoCallPage";
 
 // import PageNotFound from "./pages/PageNotFound";
 
@@ -21,6 +22,7 @@ function App() {
 							<Route path="/*" element={<UserRoutes />} />
 							<Route path="/admin/*" element={<AdminRoutes />} />
 							<Route path="/mentor/*" element={<MentorRoutes />} />
+							<Route path="/video-call/:sessionId" element={<VideoCallPage />} />
 							{/* <Route path="*" element={<PageNotFound />} /> */}
 						</Routes>
 					</BrowserRouter>

@@ -6,6 +6,7 @@ export class GetUpcomingSessionMentorUsecase implements IGetUpcomingSessionMento
 
 	async execute(mentorId: string) {
 		const sessions = await this.sessionRepo.getSessions(mentorId);
+
 		const now = new Date();
 		const upcoming = sessions.filter((session) => {
 			const sessionDate = new Date(session.date);
@@ -13,6 +14,7 @@ export class GetUpcomingSessionMentorUsecase implements IGetUpcomingSessionMento
 			sessionDate.setHours(hours, minutes, 0, 0);
 			return session.status === "upcoming" && sessionDate > now;
 		});
+
 		return upcoming;
 	}
 }

@@ -35,6 +35,7 @@
 		"passport": "^0.7.0",
 		"passport-google-oauth20": "^2.0.0",
 		"path": "^0.12.7",
+		"peer": "^1.0.2",
 		"redis": "^4.7.0",
 		"socket.io": "^4.8.1",
 		"uuid": "^11.1.0"

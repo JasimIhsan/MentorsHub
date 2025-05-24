@@ -71,7 +71,7 @@ export function MobileNav() {
 					</Button>
 				</SheetTrigger>
 				<SheetContent side="left" className="pr-0">
-					<div className="px-7">
+					<div className="px-7 mt-7">
 						<Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
 							<Avatar className="h-8 w-8">
 								<AvatarImage src="/placeholder.svg" alt="User" />
@@ -80,14 +80,16 @@ export function MobileNav() {
 							<span className="font-bold">John Doe</span>
 						</Link>
 					</div>
-					<nav className="mt-8 flex flex-col gap-4">
+					<nav className="mt-5 flex flex-col gap-4">
 						{routes.map((route) => (
-							<Link key={route.to} to={route.to} onClick={handleLogout} className={cn("px-7 py-2 text-base font-medium transition-colors hover:text-primary", pathname === route.to ? "text-primary" : "text-muted-foreground")}>
-								{route.label}
-							</Link>
+							<Button variant="ghost" key={route.to} className={(pathname === route.to ? "font-bold justify-start px-8" : "justify-start px-8")}>
+								<Link key={route.to} to={route.to} onClick={() => setOpen(false)}>
+									{route.label}
+								</Link>
+							</Button>
 						))}
 						<div className="px-7 pt-4">
-							<Button className="w-full" variant="destructive">
+							<Button className="w-full" onClick={handleLogout} variant="destructive">
 								Log out
 							</Button>
 						</div>

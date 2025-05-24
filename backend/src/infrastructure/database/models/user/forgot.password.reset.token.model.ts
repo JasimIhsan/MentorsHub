@@ -10,7 +10,7 @@ const ForgotPasswordResetTokenSchema: Schema = new Schema(
 	{
 		userId: { type: Schema.Types.ObjectId, required: true, ref: "Users" },
 		token: { type: String, required: true },
-		expiresAt: { type: Date, required: true },
+		expiresAt: { type: Date, required: true, index: { expires: 0 } },
 	},
 	{ timestamps: true }
 );

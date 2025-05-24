@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,11 +13,14 @@ import { BookOpen, BriefcaseBusiness, GraduationCap, Upload, Plus, X, CheckCircl
 import { Link, useNavigate } from "react-router-dom";
 import { SKILL_OPTIONS } from "@/data/skill.option";
 import MultipleSelector from "@/components/ui/multiple-selector";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"; // Assuming you have a Dialog component
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import axiosInstance from "@/api/config/api.config";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { WeekDay } from "@/interfaces/IMentorDTO";
+import { AxiosError } from "axios";
+import { formatTime } from "@/utility/time-data-formater";
 
 // Define types matching MentorProfileSchema
 interface WorkExperience {
@@ -59,8 +62,7 @@ interface FormData {
 	sessionTypes: string[];
 	pricing: "free" | "paid";
 	hourlyRate: string;
-	availability: string[];
-	hoursPerWeek: string;
+	availability: Partial<Record<WeekDay, string[]>>;
 	documents: File[];
 	terms: boolean;
 	guidelines: boolean;
@@ -83,10 +85,12 @@ const validateFormData = (data: FormData): { isValid: boolean; errors: string[] 
 	if (data.sessionTypes.length === 0) errors.push("At least one session type is required");
 	if (!data.pricing) errors.push("Pricing preference is required");
 	if (data.pricing !== "free" && !data.hourlyRate) errors.push("Hourly rate is required for paid sessions");
-	if (data.availability.length === 0) errors.push("At least one availability option is required");
 	if (!data.terms) errors.push("You must confirm the accuracy of the information");
 	if (!data.guidelines) errors.push("You must agree to the Mentor Guidelines");
 	if (!data.interview) errors.push("You must acknowledge the interview possibility");
+	if (!Object.values(data.availability).some((times) => times && times.length > 0)) {
+		errors.push("At least one availability time slot is required");
+	}
 
 	data.workExperiences.forEach((exp, index) => {
 		if (!exp.jobTitle.trim()) errors.push(`Work experience ${index + 1}: Job title is required`);
@@ -128,7 +132,8 @@ export function BecomeMentorPage() {
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [showErrorModal, setShowErrorModal] = useState(false);
 	const [validationErrors, setValidationErrors] = useState<string[]>([]);
-	const totalSteps = 5;
+	const [timeArray, setTimeArray] = useState<string[]>([]);
+	const totalSteps = 6;
 	const progress = (step / totalSteps) * 100;
 	const user = useSelector((state: RootState) => state.auth.user);
 	const navigate = useNavigate();
@@ -147,6 +152,21 @@ export function BecomeMentorPage() {
 		);
 	}
 
+	useEffect(() => {
+		const timeSlots = [];
+
+		for (let hour = 0; hour < 24; hour++) {
+			for (let min = 0; min < 60; min += 30) {
+				const formattedHour = hour.toString().padStart(2, "0");
+				const formattedMin = min.toString().padStart(2, "0");
+				timeSlots.push(`${formattedHour}:${formattedMin}`);
+			}
+		}
+		setTimeArray(timeSlots);
+	}, []);
+
+	console.log(`Time : `, timeArray);
+
 	const [formData, setFormData] = useState<FormData>({
 		firstName: user?.firstName || "",
 		lastName: user?.lastName || "",
@@ -163,8 +183,15 @@ export function BecomeMentorPage() {
 		sessionTypes: [],
 		pricing: "free",
 		hourlyRate: "",
-		availability: [],
-		hoursPerWeek: "",
+		availability: {
+			[WeekDay.Monday]: [],
+			[WeekDay.Tuesday]: [],
+			[WeekDay.Wednesday]: [],
+			[WeekDay.Thursday]: [],
+			[WeekDay.Friday]: [],
+			[WeekDay.Saturday]: [],
+			[WeekDay.Sunday]: [],
+		},
 		documents: [],
 		terms: false,
 		guidelines: false,
@@ -239,6 +266,42 @@ export function BecomeMentorPage() {
 		}));
 	};
 
+	// Handle removing a time slot
+	const handleTimeChange = (day: WeekDay, value: string) => {
+		if (!value) return;
+		setFormData((prev) => {
+			const currentSlots = prev.availability[day] || [];
+			// Prevent adding duplicate time slots
+			if (currentSlots.includes(value)) {
+				toast.warning(`Time slot ${value} is already selected for ${day}`);
+				return prev;
+			}
+			// Add new time slot and sort chronologically
+			const updatedSlots = [...currentSlots, value].sort((a, b) => a.localeCompare(b));
+			return {
+				...prev,
+				availability: {
+					...prev.availability,
+					[day]: updatedSlots,
+				},
+			};
+		});
+	};
+
+	const handleRemoveTimeSlot = (day: WeekDay, index: number) => {
+		setFormData((prev) => {
+			const currentSlots = prev.availability[day] || [];
+			const updatedSlots = currentSlots.filter((_, i) => i !== index);
+			return {
+				...prev,
+				availability: {
+					...prev.availability,
+					[day]: updatedSlots,
+				},
+			};
+		});
+	};
+
 	const handleNext = async () => {
 		if (step === totalSteps) {
 			const { isValid, errors } = validateFormData(formData);
@@ -249,10 +312,14 @@ export function BecomeMentorPage() {
 			}
 
 			const userId = user?.id;
-			console.log("userId: ", userId);
+			if (!userId) {
+				toast.error("User ID is missing. Please log in and try again.");
+				navigate("/login");
+				return;
+			}
 
 			const submissionData = new FormData();
-			submissionData.append("userId", userId!);
+			submissionData.append("userId", userId);
 			submissionData.append("firstName", formData.firstName);
 			submissionData.append("lastName", formData.lastName);
 			submissionData.append("bio", formData.bio);
@@ -269,10 +336,9 @@ export function BecomeMentorPage() {
 			submissionData.append("pricing", formData.pricing);
 			submissionData.append("hourlyRate", formData.hourlyRate);
 			submissionData.append("availability", JSON.stringify(formData.availability));
-			submissionData.append("hoursPerWeek", formData.hoursPerWeek);
 
 			formData.documents.forEach((file) => {
-				submissionData.append("documents", file); // Use "documents" to match multer.array("documents")
+				submissionData.append("documents", file);
 			});
 
 			try {
@@ -291,17 +357,14 @@ export function BecomeMentorPage() {
 				}
 
 				toast.success(response.data.message);
-				console.log(`resonse : `, response.data.data);
-
+				console.log(`response : `, response.data.data);
 				setIsSubmitted(true);
-			} catch (error: any) {
+			} catch (error) {
 				console.error("Submission error:", error);
-				// if(error instanceof Error){
-				// 	toast.error();
-				// }
-				toast.error(error.response.data.message);
-
-				// setShowErrorModal(true);
+				const errorMessage = error instanceof AxiosError && error.response?.data?.message ? error.response.data.message : "An error occurred while submitting your application. Please try again.";
+				toast.error(errorMessage);
+				setValidationErrors([errorMessage]);
+				setShowErrorModal(true);
 			}
 		} else {
 			setStep(step + 1);
@@ -320,7 +383,7 @@ export function BecomeMentorPage() {
 		return (
 			<div className="container py-10">
 				<div className="mx-auto max-w-2xl">
-					<Card className="overflow-hidden">
+					<Card className="overflow-hidden py-0">
 						<div className="bg-gradient-to-r from-primary to-purple-500 p-6 text-center text-white">
 							<div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
 								<CheckCircle2 className="h-10 w-10 text-white" />
@@ -328,7 +391,7 @@ export function BecomeMentorPage() {
 							<h1 className="text-3xl font-bold">Application Submitted!</h1>
 							<p className="mt-2 text-white/80">Your mentor application has been received</p>
 						</div>
-						<CardContent className="p-6">
+						<CardContent>
 							<div className="space-y-6">
 								<div className="rounded-lg bg-primary/5 p-4">
 									<h3 className="mb-4 font-medium">What happens next?</h3>
@@ -344,7 +407,7 @@ export function BecomeMentorPage() {
 								</div>
 							</div>
 						</CardContent>
-						<CardFooter className="flex flex-col gap-3 p-6">
+						<CardFooter className="flex flex-col gap-3 pb-6">
 							<Button asChild className="w-full gap-2">
 								<Link to="/dashboard">
 									Back to Dashboard
@@ -384,14 +447,16 @@ export function BecomeMentorPage() {
 								{step === 2 && "Expertise & Skills"}
 								{step === 3 && "Experience & Education"}
 								{step === 4 && "Mentoring Preferences"}
-								{step === 5 && "Documents & Verification"}
+								{step === 5 && "Weekly Availability"}
+								{step === 6 && "Documents & Verification"}
 							</CardTitle>
 							<CardDescription>
 								{step === 1 && "Tell us about yourself"}
 								{step === 2 && "Share your areas of expertise and skills"}
 								{step === 3 && "Tell us about your professional background"}
-								{step === 4 && "Set your mentoring preferences and availability"}
-								{step === 5 && "Upload supporting documents and complete your application"}
+								{step === 4 && "Set your mentoring preferences"}
+								{step === 5 && "Select the times when you are available for mentoring each day. Each slot represents a one-hour session."}
+								{step === 6 && "Upload supporting documents and complete your application"}
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-6">
@@ -581,7 +646,6 @@ export function BecomeMentorPage() {
 														<Input id={`edu-end-date-${index}`} type="number" value={edu.endYear} onChange={(e) => handleNestedChange("educations", index, "endYear", e.target.value)} placeholder="e.g. 2019" required />
 													</div>
 												</div>
-
 												{formData.educations.length > 1 && (
 													<Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => handleRemoveNested("educations", index)}>
 														<X className="h-4 w-4" />
@@ -714,27 +778,55 @@ export function BecomeMentorPage() {
 											</div>
 											<p className="text-xs text-muted-foreground">Set your hourly rate for paid sessions. The platform fee is 15%.</p>
 										</div>
-
-										<Separator />
-
-										<div className="space-y-2">
-											<Label className="font-bold">Availability</Label>
-											<div className="space-y-2">
-												{["weekdays", "weekends", "evenings", "always"].map((option) => (
-													<div key={option} className="flex items-center space-x-2">
-														<Checkbox id={option} checked={formData.availability.includes(option)} onCheckedChange={(checked) => handleArrayChange("availability", option, !!checked)} />
-														<Label htmlFor={option} className="font-normal">
-															{option.charAt(0).toUpperCase() + option.slice(1)}
-														</Label>
-													</div>
-												))}
-											</div>
-										</div>
 									</div>
 								</>
 							)}
 
 							{step === 5 && (
+								<div className="space-y-4">
+									<div className="space-y-2">
+										{Object.values(WeekDay).map((day) => (
+											<div key={day} className="rounded-lg border p-4">
+												<h4 className="font-medium mb-2">{day}</h4>
+												{(formData.availability[day] || []).length > 0 && (
+													<div className="mb-4">
+														<p className="text-sm font-semibold">Selected Time Slots:</p>
+														<div className="flex flex-wrap gap-2 mt-2">
+															{(formData.availability[day] || []).map((slot, index) => (
+																<div key={index} className="flex items-center bg-primary/10 text-primary rounded-full px-3 py-1 text-sm">
+																	<span>{formatTime(slot)}</span>
+																	<Button variant="ghost" size="sm" className="ml-2 h-6 w-6 p-0" onClick={() => handleRemoveTimeSlot(day, index)}>
+																		<X className="h-4 w-4" />
+																		<span className="sr-only">Remove {slot}</span>
+																	</Button>
+																</div>
+															))}
+														</div>
+													</div>
+												)}
+												<div className="space-y-2">
+													<Label htmlFor={`time-slot-${day}`}>Add Time Slot</Label>
+													<Select onValueChange={(value) => handleTimeChange(day, value)}>
+														<SelectTrigger id={`time-slot-${day}`}>
+															<SelectValue placeholder="Select a time slot" />
+														</SelectTrigger>
+														<SelectContent>
+															{timeArray.map((time) => (
+																<SelectItem key={time} value={time} disabled={(formData.availability[day] || []).includes(time)}>
+																	{formatTime(time)}
+																</SelectItem>
+															))}
+														</SelectContent>
+													</Select>
+												</div>
+											</div>
+										))}
+										<p className="text-xs text-muted-foreground">Select at least one time slot to indicate your availability. Each slot represents a one-hour session.</p>
+									</div>
+								</div>
+							)}
+
+							{step === 6 && (
 								<>
 									<div className="space-y-4">
 										<div className="rounded-lg border border-dashed p-6 text-center">
@@ -848,7 +940,6 @@ export function BecomeMentorPage() {
 				</div>
 			</div>
 
-			{/* Error Modal */}
 			<Dialog open={showErrorModal} onOpenChange={setShowErrorModal}>
 				<DialogContent>
 					<DialogHeader>

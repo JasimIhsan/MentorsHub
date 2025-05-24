@@ -69,10 +69,10 @@ export function RequestConfirmationPage() {
 										<div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
 											<MessageSquare className="h-5 w-5 text-primary" />
 										</div>
-										<div>
+										{/* <div>
 											<p className="text-sm text-muted-foreground">Format</p>
 											<p className="font-medium">{requestData.sessionFormat === "one-on-one" ? "One-on-One" : "Group Session"}</p>
-										</div>
+										</div> */}
 									</div>
 									<div className="flex items-center gap-3">
 										<div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">

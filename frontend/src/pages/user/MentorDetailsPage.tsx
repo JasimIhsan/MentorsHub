@@ -3,27 +3,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar } from "@/components/ui/calendar";
-import { Clock, MessageSquare, Star, Users, Briefcase, GraduationCap, Award, User, Heart } from "lucide-react";
+import { Clock, MessageSquare, Star, Users, Briefcase, GraduationCap, Award, User, Heart} from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useState } from "react"; // Removed unused useEffect
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useMentor } from "@/hooks/useMentor";
 import { motion } from "framer-motion";
-
-const availableTimes: string[] = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM"];
+import { WeekDay } from "@/interfaces/IMentorDTO";
+import { formatTime } from "@/utility/time-data-formater";
 
 export function MentorDetailsPage() {
 	const [isAvatarOpen, setIsAvatarOpen] = useState(false);
 	const { mentorId } = useParams<{ mentorId: string }>();
 	const { mentor, loading } = useMentor(mentorId as string); // Removed unused error
+	const [_selectedDay, setSelectedDay] = useState<WeekDay>(WeekDay.Monday);
 
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center min-h-screen min-w-full bg-gray-50">
 				<div className="text-center flex flex-col gap-2">
 					<motion.div className="mx-auto text-muted-foreground" animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}>
-						<User className="h-16 w-16"/>
+						<User className="h-16 w-16" />
 					</motion.div>
 					<div>
 						<h2 className="text-2xl font-semibold text-gray-800">Loading Profile...</h2>
@@ -255,32 +255,40 @@ export function MentorDetailsPage() {
 					</TabsContent>
 
 					<TabsContent value="availability" className="mt-6">
-						<div className="grid gap-6 md:grid-cols-2">
-							<Card>
+						<div>
+							<Card className="w-full  shadow-lg">
 								<CardHeader>
-									<CardTitle>Select a Date</CardTitle>
-									<CardDescription>Choose a date to see available times</CardDescription>
+									<CardTitle className="text-2xl font-bold text-gray-800">Available Time Slots</CardTitle>
+									<CardDescription className="text-gray-600">View the mentor's available times for sessions</CardDescription>
 								</CardHeader>
 								<CardContent>
-									<Calendar mode="single" className="rounded-md border w-auto" />
-								</CardContent>
-							</Card>
-
-							<Card>
-								<CardHeader>
-									<CardTitle>Available Times</CardTitle>
-									<CardDescription>Select a time slot for your session</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<div className="grid grid-cols-2 gap-3">
-										{availableTimes.map((time: string) => (
-											<Button key={time} variant="outline" className="gap-2">
-												<Clock className="h-4 w-4" />
-												{time}
-											</Button>
+									<Tabs defaultValue={WeekDay.Monday} onValueChange={(value) => setSelectedDay(value as WeekDay)}>
+										<TabsList className="grid w-full grid-cols-7 gap-2 mb-6">
+											{Object.values(WeekDay).map((day) => (
+												<TabsTrigger key={day} value={day} className="text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-indigo-100 relative">
+													{day.slice(0, 3)}
+													{mentor.availability[day]?.length > 0 && <span className="absolute top-1 right-1 h-2 w-2 bg-green-500 rounded-full" />}
+												</TabsTrigger>
+											))}
+										</TabsList>
+										{Object.entries(mentor.availability).map(([day, times]) => (
+											<TabsContent key={day} value={day} className="min-h-[150px]">
+												<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+													{times.length > 0 ? (
+														times.map((time, _index) => (
+															<div key={`${day}-${time}`} className="flex items-center justify-start gap-2 px-4 py-2 border border-gray-200 rounded-md bg-gray-50">
+																<Clock className="h-4 w-4 text-primary" />
+																<span className="text-sm font-medium">{formatTime(time)}</span>
+															</div>
+														))
+													) : (
+														<p className="col-span-2 sm:col-span-3 text-gray-500 italic">No availability on {day}</p>
+													)}
+												</div>
+											</TabsContent>
 										))}
-									</div>
-									<div className="mt-6">
+									</Tabs>
+									<div className="mt-8">
 										<Button className="w-full" asChild disabled={!mentor.userId}>
 											<Link to={`/request-session/${mentor.userId}`}>Request Session</Link>
 										</Button>

@@ -1,7 +1,7 @@
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
-import { IUpdateRequestStatusUseCase } from "../../interfaces/session";
+import { IUpdateSessionStatusUseCase } from "../../interfaces/session";
 
-export class UpdateRequestStatusUsecase implements IUpdateRequestStatusUseCase{
+export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase{
 	constructor(private sessionRepo: ISessionRepository) {}
 
 	async execute(sessionId: string, status: string, rejectReason?: string): Promise<void> {

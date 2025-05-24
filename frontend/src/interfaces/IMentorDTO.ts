@@ -1,3 +1,17 @@
+export enum WeekDay {
+	Monday = "Monday",
+	Tuesday = "Tuesday",
+	Wednesday = "Wednesday",
+	Thursday = "Thursday",
+	Friday = "Friday",
+	Saturday = "Saturday",
+	Sunday = "Sunday",
+}
+
+export type Availability = {
+	[key in WeekDay]: string[];
+};
+
 export interface IMentorDTO {
 	email: string;
 	password: string;
@@ -47,7 +61,7 @@ export interface IMentorDTO {
 	sessionTypes: string[];
 	pricing: "free" | "paid";
 	hourlyRate: number | null;
-	availability: string[];
+	availability: Availability;
 	documents: string[];
 	reviews: {
 		name: string;
