@@ -9,6 +9,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true
 	},
-	"include": ["src", "src/types"],
+	"include": ["src", "src/types", "src/infrastructure/socket/socket.io.ts"],
 	"exclude": ["node_modules", "dist"]
 }
