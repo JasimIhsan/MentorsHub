@@ -520,7 +520,7 @@ export const VideoCallPage = () => {
 	const renderRemotePlaceholder = () => {
 		if (isRemoteVideoOn) return null;
 		return (
-			<div className="absolute flex items-center justify-center bg-gradient-to-b from-primary/50 to-primary/80 rounded-2xl">
+			<div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-primary/50 to-primary/80 rounded-2xl">
 				<div className="w-24 h-24 rounded-full bg-primary/90 flex items-center justify-center text-white text-4xl">{"U"}</div>
 			</div>
 		);
