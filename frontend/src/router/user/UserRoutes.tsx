@@ -16,9 +16,7 @@ import { CheckoutPage } from "@/pages/user/CheckoutPage";
 // import { PaymentConfirmationPage } from "@/pages/user/PaymentConfirmationPage";
 import { RequestConfirmationPage } from "@/pages/user/RequestConfirmationPage";
 import { SessionsPage } from "@/pages/user/SessionsPage";
-// import { VideoCallPage } from "@/pages/user/VideoCallPage";
-// import { SampleVideoCall } from "@/pages/user/SampleVideoCall";
-import { VideoCallPage } from "@/pages/user/cv";
+import { VideoCallPage } from "@/pages/user/VideoCallPage";
 
 const UserRoutes = () => {
 	return (

@@ -24,7 +24,7 @@ const initialState: AuthState = {
 // ✅ Async thunk to fetch user profile
 export const fetchUserProfile = createAsyncThunk<UserWithoutPassword, void, { rejectValue: string }>("auth/fetchUserProfile", async (_, thunkAPI) => {
 	try {
-		const response = await axiosInstance.get("/user-profile", {
+		const response = await axiosInstance.get("/user/user-profile", {
 			withCredentials: true,
 		});
 		return response.data;
