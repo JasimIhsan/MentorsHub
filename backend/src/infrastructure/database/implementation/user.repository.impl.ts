@@ -1,5 +1,5 @@
 import { UserEntity, UserInterface } from "../../../domain/entities/user.entity";
-import { IUserRepository } from "../../../domain/repositories/user.repository";
+import { FindUsersParams, IUserRepository, PaginatedUsers } from "../../../domain/repositories/user.repository";
 import { UserModel } from "../models/user/user.model";
 import mongoose from "mongoose";
 import { IUserDTO, UserDTO } from "../../../application/dtos/user.dtos";
@@ -47,13 +47,48 @@ export class UserRepositoryImpl implements IUserRepository {
 		}
 	}
 
-	async findAllUsers(): Promise<IUserDTO[]> {
+	async findAllUsers(params: FindUsersParams): Promise<PaginatedUsers> {
 		try {
-			const userDocs = await UserModel.find().sort({ createdAt: -1 });
-			const usersData: UserEntity[] = userDocs.map((doc) => UserEntity.fromDBDocument(doc));
-			return usersData.map((user: UserEntity) => UserDTO.fromEntity(user));
+			const { page = 1, limit = 10, search, role, status, sortBy = "createdAt", sortOrder = "desc" } = params;
+
+			// Build MongoDB query
+			const query: any = {};
+			if (search) {
+				query.$or = [{ firstName: { $regex: search, $options: "i" } }, { lastName: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }];
+			}
+			if (role) {
+				query.role = role;
+			}
+			if (status) {
+				query.status = status;
+			}
+
+			// Build sort options
+			const sortOptions: { [key: string]: 1 | -1 } = {};
+			sortOptions[sortBy === "fullName" ? "fullName" : "createdAt"] = sortOrder === "asc" ? 1 : -1;
+
+			// Fetch paginated users
+			const userDocs = await UserModel.find(query)
+				.sort(sortOptions)
+				.skip((page - 1) * limit)
+				.limit(limit)
+				.lean(); // Use lean for better performance (returns plain JS objects)
+
+			// Map to UserEntity
+			const users = userDocs.map((doc) => UserEntity.fromDBDocument(doc));
+
+			// Get total count for pagination
+			const totalUsers = await UserModel.countDocuments(query);
+			const totalPages = Math.ceil(totalUsers / limit);
+
+			return {
+				users,
+				totalUsers,
+				totalPages,
+				currentPage: page,
+			};
 		} catch (error) {
-			return handleError(error, "Error geting all users");
+			return handleError(error, "Error getting all users");
 		}
 	}
 
