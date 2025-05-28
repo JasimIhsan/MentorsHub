@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { debounce } from "lodash"; // Import lodash throttle
 import { deleteUserApi, fetchAllUsers, updateUseStatusApi } from "@/api/admin/user.tab";
 import { toast } from "sonner";
 import { IUserDTO } from "@/interfaces/IUserDTO";
@@ -9,39 +11,76 @@ import { AddUserForm } from "@/components/admin/user-tab/AddUserForm";
 import { UserDetailsModal } from "@/components/admin/user-tab/UserDetailsModal";
 
 export default function AdminUsersTab() {
-	const [searchTerm, setSearchTerm] = useState("");
-	const [roleFilter, setRoleFilter] = useState<string>("all");
-	const [statusFilter, setStatusFilter] = useState<string>("all");
+	const [searchParams, setSearchParams] = useSearchParams();
+	const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+	const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm); // Throttled search term
+	const [roleFilter, setRoleFilter] = useState<string>(searchParams.get("role") || "all");
+	const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") || "all");
 	const [users, setUsers] = useState<IUserDTO[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [currentPage, setCurrentPage] = useState(1);
+	const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
 	const [itemsPerPage] = useState(10);
+	const [totalPages, setTotalPages] = useState(1);
+	const [totalUsers, setTotalUsers] = useState(0);
 	const [selectedUser, setSelectedUser] = useState<IUserDTO | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
-	const filteredUsers = users.filter((user) => {
-		const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase());
-		const matchesRole = roleFilter === "all" || user.role === roleFilter;
-		const matchesStatus = statusFilter === "all" || user.status === statusFilter;
-		return matchesSearch && matchesRole && matchesStatus;
-	});
+	// Throttle the search term updates (500ms interval)
+	const debouncedSetSearchTerm = debounce((value: string) => {
+		setDebouncedSearchTerm(value);
+	}, 1000);
 
-	const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-	const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+	// Update throttled search term when searchTerm changes
+	useEffect(() => {
+		debouncedSetSearchTerm(searchTerm);
+		return () => debouncedSetSearchTerm.cancel(); // Cleanup throttle on unmount
+	}, [searchTerm]);
+
+	// Sync URL with state
+	useEffect(() => {
+		const params = new URLSearchParams();
+		if (currentPage !== 1) params.set("page", currentPage.toString());
+		if (debouncedSearchTerm) params.set("search", debouncedSearchTerm);
+		if (roleFilter !== "all") params.set("role", roleFilter);
+		if (statusFilter !== "all") params.set("status", statusFilter);
+		setSearchParams(params, { replace: true });
+	}, [currentPage, debouncedSearchTerm, roleFilter, statusFilter, setSearchParams]);
+
+	// Fetch users from backend
+	useEffect(() => {
+		const fetchUsers = async () => {
+			setLoading(true);
+			try {
+				const response = await fetchAllUsers({
+					page: currentPage,
+					limit: itemsPerPage,
+					search: debouncedSearchTerm || undefined,
+					role: roleFilter !== "all" ? roleFilter : undefined,
+					status: statusFilter !== "all" ? statusFilter : undefined,
+				});
+				if (response.success) {
+					setUsers(response.users);
+					setTotalPages(response.totalPages);
+					setTotalUsers(response.totalUsers);
+				}
+			} catch (error) {
+				console.error("Error fetching users: ", error);
+				if (error instanceof Error) {
+					toast.error(error.message);
+				}
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchUsers();
+	}, [currentPage, itemsPerPage, debouncedSearchTerm, roleFilter, statusFilter]);
 
 	const handleStatusUpdate = async (userId: string) => {
 		try {
 			const response = await updateUseStatusApi(userId);
 			if (response.success) {
 				toast.success("User status updated successfully!");
-				setUsers((prevUsers: IUserDTO[]) => {
-					return prevUsers.map((user) => {
-						if (user.id === userId) {
-							return { ...user, status: response.user.status };
-						}
-						return user;
-					});
-				});
+				setUsers((prevUsers) => prevUsers.map((user) => (user.id === userId ? { ...user, status: response.user.status } : user)));
 			} else {
 				toast.error("Failed to update user status.");
 			}
@@ -56,14 +95,13 @@ export default function AdminUsersTab() {
 		try {
 			const response = await deleteUserApi(userId);
 			if (response.success) {
-				setUsers((prevUsers) => {
-					return prevUsers.filter((user) => {
-						if (user.id !== userId) {
-							return user;
-						}
-					});
-				});
+				setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+				setTotalUsers((prev) => prev - 1);
 				toast.success(response.message);
+				// Adjust pagination if the current page becomes empty
+				if (users.length === 1 && currentPage > 1) {
+					setCurrentPage((prev) => prev - 1);
+				}
 			}
 		} catch (error) {
 			if (error instanceof Error) {
@@ -82,25 +120,6 @@ export default function AdminUsersTab() {
 		setSelectedUser(null);
 	};
 
-	useEffect(() => {
-		const fetchUsers = async () => {
-			try {
-				const response = await fetchAllUsers();
-				if (response.success) {
-					setUsers(response.users);
-				}
-			} catch (error) {
-				console.log("error fetch users: ", error);
-				if (error instanceof Error) {
-					toast.error(error.message);
-				}
-			} finally {
-				setLoading(false);
-			}
-		};
-		fetchUsers();
-	}, []);
-
 	return (
 		<div className="space-y-6">
 			<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -110,13 +129,9 @@ export default function AdminUsersTab() {
 				</div>
 				<AddUserForm setUsers={setUsers} />
 			</div>
-
 			<UserFilter searchTerm={searchTerm} setSearchTerm={setSearchTerm} roleFilter={roleFilter} setRoleFilter={setRoleFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
-
-			<UserTable users={paginatedUsers} loading={loading} handleStatusUpdate={handleStatusUpdate} handleDeleteUser={handleUserDelete} handleViewDetails={handleViewDetails} />
-
-			<UserPagination currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} filteredUsersLength={filteredUsers.length} paginatedUsersLength={paginatedUsers.length} loading={loading} />
-
+			<UserTable users={users} loading={loading} handleStatusUpdate={handleStatusUpdate} handleDeleteUser={handleUserDelete} handleViewDetails={handleViewDetails} />
+			<UserPagination currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} filteredUsersLength={totalUsers} paginatedUsersLength={users.length} loading={loading} />
 			{isModalOpen && selectedUser && <UserDetailsModal user={selectedUser} onClose={handleCloseModal} />}
 		</div>
 	);

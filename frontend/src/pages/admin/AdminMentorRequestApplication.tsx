@@ -183,6 +183,8 @@ function ApplicationCard({ application, updateMentorStatus }: { application: IMe
 		setIsLoadingDocuments(true);
 		try {
 			const response = await fetchDocumentUrlsAPI(application.userId);
+			console.log('response: ', response);
+
 			if (response.success) {
 				setDocumentUrls(response.documents);
 				toast.success("Documents fetched successfully!");
