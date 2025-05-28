@@ -1,11 +1,11 @@
-import { IUserRepository } from "../../../../domain/repositories/user.repository";
+import { FindUsersParams, IUserRepository } from "../../../../domain/repositories/user.repository";
 import { IGetAllUsersUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
 
 export class GetAllUsersUsecase implements IGetAllUsersUsecase{
 	constructor(private userRepository: IUserRepository) {}
-	async execute(): Promise<any> {
+	async execute(params: FindUsersParams): Promise<any> {
 		try {
-			const users = await this.userRepository.findAllUsers();
+			const users = await this.userRepository.findAllUsers(params);
 			return users;
 		} catch (error) {
 			if (error instanceof Error) {

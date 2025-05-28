@@ -1,4 +1,4 @@
-import { ArrowUpDown, MoreHorizontal, ShieldOff, Trash } from "lucide-react";
+import { ArrowUpDown, Loader2, MoreHorizontal, ShieldOff, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,7 +21,7 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 	const [sortedUsers, setSortedUsers] = useState<IUserDTO[]>(users);
 	const [sortAsc, setSortAsc] = useState(true);
 	const [sortColumn, setSortColumn] = useState<"name" | "joinedDate">("name");
-	const [previewUserId, setPreviewUserId] = useState<string | null>(null); // Track the user ID for preview
+	const [previewUserId, setPreviewUserId] = useState<string | null>(null);
 
 	const handleSort = (column: "name" | "joinedDate") => {
 		const isSameColumn = sortColumn === column;
@@ -33,15 +33,11 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 			if (column === "name") {
 				const nameA = a.fullName.toLowerCase();
 				const nameB = b.fullName.toLowerCase();
-				if (nameA < nameB) return newSortAsc ? -1 : 1;
-				if (nameA > nameB) return newSortAsc ? 1 : -1;
-				return 0;
+				return newSortAsc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
 			} else if (column === "joinedDate") {
 				const dateA = new Date(a.createdAt);
 				const dateB = new Date(b.createdAt);
-				if (dateA < dateB) return newSortAsc ? -1 : 1;
-				if (dateA > dateB) return newSortAsc ? 1 : -1;
-				return 0;
+				return newSortAsc ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
 			}
 			return 0;
 		});
@@ -57,12 +53,11 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 		setSortedUsers((prevUsers) => prevUsers.map((user) => (user.id === updatedUser.id ? { ...user, ...updatedUser } : user)));
 	};
 
-	// Find the user whose preview is being shown
 	const previewUser = sortedUsers.find((user) => user.id === previewUserId);
 
 	return (
 		<div className="rounded-md border px-3 py-1">
-			<Table>
+			<Table className="w-full">
 				<TableHeader>
 					<TableRow>
 						<TableHead className="w-[250px]">
@@ -92,12 +87,15 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 					{loading ? (
 						<TableRow>
 							<TableCell colSpan={7} className="h-24 text-center">
-								Loading users...
+								<div className="flex flex-col items-center justify-center gap-2">
+									<Loader2 className="h-6 w-6 animate-spin" />
+									<span>Loading users...</span>
+								</div>
 							</TableCell>
 						</TableRow>
 					) : sortedUsers.length === 0 ? (
 						<TableRow>
-							<TableCell colSpan={7} className="h-24 text-center">
+							<TableCell colSpan={7} className="h-24 text-center flex flex-col items-center justify-center">
 								No users found
 							</TableCell>
 						</TableRow>
@@ -107,14 +105,10 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 								<TableCell>
 									<div className="flex items-center gap-3">
 										<Avatar className="h-8 w-8">
-											<AvatarImage
-												src={user.avatar ?? ""}
-												alt={user.fullName}
-												onClick={() => setPreviewUserId(user.id as string)} // Set the specific user ID for preview
-											/>
-											<AvatarFallback>{user.fullName.slice(0, 1)}</AvatarFallback>
+											<AvatarImage src={user.avatar ?? ""} alt={user.firstName} onClick={() => setPreviewUserId(user.id as string)} />
+											<AvatarFallback>{user.firstName.slice(0, 1)}</AvatarFallback>
 										</Avatar>
-										<div className="font-medium">{user.fullName}</div>
+										<div className="font-medium">{`${user.firstName} ${user.lastName}`}</div>
 									</div>
 								</TableCell>
 								<TableCell>{user.email}</TableCell>
@@ -166,7 +160,7 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 												}
 												contentTitle={`Confirm ${user.status === "blocked" ? "Unblock" : "Block"} User`}
 												contentDescription={`Are you sure you want to ${user.status === "blocked" ? "Unblock" : "Block"} "${user.fullName}"?`}
-												actionText={`${user.status === "blocked" ? "Unblock" : "Block"}`}
+												actionText={user.status === "blocked" ? "Unblock" : "Block"}
 												onConfirm={() => handleStatusUpdate(user.id as string)}
 											/>
 										</DropdownMenuContent>
@@ -178,21 +172,11 @@ export function UserTable({ users, loading, handleStatusUpdate, handleDeleteUser
 				</TableBody>
 			</Table>
 
-			{/* Preview Modal - Only shown if previewUserId is set */}
 			{previewUserId && previewUser && (
-				<div
-					className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-					onClick={() => setPreviewUserId(null)} // Close preview when clicking outside
-				>
+				<div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50" onClick={() => setPreviewUserId(null)}>
 					<div className="relative max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
-						{" "}
-						{/* Prevent closing when clicking inside */}
 						<img src={previewUser.avatar || ""} alt={`${previewUser.fullName}'s profile preview`} className="w-full h-auto rounded-lg" />
-						<Button
-							variant="outline"
-							className="absolute top-2 right-2"
-							onClick={() => setPreviewUserId(null)} // Close preview
-						>
+						<Button variant="outline" className="absolute top-2 right-2" onClick={() => setPreviewUserId(null)}>
 							X
 						</Button>
 					</div>

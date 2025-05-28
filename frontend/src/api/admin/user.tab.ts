@@ -1,8 +1,24 @@
 import axiosInstance from "../config/api.config";
 
-export const fetchAllUsers = async () => {
+interface FetchUsersParams {
+	page: number;
+	limit: number;
+	role?: string;
+	status?: string;
+	search?: string;
+}
+
+export const fetchAllUsers = async (params: FetchUsersParams) => {
 	try {
-		const response = await axiosInstance.get(`/admin/users`);
+		const response = await axiosInstance.get(`/admin/users`, {
+			params: {
+				page: params.page,
+				limit: params.limit,
+				role: params.role,
+				status: params.status,
+				search: params.search,
+			},
+		});
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error form fetchAllUsers api : `, error);

@@ -24,6 +24,7 @@ export class GetDocumentsUseCase implements IGetDocumentsUseCase{
 		if (!isOwner && !isAdmin) throw new Error("Access denied");
 
 		const urls = await Promise.all(mentor.documents.map((key) => this.s3Service.getSignedUrl(key, 60 * 5)));
+		console.log('urls: ', urls);
 		return urls;
 	}
 }

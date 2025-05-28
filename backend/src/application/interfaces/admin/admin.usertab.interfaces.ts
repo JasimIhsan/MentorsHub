@@ -1,8 +1,9 @@
 import { UserEntity } from "../../../domain/entities/user.entity";
+import { FindUsersParams, PaginatedUsers } from "../../../domain/repositories/user.repository";
 import { IUserDTO } from "../../dtos/user.dtos";
 
 export interface IGetAllUsersUsecase {
-	execute(): Promise<IUserDTO[]>;
+	execute(params: FindUsersParams): Promise<PaginatedUsers>;
 }
 export interface ICreateUserUsecase {
 	execute(firstName: string, lastName: string, email: string, role: string): Promise<IUserDTO>;
