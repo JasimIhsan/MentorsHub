@@ -40,6 +40,7 @@ export const VideoCallPage = () => {
 	const [role, setRole] = useState<"mentor" | "user" | null>(null);
 	const [hasRequestedJoin, setHasRequestedJoin] = useState(false);
 	const [rejectionMessage, setRejectionMessage] = useState<string | null>(null);
+	const [remoteParticipant, setRemoteParticipant] = useState<{ name: string; avatar: string }>({ name: "", avatar: "" });
 	const navigate = useNavigate();
 
 	// Initialize media stream
@@ -216,6 +217,7 @@ export const VideoCallPage = () => {
 		socket.on("user-joined", ({ peerId, name, avatar }: { peerId: string; name: string; avatar?: string }) => {
 			if (peer && localStreamRef.current && role === "mentor") {
 				initiateCall(peerId, 0);
+				setRemoteParticipant({ name, avatar: avatar as string });
 				toast.success(
 					<div className="flex items-center gap-2">
 						<Avatar className="w-6 h-6">{avatar ? <AvatarImage src={avatar} alt={name} /> : <AvatarFallback className="bg-gray-300 text-white text-xs">{name[0]?.toUpperCase() || "U"}</AvatarFallback>}</Avatar>
@@ -235,7 +237,7 @@ export const VideoCallPage = () => {
 		});
 
 		socket.on("join-rejected", ({ message }: { message: string }) => {
-			setIsUserWaiting(false);
+			setIsUserWaiting(true);
 			setHasRequestedJoin(false);
 			setIsRejected(true);
 			setRejectionMessage(message);
@@ -266,7 +268,8 @@ export const VideoCallPage = () => {
 
 		socket.on("error", ({ message }: { message: string }) => {
 			toast.error(message);
-			navigate("/dashboard", { replace: true });
+			if (role === "user") navigate("/sessions", { replace: true });
+			else navigate("/mentor/upcoming-sessions", { replace: true });
 		});
 
 		socket.on("join-request", ({ userId, sessionId: requestSessionId, peerId, name, avatar }: { userId: string; sessionId: string; peerId: string; name: string; avatar?: string }) => {
@@ -435,7 +438,8 @@ export const VideoCallPage = () => {
 		}
 		if (socket) socket.disconnect();
 		if (peer) peer.destroy();
-		navigate("/sessions", { replace: true });
+		if (role === "user") navigate("/sessions", { replace: true });
+		else navigate("/mentor/upcoming-sessions", { replace: true });
 	};
 
 	const handleJoinRequest = (request: { userId: string; sessionId: string; peerId: string }, approve: boolean) => {
@@ -477,7 +481,10 @@ export const VideoCallPage = () => {
 		if (isRemoteVideoOn) return null;
 		return (
 			<div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-primary/50 to-primary/80 rounded-2xl">
-				<div className="w-24 h-24 rounded-full bg-white/50 flex items-center justify-center text-white text-4xl">{"U"}</div>
+				<Avatar className="w-24 h-24">
+					<AvatarImage src={remoteParticipant.avatar} />
+					<AvatarFallback>{remoteParticipant.name.slice(0, 1)}</AvatarFallback>
+				</Avatar>
 			</div>
 		);
 	};
@@ -486,7 +493,10 @@ export const VideoCallPage = () => {
 		if (isVideoOn) return null;
 		return (
 			<div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-primary/50 to-primary/80 rounded-2xl">
-				<div className="w-24 h-24 rounded-full bg-white/50 flex items-center justify-center text-white text-4xl">{"You"}</div>
+				<Avatar className="w-24 h-24">
+					<AvatarImage src={user?.avatar as string} />
+					<AvatarFallback>{user?.firstName?.slice(0, 1)}</AvatarFallback>
+				</Avatar>
 			</div>
 		);
 	};
@@ -516,7 +526,7 @@ export const VideoCallPage = () => {
 						<video ref={remoteVideoRef} autoPlay className="object-contain rounded-2xl w-full h-auto" />
 						{renderRemotePlaceholder()}
 						<span className="absolute bottom-2 left-2 text-white bg-black/60 px-2 py-1 rounded text-sm flex items-center gap-2">
-							Remote
+							{`${remoteParticipant.name}` || "User"}
 							{isRemoteMuted ? <MicOffIcon className="inline h-4 w-4" /> : <MicIcon className="inline h-4 w-4" />}
 						</span>
 						{isRemoteHandRaised && (
@@ -530,7 +540,7 @@ export const VideoCallPage = () => {
 						<video ref={localVideoRef} autoPlay muted className="object-cover rounded-2xl w-full h-auto" />
 						{renderLocalPlaceholder()}
 						<span className="absolute bottom-2 left-2 text-white bg-black/60 px-2 py-1 rounded text-sm flex items-center gap-2">
-							{user?.firstName || "You"}
+							{`${user?.firstName} ${user?.lastName}` || "You"}
 							{isMuted ? <MicOffIcon className="inline h-4 w-4" /> : <MicIcon className="inline h-4 w-4" />}
 						</span>
 						{isHandRaised && (
@@ -587,7 +597,7 @@ interface WaitingRoomProps {
 const WaitingRoom = ({ isRejected, rejectionMessage, videoRef, isMuted, isVideoOn, hasRequestedJoin, onToggleMute, onToggleVideo, onAskToJoin }: WaitingRoomProps) => {
 	return (
 		<div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-			<div className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full transform transition-all hover:scale-[1.02]">
+			<div className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full ">
 				{isRejected ? (
 					<div className="text-center">
 						<h2 className="text-3xl font-bold text-red-600 mb-4">Join Request Rejected</h2>
@@ -596,7 +606,7 @@ const WaitingRoom = ({ isRejected, rejectionMessage, videoRef, isMuted, isVideoO
 					</div>
 				) : (
 					<>
-						<h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Prepare to Join</h2>
+						<h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Prepare to Join the Call</h2>
 						<div className="relative mb-6 rounded-2xl overflow-hidden shadow-inner aspect-video">
 							{isVideoOn ? (
 								<video ref={videoRef} autoPlay muted className="w-full h-full object-cover" />
@@ -614,7 +624,7 @@ const WaitingRoom = ({ isRejected, rejectionMessage, videoRef, isMuted, isVideoO
 							<TooltipProvider>
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<Button variant={isMuted ? "destructive" : "secondary"} size="icon" onClick={onToggleMute} className="rounded-full">
+										<Button variant={isMuted ? "destructive" : "secondary"} size="icon" onClick={onToggleMute} className="rounded-full h-12 w-12">
 											{isMuted ? <MicOffIcon /> : <MicIcon />}
 										</Button>
 									</TooltipTrigger>
@@ -624,7 +634,7 @@ const WaitingRoom = ({ isRejected, rejectionMessage, videoRef, isMuted, isVideoO
 								</Tooltip>
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<Button variant={isVideoOn ? "secondary" : "destructive"} size="icon" onClick={onToggleVideo} className="rounded-full">
+										<Button variant={isVideoOn ? "secondary" : "destructive"} size="icon" onClick={onToggleVideo} className="rounded-full h-12 w-12">
 											{isVideoOn ? <VideoIcon /> : <VideoOffIcon />}
 										</Button>
 									</TooltipTrigger>
@@ -636,8 +646,8 @@ const WaitingRoom = ({ isRejected, rejectionMessage, videoRef, isMuted, isVideoO
 						</div>
 						{hasRequestedJoin ? (
 							<div className="text-center">
-								<Loader2 className="h-6 w-6 animate-spin text-blue-600 mx-auto mb-2" />
-								<p className="text-gray-600 text-sm">Waiting for approval...</p>
+								<Loader2 className="h-10 w-10 animate-spin text-blue-600 mx-auto mb-2" />
+								<p className="text-gray-600 text">Waiting for mentor approval...</p>
 							</div>
 						) : (
 							<Button onClick={onAskToJoin} className="w-full py-2 rounded-lg" disabled={hasRequestedJoin}>
@@ -693,7 +703,7 @@ const JoinRequestDrawer = ({ isOpen, onClose, joinRequests, onApprove, onReject 
 				</div>
 				<DrawerFooter>
 					<DrawerClose asChild>
-						<Button variant="ghost" onClick={onClose}>
+						<Button variant="outline" onClick={onClose}>
 							Close
 						</Button>
 					</DrawerClose>
@@ -720,15 +730,30 @@ interface ControlBarProps {
 	onOpenJoinRequests?: () => void;
 }
 
-function ControlBar({ isMuted, isVideoOn, isScreenSharing, isSidebarOpen, isHandRaised, role, joinRequestsCount, onToggleMute, onToggleVideo, onToggleScreenShare, onToggleSidebar, onToggleRaiseHand, onEndCall, onOpenJoinRequests }: ControlBarProps) {
+function ControlBar({
+	isMuted,
+	isVideoOn,
+	isScreenSharing,
+	isSidebarOpen,
+	isHandRaised,
+	role,
+	joinRequestsCount = 0, // Default to 0 to ensure type safety
+	onToggleMute,
+	onToggleVideo,
+	onToggleScreenShare,
+	onToggleSidebar,
+	onToggleRaiseHand,
+	onEndCall,
+	onOpenJoinRequests,
+}: ControlBarProps) {
 	return (
-		<div className="fixed bottom-0 left-0 right-0 flex justify-center p-4 z-10">
+		<div className="fixed bottom-0 left-0 right-0 flex justify-center p-10 z-10">
 			<div className="bg-white/95 rounded-full shadow-lg px-4 py-2 border border-gray-200 flex items-center gap-2">
 				<TooltipProvider>
 					<div className="flex items-center gap-2">
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button variant={isMuted ? "destructive" : "secondary"} size="icon" onClick={onToggleMute} className="rounded-full">
+								<Button variant={isMuted ? "destructive" : "secondary"} size="icon" onClick={onToggleMute} className="rounded-full h-12 w-12">
 									{isMuted ? <MicOffIcon /> : <MicIcon />}
 								</Button>
 							</TooltipTrigger>
@@ -738,7 +763,7 @@ function ControlBar({ isMuted, isVideoOn, isScreenSharing, isSidebarOpen, isHand
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button variant={isVideoOn ? "secondary" : "destructive"} size="icon" onClick={onToggleVideo} className="rounded-full">
+								<Button variant={isVideoOn ? "secondary" : "destructive"} size="icon" onClick={onToggleVideo} className="rounded-full h-12 w-12">
 									{isVideoOn ? <VideoIcon /> : <VideoOffIcon />}
 								</Button>
 							</TooltipTrigger>
@@ -748,7 +773,7 @@ function ControlBar({ isMuted, isVideoOn, isScreenSharing, isSidebarOpen, isHand
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button variant={isScreenSharing ? "destructive" : "secondary"} size="icon" onClick={onToggleScreenShare} className="rounded-full">
+								<Button variant={isScreenSharing ? "destructive" : "secondary"} size="icon" onClick={onToggleScreenShare} className="rounded-full h-12 w-12">
 									<ScreenShareIcon />
 								</Button>
 							</TooltipTrigger>
@@ -761,7 +786,7 @@ function ControlBar({ isMuted, isVideoOn, isScreenSharing, isSidebarOpen, isHand
 					<div className="flex items-center gap-2">
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button variant={isHandRaised ? "default" : "secondary"} size="icon" onClick={onToggleRaiseHand} className="rounded-full">
+								<Button variant={isHandRaised ? "default" : "secondary"} size="icon" onClick={onToggleRaiseHand} className="rounded-full h-12 w-12">
 									<HandIcon className={cn("h-5 w-5", isHandRaised && "text-white")} />
 								</Button>
 							</TooltipTrigger>
@@ -771,7 +796,7 @@ function ControlBar({ isMuted, isVideoOn, isScreenSharing, isSidebarOpen, isHand
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button variant={isSidebarOpen ? "default" : "secondary"} size="icon" onClick={onToggleSidebar} className="rounded-full">
+								<Button variant={isSidebarOpen ? "default" : "secondary"} size="icon" onClick={onToggleSidebar} className="rounded-full h-12 w-12">
 									<ListIcon className={cn("h-5 w-5", isSidebarOpen && "text-white")} />
 								</Button>
 							</TooltipTrigger>
@@ -782,9 +807,9 @@ function ControlBar({ isMuted, isVideoOn, isScreenSharing, isSidebarOpen, isHand
 						{role === "mentor" && (
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<Button variant={joinRequestsCount && joinRequestsCount > 0 ? "default" : "secondary"} size="icon" onClick={onOpenJoinRequests} className="rounded-full relative">
-										<UsersIcon className={cn("h-5 w-5", joinRequestsCount && joinRequestsCount > 0 && "text-white")} />
-										{joinRequestsCount && joinRequestsCount > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{joinRequestsCount}</span>}
+									<Button variant={joinRequestsCount > 0 ? "default" : "secondary"} size="icon" onClick={onOpenJoinRequests} className="rounded-full relative h-12 w-12">
+										<UsersIcon className={cn("h-5 w-5", joinRequestsCount > 0 && "text-white")} />
+										{joinRequestsCount > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{joinRequestsCount}</span>}
 									</Button>
 								</TooltipTrigger>
 								<TooltipContent>
@@ -796,7 +821,7 @@ function ControlBar({ isMuted, isVideoOn, isScreenSharing, isSidebarOpen, isHand
 					<div className="h-8 w-px bg-gray-200 mx-2"></div>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Button variant="destructive" size="icon" onClick={onEndCall} className="rounded-full">
+							<Button variant="destructive" size="icon" onClick={onEndCall} className="rounded-full h-12 w-12">
 								<PhoneOffIcon />
 							</Button>
 						</TooltipTrigger>
