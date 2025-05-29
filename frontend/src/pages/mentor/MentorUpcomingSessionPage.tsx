@@ -16,7 +16,7 @@ import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { SessionDetailsModal } from "@/components/custorm/SessionDetailsModal";
-import Alert from "@/components/custorm/alert";
+import {Alert} from "@/components/custorm/alert";
 import { updateSessionStatatusAPI } from "@/api/mentors.api.service";
 
 export function MentorUpcomingSessionsPage() {

@@ -8,7 +8,7 @@ interface AlertProps {
 	onConfirm: () => void; // Function to execute on confirmation
 }
 
-const Alert = ({ triggerElement, contentTitle, contentDescription, actionText, onConfirm }: AlertProps) => {
+export const Alert = ({ triggerElement, contentTitle, contentDescription, actionText, onConfirm }: AlertProps) => {
 	return (
 		<AlertDialog>
 			{/* This button triggers the dialog */}
@@ -31,5 +31,3 @@ const Alert = ({ triggerElement, contentTitle, contentDescription, actionText, o
 		</AlertDialog>
 	);
 };
-
-export default Alert;

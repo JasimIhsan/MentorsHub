@@ -11,12 +11,3 @@ mentorSessionRouter.put("/:requestId/status", (req, res) => updateSessionStatusC
 mentorSessionRouter.get("/upcoming/:mentorId", (req, res) => getUpcomingSessionMentorController.handle(req, res));
 
 mentorSessionRouter.get("/session-history/:mentorId", (req, res) => getSessionHistoryController.handle(req, res));
-
-// mentorSessionRouter.put("/start/:sessionId", async (req, res, next) => {
-// 	try {
-// 		await mentorSessionController.startSession(req.params.sessionId);
-// 		res.status(200).json({ success: true, message: "Session started successfully" });
-// 	} catch (error: any) {
-// 		next(error);
-// 	}
-// });

@@ -1,12 +1,19 @@
 import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
 import { IMentorDTO } from "../../dtos/mentor.dtos";
-import { IGetAllMentorsUseCase } from "../../interfaces/mentors/mentors.interface";
+import { IGetAllMentorsUsecase } from "../../interfaces/mentors/mentors.interface";
 
-export class GetAllMentorsUseCase implements IGetAllMentorsUseCase {
+export class GetAllMentorsUseCase implements IGetAllMentorsUsecase {
 	constructor(private mentorRepo: IMentorProfileRepository) {}
 
-	async execute(): Promise<IMentorDTO[]> {
-		const mentors = await this.mentorRepo.findAllMentors();
-		return mentors;
+	async execute(query: { page?: number; limit?: number; search?: string; status?: string }): Promise<{
+		mentors: IMentorDTO[];
+		total: number;
+		page: number;
+		limit: number;
+	}> {
+		const page = query.page || 1;
+		const limit = query.limit || 10;
+		const { mentors, total } = await this.mentorRepo.findAllMentors(query);
+		return { mentors, total, page, limit };
 	}
 }

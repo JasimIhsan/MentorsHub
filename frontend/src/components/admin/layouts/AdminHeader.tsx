@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import Alert from "../custorm/alert";
+import {Alert} from "@/components/custorm/alert";
 import { useDispatch } from "react-redux";
 import { logoutSession } from "@/api/user/authentication.api.service";
 import { toast } from "sonner";

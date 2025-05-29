@@ -1,42 +1,28 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { debounce } from "lodash"; // Import lodash throttle
 import { deleteUserApi, fetchAllUsers, updateUseStatusApi } from "@/api/admin/user.tab";
 import { toast } from "sonner";
 import { IUserDTO } from "@/interfaces/IUserDTO";
 import { UserFilter } from "@/components/admin/user-tab/UserFilters";
 import { UserTable } from "@/components/admin/user-tab/UserTable";
-import { UserPagination } from "@/components/admin/pagination";
+import { UserPagination } from "@/components/admin/layouts/pagination";
 import { AddUserForm } from "@/components/admin/user-tab/AddUserForm";
 import { UserDetailsModal } from "@/components/admin/user-tab/UserDetailsModal";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function AdminUsersTab() {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
-	const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm); // Throttled search term
-	const [roleFilter, setRoleFilter] = useState<string>(searchParams.get("role") || "all");
-	const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") || "all");
+	const debouncedSearchTerm = useDebounce(searchTerm, 1000);
+	const [roleFilter, setRoleFilter] = useState(searchParams.get("role") || "all");
+	const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all");
 	const [users, setUsers] = useState<IUserDTO[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
-	const [itemsPerPage] = useState(10);
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalUsers, setTotalUsers] = useState(0);
 	const [selectedUser, setSelectedUser] = useState<IUserDTO | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
-
-	// Throttle the search term updates (500ms interval)
-	const debouncedSetSearchTerm = debounce((value: string) => {
-		setDebouncedSearchTerm(value);
-	}, 1000);
-
-	// Update throttled search term when searchTerm changes
-	useEffect(() => {
-		debouncedSetSearchTerm(searchTerm);
-		return () => debouncedSetSearchTerm.cancel(); // Cleanup throttle on unmount
-	}, [searchTerm]);
-
-	// Sync URL with state
 	useEffect(() => {
 		const params = new URLSearchParams();
 		if (currentPage !== 1) params.set("page", currentPage.toString());
@@ -46,14 +32,13 @@ export default function AdminUsersTab() {
 		setSearchParams(params, { replace: true });
 	}, [currentPage, debouncedSearchTerm, roleFilter, statusFilter, setSearchParams]);
 
-	// Fetch users from backend
 	useEffect(() => {
 		const fetchUsers = async () => {
 			setLoading(true);
 			try {
 				const response = await fetchAllUsers({
 					page: currentPage,
-					limit: itemsPerPage,
+					limit: 10,
 					search: debouncedSearchTerm || undefined,
 					role: roleFilter !== "all" ? roleFilter : undefined,
 					status: statusFilter !== "all" ? statusFilter : undefined,
@@ -73,7 +58,7 @@ export default function AdminUsersTab() {
 			}
 		};
 		fetchUsers();
-	}, [currentPage, itemsPerPage, debouncedSearchTerm, roleFilter, statusFilter]);
+	}, [currentPage, debouncedSearchTerm, roleFilter, statusFilter]);
 
 	const handleStatusUpdate = async (userId: string) => {
 		try {

@@ -41,13 +41,45 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 		}
 	}
 
-	async findAllMentors(): Promise<IMentorDTO[]> {
+	async findAllMentors(query: { page?: number; limit?: number; search?: string; status?: string }): Promise<{
+		mentors: IMentorDTO[];
+		total: number;
+	}> {
 		try {
-			// Get all mentor profiles and populate the related user data
-			const mentors = await MentorProfileModel.find().populate("userId");
+			const page = query.page || 1;
+			const limit = query.limit || 10;
+			const skip = (page - 1) * limit;
+			const search = query.search || "";
+			const status = query.status || "";
 
-			// Transform data to match the IMentorDTO structure
-			const mentorDTOs: IMentorDTO[] = mentors.map((mentor: any) => ({
+			// Build MongoDB query
+			const match: any = {};
+			if (status) {
+				match["userId.mentorRequestStatus"] = status;
+			}
+			if (search) {
+				match.$or = [
+					{ "userId.firstName": { $regex: search, $options: "i" } },
+					{ "userId.lastName": { $regex: search, $options: "i" } },
+					{ professionalTitle: { $regex: search, $options: "i" } },
+					{ "userId.skills": { $regex: search, $options: "i" } },
+				];
+			}
+
+			// Aggregation pipeline
+			const mentors = await MentorProfileModel.aggregate([
+				{ $lookup: { from: "users", localField: "userId", foreignField: "_id", as: "userId" } },
+				{ $unwind: "$userId" },
+				{ $match: match },
+				{
+					$facet: {
+						data: [{ $skip: skip }, { $limit: limit }],
+						total: [{ $count: "count" }],
+					},
+				},
+			]);
+
+			const mentorDTOs: IMentorDTO[] = mentors[0].data.map((mentor: any) => ({
 				email: mentor.userId.email,
 				password: mentor.userId.password,
 				firstName: mentor.userId.firstName,
@@ -83,7 +115,9 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 				lastActive: mentor.userId.lastActive,
 			}));
 
-			return mentorDTOs;
+			const total = mentors[0].total[0]?.count || 0;
+
+			return { mentors: mentorDTOs, total };
 		} catch (error) {
 			throw handleError(error, "Error finding all mentors");
 		}

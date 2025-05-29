@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { StarRating } from "@/components/mentor/StarRating";
+import { StarRating } from "@/components/custorm/StarRating";
 
 export function RecentReviewsPreview() {
 	const reviews = [
