@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { deleteUserApi, fetchAllUsers, updateUseStatusApi } from "@/api/admin/user.tab";
+import { deleteUserApi, fetchAllUsers, updateUserStatusApi } from "@/api/admin/user.tab";
 import { toast } from "sonner";
 import { IUserDTO } from "@/interfaces/IUserDTO";
 import { UserFilter } from "@/components/admin/user-tab/UserFilters";
@@ -62,7 +62,7 @@ export default function AdminUsersTab() {
 
 	const handleStatusUpdate = async (userId: string) => {
 		try {
-			const response = await updateUseStatusApi(userId);
+			const response = await updateUserStatusApi(userId);
 			if (response.success) {
 				toast.success("User status updated successfully!");
 				setUsers((prevUsers) => prevUsers.map((user) => (user.id === userId ? { ...user, status: response.user.status } : user)));

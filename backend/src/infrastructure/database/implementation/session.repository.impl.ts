@@ -3,7 +3,6 @@ import { ISessionDocument, SessionModel } from "../models/session/session.model"
 import { SessionEntity } from "../../../domain/entities/session.entity";
 import { handleError } from "./user.repository.impl";
 import { ISessionUserDTO, ISessionMentorDTO } from "../../../application/dtos/session.dto";
-import mongoose from "mongoose";
 
 export class SessionRepositoryImpl implements ISessionRepository {
 	async createSession(session: SessionEntity): Promise<SessionEntity> {
@@ -32,13 +31,70 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async getSessionRequestByMentor(mentorId: string): Promise<ISessionMentorDTO[]> {
+	async getSessionRequestByMentor(
+		mentorId: string,
+		queryParams: {
+			status?: string;
+			dateRange?: "all" | "free" | "paid" | "today" | "week";
+			page: number;
+			limit: number;
+		}
+	): Promise<{ requests: ISessionMentorDTO[]; total: number }> {
 		try {
-			const sessions = await SessionModel.find({ mentorId }).populate("participants.userId", "firstName lastName avatar");
+			const { dateRange, page, limit, status } = queryParams;
+			console.log('dateRange: ', dateRange);
 
-			return sessions.map(this.mapSessionToMentorDTO);
+			const query: any = { mentorId };
+
+			// Apply filters based on the single dateRange value
+			const today = new Date();
+			today.setHours(0, 0, 0, 0); // set to midnight
+
+			switch (dateRange) {
+				case "free":
+					query.pricing = "free";
+					break;
+				case "paid":
+					query.pricing = "paid";
+					break;
+				case "today":
+					query.date = {
+						$gte: today,
+						$lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
+					};
+					break;
+				case "week":
+					const startOfWeek = new Date(today);
+					startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
+					const endOfWeek = new Date(startOfWeek);
+					endOfWeek.setDate(startOfWeek.getDate() + 7); // next Sunday
+
+					query.date = {
+						$gte: startOfWeek,
+						$lt: endOfWeek,
+					};
+					break;
+				case "all":
+				default:
+					break;
+			}
+
+			if (status) {
+				query.status = status;
+			}
+
+			const total = await SessionModel.countDocuments(query);
+
+			const sessions = await SessionModel.find(query)
+				.populate("participants.userId", "firstName lastName avatar")
+				.skip((page - 1) * limit)
+				.limit(limit);
+
+			const requests = sessions.map(this.mapSessionToMentorDTO);
+
+			return { requests, total };
 		} catch (error) {
-			return handleError(error, "Error geting session requests by mentor");
+			throw new Error(`Error getting session requests by mentor: ${error instanceof Error ? error.message : "Unknown error"}`);
 		}
 	}
 

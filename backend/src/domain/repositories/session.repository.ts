@@ -5,7 +5,15 @@ import { SessionEntity } from "../entities/session.entity";
 export interface ISessionRepository {
 	createSession(session: SessionEntity): Promise<SessionEntity>;
 	getSessionsByUser(userId: string): Promise<ISessionUserDTO[]>;
-	getSessionRequestByMentor(mentorId: string): Promise<ISessionMentorDTO[]>;
+	getSessionRequestByMentor(
+		mentorId: string,
+		queryParams: {
+			status?: string;
+			dateRange?: "all" | "free" | "paid" | "today" | "week";
+			page: number;
+			limit: number;
+		}
+	): Promise<{ requests: ISessionMentorDTO[]; total: number }>;
 	updateRequestStatus(sessionId: string, status: string, rejectReason?: string): Promise<void>;
 	paySession(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void>;
 	getSessions(mentorId: string): Promise<ISessionMentorDTO[]>;

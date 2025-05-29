@@ -1,409 +1,75 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Search, Filter, Calendar, Check, Clock, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import axiosInstance from "@/api/config/api.config";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
-
-// Define the interface based on the JSON structure
-interface SessionParticipant {
-	_id: string;
-	firstName: string;
-	lastName: string;
-	avatar: string;
-	paymentStatus: string;
-	paymentId: string;
-}
-
-interface ISessionMentorDTO {
-	id: string;
-	mentor: string;
-	participants: SessionParticipant[];
-	topic: string;
-	sessionType: string;
-	sessionFormat: string;
-	date: string;
-	time: string;
-	hours: number;
-	message: string;
-	status: string;
-	pricing: string;
-	totalAmount: number;
-	createdAt: string;
-	rejectReason?: string;
-}
+import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { Filters } from "@/components/mentor/requests/Filters";
+import { RequestList } from "@/components/mentor/requests/RequestList";
+import { useSearchParams } from "react-router-dom";
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from "@/components/ui/pagination";
+import { fetchSessionsByMentor } from "@/api/session.api.service";
 
 export function MentorRequestsPage() {
 	const user = useSelector((state: RootState) => state.auth.user);
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [requests, setRequests] = useState<ISessionMentorDTO[]>([]);
-	const [selectedRequest, setSelectedRequest] = useState<ISessionMentorDTO | null>(null);
+	const [isLoading, setIsLoading] = useState(false);
+	const [activeTab, setActiveTab] = useState<"pending" | "approved" | "rejected">("pending");
+	const [filterOption, setFilterOption] = useState<"all" | "free" | "paid" | "today" | "week">("all");
 	const [confirmationDialog, setConfirmationDialog] = useState<{
 		isOpen: boolean;
 		type: "approve" | "reject" | null;
 		requestId: string | null;
 		rejectReason: string;
 	}>({ isOpen: false, type: null, requestId: null, rejectReason: "" });
-	const [searchQuery, setSearchQuery] = useState("");
-	const [filterOption, setFilterOption] = useState<"all" | "free" | "paid" | "today" | "week">("all");
-	const [currentPage, setCurrentPage] = useState<{ pending: number; approved: number; rejected: number }>({
-		pending: 1,
-		approved: 1,
-		rejected: 1,
-	});
-	const itemsPerPage = 6;
+	const [page, setPage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const limit = 6;
+
+	// Initialize state from URL search parameters
+	useEffect(() => {
+		const status = searchParams.get("status") as "pending" | "approved" | "rejected" | null;
+		const filter = searchParams.get("filter") as "all" | "free" | "paid" | "today" | "week" | null;
+		const pageParam = searchParams.get("page");
+
+		if (status) setActiveTab(status);
+		if (filter) setFilterOption(filter);
+		if (pageParam) setPage(parseInt(pageParam, 10));
+	}, [searchParams]);
+
+	// Update URL search parameters when activeTab, filterOption, page, or searchQuery changes
+	useEffect(() => {
+		const params = new URLSearchParams();
+		params.set("status", activeTab);
+		if (filterOption !== "all") params.set("filter", filterOption);
+		if (page !== 1) params.set("page", page.toString());
+		setSearchParams(params, { replace: true });
+	}, [activeTab, filterOption, page, setSearchParams]);
 
 	useEffect(() => {
-		const fetch = async () => {
+		const fetchRequests = async () => {
+			setIsLoading(true);
 			try {
-				const response = await axiosInstance.get(`/mentor/sessions/${user?.id}/requests`);
-				setRequests(Array.isArray(response.data.requests) ? response.data.requests : []);
-			} catch (error) {
-				console.error("Failed to fetch requests:", error);
+				const response = await fetchSessionsByMentor(user?.id as string, filterOption, activeTab, page, limit);
+				setRequests(Array.isArray(response.requests) ? response.requests : []);
+				setTotalPages(Math.ceil((response.total || 0) / limit));
+			} catch (err) {
+				console.error("Failed to fetch requests:", err);
 				setRequests([]);
+				setTotalPages(1);
+			} finally {
+				setIsLoading(false);
 			}
 		};
-		if (user?.id) fetch();
-	}, [user?.id]);
-
-	const handleApprove = (requestId: string) => {
-		setConfirmationDialog({ isOpen: true, type: "approve", requestId, rejectReason: "" });
-	};
-
-	const handleReject = (requestId: string) => {
-		setConfirmationDialog({ isOpen: true, type: "reject", requestId, rejectReason: "" });
-	};
-
-	const handleConfirmAction = async () => {
-		if (!confirmationDialog.requestId || !confirmationDialog.type) return;
-
-		try {
-			if (confirmationDialog.type === "approve") {
-				const response = await axiosInstance.put(`/mentor/sessions/${confirmationDialog.requestId}/status`, { status: "approved" });
-				toast.success(response.data.message);
-				setRequests((prev) => prev.map((r) => (r.id === confirmationDialog.requestId ? { ...r, status: "approved" } : r)));
-			} else {
-				const payload = {
-					status: "rejected",
-					rejectReason: confirmationDialog.rejectReason,
-				};
-
-				if (!confirmationDialog.rejectReason.trim()) {
-					toast.error("Please provide a reason for rejection.");
-					return;
-				}
-
-				const response = await axiosInstance.put(`/mentor/sessions/${confirmationDialog.requestId}/status`, payload);
-				toast.success(response.data.message);
-				setRequests((prev) => prev.map((r) => (r.id === confirmationDialog.requestId ? { ...r, status: "rejected", rejectReason: confirmationDialog.rejectReason } : r)));
-			}
-		} catch (error: any) {
-			console.error(`Failed to ${confirmationDialog.type} request:`, error.response?.data || error.message);
-			toast.error(`Failed to ${confirmationDialog.type} request: ${error.response?.data?.message || "Unknown error"}`);
-		} finally {
-			setConfirmationDialog({
-				isOpen: false,
-				type: null,
-				requestId: null,
-				rejectReason: "",
-			});
+		if (user?.id) {
+			fetchRequests();
 		}
-	};
+	}, [user?.id, filterOption, activeTab, page]);
 
-	const filterRequests = (requests: ISessionMentorDTO[], status: string) => {
-		let filtered = requests.filter((req) => req.status === status);
-
-		if (searchQuery) {
-			const lowerQuery = searchQuery.toLowerCase();
-			filtered = filtered.filter((req) => req.participants.some((p) => `${p.firstName} ${p.lastName}`.toLowerCase().includes(lowerQuery) || req.topic.toLowerCase().includes(lowerQuery)));
+	const handlePageChange = (newPage: number) => {
+		if (newPage >= 1 && newPage <= totalPages) {
+			setPage(newPage);
 		}
-
-		const today = new Date();
-		const startOfWeek = new Date(today);
-		startOfWeek.setDate(today.getDate() - today.getDay());
-
-		switch (filterOption) {
-			case "free":
-				return filtered.filter((req) => req.pricing.toLowerCase() === "free");
-			case "paid":
-				return filtered.filter((req) => req.pricing.toLowerCase() === "paid");
-			case "today":
-				return filtered.filter((req) => new Date(req.date).toDateString() === today.toDateString());
-			case "week":
-				return filtered.filter((req) => {
-					const reqDate = new Date(req.date);
-					return reqDate >= startOfWeek && reqDate <= new Date(today.getTime() + 6 * 24 * 60 * 60 * 1000);
-				});
-			case "all":
-			default:
-				return filtered;
-		}
-	};
-
-	const getPaginatedRequests = (filteredRequests: ISessionMentorDTO[], status: string) => {
-		const page = currentPage[status as keyof typeof currentPage];
-		const startIndex = (page - 1) * itemsPerPage;
-		const endIndex = startIndex + itemsPerPage;
-		return filteredRequests.slice(startIndex, endIndex);
-	};
-
-	const getTotalPages = (filteredRequests: ISessionMentorDTO[]) => {
-		return Math.ceil(filteredRequests.length / itemsPerPage);
-	};
-
-	const handlePageChange = (status: string, page: number) => {
-		setCurrentPage((prev) => ({ ...prev, [status]: page }));
-	};
-
-	const renderSessionRequestsList = (filteredRequests: ISessionMentorDTO[], status: string) => {
-		const processedRequests = filterRequests(filteredRequests, status);
-		const paginatedRequests = getPaginatedRequests(processedRequests, status);
-		const totalPages = getTotalPages(processedRequests);
-
-		return (
-			<>
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-					{paginatedRequests.map((request) => {
-						const participant = request.participants[0]; // Assuming one participant for one-on-one sessions
-						return (
-							<Card key={request.id}>
-								<CardHeader>
-									<div className="flex justify-between items-start">
-										<div className="flex items-center gap-3">
-											<Avatar className="h-12 w-12">
-												<AvatarImage src={participant.avatar} alt={`${participant.firstName} ${participant.lastName}`} />
-											</Avatar>
-											<div>
-												<CardTitle className="text-lg">{`${participant.firstName} ${participant.lastName}`}</CardTitle>
-												<CardDescription>{request.sessionFormat}</CardDescription>
-											</div>
-										</div>
-										<Badge variant={request.pricing === "paid" ? "default" : "outline"}>{request.pricing}</Badge>
-									</div>
-								</CardHeader>
-								<CardContent>
-									<div className="grid grid-cols-1 gap-1">
-										<div className="space-y-1">
-											<span className="text-sm font-medium text-muted-foreground">Topic</span>
-											<p className="font-medium">{request.topic}</p>
-										</div>
-										<div className="grid grid-cols-2 gap-4">
-											<div className="space-y-1">
-												<span className="text-sm font-medium text-muted-foreground">Session Type</span>
-												<p className="text-sm">{request.sessionType}</p>
-											</div>
-											<div className="space-y-1">
-												<span className="text-sm font-medium text-muted-foreground">Format</span>
-												<p className="text-sm">{request.sessionFormat}</p>
-											</div>
-										</div>
-										<div className="space-y-1">
-											<span className="text-sm font-medium text-muted-foreground">Date & Time</span>
-											<div className="flex items-center gap-1 text-sm">
-												<Clock className="h-4 w-4 text-muted-foreground" />
-												<span>{`${new Date(request.date).toLocaleDateString()} ${request.time} (${request.hours} hour${request.hours > 1 ? "s" : ""})`}</span>
-											</div>
-										</div>
-									</div>
-								</CardContent>
-								<CardFooter>
-									{status === "pending" ? (
-										<div className="flex items-center gap-2 w-full">
-											<Button variant="outline" className="flex-1" onClick={() => setSelectedRequest(request)}>
-												View Details
-											</Button>
-											<Button size="icon" variant="outline" className="h-9 w-9" onClick={() => handleApprove(request.id)}>
-												<Check className="h-4 w-4 text-green-500" />
-												<span className="sr-only">Approve</span>
-											</Button>
-											<Button size="icon" variant="outline" className="h-9 w-9" onClick={() => handleReject(request.id)}>
-												<X className="h-4 w-4 text-red-500" />
-												<span className="sr-only">Reject</span>
-											</Button>
-										</div>
-									) : (
-										<Button variant="outline" className="w-full" onClick={() => setSelectedRequest(request)}>
-											View Details
-										</Button>
-									)}
-								</CardFooter>
-							</Card>
-						);
-					})}
-				</div>
-
-				{processedRequests.length === 0 && (
-					<div className="text-center py-12">
-						<div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
-							<Calendar className="h-6 w-6 text-muted-foreground" />
-						</div>
-						<h3 className="text-lg font-semibold">No {status} requests</h3>
-						<p className="text-muted-foreground">{status === "pending" ? "You're all caught up! No pending requests to review." : status === "approved" ? "No approved requests yet." : "No rejected requests."}</p>
-					</div>
-				)}
-
-				{processedRequests.length > 0 && (
-					<Pagination className="mt-6">
-						<PaginationContent>
-							<PaginationItem>
-								<PaginationPrevious
-									onClick={() => handlePageChange(status, currentPage[status as keyof typeof currentPage] - 1)}
-									className={currentPage[status as keyof typeof currentPage] === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-								/>
-							</PaginationItem>
-							{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-								<PaginationItem key={page}>
-									<PaginationLink onClick={() => handlePageChange(status, page)} isActive={currentPage[status as keyof typeof currentPage] === page} className="cursor-pointer">
-										{page}
-									</PaginationLink>
-								</PaginationItem>
-							))}
-							<PaginationItem>
-								<PaginationNext
-									onClick={() => handlePageChange(status, currentPage[status as keyof typeof currentPage] + 1)}
-									className={currentPage[status as keyof typeof currentPage] === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-								/>
-							</PaginationItem>
-						</PaginationContent>
-					</Pagination>
-				)}
-
-				<Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-					<DialogContent className="max-w-lg">
-						<DialogHeader>
-							<DialogTitle className="text-2xl">Session Request Details</DialogTitle>
-							<DialogDescription>Review the details of this session request below</DialogDescription>
-						</DialogHeader>
-
-						{selectedRequest && (
-							<div className="space-y-2">
-								<div className="flex items-center gap-4 border-b pb-3">
-									<Avatar className="h-14 w-14">
-										<AvatarImage src={selectedRequest.participants[0].avatar ?? "/placeholder.svg"} alt={`${selectedRequest.participants[0].firstName} ${selectedRequest.participants[0].lastName}`} />
-									</Avatar>
-									<div>
-										<h3 className="text-lg font-semibold">{`${selectedRequest.participants[0].firstName} ${selectedRequest.participants[0].lastName}`}</h3>
-										<p className="text-sm text-muted-foreground">{selectedRequest.sessionFormat}</p>
-									</div>
-								</div>
-
-								<div className="space-y-2">
-									<h4 className="text-md font-semibold text-foreground">Session Details</h4>
-									<div className="grid grid-cols-1 gap-1">
-										<div>
-											<span className="text-sm font-medium text-muted-foreground">Topic</span>
-											<p className="text-sm">{selectedRequest.topic}</p>
-										</div>
-										<div className="grid grid-cols-2 gap-4">
-											<div>
-												<span className="text-sm font-medium text-muted-foreground">Session Type</span>
-												<p className="text-sm">{selectedRequest.sessionType}</p>
-											</div>
-											<div>
-												<span className="text-sm font-medium text-muted-foreground">Session Format</span>
-												<p className="text-sm">{selectedRequest.sessionFormat}</p>
-											</div>
-										</div>
-										<div className="grid grid-cols-2 gap-4">
-											<div>
-												<span className="text-sm font-medium text-muted-foreground">Date & Time</span>
-												<p className="text-sm">{`${new Date(selectedRequest.date).toLocaleDateString()} ${selectedRequest.time}`}</p>
-											</div>
-											<div>
-												<span className="text-sm font-medium text-muted-foreground">Duration</span>
-												<p className="text-sm">{`${selectedRequest.hours} hour${selectedRequest.hours > 1 ? "s" : ""}`}</p>
-											</div>
-										</div>
-										<div>
-											<span className="text-sm font-medium text-muted-foreground">Message</span>
-											<p className="text-sm text-foreground">{selectedRequest.message}</p>
-										</div>
-									</div>
-								</div>
-
-								<div className="space-y-2 border-t pt-2">
-									<h4 className="text-md font-semibold text-foreground">Payment Details</h4>
-									<div className="grid grid-cols-1 gap-2">
-										<div className="grid grid-cols-2 gap-4">
-											<div>
-												<span className="text-sm font-medium text-muted-foreground">Pricing</span>
-												<p className="text-sm">{selectedRequest.pricing}</p>
-											</div>
-											<div>
-												<span className="text-sm font-medium text-muted-foreground">Total Amount</span>
-												<p className="text-sm">${selectedRequest.totalAmount}</p>
-											</div>
-										</div>
-										<div>
-											<span className="text-sm font-medium text-muted-foreground">Payment Status</span>
-											<p className="text-sm">{selectedRequest.participants[0].paymentStatus}</p>
-										</div>
-									</div>
-								</div>
-							</div>
-						)}
-
-						<DialogFooter className="mt-6">
-							{status === "pending" ? (
-								<div className="flex w-full gap-2 justify-end">
-									<Button variant="destructive" size="sm" onClick={() => handleReject(selectedRequest?.id as string)}>
-										<X className="h-4 w-4 mr-1" />
-										Reject
-									</Button>
-									<Button size="sm" onClick={() => handleApprove(selectedRequest?.id as string)}>
-										<Check className="h-4 w-4 mr-1" />
-										Approve
-									</Button>
-								</div>
-							) : (
-								<Button onClick={() => setSelectedRequest(null)}>Close</Button>
-							)}
-						</DialogFooter>
-					</DialogContent>
-				</Dialog>
-
-				<Dialog open={confirmationDialog.isOpen} onOpenChange={() => setConfirmationDialog({ isOpen: false, type: null, requestId: null, rejectReason: "" })}>
-					<DialogContent className="max-w-md">
-						<DialogHeader>
-							<DialogTitle>{confirmationDialog.type === "approve" ? "Confirm Approval" : "Confirm Rejection"}</DialogTitle>
-							<DialogDescription>{confirmationDialog.type === "approve" ? "Are you sure you want to approve this session request?" : "Please provide a reason for rejecting this session request."}</DialogDescription>
-						</DialogHeader>
-						{confirmationDialog.type === "reject" && (
-							<div className="py-4">
-								<Textarea
-									placeholder="Enter reason for rejection"
-									value={confirmationDialog.rejectReason}
-									onChange={(e) =>
-										setConfirmationDialog((prev) => {
-											console.log("Updated rejectReason:", e.target.value);
-											return { ...prev, rejectReason: e.target.value };
-										})
-									}
-									className="w-full"
-								/>
-							</div>
-						)}
-						<DialogFooter>
-							<Button variant="outline" onClick={() => setConfirmationDialog({ isOpen: false, type: null, requestId: null, rejectReason: "" })}>
-								Cancel
-							</Button>
-							<Button variant={confirmationDialog.type === "approve" ? "default" : "destructive"} onClick={handleConfirmAction} disabled={confirmationDialog.type === "reject" && !confirmationDialog.rejectReason.trim()}>
-								{confirmationDialog.type === "approve" ? "Approve" : "Reject"}
-							</Button>
-						</DialogFooter>
-					</DialogContent>
-				</Dialog>
-			</>
-		);
 	};
 
 	return (
@@ -415,48 +81,51 @@ export function MentorRequestsPage() {
 				</div>
 			</div>
 
-			<Tabs defaultValue="pending" className="space-y-4">
+			<Tabs className="space-y-4" value={activeTab} onValueChange={(value) => setActiveTab(value as "pending" | "approved" | "rejected")}>
 				<div className="flex flex-col sm:flex-row justify-between gap-4">
 					<TabsList>
-						<TabsTrigger value="pending">Pending ({requests ? requests.filter((req) => req.status === "pending").length : 0})</TabsTrigger>
-						<TabsTrigger value="approved">Approved ({requests ? requests.filter((req) => req.status === "approved").length : 0})</TabsTrigger>
-						<TabsTrigger value="rejected">Rejected ({requests ? requests.filter((req) => req.status === "rejected").length : 0})</TabsTrigger>
+						<TabsTrigger value="pending">Pending</TabsTrigger>
+						<TabsTrigger value="approved">Approved</TabsTrigger>
+						<TabsTrigger value="rejected">Rejected</TabsTrigger>
 					</TabsList>
 
-					<div className="flex items-center gap-2">
-						<div className="relative">
-							<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-							<Input type="search" placeholder="Search by name or topic..." className="w-full sm:w-[200px] pl-8 bg-background" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-						</div>
-
-						<Select value={filterOption} onValueChange={(value) => setFilterOption(value as typeof filterOption)}>
-							<SelectTrigger className="w-[180px]">
-								<Filter className="h-4 w-4 mr-2" />
-								<SelectValue placeholder="Filter by" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="all">All Requests</SelectItem>
-								<SelectItem value="free">Free Sessions</SelectItem>
-								<SelectItem value="paid">Paid Sessions</SelectItem>
-								<SelectItem value="today">Today</SelectItem>
-								<SelectItem value="week">This Week</SelectItem>
-							</SelectContent>
-						</Select>
-					</div>
+					<Filters filterOption={filterOption} setFilterOption={setFilterOption} />
 				</div>
 
 				<TabsContent value="pending" className="space-y-4">
-					{renderSessionRequestsList(requests, "pending")}
+					<RequestList requests={requests} isLoading={isLoading} status={activeTab} confirmationDialog={confirmationDialog} setConfirmationDialog={setConfirmationDialog} setRequests={setRequests} />
 				</TabsContent>
 
 				<TabsContent value="approved" className="space-y-4">
-					{renderSessionRequestsList(requests, "approved")}
+					<RequestList requests={requests} isLoading={isLoading} status={activeTab} confirmationDialog={confirmationDialog} setConfirmationDialog={setConfirmationDialog} setRequests={setRequests} />
 				</TabsContent>
 
 				<TabsContent value="rejected" className="space-y-4">
-					{renderSessionRequestsList(requests, "rejected")}
+					<RequestList requests={requests} isLoading={isLoading} status={activeTab} confirmationDialog={confirmationDialog} setConfirmationDialog={setConfirmationDialog} setRequests={setRequests} />
 				</TabsContent>
 			</Tabs>
+
+			{requests.length > 0 && (
+				<Pagination className="mt-6">
+					<PaginationContent>
+						<PaginationItem>
+							<PaginationPrevious onClick={() => handlePageChange(page - 1)} className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} />
+						</PaginationItem>
+
+						{Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+							<PaginationItem key={pageNumber}>
+								<PaginationLink onClick={() => handlePageChange(pageNumber)} isActive={pageNumber === page} className={pageNumber === page ? "bg-primary text-white hover:bg-primary" : "cursor-pointer"}>
+									{pageNumber}
+								</PaginationLink>
+							</PaginationItem>
+						))}
+
+						<PaginationItem>
+							<PaginationNext onClick={() => handlePageChange(page + 1)} className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} />
+						</PaginationItem>
+					</PaginationContent>
+				</Pagination>
+			)}
 		</div>
 	);
 }

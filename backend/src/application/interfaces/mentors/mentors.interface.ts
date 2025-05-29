@@ -20,7 +20,17 @@ export interface IGetMentorUsecase {
 }
 
 export interface IGetSessionRequests {
-	execute(mentorId: string): Promise<ISessionMentorDTO[]>;
+	execute(
+		mentorId: string,
+		queryParams: {
+			status?: string;
+			pricing?: string;
+			dateRange?: "today" | "week" | "all" | "free" | "paid";
+			searchQuery?: string;
+			page: number;
+			limit: number;
+		}
+	): Promise<{ requests: ISessionMentorDTO[]; total: number }>;
 }
 
 export interface IGetAllMentorsUseCase {

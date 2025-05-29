@@ -17,7 +17,7 @@ import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { SessionDetailsModal } from "@/components/custorm/SessionDetailsModal";
 import {Alert} from "@/components/custorm/alert";
-import { updateSessionStatatusAPI } from "@/api/mentors.api.service";
+import { updateSessionStatatusAPI } from "@/api/session.api.service";
 
 export function MentorUpcomingSessionsPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
