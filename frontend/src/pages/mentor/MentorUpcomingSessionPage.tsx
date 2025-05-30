@@ -5,7 +5,7 @@ import { RootState } from "@/store/store";
 import { toast } from "sonner";
 import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
-import { fetchUpcomingSessionsByMentor, updateSessionStatatusAPI } from "@/api/session.api.service";
+import { fetchUpcomingSessionsByMentorAPI, updateSessionStatatusAPI } from "@/api/session.api.service";
 import { SessionList } from "@/components/mentor/upcoming-sessions/SessionList";
 import { SessionFilter } from "@/components/mentor/upcoming-sessions/SessionFilter";
 import { PaginationControls } from "@/components/custom/PaginationControls";
@@ -58,7 +58,7 @@ export function MentorUpcomingSessionsPage() {
 
 		setLoading(true);
 		try {
-			const response = await fetchUpcomingSessionsByMentor(user.id, filterOption, currentPage, sessionsPerPage, "upcoming");
+			const response = await fetchUpcomingSessionsByMentorAPI(user.id, filterOption, currentPage, sessionsPerPage, "upcoming");
 
 			if (!response.sessions) {
 				throw new Error("No sessions data received");

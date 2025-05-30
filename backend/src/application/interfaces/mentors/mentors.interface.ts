@@ -50,7 +50,7 @@ export interface IGetUpcomingSessionMentorUsecase {
 }
 
 export interface IGetSessionHistoryUsecase {
-	execute(mentorId: string): Promise<ISessionMentorDTO[]>;
+	execute(mentorId: string, queryParams: { page: number; limit: number; status: string }): Promise<{ sessions: ISessionMentorDTO[]; total: number }>;
 }
 
 export interface IGetAvailabilityUseCase {

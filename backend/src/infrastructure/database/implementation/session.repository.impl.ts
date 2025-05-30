@@ -42,6 +42,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 	): Promise<{ sessions: ISessionMentorDTO[]; total: number }> {
 		try {
 			const { filterOption, page, limit, status } = queryParams;
+			console.log('queryParams: ', queryParams);
 
 			const query: any = { mentorId };
 

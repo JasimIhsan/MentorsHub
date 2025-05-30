@@ -1,138 +1,64 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, Video, Users, MessageSquare, IndianRupee, FileText } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import axiosInstance from "@/api/config/api.config";
-import { toast } from "sonner";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/custom/Loading";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
-import { Avatar } from "@radix-ui/react-avatar";
-import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
+import { PaginationControls } from "@/components/custom/PaginationControls";
+import { FilterDropdown } from "@/components/mentor/session-history/FilterDropdown";
+import { SessionList } from "@/components/mentor/session-history/SessionList";
+import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { fetchSessionHistoryAPI } from "@/api/session.api.service";
 
 export function MentorSessionHistoryPage() {
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
-	const [filteredSessions, setFilteredSessions] = useState<ISessionMentorDTO[]>([]);
+	const [totalPages, setTotalPages] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [filterOption, setFilterOption] = useState<"all" | "completed" | "canceled">("all");
-	const [currentPage, setCurrentPage] = useState(1);
-	const [selectedSession, setSelectedSession] = useState<ISessionMentorDTO | null>(null); // State for modal
-	const sessionsPerPage = 5;
+	const [selectedSession, setSelectedSession] = useState<ISessionMentorDTO | null>(null);
 	const user = useSelector((state: RootState) => state.auth.user);
+	const filterOption = searchParams.get("status") || "completed";
+	const currentPage = parseInt(searchParams.get("page") || "1", 10);
+	const sessionsPerPage = 5;
 
-	useEffect(() => {
-		const fetchSessions = async () => {
-			if (!user?.id) {
-				setError("User not authenticated. Please log in to view session history.");
-				setLoading(false);
-				return;
-			}
-
-			try {
-				const response = await axiosInstance.get(`/mentor/sessions/session-history/${user.id}`);
-				if (!response.data?.sessions) {
-					throw new Error("No session history data received");
-				}
-				setSessions(response.data.sessions);
-				setFilteredSessions(response.data.sessions);
-			} catch (err: any) {
-				const message = err.response?.data?.message || "Failed to load session history.";
-				setError(message);
-				toast.error(message);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchSessions();
-	}, [user?.id]);
-
-	// Filter sessions based on filter option
-	useEffect(() => {
-		let filtered = sessions;
-		if (filterOption === "completed") {
-			filtered = sessions.filter((session) => session.status === "completed");
-		} else if (filterOption === "canceled") {
-			filtered = sessions.filter((session) => session.status === "canceled");
+	const fetchSessions = useCallback(async () => {
+		if (!user?.id) {
+			setError("User not authenticated. Please log in to view session history.");
+			setLoading(false);
+			return;
 		}
-		setFilteredSessions(filtered);
-		setCurrentPage(1); // Reset to first page when filtering changes
-	}, [filterOption, sessions]);
 
-	// Pagination logic
-	const totalPages = Math.ceil(filteredSessions.length / sessionsPerPage);
-	const indexOfLastSession = currentPage * sessionsPerPage;
-	const indexOfFirstSession = indexOfLastSession - sessionsPerPage;
-	const currentSessions = filteredSessions.slice(indexOfFirstSession, indexOfLastSession);
+		setLoading(true);
+		try {
+			const response = await fetchSessionHistoryAPI(user.id, filterOption, currentPage, sessionsPerPage);
+			setSessions(response.sessions);
+			setTotalPages(Math.ceil(response.total / sessionsPerPage));
+		} catch (err: any) {
+			const message = err.message || "Failed to load session history.";
+			setError(message);
+			toast.error(message);
+		} finally {
+			setLoading(false);
+		}
+	}, [user?.id, filterOption, currentPage]);
+
+	useEffect(() => {
+		fetchSessions();
+	}, [fetchSessions]);
+
+	const handleFilterChange = (status: string) => {
+		setSearchParams({ status, page: "1" });
+	};
 
 	const handlePageChange = (page: number) => {
-		if (page >= 1 && page <= totalPages) {
-			setCurrentPage(page);
-		}
+		setSearchParams({ status: filterOption, page: page.toString() });
 	};
 
-	const renderPaginationItems = () => {
-		const items = [];
-		const maxPagesToShow = 5; // Show up to 5 page numbers at a time
-		let startPage = Math.max(1, currentPage - 2);
-		let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
-		if (endPage - startPage < maxPagesToShow - 1) {
-			startPage = Math.max(1, endPage - maxPagesToShow + 1);
-		}
-
-		if (startPage > 1) {
-			items.push(
-				<PaginationItem key={1}>
-					<PaginationLink onClick={() => handlePageChange(1)}>{1}</PaginationLink>
-				</PaginationItem>
-			);
-			if (startPage > 2) {
-				items.push(
-					<PaginationItem key="start-ellipsis">
-						<PaginationEllipsis />
-					</PaginationItem>
-				);
-			}
-		}
-
-		for (let page = startPage; page <= endPage; page++) {
-			items.push(
-				<PaginationItem key={page}>
-					<PaginationLink onClick={() => handlePageChange(page)} isActive={currentPage === page}>
-						{page}
-					</PaginationLink>
-				</PaginationItem>
-			);
-		}
-
-		if (endPage < totalPages) {
-			if (endPage < totalPages - 1) {
-				items.push(
-					<PaginationItem key="end-ellipsis">
-						<PaginationEllipsis />
-					</PaginationItem>
-				);
-			}
-			items.push(
-				<PaginationItem key={totalPages}>
-					<PaginationLink onClick={() => handlePageChange(totalPages)}>{totalPages}</PaginationLink>
-				</PaginationItem>
-			);
-		}
-
-		return items;
-	};
-
-	if (loading) {
-		return <Loading appName="Mentor Session History" loadingMessage="Loading your session history" />;
-	}
+	const handleSelectSession = useCallback((session: ISessionMentorDTO) => {
+		setSelectedSession(session);
+	}, []);
 
 	if (error) {
 		toast.error(error);
@@ -144,48 +70,14 @@ export function MentorSessionHistoryPage() {
 			<div className="flex flex-col gap-8">
 				<div className="flex justify-between items-center">
 					<h1 className="text-3xl font-bold tracking-tight">Session History</h1>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="outline" className="flex items-center gap-2">
-								<span>Filter: {filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}</span>
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent>
-							<DropdownMenuItem onClick={() => setFilterOption("all")}>All</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setFilterOption("completed")}>Completed</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setFilterOption("canceled")}>Canceled</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+					<FilterDropdown filterOption={filterOption} onFilterChange={handleFilterChange} />
 				</div>
-				<Card className="p-0 border-none bg-background shadow-none">
+				<Card className="p-0 border-none bg-transparent shadow-none">
 					<CardContent className="p-0">
-						<div className="space-y-6">
-							{currentSessions.map((session) => (
-								<MentorSessionCardDetailed
-									key={session.id}
-									session={session}
-									setSelectedSession={setSelectedSession} // Pass setSelectedSession to open modal
-								/>
-							))}
-							{currentSessions.length === 0 && (
-								<div className="text-center p-4">
-									<p className="text-sm text-muted-foreground">No sessions found for the selected filter.</p>
-								</div>
-							)}
-						</div>
+						<SessionList sessions={sessions} onSelectSession={handleSelectSession} isLoading={loading} />{" "}
 						{totalPages > 0 && (
 							<div className="mt-6">
-								<Pagination>
-									<PaginationContent>
-										<PaginationItem>
-											<PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} className={currentPage === 1 ? "pointer-events-none opacity-50" : ""} />
-										</PaginationItem>
-										{renderPaginationItems()}
-										<PaginationItem>
-											<PaginationNext onClick={() => handlePageChange(currentPage + 1)} className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""} />
-										</PaginationItem>
-									</PaginationContent>
-								</Pagination>
+								<PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} maxPagesToShow={5} />
 							</div>
 						)}
 					</CardContent>
@@ -193,114 +85,5 @@ export function MentorSessionHistoryPage() {
 			</div>
 			{selectedSession && <SessionDetailsModal session={selectedSession} onClose={() => setSelectedSession(null)} />}
 		</div>
-	);
-}
-
-interface MentorSessionCardProps {
-	session: ISessionMentorDTO;
-	setSelectedSession: (session: ISessionMentorDTO) => void; // Add prop to set selected session
-}
-
-function MentorSessionCardDetailed({ session, setSelectedSession }: MentorSessionCardProps) {
-	const formatTime = (time: string) => {
-		const [hour, minute] = time.split(":").map(Number);
-		const ampm = hour >= 12 ? "PM" : "AM";
-		const hour12 = hour % 12 || 12;
-		return `${hour12}:${minute.toString().padStart(2, "0")} ${ampm}`;
-	};
-
-	return (
-		<Card className="overflow-hidden p-0">
-			<CardContent className="p-6">
-				<div className="flex flex-col md:flex-row gap-6">
-					<div className="flex-1">
-						<div className="flex justify-between items-center">
-							<div>
-								<h3 className="font-bold text-xl text-primary cursor-pointer hover:underline" onClick={() => setSelectedSession(session)}>
-									{session.topic}
-								</h3>
-							</div>
-						</div>
-						<div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-							<div className="flex items-center gap-2">
-								<CalendarDays className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">
-									{new Date(session.date).toLocaleString("en-US", {
-										dateStyle: "medium",
-									})}
-								</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<Clock className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">
-									{formatTime(session.time)} ({session.hours} hours)
-								</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<Video className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">{session.sessionFormat}</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<IndianRupee className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">{session.pricing === "free" ? "Free" : `${session.totalAmount?.toFixed(2) || 0}`}</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<MessageSquare className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">{session.sessionType}</span>
-							</div>
-						</div>
-					</div>
-					<div className="flex justify-center items-center gap-2">
-						<Badge variant={session.status === "completed" ? "outline" : "default"} className={`${session.status === "completed" ? "bg-primary/5 text-primary" : "bg-primary text-primary-foreground"} capitalize`}>
-							{session.status}
-						</Badge>
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="outline" className="flex items-center gap-2">
-									<Users className="h-4 w-4" />
-									<span>Participants ({session.participants.length})</span>
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end" className="w-64">
-								{session.participants.length === 0 ? (
-									<DropdownMenuItem disabled className="text-muted-foreground">
-										No participants
-									</DropdownMenuItem>
-								) : (
-									session.participants.map((participant) => (
-										<DropdownMenuItem key={participant._id} className="flex items-center gap-2">
-											<Avatar className="h-8 w-8">
-												<AvatarImage src={participant.avatar} alt={`${participant.firstName} ${participant.lastName}`} />
-												<AvatarFallback>{participant.firstName.charAt(0)}</AvatarFallback>
-											</Avatar>
-											<div className="flex flex-col">
-												<span className="font-medium">
-													{participant.firstName} {participant.lastName}
-												</span>
-												<span className="text-sm text-muted-foreground">Payment: {participant.paymentStatus || "N/A"}</span>
-											</div>
-										</DropdownMenuItem>
-									))
-								)}
-							</DropdownMenuContent>
-						</DropdownMenu>
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" size="icon">
-									<FileText className="h-4 w-4" />
-									<span className="sr-only">More options</span>
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								<DropdownMenuItem onSelect={() => setSelectedSession(session)}>
-									<FileText className="mr-2 h-4 w-4" />
-									View Details
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</div>
-				</div>
-			</CardContent>
-		</Card>
 	);
 }

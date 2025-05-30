@@ -7,8 +7,14 @@ export class GetSessionHistoryController {
 	async handle(req: Request, res: Response) {
 		try {
 			const { mentorId } = req.params;
-			const sessions = await this.getSessionHistoryUsecase.execute(mentorId);
-			res.status(HttpStatusCode.OK).json({ success: true, sessions });
+			const { status, page = "1", limit = "6" } = req.query;
+			const queryParams = {
+				status: status as string,
+				page: parseInt(page as string, 10),
+				limit: parseInt(limit as string, 10),
+			};
+			const sessions = await this.getSessionHistoryUsecase.execute(mentorId, queryParams);
+			res.status(HttpStatusCode.OK).json({ success: true, sessions: sessions.sessions, total: sessions.total });
 		} catch (error) {
 			if (error instanceof Error) {
 				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });

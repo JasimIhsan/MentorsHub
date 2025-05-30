@@ -10,4 +10,4 @@ mentorSessionRouter.put("/:requestId/status", (req, res) => updateSessionStatusC
 
 mentorSessionRouter.get("/:mentorId/upcoming", (req, res) => getUpcomingSessionMentorController.handle(req, res));
 
-mentorSessionRouter.get("/session-history/:mentorId", (req, res) => getSessionHistoryController.handle(req, res));
+mentorSessionRouter.get("/:mentorId/session-history", (req, res) => getSessionHistoryController.handle(req, res));

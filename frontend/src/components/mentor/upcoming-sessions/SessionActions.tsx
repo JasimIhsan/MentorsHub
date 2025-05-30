@@ -1,6 +1,5 @@
 // components/sessions/SessionActions.tsx
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { FileText } from "lucide-react";
 import { Alert } from "@/components/custom/alert";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
@@ -33,20 +32,9 @@ export default function SessionActions({ session, onStartSession, handleUpdateSe
 					/>
 				</div>
 			)}
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button variant="ghost" size="icon">
-						<FileText className="h-4 w-4" />
-						<span className="sr-only">More options</span>
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end">
-					<DropdownMenuItem onSelect={() => setSelectedSession(session)}>
-						<FileText className="mr-2 h-4 w-4" />
-						View Details
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
+			<Button variant="ghost" size="icon" onClick={() => setSelectedSession(session)}>
+				<FileText className="h-4 w-4" />
+			</Button>
 		</>
 	);
 }

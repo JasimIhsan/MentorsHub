@@ -27,7 +27,7 @@ export const updateSessionStatatusAPI = async (sessionId: string, status: string
 	}
 };
 
-export const fetchUpcomingSessionsByMentor = async (userId: string, filterOption: string, page: number, limit: number, status: string) => {
+export const fetchUpcomingSessionsByMentorAPI = async (userId: string, filterOption: string, page: number, limit: number, status: string) => {
 	try {
 		const response = await axiosInstance.get(`/mentor/sessions/${userId}/upcoming`, {
 			params: {
@@ -41,5 +41,14 @@ export const fetchUpcomingSessionsByMentor = async (userId: string, filterOption
 	} catch (error: any) {
 		console.error("Error fetching upcoming sessions by mentor:", error);
 		throw new Error(error.response.data.message);
+	}
+};
+
+export const fetchSessionHistoryAPI = async (mentorId: string, status: string, page: number, limit: number, sort?: string) => {
+	try {
+		const response = await axiosInstance.get(`/mentor/sessions/${mentorId}/session-history`, { params: { status, page, limit, sort } });
+		return response.data;
+	} catch (error: any) {
+		throw new Error(error.response?.data?.message || "Failed to load session history.");
 	}
 };
