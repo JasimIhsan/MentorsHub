@@ -19,13 +19,13 @@ export interface IGetMentorUsecase {
 	execute(userId: string): Promise<IMentorDTO | null>;
 }
 
-export interface IGetSessionRequests {
+export interface IGetSessionRequestsUseCase {
 	execute(
 		mentorId: string,
 		queryParams: {
 			status?: string;
 			pricing?: string;
-			dateRange?: "today" | "week" | "all" | "free" | "paid";
+			filterOption?: "today" | "week" | "all" | "free" | "paid";
 			searchQuery?: string;
 			page: number;
 			limit: number;
@@ -38,7 +38,15 @@ export interface IGetAllMentorsUseCase {
 }
 
 export interface IGetUpcomingSessionMentorUsecase {
-	execute(mentorId: string): Promise<ISessionMentorDTO[]>;
+	execute(
+		mentorId: string,
+		queryParams: {
+			status?: string;
+			filterOption?: "all" | "free" | "paid" | "today" | "week" | "month";
+			page: number;
+			limit: number;
+		}
+	): Promise<{ sessions: ISessionMentorDTO[]; total: number }>;
 }
 
 export interface IGetSessionHistoryUsecase {

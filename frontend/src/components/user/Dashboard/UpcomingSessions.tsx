@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Clock, Video, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
-import { CustomHeader } from "@/components/custorm/header";
+import { CustomHeader } from "@/components/custom/header";
 import { Session } from "@/interfaces/interfaces";
 
 interface UpcomingSessionsProps {

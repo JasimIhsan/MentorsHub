@@ -10,7 +10,7 @@ import { logoutSession } from "@/api/user/authentication.api.service";
 import { logout } from "@/store/slices/userSlice";
 import { toast } from "sonner";
 import { RootState } from "@/store/store";
-import {Alert} from "@/components/custorm/alert";
+import {Alert} from "@/components/custom/alert";
 
 export function MentorHeader() {
 	const user = useSelector((state: RootState) => state.auth.user);

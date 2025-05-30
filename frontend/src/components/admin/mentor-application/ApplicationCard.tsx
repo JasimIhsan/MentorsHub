@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { BriefcaseBusiness, Calendar, Check, Download, Eye, GraduationCap, X } from "lucide-react";
 import { toast } from "sonner";
-import {Alert} from "@/components/custorm/alert";
+import {Alert} from "@/components/custom/alert";
 import StatusBadge from "./StatusBadge";
 import { fetchDocumentUrlsAPI } from "@/api/admin/common/fetchDocuments";
 import { extractDocumentName } from "@/utility/extractDocumentName";

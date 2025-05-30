@@ -8,12 +8,12 @@ import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/custorm/Loading";
+import { Loading } from "@/components/custom/Loading";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
 import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { SessionDetailsModal } from "@/components/custorm/SessionDetailsModal";
+import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
 
 export function MentorSessionHistoryPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);

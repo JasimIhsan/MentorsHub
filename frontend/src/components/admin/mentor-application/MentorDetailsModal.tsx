@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Alert } from "@/components/custorm/alert";
+import { Alert } from "@/components/custom/alert";
 
 interface MentorDetailsModalProps {
 	mentor: IMentorDTO;

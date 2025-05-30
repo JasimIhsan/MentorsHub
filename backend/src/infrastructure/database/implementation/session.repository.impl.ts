@@ -31,26 +31,25 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async getSessionRequestByMentor(
+	async getSessionByMentor(
 		mentorId: string,
 		queryParams: {
 			status?: string;
-			dateRange?: "all" | "free" | "paid" | "today" | "week";
+			filterOption?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
 		}
-	): Promise<{ requests: ISessionMentorDTO[]; total: number }> {
+	): Promise<{ sessions: ISessionMentorDTO[]; total: number }> {
 		try {
-			const { dateRange, page, limit, status } = queryParams;
-			console.log('dateRange: ', dateRange);
+			const { filterOption, page, limit, status } = queryParams;
 
 			const query: any = { mentorId };
 
-			// Apply filters based on the single dateRange value
+			// Apply filters based on the single filterOption value
 			const today = new Date();
 			today.setHours(0, 0, 0, 0); // set to midnight
 
-			switch (dateRange) {
+			switch (filterOption) {
 				case "free":
 					query.pricing = "free";
 					break;
@@ -74,6 +73,15 @@ export class SessionRepositoryImpl implements ISessionRepository {
 						$lt: endOfWeek,
 					};
 					break;
+				case "month":
+					const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+					const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+
+					query.date = {
+						$gte: startOfMonth,
+						$lt: endOfMonth,
+					};
+					break;
 				case "all":
 				default:
 					break;
@@ -85,14 +93,14 @@ export class SessionRepositoryImpl implements ISessionRepository {
 
 			const total = await SessionModel.countDocuments(query);
 
-			const sessions = await SessionModel.find(query)
+			const sessionsData = await SessionModel.find(query)
 				.populate("participants.userId", "firstName lastName avatar")
 				.skip((page - 1) * limit)
 				.limit(limit);
 
-			const requests = sessions.map(this.mapSessionToMentorDTO);
+			const sessions = sessionsData.map(this.mapSessionToMentorDTO);
 
-			return { requests, total };
+			return { sessions, total };
 		} catch (error) {
 			throw new Error(`Error getting session requests by mentor: ${error instanceof Error ? error.message : "Unknown error"}`);
 		}

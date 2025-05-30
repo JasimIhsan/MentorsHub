@@ -26,3 +26,20 @@ export const updateSessionStatatusAPI = async (sessionId: string, status: string
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const fetchUpcomingSessionsByMentor = async (userId: string, filterOption: string, page: number, limit: number, status: string) => {
+	try {
+		const response = await axiosInstance.get(`/mentor/sessions/${userId}/upcoming`, {
+			params: {
+				filterOption,
+				page,
+				limit,
+				status,
+			},
+		});
+		return response.data;
+	} catch (error: any) {
+		console.error("Error fetching upcoming sessions by mentor:", error);
+		throw new Error(error.response.data.message);
+	}
+};

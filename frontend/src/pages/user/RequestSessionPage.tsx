@@ -18,9 +18,9 @@ import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/custorm/Loading";
+import { Loading } from "@/components/custom/Loading";
 import { fetchMentorAvailabilityAPI } from "@/api/mentors.api.service";
-import { CustomCalendar } from "@/components/custorm/CustomCalendar";
+import { CustomCalendar } from "@/components/custom/CustomCalendar";
 
 export interface SessionData {
 	mentorId: string;

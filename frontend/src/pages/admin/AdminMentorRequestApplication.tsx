@@ -5,7 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import { Button } from "@/components/ui/button";
-import { SearchBar } from "@/components/custorm/SearchBar";
+import { SearchBar } from "@/components/custom/SearchBar";
 import { ApplicationList } from "@/components/admin/mentor-application/ApplicationList";
 import { MentorDetailsModal } from "@/components/admin/mentor-application/MentorDetailsModal";
 import { useMentors } from "@/hooks/useMentors";

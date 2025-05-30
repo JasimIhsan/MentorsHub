@@ -1,24 +1,24 @@
 import { Request, Response } from "express";
-import { IGetSessionRequests } from "../../../application/interfaces/mentors/mentors.interface";
+import { IGetSessionRequestsUseCase } from "../../../application/interfaces/mentors/mentors.interface";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 
-export class GetRequestsController {
-	constructor(private getAllRequestsByMentorUsecase: IGetSessionRequests) {}
+export class GetSessionRequestsController {
+	constructor(private getSessionByMentorUsecase: IGetSessionRequestsUseCase) {}
 
 	async handle(req: Request, res: Response) {
 		try {
 			const { mentorId } = req.params;
-			const { status, pricing, dateRange, page = "1", limit = "6" } = req.query;
+			const { status, pricing, filterOption, page = "1", limit = "6" } = req.query;
 
 			const queryParams = {
 				status: status as string | undefined,
 				pricing: pricing as string | undefined,
-				dateRange: dateRange as "today" | "week" | "all" | "free" | "paid",
+				filterOption: filterOption as "today" | "week" | "all" | "free" | "paid",
 				page: parseInt(page as string, 10),
 				limit: parseInt(limit as string, 10),
 			};
 
-			const result = await this.getAllRequestsByMentorUsecase.execute(mentorId, queryParams);
+			const result = await this.getSessionByMentorUsecase.execute(mentorId, queryParams);
 
 			res.status(HttpStatusCode.OK).json({
 				success: true,

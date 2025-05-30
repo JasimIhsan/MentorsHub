@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bell, Users, Award, BookOpen } from "lucide-react";
-import { CustomHeader } from "@/components/custorm/header";
+import { CustomHeader } from "@/components/custom/header";
 import { Notification } from "@/interfaces/interfaces";
 
 interface NotificationsProps {

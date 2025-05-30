@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { CustomHeader } from "@/components/custorm/header";
+import { CustomHeader } from "@/components/custom/header";
 
 const QuickLinks: React.FC = () => {
 	return (
