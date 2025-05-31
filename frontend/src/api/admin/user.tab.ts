@@ -44,12 +44,12 @@ export const createUserApi = async (data: CreateUserData) => {
 	}
 };
 
-export const updateUseStatusApi = async (userId: string) => {
+export const updateUserStatusApi = async (userId: string) => {
 	try {
 		const response = await axiosInstance.put(`/admin/users/update-status/${userId}`);
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error form updateUseStatusApi api : `, error);
+		console.log(`Error form updateUserStatusApi api : `, error);
 		throw new Error(error.response.data.message);
 	}
 };

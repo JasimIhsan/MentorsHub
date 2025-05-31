@@ -1,109 +1,85 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Added for navigation
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, Video, Users, MessageSquare, CheckCircle, XCircle, IndianRupee, FileText } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import axiosInstance from "@/api/config/api.config";
-import { toast } from "sonner";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/custorm/Loading";
+import { toast } from "sonner";
+import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
-import { Avatar } from "@radix-ui/react-avatar";
-import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { SessionDetailsModal } from "@/components/custorm/SessionDetailsModal";
-import Alert from "@/components/custorm/alert";
-import { updateSessionStatatusAPI } from "@/api/mentors.api.service";
+import { fetchUpcomingSessionsByMentorAPI, updateSessionStatatusAPI } from "@/api/session.api.service";
+import { SessionList } from "@/components/mentor/upcoming-sessions/SessionList";
+import { SessionFilter } from "@/components/mentor/upcoming-sessions/SessionFilter";
+import { PaginationControls } from "@/components/custom/PaginationControls";
+import { SessionSkeleton } from "@/components/mentor/upcoming-sessions/LoadingSkeleton";
 
 export function MentorUpcomingSessionsPage() {
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
-	const [filteredSessions, setFilteredSessions] = useState<ISessionMentorDTO[]>([]);
+	const [totalPages, setTotalPages] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [joinRequests, setJoinRequests] = useState<{ userId: string; userName: string; sessionId: string }[]>([]);
-	const [showJoinRequestsModal, setShowJoinRequestsModal] = useState(false);
-	const [filterOption, setFilterOption] = useState<"all" | "today" | "thisMonth">("all");
+	const [filterOption, setFilterOption] = useState<"all" | "today" | "month">("all");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [selectedSession, setSelectedSession] = useState<ISessionMentorDTO | null>(null);
-	const sessionsPerPage = 5;
+	const sessionsPerPage = 6;
 	const user = useSelector((state: RootState) => state.auth.user);
-	const navigate = useNavigate(); // Added for navigation
+	const navigate = useNavigate();
 
+	// Initialize state from URL query parameters
 	useEffect(() => {
-		const fetchSessions = async () => {
-			if (!user?.id) {
-				setError("User not authenticated. Please log in to view sessions.");
-				setLoading(false);
-				return;
-			}
+		const filter = searchParams.get("filter") as "all" | "today" | "month" | null;
+		const page = parseInt(searchParams.get("page") || "1", 10);
 
-			try {
-				const response = await axiosInstance.get(`/mentor/sessions/upcoming/${user.id}`);
-				if (!response.data?.sessions) {
-					throw new Error("No sessions data received");
-				}
-				setSessions(response.data.sessions);
-				setFilteredSessions(response.data.sessions);
-			} catch (err: any) {
-				const message = err.response?.data?.message || "Failed to load sessions.";
-				setError(message);
-				toast.error(message);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchSessions();
-	}, [user?.id]);
-
-	useEffect(() => {
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-		let filtered = sessions;
-		if (filterOption === "today") {
-			filtered = sessions.filter((session) => {
-				const sessionDate = new Date(session.date);
-				return sessionDate.toDateString() === today.toDateString();
-			});
-		} else if (filterOption === "thisMonth") {
-			filtered = sessions.filter((session) => {
-				const sessionDate = new Date(session.date);
-				return sessionDate >= startOfMonth && sessionDate <= new Date(today.getFullYear(), today.getMonth() + 1, 0);
-			});
+		if (filter && ["all", "today", "month"].includes(filter)) {
+			setFilterOption(filter);
 		}
-		setFilteredSessions(filtered);
-		setCurrentPage(1);
-	}, [filterOption, sessions]);
-
-	const totalPages = Math.ceil(filteredSessions.length / sessionsPerPage);
-	const indexOfLastSession = currentPage * sessionsPerPage;
-	const indexOfFirstSession = indexOfLastSession - sessionsPerPage;
-	const currentSessions = filteredSessions.slice(indexOfFirstSession, indexOfLastSession);
-
-	const handlePageChange = (page: number) => {
-		if (page >= 1 && page <= totalPages) {
+		if (page && !isNaN(page) && page >= 1) {
 			setCurrentPage(page);
 		}
-	};
+	}, [searchParams]);
 
-	const handleApproveJoin = async (request: { userId: string; userName: string; sessionId: string }) => {
-		try {
-			await axiosInstance.put(`/mentor/sessions/${request.sessionId}/approve`, { userId: request.userId });
-			setJoinRequests((prev) => prev.filter((req) => req.userId !== request.userId));
-			toast.success(`Approved ${request.userName} to join session.`);
-		} catch (err: any) {
-			toast.error(err.response?.data?.message || "Failed to approve join request.");
+	// Update URL query parameters when filterOption or currentPage changes
+	useEffect(() => {
+		const params = new URLSearchParams();
+		if (filterOption !== "all") {
+			params.set("filter", filterOption);
 		}
-	};
+		if (currentPage !== 1) {
+			params.set("page", currentPage.toString());
+		}
+		setSearchParams(params, { replace: true });
+	}, [filterOption, currentPage, setSearchParams]);
 
-	const handleUpdateSession = async (sessionId: string) => {
-		console.log(`Confirming session with ID: ${filteredSessions}`);
+	const fetchSessions = useCallback(async () => {
+		if (!user?.id) {
+			setError("User not authenticated. Please log in to view sessions.");
+			setLoading(false);
+			return;
+		}
+
+		setLoading(true);
+		try {
+			const response = await fetchUpcomingSessionsByMentorAPI(user.id, filterOption, currentPage, sessionsPerPage, "upcoming");
+
+			if (!response.sessions) {
+				throw new Error("No sessions data received");
+			}
+
+			setSessions(response.sessions);
+			setTotalPages(Math.ceil(response.total / sessionsPerPage));
+		} catch (err: any) {
+			const message = err.response?.message || "Failed to load sessions.";
+			setError(message);
+			toast.error(message);
+		} finally {
+			setLoading(false);
+		}
+	}, [user?.id, filterOption, currentPage, sessionsPerPage]);
+
+	useEffect(() => {
+		fetchSessions();
+	}, [fetchSessions]);
+
+	const handleUpdateSession = useCallback(async (sessionId: string) => {
 		try {
 			const response = await updateSessionStatatusAPI(sessionId, "completed");
 			if (response.success) {
@@ -113,74 +89,18 @@ export function MentorUpcomingSessionsPage() {
 		} catch (error) {
 			if (error instanceof Error) toast.error(error.message);
 		}
-	};
+	}, []);
 
-	const handleRejectJoin = async (request: { userId: string; userName: string; sessionId: string }) => {
-		try {
-			await axiosInstance.put(`/mentor/sessions/${request.sessionId}/reject`, { userId: request.userId });
-			setJoinRequests((prev) => prev.filter((req) => req.userId !== request.userId));
-			toast.success(`Rejected ${request.userName}'s join request.`);
-		} catch (err: any) {
-			toast.error(err.response?.data?.message || "Failed to reject join request.");
-		}
-	};
-
-	const renderPaginationItems = () => {
-		const items = [];
-		const maxPagesToShow = 5;
-		let startPage = Math.max(1, currentPage - 2);
-		let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
-		if (endPage - startPage < maxPagesToShow - 1) {
-			startPage = Math.max(1, endPage - maxPagesToShow + 1);
-		}
-
-		if (startPage > 1) {
-			items.push(
-				<PaginationItem key={1}>
-					<PaginationLink onClick={() => handlePageChange(1)}>{1}</PaginationLink>
-				</PaginationItem>
-			);
-			if (startPage > 2) {
-				items.push(
-					<PaginationItem key="start-ellipsis">
-						<PaginationEllipsis />
-					</PaginationItem>
-				);
+	const handleStartSession = useCallback(
+		(sessionId: string) => {
+			try {
+				navigate(`/video-call/${sessionId}`);
+			} catch (err: any) {
+				toast.error(err.response?.data?.message || "Failed to start session.");
 			}
-		}
-
-		for (let page = startPage; page <= endPage; page++) {
-			items.push(
-				<PaginationItem key={page}>
-					<PaginationLink onClick={() => handlePageChange(page)} isActive={currentPage === page}>
-						{page}
-					</PaginationLink>
-				</PaginationItem>
-			);
-		}
-
-		if (endPage < totalPages) {
-			if (endPage < totalPages - 1) {
-				items.push(
-					<PaginationItem key="end-ellipsis">
-						<PaginationEllipsis />
-					</PaginationItem>
-				);
-			}
-			items.push(
-				<PaginationItem key={totalPages}>
-					<PaginationLink onClick={() => handlePageChange(totalPages)}>{totalPages}</PaginationLink>
-				</PaginationItem>
-			);
-		}
-
-		return items;
-	};
-
-	if (loading) {
-		return <Loading appName="Mentor Sessions" loadingMessage="Loading your sessions" />;
-	}
+		},
+		[navigate]
+	);
 
 	if (error) {
 		toast.error(error);
@@ -192,241 +112,12 @@ export function MentorUpcomingSessionsPage() {
 			<div className="flex flex-col gap-8">
 				<div className="flex justify-between items-center">
 					<h1 className="text-3xl font-bold tracking-tight">Upcoming Sessions</h1>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="outline" className="flex items-center gap-2">
-								<span>Filter: {filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}</span>
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent>
-							<DropdownMenuItem onClick={() => setFilterOption("all")}>All</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setFilterOption("today")}>Today</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setFilterOption("thisMonth")}>This Month</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+					<SessionFilter filterOption={filterOption} setFilterOption={setFilterOption} />
 				</div>
-				<Card className="p-0 border-none bg-background shadow-none">
-					<CardContent className="p-0">
-						<div className="space-y-6">
-							{currentSessions.map((session) => (
-								<MentorSessionCardDetailed
-									key={session.id}
-									session={session}
-									onStartSession={() => handleStartSession(session)} // Pass session-specific handler
-									setSelectedSession={setSelectedSession}
-									handleUpdateSession={handleUpdateSession}
-								/>
-							))}
-							{currentSessions.length === 0 && (
-								<div className="text-center p-4">
-									<p className="text-sm text-muted-foreground">No sessions found for the selected filter.</p>
-								</div>
-							)}
-						</div>
-						{totalPages > 0 && (
-							<div className="mt-6">
-								<Pagination>
-									<PaginationContent>
-										<PaginationItem>
-											<PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} className={currentPage === 1 ? "pointer-events-none opacity-50" : ""} />
-										</PaginationItem>
-										{renderPaginationItems()}
-										<PaginationItem>
-											<PaginationNext onClick={() => handlePageChange(currentPage + 1)} className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""} />
-										</PaginationItem>
-									</PaginationContent>
-								</Pagination>
-							</div>
-						)}
-					</CardContent>
-				</Card>
+				{loading ? <SessionSkeleton /> : <SessionList sessions={sessions} onStartSession={handleStartSession} setSelectedSession={setSelectedSession} handleUpdateSession={handleUpdateSession} />}
+				{totalPages > 0 && <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
 			</div>
-			<JoinRequestsModal isOpen={showJoinRequestsModal} onClose={() => setShowJoinRequestsModal(false)} joinRequests={joinRequests} onApprove={handleApproveJoin} onReject={handleRejectJoin} />
 			{selectedSession && <SessionDetailsModal session={selectedSession} onClose={() => setSelectedSession(null)} />}
 		</div>
-	);
-
-	// Moved handleStartSession here and made it session-specific
-	async function handleStartSession(session: ISessionMentorDTO) {
-		try {
-			// Update session status to "ongoing"
-			// await axiosInstance.put(`/mentor/sessions/${session.id}/start`, { status: "ongoing" });
-			// toast.success("Session started!");
-			// Navigate to video call page
-			navigate(`/video-call/${session.id}`);
-		} catch (err: any) {
-			toast.error(err.response?.data?.message || "Failed to start session.");
-		}
-	}
-}
-
-interface MentorSessionCardProps {
-	session: ISessionMentorDTO;
-	onStartSession: () => void;
-	setSelectedSession: (session: ISessionMentorDTO) => void;
-	handleUpdateSession: (sessionId: string) => void;
-}
-
-function MentorSessionCardDetailed({ session, onStartSession, setSelectedSession, handleUpdateSession }: MentorSessionCardProps) {
-	const formatTime = (time: string) => {
-		const [hour, minute] = time.split(":").map(Number);
-		const ampm = hour >= 12 ? "PM" : "AM";
-		const hour12 = hour % 12 || 12;
-		return `${hour12}:${minute.toString().padStart(2, "0")} ${ampm}`;
-	};
-
-	return (
-		<Card className="overflow-hidden p-0">
-			<CardContent className="p-6">
-				<div className="flex flex-col md:flex-row gap-6">
-					<div className="flex-1">
-						<div className="flex justify-between items-center">
-							<div>
-								<h3 className="font-bold text-xl text-primary cursor-pointer hover:underline" onClick={() => setSelectedSession(session)}>
-									{session.topic}
-								</h3>
-							</div>
-						</div>
-						<div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-							<div className="flex items-center gap-2">
-								<CalendarDays className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">
-									{new Date(session.date).toLocaleString("en-US", {
-										dateStyle: "medium",
-									})}
-								</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<Clock className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">
-									{formatTime(session.time)} ({session.hours} hours)
-								</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<Video className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">{session.sessionFormat}</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<IndianRupee className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">{session.pricing === "free" ? "Free" : `${session.totalAmount?.toFixed(2) || 0}`}</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<MessageSquare className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">{session.sessionType}</span>
-							</div>
-						</div>
-					</div>
-					<div className="flex justify-center items-center gap-2">
-						<Badge variant={session.status === "completed" ? "outline" : "default"} className={`${session.status === "completed" ? "bg-primary/5 text-primary" : "bg-primary text-primary-foreground"} capitalize`}>
-							{session.status}
-						</Badge>
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="outline" className="flex items-center gap-2">
-									<Users className="h-4 w-4" />
-									<span>Participants ({session.participants.length})</span>
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end" className="w-64">
-								{session.participants.length === 0 ? (
-									<DropdownMenuItem disabled className="text-muted-foreground">
-										No participants
-									</DropdownMenuItem>
-								) : (
-									session.participants.map((participant) => (
-										<DropdownMenuItem key={participant._id} className="flex items-center gap-2">
-											<Avatar className="h-8 w-8">
-												<AvatarImage src={participant.avatar} alt={`${participant.firstName} ${participant.lastName}`} />
-												<AvatarFallback>{participant.firstName.charAt(0)}</AvatarFallback>
-											</Avatar>
-											<div className="flex flex-col">
-												<span className="font-medium">
-													{participant.firstName} {participant.lastName}
-												</span>
-												<span className="text-sm text-muted-foreground">Payment: {participant.paymentStatus || "N/A"}</span>
-											</div>
-										</DropdownMenuItem>
-									))
-								)}
-							</DropdownMenuContent>
-						</DropdownMenu>
-						{session.status === "upcoming" && (
-							<div className="flex flex-col gap-2">
-								<Button onClick={onStartSession} className="w-full md:w-auto">
-									Start Session
-								</Button>
-								<Alert
-									triggerElement={
-										<Button variant="outline" className="w-full md:w-auto">
-											Mark as Completed
-										</Button>
-									}
-									contentTitle="Are you sure?"
-									contentDescription="This action will mark the session as completed. You can't undo this."
-									actionText="Yes, mark it"
-									onConfirm={() => handleUpdateSession(session.id)}
-								/>
-							</div>
-						)}
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" size="icon">
-									<FileText className="h-4 w-4" />
-									<span className="sr-only">More options</span>
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								<DropdownMenuItem onSelect={() => setSelectedSession(session)}>
-									<FileText className="mr-2 h-4 w-4" />
-									View Details
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</div>
-				</div>
-			</CardContent>
-		</Card>
-	);
-}
-
-interface JoinRequestsModalProps {
-	isOpen: boolean;
-	onClose: () => void;
-	joinRequests: { userId: string; userName: string; sessionId: string }[];
-	onApprove: (request: { userId: string; userName: string; sessionId: string }) => void;
-	onReject: (request: { userId: string; userName: string; sessionId: string }) => void;
-}
-
-function JoinRequestsModal({ isOpen, onClose, joinRequests, onApprove, onReject }: JoinRequestsModalProps) {
-	return (
-		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>Join Requests</DialogTitle>
-				</DialogHeader>
-				<div className="space-y-4">
-					{joinRequests.length === 0 ? (
-						<p className="text-center text-sm text-muted-foreground">No pending join requests.</p>
-					) : (
-						joinRequests.map((request) => (
-							<div key={request.userId} className="flex items-center justify-between p-2 border-b">
-								<div>
-									<p className="font-medium">{request.userName}</p>
-									<p className="text-sm text-muted-foreground">Requested to join session {request.sessionId}</p>
-								</div>
-								<div className="flex gap-2">
-									<Button size="sm" onClick={() => onApprove(request)}>
-										<CheckCircle className="h-4 w-4 mr-1" /> Approve
-									</Button>
-									<Button size="sm" variant="destructive" onClick={() => onReject(request)}>
-										<XCircle className="h-4 w-4 mr-1" /> Reject
-									</Button>
-								</div>
-							</div>
-						))
-					)}
-				</div>
-			</DialogContent>
-		</Dialog>
 	);
 }

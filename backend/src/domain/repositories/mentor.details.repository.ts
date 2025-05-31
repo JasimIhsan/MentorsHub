@@ -6,7 +6,10 @@ export interface IMentorProfileRepository {
 	findByUserId(userId: string): Promise<MentorProfileEntity | null>;
 	updateByUserId(userId: string, updatedData: Partial<MentorProfileEntity>): Promise<MentorProfileEntity>;
 	createMentorProfile(userId: string, data: MentorProfileEntity): Promise<MentorProfileEntity>;
-	findAllMentors(): Promise<IMentorDTO[]>;
+	findAllMentors(query: { page?: number; limit?: number; search?: string; status?: string }): Promise<{
+		mentors: IMentorDTO[];
+		total: number;
+	}>;
 	findAllApprovedMentors(): Promise<IMentorDTO[]>;
 	findMentorByUserId(userId: string): Promise<IMentorDTO | null>;
 	getAvailability(userId: string): Promise<IAvailabilityDTO | null>;

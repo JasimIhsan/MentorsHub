@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { RoleBadge, StatusBadge } from "./UserBadges";
 import { IUserDTO } from "@/interfaces/IUserDTO";
 import { useState, useEffect } from "react";
-import Alert from "@/components/custorm/alert";
+import {Alert} from "@/components/custom/alert";
 import { EditUserForm } from "./EditUserForm";
 
 interface UserTableProps {

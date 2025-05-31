@@ -1,11 +1,13 @@
 import axiosInstance from "./config/api.config";
 
-export const fetchAllMentors = async () => {
+export const fetchMentors = async (query: { page?: number; limit?: number; search?: string; status?: string }) => {
 	try {
-		const response = await axiosInstance.get("/admin/mentor-application/all");
+		const response = await axiosInstance.get("/admin/mentor-application/all", {
+			params: query,
+		});
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error form fetchAllMentors api : `, error);
+		console.log(`Error from fetchAllMentors API: `, error);
 		throw new Error(error.response.data.message);
 	}
 };
@@ -40,12 +42,21 @@ export const fetchMentorAvailabilityAPI = async (mentorId: string, date: Date) =
 	}
 };
 
-export const updateSessionStatatusAPI = async ( sessionId: string, status: string) => {
+
+
+export const updateMentorStatusAPI = async (userId: string, status: "approved" | "rejected", rejectionReason?: string) => {
 	try {
-		const response = await axiosInstance.put(`/mentor/sessions/${sessionId}/status`, { status });
+		const payload: {
+			mentorRequestStatus: "approved" | "rejected";
+			rejectionReason?: string;
+		} = {
+			mentorRequestStatus: status,
+			rejectionReason: status === "rejected" ? rejectionReason || "No reason provided" : undefined,
+		};
+		const response = await axiosInstance.put(`/admin/mentor-application/${userId}/verify`, payload);
 		return response.data;
 	} catch (error: any) {
-		console.error("Error updating session status:", error);
+		console.error(`Error updating mentor status to ${status}:`, error);
 		throw new Error(error.response.data.message);
 	}
 };

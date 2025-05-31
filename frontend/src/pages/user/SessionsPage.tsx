@@ -12,9 +12,9 @@ import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/custorm/Loading";
+import { Loading } from "@/components/custom/Loading";
 import { ISessionUserDTO } from "@/interfaces/ISessionDTO";
-import { SessionDetailsModal } from "@/components/custorm/SessionDetailsModal";
+import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
 import { formatDate, formatTime } from "@/utility/time-data-formater";
 import { isSessionExpired } from "@/utility/is-session-expired";
 
