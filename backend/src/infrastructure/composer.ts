@@ -18,6 +18,8 @@ import { ISessionRepository } from "../domain/repositories/session.repository";
 import { SessionRepositoryImpl } from "./database/implementation/session.repository.impl";
 import { S3Service } from "./cloud/S3 bucket/s3.implementation";
 import { IS3Service } from "../domain/interface/s3.service.interface";
+import { INotificationRepository } from "../domain/repositories/notification.repository";
+import { NotificationRepositoryImpl } from "./database/implementation/notification.repository.impl";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -25,6 +27,7 @@ export const forgotResetRepository: IForgotPasswordTokensRepository = new Forgot
 export const adminRepository: IAdminRepository = new AdminRepositoryImpl();
 export const mentorRepository: IMentorProfileRepository = new MentorDetailsRepositoryImpl()
 export const sessionRepository: ISessionRepository = new SessionRepositoryImpl();
+export const notificationRepository: INotificationRepository = new NotificationRepositoryImpl();
 
 // Initialize services implementation
 export const tokenInterface: ITokenService = new TokenServicesImpl();

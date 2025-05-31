@@ -23,6 +23,7 @@ import { documentsRouter } from "./presentation/routes/common/documents.routes";
 import { mentorSessionRouter } from "./presentation/routes/mentors/mentor.session.routes";
 import { SessionModel } from "./infrastructure/database/models/session/session.model";
 import initializeSocket from "./infrastructure/socket/socket.io";
+import { notificationRouter } from "./presentation/routes/common/notification.routes";
 
 dotenv.config();
 
@@ -71,6 +72,7 @@ app.use("/api/mentor", mentorRouter);
 app.use("/api/mentor/sessions", mentorSessionRouter);
 
 app.use("/api/documents", documentsRouter);
+app.use("/api/notifications", notificationRouter);
 
 // Start the server
 const PORT = process.env.PORT || 5858;
