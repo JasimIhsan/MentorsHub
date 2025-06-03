@@ -5,9 +5,10 @@ import { verifyAccessToken } from "../../middlewares/auth.access.token.middlewar
 import { MentorProfileModel } from "../../../infrastructure/database/models/user/mentor.details.model";
 import { UserModel } from "../../../infrastructure/database/models/user/user.model";
 import { getAvailabilityController } from "../../controllers/user/composer";
+import { requireRole } from "../../middlewares/require.role.middleware";
 
 export const mentorRouter = Router();
 
-mentorRouter.get("/:mentorId", verifyAccessToken, (req, res) => getMentorController.handle(req, res));
+mentorRouter.get("/:mentorId", verifyAccessToken, requireRole("mentor", "user"), (req, res) => getMentorController.handle(req, res));
 
-mentorRouter.get('/availability/:mentorId', (req, res) => getAvailabilityController.handle(req, res));
+mentorRouter.get("/availability/:mentorId", verifyAccessToken, requireRole("mentor", "user"), (req, res) => getAvailabilityController.handle(req, res));

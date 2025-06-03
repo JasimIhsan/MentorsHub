@@ -31,11 +31,12 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 				res.status(HttpStatusCode.UNAUTHORIZED).json({ success: false, message: "Admin not found" });
 				return;
 			}
+
 			const admin = new AdminEntity({
 				...adminData,
 				id: decoded.userId,
 			});
-			(req.user as AdminEntity) = admin;
+			(req.user as any) = { ...admin, role: "admin" };
 			return next();
 		} else {
 			const user = await userRepo.findUserById(decoded.userId);
@@ -44,7 +45,15 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 				return;
 			}
 
-			(req.user as UserEntity) = user;
+			if (user.getStatus() === "blocked") {
+				res.status(HttpStatusCode.FORBIDDEN).json({ success: false, blocked: true, message: CommonStringMessage.BLOCKED });
+				return;
+			}
+
+			(req.user as any) = {
+				...user,
+				role: user.getRole() === "mentor" ? "mentor" : "user",
+			};
 			return next();
 		}
 	} catch (error) {

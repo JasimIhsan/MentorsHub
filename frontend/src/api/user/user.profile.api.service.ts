@@ -41,9 +41,9 @@ export const changePasswordApi = async (userId: string, oldPassword: string, new
 	}
 };
 
-export const getUserProfileApi = async () => {
+export const getUserProfileApi = async (userId: string) => {
 	try {
-		const response = await axiosInstance.get(`/user/user-profile`);
+		const response = await axiosInstance.get(`/user/user-profile/${userId}`);
 		return response.data;
 	} catch (error: any) {
 		console.log(`Error from getUserProfile api: `, error);

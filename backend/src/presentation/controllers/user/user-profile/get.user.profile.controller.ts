@@ -9,10 +9,9 @@ export class GetUserProfileController {
 	constructor(private getUserProfileUsecase: IGetUserProfileUseCase) {}
 	async handle(req: Request, res: Response) {
 		try {
-			const customReq = req as CustomRequest;
-			const userId = customReq.user.getId();
+			const { userId } = req.params;
 			const user = await this.getUserProfileUsecase.execute(userId as string);
-			res.status(HttpStatusCode.OK).json(user);
+			res.status(HttpStatusCode.OK).json({ success: true, user });
 		} catch (error) {
 			if (error instanceof Error) {
 				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
