@@ -9,8 +9,8 @@ interface ProtectedRouteProps {
 }
 
 export function MentorProtectedRoute({ children, redirectTo = "/" }: ProtectedRouteProps) {
-	const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
-	const userRole = useSelector((state: RootState) => state.auth.user?.role);
+	const isAuthenticated = useSelector((state: RootState) => state.userAuth.isAuthenticated);
+	const userRole = useSelector((state: RootState) => state.userAuth.user?.role);
 	const location = useLocation();
 
 	if (!isAuthenticated || userRole !== "mentor") {

@@ -22,7 +22,7 @@ import { fetchDocumentUrlsAPI } from "@/api/admin/common/fetchDocuments";
 export function MentorProfilePage() {
 	const [isEditing, setIsEditing] = useState(false);
 	const [newSkill, setNewSkill] = useState("");
-	const user = useSelector((state: RootState) => state.auth.user);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 	const { error, loading, mentor } = useMentor(user?.id as string);
 	const [documentUrls, setDocumentUrls] = useState<string[]>([]);
 
@@ -132,8 +132,8 @@ export function MentorProfilePage() {
 												<SelectItem value="away">Away</SelectItem>
 											</SelectContent>
 										</Select>
-									) : mentor.availability.length > 0 ? (
-										"Available for Sessions"
+									// ) : mentor.availability > 0 ? (
+									// 	"Available for Sessions"
 									) : (
 										"Currently Busy"
 									)}
@@ -577,7 +577,7 @@ export function MentorProfilePage() {
 												<Label htmlFor="availability-visibility">Show Availability</Label>
 												<p className="text-sm text-muted-foreground">Display your available time slots on your profile</p>
 											</div>
-											<Switch id="availability-visibility" defaultChecked={mentor.availability.length > 0} />
+											{/* <Switch id="availability-visibility" defaultChecked={mentor.availability.length > 0} /> */}
 										</div>
 										<div className="flex items-center justify-between">
 											<div className="space-y-0.5">

@@ -11,7 +11,6 @@ import { Link } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { INTEREST_OPTIONS } from "@/data/interest.option";
 import { fetchAllApprovedMentors } from "@/api/mentors.api.service";
 import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import { toast } from "sonner";
@@ -19,6 +18,7 @@ import verified from "../../assets/verify.png";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Loading } from "@/components/custom/Loading";
+import { INTEREST_OPTIONS } from "@/constants/interest.option";
 
 interface Mentor {
 	id: string;
@@ -43,7 +43,7 @@ export default function BrowseMentorsPage() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [mentors, setMentors] = useState<Mentor[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
-	const user = useSelector((state: RootState) => state.auth.user);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 	const mentorsPerPage = 6;
 
 	const handleInterestToggle = (value: string) => {

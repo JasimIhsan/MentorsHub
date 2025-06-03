@@ -4,21 +4,22 @@ import authReducer from "@/store/slices/userSlice";
 import adminAuthReducer from "@/store/slices/adminSlice";
 import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage
+import { notificationsReducer } from "./slices/notificationSlice";
 
-// Persist configuration
 const persistConfig = {
-	key: "root", // Key for the persisted state in storage
-	storage, // Use localStorage (or sessionStorage if preferred)
-	// whitelist: ["auth"], // Only persist the 'auth' slice
+	key: "root",
+	storage,
 };
 
 const persistedAuthReducer = persistReducer(persistConfig, authReducer);
 const persistedAdminAuthReducer = persistReducer(persistConfig, adminAuthReducer);
+const persistedNotificationReducer = persistReducer(persistConfig, notificationsReducer)
 
 export const store = configureStore({
 	reducer: {
-		auth: persistedAuthReducer,
+		userAuth: persistedAuthReducer,
 		adminAuth: persistedAdminAuthReducer,
+		notifications: persistedNotificationReducer
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({

@@ -49,7 +49,7 @@ export function RequestSessionPage() {
 	const { mentorId } = useParams<{ mentorId: string }>();
 	const { mentor, loading } = useMentor(mentorId as string) as { mentor: IMentorDTO | null; loading: boolean };
 	const navigate = useNavigate();
-	const user = useSelector((state: RootState) => state.auth.user);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 
 	useEffect(() => {
 		const fetchAvailability = async () => {

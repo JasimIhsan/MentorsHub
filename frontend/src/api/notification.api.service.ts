@@ -1,7 +1,7 @@
 import { NotificationType } from "@/interfaces/INotification";
 import axiosInstance from "./config/api.config";
 
-export const createNotification = async (userId: string, title: string, message: string, type: NotificationType) => {
+export const createNotificationAPI = async (userId: string, title: string, message: string, type: NotificationType) => {
 	try {
 		const res = await axiosInstance.post("/notifications", {
 			userId,
@@ -16,7 +16,8 @@ export const createNotification = async (userId: string, title: string, message:
 	}
 };
 
-export const getUserNotifications = async (userId: string) => {
+export const getUserNotificationsAPI = async (userId: string) => {
+	console.log('userId: ', userId);
 	try {
 		const res = await axiosInstance.get(`/notifications/${userId}`);
 		return res.data.data;
@@ -26,7 +27,7 @@ export const getUserNotifications = async (userId: string) => {
 	}
 };
 
-export const markNotificationAsRead = async (notificationId: string) => {
+export const markNotificationAsReadAPI = async (notificationId: string) => {
 	try {
 		await axiosInstance.patch(`/notifications/read/${notificationId}`);
 	} catch (error) {
@@ -35,7 +36,7 @@ export const markNotificationAsRead = async (notificationId: string) => {
 	}
 };
 
-export const markAllNotificationsAsRead = async (userId: string) => {
+export const markAllNotificationsAsReadAPI = async (userId: string) => {
 	try {
 		await axiosInstance.patch(`/notifications/read-all/${userId}`);
 	} catch (error) {

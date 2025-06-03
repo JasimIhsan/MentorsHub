@@ -35,7 +35,7 @@ export function SessionsPage() {
 	const [selectedSession, setSelectedSession] = useState<ISessionUserDTO | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage] = useState(5); // Number of sessions per page
-	const user = useSelector((state: RootState) => state.auth.user);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 
 	// Load Razorpay script
 	useEffect(() => {
@@ -240,7 +240,7 @@ interface SessionCardProps {
 function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayLoaded, setSelectedSession }: SessionCardProps) {
 	const [isPaying, setIsPaying] = useState(false);
 	const [isReasonOpen, setIsReasonOpen] = useState(false);
-	const user = useSelector((state: RootState) => state.auth.user);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 
 	const isExpired = session.status === "upcoming" && isSessionExpired(session.date, session.time);
 	const type = isExpired ? "expired" : session.status;

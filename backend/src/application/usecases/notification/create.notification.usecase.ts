@@ -1,7 +1,6 @@
 import { INotificationRepository } from "../../../domain/repositories/notification.repository";
 import { INotificationEntity, NotificationType } from "../../../domain/entities/notification.entity";
 import { ICreateNotificationUseCase } from "../../interfaces/notification";
-import { Server } from "socket.io";
 
 export class CreateNotificationUseCase implements ICreateNotificationUseCase {
 	constructor(private notificationRepo: INotificationRepository) {}

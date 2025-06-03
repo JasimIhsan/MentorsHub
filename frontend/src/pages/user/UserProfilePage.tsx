@@ -18,7 +18,7 @@ import { z } from "zod";
 export default function UserProfilePage() {
 	const [isEditing, setIsEditing] = useState(false);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-	const user = useSelector((state: RootState) => state.auth.user as UserInterface);
+	const user = useSelector((state: RootState) => state.userAuth.user as UserInterface);
 	const fullName = useSelector(getFullName);
 	const navigate = useNavigate();
 	const dispatch = useDispatch();

@@ -11,7 +11,7 @@ import { UserInterface } from "@/interfaces/interfaces";
 // import "@/styles/globals.css";
 
 export default function MainLayout() {
-	const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+	const { isAuthenticated, user } = useSelector((state: RootState) => state.userAuth);
 	const navigate = useNavigate();
 	
 	return (

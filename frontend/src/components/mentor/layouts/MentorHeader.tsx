@@ -1,8 +1,7 @@
-import { ArrowRightLeft, Bell, Calendar, Info, LogOut, Settings, Star, User } from "lucide-react";
+import { ArrowRightLeft, Calendar, LogOut, Settings, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import Logo from "@/assets/logo.png.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,10 +9,11 @@ import { logoutSession } from "@/api/user/authentication.api.service";
 import { logout } from "@/store/slices/userSlice";
 import { toast } from "sonner";
 import { RootState } from "@/store/store";
-import {Alert} from "@/components/custom/alert";
+import { Alert } from "@/components/custom/alert";
+import { NotificationDropdown } from "@/components/custom/NotificationDropdown";
 
 export function MentorHeader() {
-	const user = useSelector((state: RootState) => state.auth.user);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
@@ -31,7 +31,6 @@ export function MentorHeader() {
 		}
 	};
 
-	// Fallback for when user is null
 	if (!user) {
 		return (
 			<header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -73,26 +72,7 @@ export function MentorHeader() {
 						<span className="sr-only">Calendar</span>
 					</Button>
 
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="outline" size="icon" className="relative">
-								<Bell className="h-5 w-5" />
-								<Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center">3</Badge>
-								<span className="sr-only">Notifications</span>
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-80">
-							<DropdownMenuLabel>Notifications</DropdownMenuLabel>
-							<DropdownMenuSeparator />
-							<div className="max-h-80 overflow-auto">
-								<NotificationItem title="New Session Request" description="Alex Johnson requested a session on React Fundamentals" time="5 minutes ago" type="request" />
-								<NotificationItem title="Session Reminder" description="Upcoming session with Maria Garcia in 1 hour" time="25 minutes ago" type="reminder" />
-								<NotificationItem title="New Review" description="David Lee left a 5-star review for your last session" time="2 hours ago" type="review" />
-							</div>
-							<DropdownMenuSeparator />
-							<DropdownMenuItem className="cursor-pointer justify-center text-center">View all notifications</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+					<NotificationDropdown />
 
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
@@ -103,7 +83,7 @@ export function MentorHeader() {
 								</Avatar>
 							</Button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent className="w-56" align="end" forceMount>
+						<DropdownMenuContent className="w-56 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-[1000]" align="end" forceMount>
 							<DropdownMenuLabel className="font-normal">
 								<div className="flex flex-col space-y-1">
 									<p className="text-sm font-medium leading-none">
@@ -145,25 +125,5 @@ export function MentorHeader() {
 				</div>
 			</div>
 		</header>
-	);
-}
-
-function NotificationItem({ title, description, time, type }: { title: string; description: string; time: string; type: "request" | "reminder" | "review" | "other" }) {
-	const icons = {
-		request: <Calendar className="h-5 w-5 text-blue-500" />,
-		reminder: <Bell className="h-5 w-5 text-amber-500" />,
-		review: <Star className="h-5 w-5 text-green-500" />,
-		other: <Info className="h-5 w-5 text-gray-500" />,
-	};
-
-	return (
-		<div className="flex items-start gap-3 p-3 hover:bg-muted cursor-pointer">
-			<div className="mt-1">{icons[type]}</div>
-			<div className="flex-1 space-y-1">
-				<p className="text-sm font-medium">{title}</p>
-				<p className="text-xs text-muted-foreground">{description}</p>
-				<p className="text-xs text-muted-foreground">{time}</p>
-			</div>
-		</div>
 	);
 }

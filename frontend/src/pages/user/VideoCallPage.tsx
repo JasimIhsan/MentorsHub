@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
 import Peer, { MediaConnection } from "peerjs";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from "react-router-dom";
@@ -13,10 +12,11 @@ import axiosInstance from "@/api/config/api.config";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter, DrawerClose } from "@/components/ui/drawer";
 import { Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSocket } from "@/context/SocketContext";
 
 export const VideoCallPage = () => {
 	const { sessionId } = useParams<{ sessionId: string }>();
-	const [socket, setSocket] = useState<Socket | null>(null);
+	const { socket, isConnected } = useSocket();
 	const [peer, setPeer] = useState<Peer | null>(null);
 	const [call, setCall] = useState<MediaConnection | null>(null);
 	const [isMuted, setIsMuted] = useState(false);
@@ -28,22 +28,20 @@ export const VideoCallPage = () => {
 	const remoteVideoRef = useRef<HTMLVideoElement>(null);
 	const waitingVideoRef = useRef<HTMLVideoElement>(null);
 	const localStreamRef = useRef<MediaStream | null>(null);
-	const user = useSelector((state: RootState) => state.auth.user);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 	const [isScreenSharing, setIsScreenSharing] = useState(false);
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const [isHandRaised, setIsHandRaised] = useState(false);
-	const [isConnected, setIsConnected] = useState(false);
-	const [joinRequests, setJoinRequests] = useState<{ userId: string; sessionId: string; peerId: string; name: string; avatar?: string }[]>([]);
-	const [showJoinRequestDrawer, setShowJoinRequestDrawer] = useState(false);
 	const [isUserWaiting, setIsUserWaiting] = useState(false);
 	const [isRejected, setIsRejected] = useState(false);
-	const [role, setRole] = useState<"mentor" | "user" | null>(null);
+	const [joinRequests, setJoinRequests] = useState<{ userId: string; sessionId: string; peerId: string; name: string; avatar?: string }[]>([]);
+	const [showJoinRequestDrawer, setShowJoinRequestDrawer] = useState(false);
 	const [hasRequestedJoin, setHasRequestedJoin] = useState(false);
 	const [rejectionMessage, setRejectionMessage] = useState<string | null>(null);
 	const [remoteParticipant, setRemoteParticipant] = useState<{ name: string; avatar: string }>({ name: "", avatar: "" });
+	const [role, setRole] = useState<"mentor" | "user" | null>(null);
 	const navigate = useNavigate();
 
-	// Initialize media stream
 	useEffect(() => {
 		navigator.mediaDevices
 			.getUserMedia({ video: true, audio: true })
@@ -72,21 +70,18 @@ export const VideoCallPage = () => {
 		};
 	}, [isUserWaiting]);
 
-	// Handle mute status emission
 	useEffect(() => {
-		if (socket && user) {
+		if (user) {
 			socket.emit("mute-status", { userId: user.id, isMuted });
 		}
 	}, [isMuted, socket, user]);
 
-	// Handle video status emission
 	useEffect(() => {
-		if (socket && user) {
+		if (user) {
 			socket.emit("video-status", { userId: user.id, isVideoOn });
 		}
 	}, [isVideoOn, socket, user]);
 
-	// Initialize connections
 	useEffect(() => {
 		if (!user) {
 			toast.error("Please login first. Redirecting...");
@@ -94,7 +89,6 @@ export const VideoCallPage = () => {
 			return;
 		}
 
-		let newSocket: Socket | null = null;
 		let newPeer: Peer | null = null;
 
 		const determineRole = async (): Promise<"mentor" | "user" | null> => {
@@ -121,23 +115,14 @@ export const VideoCallPage = () => {
 			const determinedRole = await determineRole();
 			if (!determinedRole) return;
 
-			newSocket = io("http://localhost:5858", {
-				withCredentials: true,
-				transports: ["websocket"],
-				reconnection: true,
-				reconnectionAttempts: 5,
-				reconnectionDelay: 1000,
-			});
-			setSocket(newSocket);
-
 			newPeer = new Peer({
 				host: "0.peerjs.com",
 				secure: true,
 			});
 
 			newPeer.on("open", (peerId) => {
-				if (newSocket?.connected && determinedRole === "mentor") {
-					newSocket.emit("join-session", {
+				if (isConnected && determinedRole === "mentor") {
+					socket.emit("join-session", {
 						sessionId,
 						userId: user.id,
 						peerId,
@@ -146,38 +131,13 @@ export const VideoCallPage = () => {
 						avatar: user.avatar,
 					});
 				}
-				setIsConnected(!!(newSocket?.connected && peerId));
 			});
 
 			newPeer.on("error", (error) => {
 				console.error("PeerJS error:", error);
-				setIsConnected(false);
 				toast.error("Peer connection error. Attempting to reconnect...");
-				attemptReconnect(newSocket, newPeer, determinedRole);
+				attemptReconnect(newPeer, determinedRole);
 			});
-
-			if (newSocket) {
-				newSocket.on("connect", () => {
-					setIsConnected(!!newPeer?.id);
-					if (determinedRole === "mentor" && newPeer?.id) {
-						newSocket!.emit("join-session", {
-							sessionId,
-							userId: user.id,
-							peerId: newPeer.id,
-							role: determinedRole,
-							name: `${user.firstName || ""} ${user.lastName || ""}`,
-							avatar: user.avatar,
-						});
-					}
-				});
-
-				newSocket.on("connect_error", (err) => {
-					console.error("Socket.IO connect_error:", err.message);
-					setIsConnected(false);
-					toast.error("Lost connection to server. Reconnecting...");
-					attemptReconnect(newSocket, newPeer, determinedRole);
-				});
-			}
 
 			setPeer(newPeer);
 		};
@@ -185,14 +145,14 @@ export const VideoCallPage = () => {
 		initializeConnections();
 
 		return () => {
-			if (newSocket) newSocket.disconnect();
 			if (newPeer) newPeer.destroy();
 		};
-	}, [sessionId, user, navigate]);
+	}, [sessionId, user, navigate, socket, isConnected]);
 
-	// Handle socket and peer events
 	useEffect(() => {
 		if (!peer || !socket || !role) return;
+
+		const unsubscribes: Array<() => void> = [];
 
 		peer.on("call", (incomingCall) => {
 			if (localStreamRef.current) {
@@ -214,93 +174,102 @@ export const VideoCallPage = () => {
 			}
 		});
 
-		socket.on("user-joined", ({ peerId, name, avatar }: { peerId: string; name: string; avatar?: string }) => {
-			if (peer && localStreamRef.current && role === "mentor") {
-				initiateCall(peerId, 0);
-				setRemoteParticipant({ name, avatar: avatar as string });
-				toast.success(
-					<div className="flex items-center gap-2">
-						<Avatar className="w-6 h-6">{avatar ? <AvatarImage src={avatar} alt={name} /> : <AvatarFallback className="bg-gray-300 text-white text-xs">{name[0]?.toUpperCase() || "U"}</AvatarFallback>}</Avatar>
-						<span>{`${name} has joined the session`}</span>
-					</div>
-				);
-			}
-		});
+		unsubscribes.push(
+			socket.onVideoCallEvent("user-joined", ({ peerId, name, avatar }: { peerId: string; name: string; avatar?: string }) => {
+				if (peer && localStreamRef.current && role === "mentor") {
+					initiateCall(peerId, 0);
+					setRemoteParticipant({ name, avatar: avatar as string });
+					toast.success(
+						<div className="flex items-center gap-2">
+							<Avatar className="w-6 h-6">{avatar ? <AvatarImage src={avatar} alt={name} /> : <AvatarFallback className="bg-gray-300 text-white text-xs">{name[0]?.toUpperCase() || "U"}</AvatarFallback>}</Avatar>
+							<span>{`${name} has joined the session`}</span>
+						</div>
+					);
+				}
+			})
+		);
 
-		socket.on("join-approved", ({ mentorPeerId }: { mentorPeerId: string | null }) => {
-			setIsUserWaiting(false);
-			setIsRejected(false);
-			toast.success("You have been approved to join the session!");
-			if (role === "user" && peer && localStreamRef.current && mentorPeerId) {
-				initiateCall(mentorPeerId, 0);
-			}
-		});
+		unsubscribes.push(
+			socket.onVideoCallEvent("join-approved", ({ mentorPeerId }: { mentorPeerId: string | null }) => {
+				setIsUserWaiting(false);
+				setIsRejected(false);
+				toast.success("You have been approved to join the session!");
+				if (role === "user" && peer && localStreamRef.current && mentorPeerId) {
+					initiateCall(mentorPeerId, 0);
+				}
+			})
+		);
 
-		socket.on("join-rejected", ({ message }: { message: string }) => {
-			setIsUserWaiting(true);
-			setHasRequestedJoin(false);
-			setIsRejected(true);
-			setRejectionMessage(message);
-			toast.error(message);
-			setTimeout(() => {
-				navigate("/sessions", { replace: true });
-			}, 5000);
-		});
+		unsubscribes.push(
+			socket.onVideoCallEvent("join-rejected", ({ message }: { message: string }) => {
+				setIsUserWaiting(true);
+				setHasRequestedJoin(false);
+				setIsRejected(true);
+				setRejectionMessage(message);
+				toast.error(message);
+				setTimeout(() => {
+					navigate("/sessions", { replace: true });
+				}, 5000);
+			})
+		);
 
-		socket.on("user-disconnected", ({ userId }: { userId: string }) => {
-			toast.info(`User ${userId} has disconnected`);
-			if (remoteVideoRef.current) {
-				remoteVideoRef.current.srcObject = null;
-			}
-		});
+		unsubscribes.push(
+			socket.onVideoCallEvent("user-disconnected", ({ userId }: { userId: string }) => {
+				toast.info(`User ${userId} has disconnected`);
+				if (remoteVideoRef.current) {
+					remoteVideoRef.current.srcObject = null;
+				}
+			})
+		);
 
-		socket.on("mute-status", ({ isMuted }: { isMuted: boolean }) => {
-			setIsRemoteMuted(isMuted);
-		});
+		unsubscribes.push(
+			socket.onVideoCallEvent("mute-status", ({ isMuted }: { isMuted: boolean }) => {
+				setIsRemoteMuted(isMuted);
+			})
+		);
 
-		socket.on("video-status", ({ isVideoOn }: { isVideoOn: boolean }) => {
-			setIsRemoteVideoOn(isVideoOn);
-		});
+		unsubscribes.push(
+			socket.onVideoCallEvent("video-status", ({ isVideoOn }: { isVideoOn: boolean }) => {
+				setIsRemoteVideoOn(isVideoOn);
+			})
+		);
 
-		socket.on("hand-raise-status", ({ isHandRaised }: { isHandRaised: boolean }) => {
-			setIsRemoteHandRaised(isHandRaised);
-		});
+		unsubscribes.push(
+			socket.onVideoCallEvent("hand-raise-status", ({ isHandRaised }: { isHandRaised: boolean }) => {
+				setIsRemoteHandRaised(isHandRaised);
+			})
+		);
 
-		socket.on("error", ({ message }: { message: string }) => {
-			toast.error(message);
-			if (role === "user") navigate("/sessions", { replace: true });
-			else navigate("/mentor/upcoming-sessions", { replace: true });
-		});
+		unsubscribes.push(
+			socket.onVideoCallEvent("error", ({ message }: { message: string }) => {
+				toast.error(message);
+				if (role === "user") navigate("/sessions", { replace: true });
+				else navigate("/mentor/upcoming-sessions", { replace: true });
+			})
+		);
 
-		socket.on("join-request", ({ userId, sessionId: requestSessionId, peerId, name, avatar }: { userId: string; sessionId: string; peerId: string; name: string; avatar?: string }) => {
-			if (role === "mentor" && requestSessionId === sessionId) {
-				setJoinRequests((prev) => {
-					if (prev.some((req) => req.userId === userId)) {
-						return prev;
-					}
-					return [...prev, { userId, sessionId: requestSessionId, peerId, name, avatar }];
-				});
-				setShowJoinRequestDrawer(true);
-			}
-		});
+		unsubscribes.push(
+			socket.onVideoCallEvent("join-request", ({ userId, sessionId: requestSessionId, peerId, name, avatar }: { userId: string; sessionId: string; peerId: string; name: string; avatar?: string }) => {
+				if (role === "mentor" && requestSessionId === sessionId) {
+					setJoinRequests((prev) => {
+						if (prev.some((req) => req.userId === userId)) {
+							return prev;
+						}
+						return [...prev, { userId, sessionId: requestSessionId, peerId, name, avatar }];
+					});
+					setShowJoinRequestDrawer(true);
+				}
+			})
+		);
 
-		socket.on("reconnect-success", () => {
-			setIsConnected(true);
-			toast.success("Reconnected to session!");
-		});
+		unsubscribes.push(
+			socket.onVideoCallEvent("reconnect-success", () => {
+				toast.success("Reconnected to session!");
+			})
+		);
 
 		return () => {
-			socket.off("user-joined");
-			socket.off("user-disconnected");
-			socket.off("mute-status");
-			socket.off("video-status");
-			socket.off("hand-raise-status");
-			socket.off("error");
-			socket.off("join-request");
-			socket.off("join-approved");
-			socket.off("join-rejected");
-			socket.off("reconnect-success");
-			peer.off("call");
+			unsubscribes.forEach((unsubscribe) => unsubscribe());
 		};
 	}, [peer, socket, role, sessionId, navigate]);
 
@@ -332,9 +301,8 @@ export const VideoCallPage = () => {
 		}
 	};
 
-	const attemptReconnect = (socket: Socket | null, peer: Peer | null, determinedRole: "mentor" | "user" | null) => {
-		if (!socket || !peer || !determinedRole || !user) return;
-		setIsConnected(false);
+	const attemptReconnect = (peer: Peer | null, determinedRole: "mentor" | "user" | null) => {
+		if (!peer || !determinedRole || !user) return;
 		const reconnectInterval = setInterval(() => {
 			if (isConnected) {
 				clearInterval(reconnectInterval);
@@ -368,7 +336,7 @@ export const VideoCallPage = () => {
 
 	const toggleRaiseHand = () => {
 		setIsHandRaised((prev) => {
-			socket?.emit("hand-raise-status", { userId: user?.id, isHandRaised: !prev });
+			socket.emit("hand-raise-status", { userId: user?.id, isHandRaised: !prev });
 			return !prev;
 		});
 	};
@@ -394,7 +362,7 @@ export const VideoCallPage = () => {
 				const videoSender = senders.find((sender) => sender.track?.kind === "video");
 				if (videoSender) {
 					await videoSender.replaceTrack(videoTrack);
-					localStreamRef.current.getVideoTracks().forEach((track) => track.stop());
+					localStreamRef.current.getTracks().forEach((track) => track.stop());
 					localStreamRef.current = screenStream;
 					if (localVideoRef.current) {
 						localVideoRef.current.srcObject = screenStream;
@@ -436,14 +404,13 @@ export const VideoCallPage = () => {
 			localStreamRef.current.getTracks().forEach((track) => track.stop());
 			localStreamRef.current = null;
 		}
-		if (socket) socket.disconnect();
 		if (peer) peer.destroy();
 		if (role === "user") navigate("/sessions", { replace: true });
 		else navigate("/mentor/upcoming-sessions", { replace: true });
 	};
 
 	const handleJoinRequest = (request: { userId: string; sessionId: string; peerId: string }, approve: boolean) => {
-		socket?.emit("approve-join", {
+		socket.emit("approve-join", {
 			userId: request.userId,
 			sessionId: request.sessionId,
 			approve,
@@ -464,7 +431,7 @@ export const VideoCallPage = () => {
 			toast.info("Join request already sent");
 			return;
 		}
-		if (socket && peer && user) {
+		if (peer && user) {
 			socket.emit("join-session", {
 				sessionId,
 				userId: user.id,
@@ -597,7 +564,7 @@ interface WaitingRoomProps {
 const WaitingRoom = ({ isRejected, rejectionMessage, videoRef, isMuted, isVideoOn, hasRequestedJoin, onToggleMute, onToggleVideo, onAskToJoin }: WaitingRoomProps) => {
 	return (
 		<div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-			<div className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full ">
+			<div className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full">
 				{isRejected ? (
 					<div className="text-center">
 						<h2 className="text-3xl font-bold text-red-600 mb-4">Join Request Rejected</h2>
@@ -730,14 +697,14 @@ interface ControlBarProps {
 	onOpenJoinRequests?: () => void;
 }
 
-function ControlBar({
+const ControlBar = ({
 	isMuted,
 	isVideoOn,
 	isScreenSharing,
 	isSidebarOpen,
 	isHandRaised,
 	role,
-	joinRequestsCount = 0, // Default to 0 to ensure type safety
+	joinRequestsCount = 0,
 	onToggleMute,
 	onToggleVideo,
 	onToggleScreenShare,
@@ -745,7 +712,7 @@ function ControlBar({
 	onToggleRaiseHand,
 	onEndCall,
 	onOpenJoinRequests,
-}: ControlBarProps) {
+}: ControlBarProps) => {
 	return (
 		<div className="fixed bottom-0 left-0 right-0 flex justify-center p-10 z-10">
 			<div className="bg-white/95 rounded-full shadow-lg px-4 py-2 border border-gray-200 flex items-center gap-2">
@@ -833,4 +800,4 @@ function ControlBar({
 			</div>
 		</div>
 	);
-}
+};

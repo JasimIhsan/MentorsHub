@@ -11,7 +11,6 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { BookOpen, BriefcaseBusiness, GraduationCap, Upload, Plus, X, CheckCircle2, ArrowRight, ArrowLeft, IndianRupee } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { SKILL_OPTIONS } from "@/data/skill.option";
 import MultipleSelector from "@/components/ui/multiple-selector";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -21,6 +20,7 @@ import { RootState } from "@/store/store";
 import { WeekDay } from "@/interfaces/IMentorDTO";
 import { AxiosError } from "axios";
 import { formatTime } from "@/utility/time-data-formater";
+import { SKILL_OPTIONS } from "@/constants/skill.option";
 
 // Define types matching MentorProfileSchema
 interface WorkExperience {
@@ -135,7 +135,7 @@ export function BecomeMentorPage() {
 	const [timeArray, setTimeArray] = useState<string[]>([]);
 	const totalSteps = 6;
 	const progress = (step / totalSteps) * 100;
-	const user = useSelector((state: RootState) => state.auth.user);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 	const navigate = useNavigate();
 
 	if (user?.role === "mentor") {

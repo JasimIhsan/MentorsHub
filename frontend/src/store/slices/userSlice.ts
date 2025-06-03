@@ -87,8 +87,8 @@ export const { login, logout, updateUser, removeUserData, updateUserIsAuthentica
 export default userSlice.reducer;
 
 export const getFullName = (state: RootState) => {
-	if (state.auth.user) {
-		return `${state.auth.user.firstName} ${state.auth.user.lastName}`;
+	if (state.userAuth.user) {
+		return `${state.userAuth.user.firstName} ${state.userAuth.user.lastName}`;
 	}
 	return "";
 };
