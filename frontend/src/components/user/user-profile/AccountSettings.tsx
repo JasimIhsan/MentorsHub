@@ -33,7 +33,7 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 export function AccountSettingsSection({ handleNavigation }: AccountSettingsSectionProps) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const user = useSelector((state: any) => state.auth.user);
+	const user = useSelector((state: any) => state.userAuth.user);
 
 	const {
 		register,

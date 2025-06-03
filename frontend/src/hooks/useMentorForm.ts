@@ -14,7 +14,7 @@ export const useMentorForm = () => {
 	const [showErrorModal, setShowErrorModal] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [formErrors, setFormErrors] = useState<FormErrors>({});
-	const user = useSelector((state: RootState) => state.auth.user);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 
 	const [formData, setFormData] = useState<MentorApplication>({
 		firstName: user?.firstName || "",

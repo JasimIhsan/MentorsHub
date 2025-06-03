@@ -3,9 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import MultipleSelector from "@/components/ui/multiple-selector";
 import { BookOpen } from "lucide-react";
-import { SKILL_OPTIONS } from "@/data/skill.option";
-import { INTEREST_OPTIONS } from "@/data/interest.option";
 import { UpdateProfileFormData } from "@/schema/updateProfilePersonalInfo";
+import { INTEREST_OPTIONS } from "@/constants/interest.option";
+import { SKILL_OPTIONS } from "@/constants/skill.option";
 
 interface SkillsInterestsSectionProps {
   formData: UpdateProfileFormData;

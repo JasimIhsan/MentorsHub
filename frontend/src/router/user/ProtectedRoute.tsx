@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, redirectTo = "/" }: ProtectedRouteProps) {
-	const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+	const isAuthenticated = useSelector((state: RootState) => state.userAuth.isAuthenticated);
 	const location = useLocation();
 
 	if (!isAuthenticated) {

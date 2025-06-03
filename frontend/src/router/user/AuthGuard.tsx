@@ -9,7 +9,7 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children, redirectUrl = "/dashboard" }: AuthGuardProps) {
-	const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+	const isAuthenticated = useSelector((state: RootState) => state.userAuth.isAuthenticated);
 	const location = useLocation();
 	if (isAuthenticated) {
 		return <Navigate to={redirectUrl} state={{ from: location }} replace />;

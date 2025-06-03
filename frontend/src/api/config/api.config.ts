@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // base URL for your API
-const baseURL = "http://localhost:5858/api";
+const baseURL = `${import.meta.env.VITE_SERVER_URL}/api`;
 
 //create axios instance
 const axiosInstance = axios.create({
@@ -78,11 +78,10 @@ axiosInstance.interceptors.response.use(
 			localStorage.removeItem("persist:root");
 
 			if (error.response.data.blocked) {
-
 				setTimeout(() => {
 					window.location.href = "/authenticate";
 				}, 3000);
-				
+
 				return Promise.reject(error); // Don't propagate the 403 error further
 			} else {
 				window.location.href = "/authenticate";

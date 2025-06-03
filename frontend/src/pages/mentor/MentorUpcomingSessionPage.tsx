@@ -21,7 +21,7 @@ export function MentorUpcomingSessionsPage() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [selectedSession, setSelectedSession] = useState<ISessionMentorDTO | null>(null);
 	const sessionsPerPage = 6;
-	const user = useSelector((state: RootState) => state.auth.user);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 	const navigate = useNavigate();
 
 	// Initialize state from URL query parameters

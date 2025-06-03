@@ -10,7 +10,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, Pagi
 import { fetchSessionsByMentor } from "@/api/session.api.service";
 
 export function MentorRequestsPage() {
-	const user = useSelector((state: RootState) => state.auth.user);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [requests, setRequests] = useState<ISessionMentorDTO[]>([]);
 	const [isLoading, setIsLoading] = useState(false);

@@ -6,7 +6,7 @@ import { GetAllApprovedMentorsUsecase } from "./getAllApprovedMentors.usecase";
 import { GetAllMentorsUseCase } from "./getAllMentors.usecase";
 import { GetMentorUsecase } from "./getMentor.usecase";
 import { GetSessionRequests } from "./getSessionRequests.usecase";
-import { UpdateSessionStatusUsecase } from "./update.request.status.usecase";
+import { UpdateSessionStatusUsecase } from "./update.status.usecase";
 
 export const getAllMentorsUsecase = new GetAllMentorsUseCase(mentorRepository);
 export const getAllApprovedMentorsUsecase = new GetAllApprovedMentorsUsecase(mentorRepository);
