@@ -21,7 +21,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 		}
 	}
 
-	async updateByUserId(userId: string, updatedData: Partial<MentorProfileEntity>): Promise<MentorProfileEntity> {
+	async updateMentorProfile(userId: string, updatedData: Partial<MentorProfileEntity>): Promise<MentorProfileEntity> {
 		try {
 			const updated = await MentorProfileModel.findOneAndUpdate({ userId }, updatedData, { new: true });
 			if (!updated) throw new Error("Mentor profile not found");

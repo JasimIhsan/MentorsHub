@@ -119,7 +119,7 @@ export class MentorProfileEntity {
 		});
 	}
 
-	updateMentorDetails(updatedData: Partial<IMentorInterface>) {
+	updateMentorProfile(updatedData: Partial<IMentorInterface>) {
 		if (updatedData.professionalTitle !== undefined) this.professionalTitle = updatedData.professionalTitle;
 		if (updatedData.languages !== undefined) this.languages = updatedData.languages;
 		if (updatedData.primaryExpertise !== undefined) this.primaryExpertise = updatedData.primaryExpertise;
@@ -159,6 +159,10 @@ export class MentorProfileEntity {
 
 	getHourlyRate(): number | null {
 		return this.hourlyRate;
+	}
+
+	getDocuments(): string[] {
+		return this.documents;
 	}
 
 	getFullProfile(): Partial<IMentorInterface> {

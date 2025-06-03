@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { becomeMentorApplicationController, changePasswordController, getUserProfileController, updateUseProfileController } from "../../controllers/user/composer";
+import { becomeMentorApplicationController, changePasswordController, getUserProfileController, reApplyMentorApplicationController, updateUseProfileController } from "../../controllers/user/composer";
 import { upload } from "../../../infrastructure/file-upload/multer/multer.config";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { requireRole } from "../../middlewares/require.role.middleware";
@@ -11,4 +11,6 @@ userProfileRoutes.put("/edit-profile", verifyAccessToken, requireRole("mentor", 
 
 userProfileRoutes.put("/change-password", verifyAccessToken, requireRole("mentor", "user"), (req, res) => changePasswordController.handle(req, res));
 
-userProfileRoutes.post("/mentor-application", verifyAccessToken, requireRole( "user"), upload.array("documents"), (req, res) => becomeMentorApplicationController.handle(req, res));
+userProfileRoutes.post("/mentor-application", verifyAccessToken, requireRole("user"), upload.array("documents"), (req, res) => becomeMentorApplicationController.handle(req, res));
+
+userProfileRoutes.post("/mentor-application/resend", verifyAccessToken, requireRole("user"), upload.array("documents"), (req, res) => reApplyMentorApplicationController.handle(req, res));

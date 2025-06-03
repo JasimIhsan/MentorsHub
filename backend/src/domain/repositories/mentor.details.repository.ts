@@ -4,8 +4,8 @@ import { IMentorInterface, MentorProfileEntity } from "../entities/mentor.detail
 
 export interface IMentorProfileRepository {
 	findByUserId(userId: string): Promise<MentorProfileEntity | null>;
-	updateByUserId(userId: string, updatedData: Partial<MentorProfileEntity>): Promise<MentorProfileEntity>;
 	createMentorProfile(userId: string, data: MentorProfileEntity): Promise<MentorProfileEntity>;
+	updateMentorProfile(userId: string, updatedData: Partial<MentorProfileEntity>): Promise<MentorProfileEntity>;
 	findAllMentors(query: { page?: number; limit?: number; search?: string; status?: string }): Promise<{
 		mentors: IMentorDTO[];
 		total: number;
