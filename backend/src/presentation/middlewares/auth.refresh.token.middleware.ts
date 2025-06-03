@@ -11,7 +11,7 @@ export const verifyRefreshToken = (req: Request, res: Response, next: NextFuncti
 		if (!refreshToken) {
 			res.clearCookie("access_token");
 			res.clearCookie("refresh_token");
-			res.status(HttpStatusCode.UNAUTHORIZED).json({ success: false, message: "Refresh token is missing" });
+			res.status(HttpStatusCode.UNAUTHORIZED).json({ success: false, message: CommonStringMessage.TOKEN_NOT_PROVIDED });
 			return;
 		}
 
@@ -21,7 +21,7 @@ export const verifyRefreshToken = (req: Request, res: Response, next: NextFuncti
 		if (!decoded) {
 			res.clearCookie("access_token");
 			res.clearCookie("refresh_token");
-			res.status(HttpStatusCode.FORBIDDEN).json({ success: false, message: "Invalid or expired refresh token" });
+			res.status(HttpStatusCode.FORBIDDEN).json({ success: false, message: CommonStringMessage.INVALID_TOKEN });
 			return;
 		}
 

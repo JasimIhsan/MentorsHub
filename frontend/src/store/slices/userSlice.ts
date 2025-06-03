@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { UserInterface } from "@/interfaces/interfaces";
 import { RootState } from "../store";
-import axiosInstance from "@/api/config/api.config";
+import { getUserProfileApi } from "@/api/user/user.profile.api.service";
 
 // Type without password
 type UserWithoutPassword = Omit<UserInterface, "password">;
@@ -22,12 +22,18 @@ const initialState: AuthState = {
 };
 
 // ✅ Async thunk to fetch user profile
-export const fetchUserProfile = createAsyncThunk<UserWithoutPassword, void, { rejectValue: string }>("auth/fetchUserProfile", async (_, thunkAPI) => {
+export const fetchUserProfile = createAsyncThunk<UserWithoutPassword, void, { state: RootState; rejectValue: string }>("auth/fetchUserProfile", async (_, thunkAPI) => {
 	try {
-		const response = await axiosInstance.get("/user/user-profile", {
-			withCredentials: true,
-		});
-		return response.data;
+		// Access the current state to get the user ID
+		const state = thunkAPI.getState();
+		const userId = state.userAuth.user?.id;
+
+		if (!userId) {
+			return thunkAPI.rejectWithValue("User ID not found");
+		}
+
+		const response = await getUserProfileApi(userId);
+		return response.user;
 	} catch (error) {
 		return thunkAPI.rejectWithValue("Failed to fetch user profile");
 	}

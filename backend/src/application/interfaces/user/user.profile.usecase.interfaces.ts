@@ -1,7 +1,6 @@
 import { exitCode } from "process";
 import { UserEntity, UserInterface } from "../../../domain/entities/user.entity";
-import { IMentorInterface } from "../../../domain/entities/mentor.detailes.entity";
-import { MentorProfileEntity } from "../../../infrastructure/database/database.config";
+import { IMentorInterface, MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
 
 export interface IUpdateUserProfileUseCase {
 	execute(userId: string, data: Partial<UserInterface>, imageUrl?: string): Promise<UserEntity>;

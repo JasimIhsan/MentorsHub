@@ -48,7 +48,7 @@ export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
 					<Button variant="ghost" className="relative h-8 w-8 rounded-full">
 						<Avatar className="h-8 w-8">
 							<AvatarImage src={user.avatar as string} alt="User" />
-							<AvatarFallback>{user.firstName.slice(0, 1) + user.lastName.slice(0, 1)}</AvatarFallback>
+							<AvatarFallback>{user.firstName ? user.firstName.charAt(0): "AB" }</AvatarFallback>
 						</Avatar>
 					</Button>
 				</DropdownMenuTrigger>
