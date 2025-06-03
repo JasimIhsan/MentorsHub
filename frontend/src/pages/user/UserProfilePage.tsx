@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/store/store";
-import { getFullName, updateUser } from "@/store/slices/userSlice";
+import { AppDispatch, RootState } from "@/store/store";
+import { fetchUserProfile, getFullName, updateUser } from "@/store/slices/userSlice";
 import { UserInterface } from "@/interfaces/interfaces";
 import { updateUserApi } from "@/api/user/user.profile.api.service";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ import { PersonalInfoSection } from "@/components/user/user-profile/PersonalInfo
 import { AccountSettingsSection } from "@/components/user/user-profile/AccountSettings";
 import { updateProfileSchema, UpdateProfileFormData } from "@/schema/updateProfilePersonalInfo";
 import { z } from "zod";
+import { Button } from "@/components/ui/button";
 
 export default function UserProfilePage() {
 	const [isEditing, setIsEditing] = useState(false);
@@ -21,7 +22,7 @@ export default function UserProfilePage() {
 	const user = useSelector((state: RootState) => state.userAuth.user as UserInterface);
 	const fullName = useSelector(getFullName);
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
+	const dispatch = useDispatch<AppDispatch>();
 
 	const [formData, setFormData] = useState<UpdateProfileFormData & { avatar?: string }>({
 		firstName: "",
@@ -42,6 +43,10 @@ export default function UserProfilePage() {
 		interests: "",
 		bio: "",
 	});
+
+	useEffect(() => {
+		dispatch(fetchUserProfile());
+	}, [dispatch]);
 
 	useEffect(() => {
 		if (user) {
@@ -187,18 +192,19 @@ export default function UserProfilePage() {
 						handleSave={handleSave}
 						errors={errors}
 						handleCancel={handleCancel}
-						onAvatarChange={handleAvatarChange} // Pass avatar change handler
+						onAvatarChange={handleAvatarChange}
 					/>
 					{user.mentorRequestStatus === "rejected" && (
-						<div className="bg-red-100 text-red-700 p-4 rounded-md">
-							<p className="font-semibold">Your request to become a mentor has been rejected.</p>
-							<p>Please check your email for further details and the reason for the rejection.</p>
+						<div className="bg-red-100 text-red-700 p-4 rounded-md flex justify-between items-center">
+							<div>
+								<p className="font-semibold">Your request to become a mentor has been rejected.</p>
+								<p>Please check your email for further details and the reason for the rejection.</p>
+							</div>
+							<Link to="/become-mentor">
+								<Button>Re-Apply</Button>
+							</Link>
 						</div>
 					)}
-					{/* <div className="bg-red-100 text-red-700 p-4 rounded-md">
-						<p className="font-semibold">Your request to become a mentor has been rejected.</p>
-						<p>Please check your email for further details and the reason for the rejection.</p>
-					</div> */}
 				</div>
 				<div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
 					<div className="space-y-6 lg:col-span-2">

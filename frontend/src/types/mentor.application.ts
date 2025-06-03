@@ -1,4 +1,13 @@
-// src/types/mentor-application.ts
+export enum WeekDay {
+	Monday = "Monday",
+	Tuesday = "Tuesday",
+	Wednesday = "Wednesday",
+	Thursday = "Thursday",
+	Friday = "Friday",
+	Saturday = "Saturday",
+	Sunday = "Sunday",
+}
+
 export interface WorkExperience {
 	jobTitle: string;
 	company: string;
@@ -22,7 +31,7 @@ export interface Certification {
 	expiryDate: string;
 }
 
-export interface MentorApplication {
+export interface MentorApplicationFormData {
 	firstName: string;
 	lastName: string;
 	professionalTitle: string;
@@ -36,16 +45,11 @@ export interface MentorApplication {
 	certifications: Certification[];
 	sessionFormat: "one-on-one" | "group" | "both";
 	sessionTypes: string[];
-	pricing: "free" | "paid" | "both-pricing";
+	pricing: "free" | "paid";
 	hourlyRate: string;
-	availability: string[];
-	hoursPerWeek: string;
+	availability: Partial<Record<WeekDay, string[]>>;
 	documents: File[];
 	terms: boolean;
 	guidelines: boolean;
 	interview: boolean;
-}
-
-export interface FormErrors {
-	[key: string]: string;
 }

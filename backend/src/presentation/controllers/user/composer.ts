@@ -24,8 +24,8 @@ import {
 	requestSessionUsecase,
 	getSessionsByUserUsecase,
 	paySessionUsecase,
+	reApplyMentorApplicationUseCase,
 } from "../../../application/usecases/user/composer";
-import { UpdateUserController } from "../admin/user-tab/update.user.controller";
 import { UpdateUserProfileController } from "./user-profile/update.user.profile.controller";
 import { cloudinaryService } from "../../../infrastructure/composer";
 import { ChangePasswordController } from "./user-profile/change.password.controller";
@@ -36,6 +36,7 @@ import { GetSessionByUserController } from "./session/get.session.by.user.contro
 import { PaySessionController } from "./session/pay.session.usecase.controller";
 import { GetMentorAvailabilityController } from "./session/get.mentor.availability.controller";
 import { getAvailabilityUsecase } from "../../../application/usecases/mentors/composer";
+import { ReApplyMentorApplicationController } from "./user-profile/update.mentor.profile.controller";
 
 export const signupController = new SignupController(signupUseCase);
 export const signinController = new SigninController(signinUseCase);
@@ -49,6 +50,7 @@ export const googleAuthController = new GoogleAuthController(googleAuthUsecase);
 export const updateUseProfileController = new UpdateUserProfileController(updateUserProfileUsecase, cloudinaryService);
 export const changePasswordController = new ChangePasswordController(changePasswordUsecase);
 export const becomeMentorApplicationController = new BecomeMentorController(becomeMentorUseCase);
+export const reApplyMentorApplicationController = new ReApplyMentorApplicationController(reApplyMentorApplicationUseCase);
 export const getUserProfileController = new GetUserProfileController(getUserProfileUsecase);
 export const createSessionController = new RequestSessionController(requestSessionUsecase);
 export const getSessionsByUserController = new GetSessionByUserController(getSessionsByUserUsecase);

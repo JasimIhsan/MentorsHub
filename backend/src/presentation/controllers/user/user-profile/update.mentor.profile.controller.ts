@@ -1,14 +1,15 @@
 import { Request, Response } from "express";
-import { IBecomeMentorUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
+import { IReApplyMentorApplicationUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
-export class BecomeMentorController {
-	constructor(private becomeMentorUseCase: IBecomeMentorUseCase) {}
+export class ReApplyMentorApplicationController {
+	constructor(private upsertMentorApplicationUseCase: IReApplyMentorApplicationUseCase) {}
 
 	async handle(req: Request, res: Response) {
 		try {
-			const { userId, firstName, lastName, bio, professionalTitle, languages, primaryExpertise, skills, yearsExperience, workExperiences, educations, certifications, sessionFormat, sessionTypes, pricing, hourlyRate, availability, hoursPerWeek } =
-			req.body;
+			const { userId, firstName, lastName, bio, professionalTitle, languages, primaryExpertise, skills, yearsExperience, workExperiences, educations, certifications, sessionFormat, sessionTypes, pricing, hourlyRate, availability } = req.body;
+
+			console.log(`req.body : `, req.body);
 			// Parse stringified fields
 			const parsedData = {
 				languages: JSON.parse(languages || "[]"),
@@ -17,12 +18,11 @@ export class BecomeMentorController {
 				educations: JSON.parse(educations || "[]"),
 				certifications: JSON.parse(certifications || "[]"),
 				sessionTypes: JSON.parse(sessionTypes || "[]"),
-				availability: JSON.parse(availability || "[]"),
+				availability: JSON.parse(availability || "{}"), // Changed to object to match Partial<Record<WeekDay, string[]>>
 			};
 
 			// Normalize files to File[]
 			let documents: Express.Multer.File[] = [];
-
 			if (Array.isArray(req.files)) {
 				documents = req.files as Express.Multer.File[];
 			} else if (req.files && typeof req.files === "object") {
@@ -31,7 +31,7 @@ export class BecomeMentorController {
 				});
 			}
 
-			const mentorProfile = await this.becomeMentorUseCase.execute(
+			const mentorProfile = await this.upsertMentorApplicationUseCase.execute(
 				userId,
 				{
 					userId,
@@ -63,7 +63,7 @@ export class BecomeMentorController {
 				mentorProfile,
 			});
 		} catch (error: any) {
-			console.error("Error in mentor application:", error.message);
+			console.error("Error in upsert mentor application:", error.message);
 			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
 				success: false,
 				message: error.message,

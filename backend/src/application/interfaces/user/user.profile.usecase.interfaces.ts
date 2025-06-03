@@ -25,6 +25,18 @@ export interface IBecomeMentorUseCase {
 	}>;
 }
 
+export interface IReApplyMentorApplicationUseCase {
+	execute(
+		userId: string,
+		data: Omit<IMentorInterface, "documents">,
+		userData: Partial<UserInterface>,
+		documents: Express.Multer.File[]
+	): Promise<{
+		savedUser: UserEntity;
+		mentorProfile: MentorProfileEntity;
+	}>;
+}
+
 export interface IGetUserProfileUseCase {
 	execute(userId: string): Promise<UserEntity | null>;
 }

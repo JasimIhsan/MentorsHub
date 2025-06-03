@@ -18,6 +18,7 @@ import { RequestSessionUseCase } from "./session/request.session.usecase";
 import { GetSessionsByUserUseCase } from "./session/get.sessions.by.user.usecase";
 import { PaySessionUseCase } from "./session/pay.session.usecase";
 import { UploadMentorDocumentUseCase } from "../documents/upload.mentor.document.usecase";
+import { ReApplyMentorApplicationUseCase } from "./user-profile/re.apply.mentor.application.usecase";
 
 // Initialize UseCases
 export const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
@@ -34,6 +35,7 @@ export const uploadImageCloudinaryUsecase = new UploadAvatarUseCase(cloudinarySe
 export const changePasswordUsecase = new ChangePasswordUsecase(userRepository);
 export const uploadMentorDocumentUseCase = new UploadMentorDocumentUseCase(s3BucketService);
 export const becomeMentorUseCase = new BecomeMentorUseCase(mentorRepository, userRepository, uploadMentorDocumentUseCase);
+export const reApplyMentorApplicationUseCase = new ReApplyMentorApplicationUseCase(mentorRepository, userRepository, uploadMentorDocumentUseCase);
 export const getUserProfileUsecase = new GetUserProfileUseCase(userRepository);
 export const requestSessionUsecase = new RequestSessionUseCase(sessionRepository, mentorRepository);
 export const getSessionsByUserUsecase = new GetSessionsByUserUseCase(sessionRepository);
