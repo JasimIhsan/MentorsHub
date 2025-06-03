@@ -21,3 +21,7 @@ export interface IPaySessionUseCase {
 export interface IStartSessionUseCase {
 	execute(sessionId: string): Promise<void>;
 }
+
+export interface ICancelSessionUseCase {
+	execute(sessionId: string , userId: string): Promise<SessionEntity>;
+}

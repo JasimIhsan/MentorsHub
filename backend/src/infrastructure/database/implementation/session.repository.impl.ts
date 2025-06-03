@@ -22,6 +22,15 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
+	async getSessionById(sessionId: string): Promise<SessionEntity | null> {
+		try {
+			const session = await SessionModel.findById(sessionId);
+			return session ? SessionEntity.fromDBDocument(session) : null;
+		} catch (error) {
+			return handleError(error, "Error geting session by id");
+		}
+	}
+
 	async getSessionsByUser(userId: string): Promise<ISessionUserDTO[]> {
 		try {
 			const sessions = await SessionModel.find({ "participants.userId": userId }).populate("participants.userId", "firstName lastName avatar").populate("mentorId", "firstName lastName avatar");
@@ -42,7 +51,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 	): Promise<{ sessions: ISessionMentorDTO[]; total: number }> {
 		try {
 			const { filterOption, page, limit, status } = queryParams;
-			console.log('queryParams: ', queryParams);
+			console.log("queryParams: ", queryParams);
 
 			const query: any = { mentorId };
 
@@ -107,10 +116,11 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async updateRequestStatus(sessionId: string, status: string, rejectReason?: string): Promise<void> {
+	async updateSessionStatus(sessionId: string, status: string, rejectReason?: string): Promise<SessionEntity> {
 		try {
 			const updatedSession = await SessionModel.findByIdAndUpdate(sessionId, { status, rejectReason }, { new: true });
 			if (!updatedSession) throw new Error("Session not found");
+			return SessionEntity.fromDBDocument(updatedSession);
 		} catch (error) {
 			return handleError(error, "Error updating session request status");
 		}

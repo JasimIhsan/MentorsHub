@@ -19,6 +19,7 @@ import { GetSessionsByUserUseCase } from "./session/get.sessions.by.user.usecase
 import { PaySessionUseCase } from "./session/pay.session.usecase";
 import { UploadMentorDocumentUseCase } from "../documents/upload.mentor.document.usecase";
 import { ReApplyMentorApplicationUseCase } from "./user-profile/re.apply.mentor.application.usecase";
+import { CancelSessionUseCase } from "./session/cancel.session.usecase";
 
 // Initialize UseCases
 export const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
@@ -41,3 +42,4 @@ export const requestSessionUsecase = new RequestSessionUseCase(sessionRepository
 export const getSessionsByUserUsecase = new GetSessionsByUserUseCase(sessionRepository);
 export const getSessionByMentorUsecase = new GetSessionsByUserUseCase(sessionRepository);
 export const paySessionUsecase = new PaySessionUseCase(sessionRepository);
+export const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository)
