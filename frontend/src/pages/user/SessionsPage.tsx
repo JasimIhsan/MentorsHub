@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Clock, Video, MessageSquare, FileText, MoreHorizontal, Search, CreditCard, ChevronDown, CheckCircle, ArrowRight, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
@@ -34,7 +34,9 @@ export function SessionsPage() {
 	const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 	const [selectedSession, setSelectedSession] = useState<ISessionUserDTO | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
-	const [itemsPerPage] = useState(5); // Number of sessions per page
+	const [itemsPerPage] = useState(5);
+	const [showCancelDialog, setShowCancelDialog] = useState(false);
+	const [sessionToCancel, setSessionToCancel] = useState<ISessionUserDTO | null>(null);
 	const user = useSelector((state: RootState) => state.userAuth.user);
 
 	// Load Razorpay script
@@ -93,6 +95,28 @@ export function SessionsPage() {
 		fetchSessions();
 	}, [user?.id]);
 
+	const handleCancelSession = async () => {
+		if (!sessionToCancel || !user?.id) return;
+
+		try {
+			const response = await axiosInstance.put(`/user/sessions/cancel-session`, {
+				sessionId: sessionToCancel.id,
+				userId: user.id,
+			});
+			if (response.data.success) {
+				setSessions((prevSessions) => prevSessions.map((s) => (s.id === sessionToCancel.id ? { ...s, status: "canceled" } : s)));
+				toast.success("Session canceled successfully.");
+			} else {
+				toast.error(response.data.message || "Failed to cancel session.");
+			}
+		} catch (error: any) {
+			toast.error(error.response?.data?.message || "Failed to cancel session.");
+		} finally {
+			setShowCancelDialog(false);
+			setSessionToCancel(null);
+		}
+	};
+
 	if (loading) {
 		return <Loading appName="My Sessions" loadingMessage="Loading your sessions" />;
 	}
@@ -105,7 +129,6 @@ export function SessionsPage() {
 	const filteredSessions = selectedCategory === "all" ? sessions : sessions.filter((session) => session.status === selectedCategory);
 	const sortedSessions = filteredSessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-	// Pagination calculations
 	const totalItems = sortedSessions.length;
 	const totalPages = Math.ceil(totalItems / itemsPerPage);
 	const indexOfLastItem = currentPage * itemsPerPage;
@@ -160,7 +183,16 @@ export function SessionsPage() {
 					<CardContent className="pt-6">
 						<div className="space-y-4">
 							{currentSessions.map((session) => (
-								<SessionCard key={session.id} session={session} setShowPaymentModal={setShowPaymentModal} setPaidSession={setPaidSession} isRazorpayLoaded={isRazorpayLoaded} setSelectedSession={setSelectedSession} />
+								<SessionCard
+									key={session.id}
+									session={session}
+									setShowPaymentModal={setShowPaymentModal}
+									setPaidSession={setPaidSession}
+									isRazorpayLoaded={isRazorpayLoaded}
+									setSelectedSession={setSelectedSession}
+									setShowCancelDialog={setShowCancelDialog}
+									setSessionToCancel={setSessionToCancel}
+								/>
 							))}
 							{currentSessions.length === 0 && (
 								<EmptyState
@@ -225,6 +257,25 @@ export function SessionsPage() {
 				/>
 			)}
 			{selectedSession && <SessionDetailsModal session={selectedSession} onClose={() => setSelectedSession(null)} />}
+			<Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Cancel Session</DialogTitle>
+						<DialogDescription>
+							Are you sure you want to cancel your session with {sessionToCancel ? `${sessionToCancel.mentor.firstName} ${sessionToCancel.mentor.lastName}` : "this mentor"} on {sessionToCancel ? formatDate(sessionToCancel.date) : ""} at{" "}
+							{sessionToCancel ? formatTime(sessionToCancel.time) : ""}?
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setShowCancelDialog(false)}>
+							Keep Session
+						</Button>
+						<Button variant="destructive" onClick={handleCancelSession}>
+							Cancel Session
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }
@@ -235,9 +286,11 @@ interface SessionCardProps {
 	setPaidSession: (session: ISessionUserDTO) => void;
 	isRazorpayLoaded: boolean;
 	setSelectedSession: (session: ISessionUserDTO) => void;
+	setShowCancelDialog: (value: boolean) => void;
+	setSessionToCancel: (session: ISessionUserDTO | null) => void;
 }
 
-function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayLoaded, setSelectedSession }: SessionCardProps) {
+function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayLoaded, setSelectedSession, setShowCancelDialog, setSessionToCancel }: SessionCardProps) {
 	const [isPaying, setIsPaying] = useState(false);
 	const [isReasonOpen, setIsReasonOpen] = useState(false);
 	const user = useSelector((state: RootState) => state.userAuth.user);
@@ -375,7 +428,14 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 													<FileText className="mr-2 h-4 w-4" />
 													View Notes
 												</DropdownMenuItem>
-												<DropdownMenuItem className="text-destructive">Cancel Session</DropdownMenuItem>
+												<DropdownMenuItem
+													className="text-destructive"
+													onSelect={() => {
+														setSessionToCancel(session);
+														setShowCancelDialog(true);
+													}}>
+													Cancel Session
+												</DropdownMenuItem>
 											</DropdownMenuContent>
 										</DropdownMenu>
 									</>
@@ -389,6 +449,34 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 											{isPaying ? "Processing..." : "Pay Now"}
 											<CreditCard className="ml-2 h-4 w-4" />
 										</Button>
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												<Button variant="ghost" size="icon">
+													<MoreHorizontal className="h-4 w-4" />
+													<span className="sr-only">More options</span>
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent align="end">
+												<DropdownMenuItem onSelect={() => setSelectedSession(session)}>
+													<FileText className="mr-2 h-4 w-4" />
+													View Details
+												</DropdownMenuItem>
+												<DropdownMenuItem asChild>
+													<Link to={`/messages?mentor=${session.mentor._id}`} className="cursor-pointer">
+														<MessageSquare className="mr-2 h-4 w-4" />
+														Message
+													</Link>
+												</DropdownMenuItem>
+												<DropdownMenuItem
+													className="text-destructive"
+													onSelect={() => {
+														setSessionToCancel(session);
+														setShowCancelDialog(true);
+													}}>
+													Cancel Session
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
 									</>
 								)}
 								{type === "completed" && (

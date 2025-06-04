@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { createSessionController, getAvailabilityController, getSessionsByUserController, paySessionController } from "../../controllers/user/composer";
+import { cancelSessionController, createSessionController, getAvailabilityController, getSessionsByUserController, paySessionController } from "../../controllers/user/composer";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { SessionModel } from "../../../infrastructure/database/models/session/session.model";
 import { requireRole } from "../../middlewares/require.role.middleware";
@@ -10,6 +10,8 @@ sessionRouter.post("/create-session", verifyAccessToken, requireRole("mentor", "
 sessionRouter.get("/all/:userId", verifyAccessToken, requireRole("mentor", "user"), (req, res) => getSessionsByUserController.handle(req, res));
 
 sessionRouter.put("/pay", verifyAccessToken, requireRole("mentor", "user"), (req, res) => paySessionController.handle(req, res));
+
+sessionRouter.put("/cancel-session", verifyAccessToken, requireRole("user"), (req: Request, res: Response) => cancelSessionController.handle(req, res));
 
 // In mentorSessionRouter
 sessionRouter.get("/:sessionId", verifyAccessToken, requireRole("mentor", "user"), async (req, res) => {

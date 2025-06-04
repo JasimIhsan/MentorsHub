@@ -25,6 +25,7 @@ import {
 	getSessionsByUserUsecase,
 	paySessionUsecase,
 	reApplyMentorApplicationUseCase,
+	cancelSessionUseCase,
 } from "../../../application/usecases/user/composer";
 import { UpdateUserProfileController } from "./user-profile/update.user.profile.controller";
 import { cloudinaryService } from "../../../infrastructure/composer";
@@ -37,6 +38,7 @@ import { PaySessionController } from "./session/pay.session.usecase.controller";
 import { GetMentorAvailabilityController } from "./session/get.mentor.availability.controller";
 import { getAvailabilityUsecase } from "../../../application/usecases/mentors/composer";
 import { ReApplyMentorApplicationController } from "./user-profile/update.mentor.profile.controller";
+import { CancelSessionController } from "./session/cancel.session.controller";
 
 export const signupController = new SignupController(signupUseCase);
 export const signinController = new SigninController(signinUseCase);
@@ -56,3 +58,4 @@ export const createSessionController = new RequestSessionController(requestSessi
 export const getSessionsByUserController = new GetSessionByUserController(getSessionsByUserUsecase);
 export const paySessionController = new PaySessionController(paySessionUsecase);
 export const getAvailabilityController = new GetMentorAvailabilityController(getAvailabilityUsecase);
+export const cancelSessionController = new CancelSessionController(cancelSessionUseCase);

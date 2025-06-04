@@ -3,6 +3,7 @@ import { ISessionDocument } from "../../infrastructure/database/models/session/s
 import { SessionEntity } from "../entities/session.entity";
 
 export interface ISessionRepository {
+	getSessionById(sessionId: string): Promise<SessionEntity | null>;
 	createSession(session: SessionEntity): Promise<SessionEntity>;
 	getSessionsByUser(userId: string): Promise<ISessionUserDTO[]>;
 	getSessionByMentor(
@@ -14,7 +15,7 @@ export interface ISessionRepository {
 			limit: number;
 		}
 	): Promise<{ sessions: ISessionMentorDTO[]; total: number }>;
-	updateRequestStatus(sessionId: string, status: string, rejectReason?: string): Promise<void>;
+	updateSessionStatus(sessionId: string, status: string, rejectReason?: string): Promise<SessionEntity>;
 	paySession(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void>;
 	getSessions(mentorId: string): Promise<ISessionMentorDTO[]>;
 	expireSession(sessionId: string): Promise<void>;
