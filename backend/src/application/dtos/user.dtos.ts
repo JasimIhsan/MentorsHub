@@ -15,8 +15,9 @@ export interface IUserDTO {
 	interests?: string[] | null;
 	skills?: string[] | null;
 	badges?: ObjectId[] | null;
+	averageRating: number | null;
+	totalReviews: number | null;
 	sessionCompleted?: number;
-	mentorDetailsId?: ObjectId | null;
 	createdAt: Date;
 	updatedAt?: Date | null;
 }
@@ -35,7 +36,8 @@ export class UserDTO implements IUserDTO {
 	skills?: string[] | null;
 	badges?: ObjectId[] | null;
 	sessionCompleted?: number;
-	mentorDetailsId?: ObjectId | null;
+	averageRating: number | null;
+	totalReviews: number | null;
 	createdAt: Date;
 	updatedAt?: Date | null;
 
@@ -53,7 +55,8 @@ export class UserDTO implements IUserDTO {
 		skills: string[] | null,
 		badges: ObjectId[] | null,
 		sessionCompleted: number,
-		mentorDetailsId: ObjectId | null,
+		averageRating: number | null,
+		totalReviews: number | null,
 		createdAt: Date,
 		updatedAt: Date | null
 	) {
@@ -69,8 +72,9 @@ export class UserDTO implements IUserDTO {
 		this.interests = interests;
 		this.skills = skills;
 		this.badges = badges;
+		this.averageRating = averageRating;
+		this.totalReviews = totalReviews;
 		this.sessionCompleted = sessionCompleted;
-		this.mentorDetailsId = mentorDetailsId;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
@@ -91,8 +95,9 @@ export class UserDTO implements IUserDTO {
 			profile.interests ?? null,
 			profile.skills ?? null,
 			profile.badges ?? null,
+			user.getrating() ?? 0,
+			user.getTotalReviews() ?? 0,
 			profile.sessionCompleted ?? 0,
-			profile.mentorDetailsId ?? null,
 			profile.createdAt!,
 			profile.updatedAt ?? null
 		);

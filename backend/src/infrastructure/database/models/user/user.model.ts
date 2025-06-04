@@ -17,7 +17,8 @@ export interface IUsers extends Document {
 	createdAt: Date;
 	lastActive: Date | null;
 	isVerified: boolean | null;
-	rating: number | null;
+	averageRating: number | null;
+	totalReviews: number | null;
 	sessionCompleted: number | null;
 	featuredMentor: boolean | null;
 	badges: ObjectId[] | null;
@@ -42,7 +43,8 @@ const UsersSchema: Schema = new Schema(
 			enum: ["pending", "approved", "rejected", "not-requested"],
 			default: "not-requested",
 		},
-		rating: { type: Number },
+		averageRating: { type: Number, default: 0 },
+		totalReviews: { type: Number, default: 0 },
 		sessionCompleted: { type: Number },
 		featuredMentor: { type: Boolean },
 		badges: [{ type: Schema.Types.ObjectId }],

@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import http from "http";
 import { Server, Socket } from "socket.io";
-import connectDB from "./infrastructure/database/database.config";
+import connectDB from "./infrastructure/database/models/config/database.config";
 import authRouter from "./presentation/routes/user/auth.routes";
 import passport from "passport";
 import { googleAuthRouter } from "./presentation/routes/user/google.auth.routes";

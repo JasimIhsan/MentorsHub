@@ -16,7 +16,8 @@ export interface IMentorDTO {
 	createdAt: Date;
 	lastActive: Date | null;
 	isVerified: boolean | null;
-	rating: number | null;
+	averageRating: number | null;
+	totalReviews: number | null;
 	sessionCompleted: number | null;
 	featuredMentor: boolean | null;
 	badges: string[] | null;

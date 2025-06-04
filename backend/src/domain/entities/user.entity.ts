@@ -3,11 +3,6 @@ import bcrypt from "bcrypt";
 // import { IMentorInterface } from "./mentor.detailes.entity";
 
 export type UserRole = "user" | "mentor";
-// interface IUserLocation {
-// 	city: string | null;
-// 	country: string | null;
-// 	timezone: string | null;
-//  }
 
 // Interface representing the user structure
 export interface UserInterface {
@@ -24,8 +19,8 @@ export interface UserInterface {
 	skills?: string[] | null;
 	badges?: ObjectId[] | null;
 	sessionCompleted?: number;
-	// location?: IUserLocation;
-	mentorDetailsId?: ObjectId | null;
+	averageRating: number | null;
+	totalReviews: number | null;
 	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
 	googleId?: string | null;
 	createdAt?: Date;
@@ -47,8 +42,8 @@ export class UserEntity {
 	private skills?: string[] | null;
 	private badges?: ObjectId[] | null;
 	private sessionCompleted?: number;
-	private location?: Location;
-	private mentorDetailsId?: ObjectId | null;
+	private averageRating: number | null;
+	private totalReviews: number | null;
 	private mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
 	private googleId?: string | null;
 	private createdAt: Date;
@@ -57,7 +52,7 @@ export class UserEntity {
 	constructor(user: UserInterface) {
 		this.id = user.id;
 		this.email = user.email;
-		this.firstName = user.firstName;	
+		this.firstName = user.firstName;
 		this.lastName = user.lastName;
 		this.password = user.password;
 		this.role = user.role || "user";
@@ -67,9 +62,9 @@ export class UserEntity {
 		this.interests = user.interests ?? null;
 		this.skills = user.skills ?? null;
 		this.badges = user.badges ?? null;
+		this.averageRating = user.averageRating ?? null;
+		this.totalReviews = user.totalReviews ?? null;
 		this.sessionCompleted = user.sessionCompleted ?? 0;
-		// this.location = user.location as IUserLocation ?? { city: null, country: null, timezone: null } as IUserLocation;
-		this.mentorDetailsId = user.mentorDetailsId ?? null;
 		this.mentorRequestStatus = user.mentorRequestStatus || "not-requested";
 		this.googleId = user.googleId ?? null;
 		this.createdAt = user.createdAt ?? new Date();
@@ -88,6 +83,8 @@ export class UserEntity {
 			status: "unblocked",
 			mentorRequestStatus: "not-requested",
 			role,
+			averageRating: 0,
+			totalReviews: 0,
 			sessionCompleted: 0,
 			createdAt: new Date(),
 		});
@@ -102,6 +99,8 @@ export class UserEntity {
 			lastName,
 			status: "unblocked",
 			sessionCompleted: 0,
+			averageRating: 0,
+			totalReviews: 0,
 			mentorRequestStatus: "not-requested",
 			googleId: googleId ?? null,
 			avatar,
@@ -123,10 +122,10 @@ export class UserEntity {
 			interests: userDoc.interests ?? null,
 			skills: userDoc.skills ?? null,
 			status: userDoc.status || "unblocked",
+			averageRating: userDoc.averageRating ?? null,
+			totalReviews: userDoc.totalReviews ?? null,
 			googleId: userDoc.googleId ?? null,
 			mentorRequestStatus: userDoc.mentorRequestStatus || "not-requested",
-			// location: userDoc.location ?? { city: null, country: null, timezone: null },
-			mentorDetailsId: userDoc.mentorDetails ?? {},
 			sessionCompleted: userDoc.sessionCompleted ?? 0,
 			badges: userDoc.badges ?? null,
 			createdAt: userDoc.createdAt ?? new Date(),
@@ -157,9 +156,8 @@ export class UserEntity {
 		if (updatedData.skills !== undefined) this.skills = updatedData.skills;
 		if (updatedData.badges !== undefined) this.badges = updatedData.badges;
 		if (updatedData.sessionCompleted !== undefined) this.sessionCompleted = updatedData.sessionCompleted;
-		if (updatedData.mentorDetailsId !== undefined) this.mentorDetailsId = updatedData.mentorDetailsId;
-		if (updatedData.mentorRequestStatus !== undefined){
-			this.mentorRequestStatus = updatedData.mentorRequestStatus
+		if (updatedData.mentorRequestStatus !== undefined) {
+			this.mentorRequestStatus = updatedData.mentorRequestStatus;
 		}
 		this.updatedAt = new Date();
 	}
@@ -198,6 +196,14 @@ export class UserEntity {
 		return this.status;
 	}
 
+	getrating(): number | null {
+		return this.averageRating;
+	}
+
+	getTotalReviews(): number | null {
+		return this.totalReviews;
+	}
+
 	getProfile(includePassword: boolean = false): Partial<UserInterface> {
 		return {
 			email: this.email,
@@ -211,7 +217,6 @@ export class UserEntity {
 			skills: this.skills,
 			badges: this.badges,
 			sessionCompleted: this.sessionCompleted,
-			// location: this.location,
 			createdAt: this.createdAt,
 			updatedAt: this.updatedAt,
 			mentorRequestStatus: this.mentorRequestStatus,
