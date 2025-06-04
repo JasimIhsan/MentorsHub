@@ -3,12 +3,14 @@ import { IReviewRepository } from "../../../domain/repositories/review.repositor
 import { ReviewModel } from "../models/review-rating/review.model";
 
 export class ReviewRepositoryImpl implements IReviewRepository {
-	async create(review: ReviewEntity): Promise<ReviewEntity> {
-		const created = await ReviewModel.create(review.toObject());
-		return ReviewEntity.fromDBDocument(created);
+	async create(review: { reviewerId: string; mentorId: string; rating: number; comment: string; sessionId?: string }): Promise<ReviewEntity> {
+		const newReview = new ReviewModel(review);
+		await newReview.save();
+		return ReviewEntity.fromDBDocument(newReview);
 	}
 
 	async findByMentorId(mentorId: string, options?: { page?: number; limit?: number; rating?: number }): Promise<{ reviews: ReviewEntity[]; total: number }> {
+		console.log('options: ', options);
 		const page = options?.page ?? 1;
 		const limit = options?.limit ?? 10;
 		const skip = (page - 1) * limit;

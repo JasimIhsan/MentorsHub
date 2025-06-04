@@ -97,9 +97,9 @@ export class ReviewEntity {
 	static fromDBDocument(doc: IReviewDocument): ReviewEntity {
 		return new ReviewEntity({
 			id: doc._id?.toString(),
-			reviewerId: doc.reviewer?.toString(),
-			mentorId: doc.mentor?.toString(),
-			sessionId: doc.session?.toString() ?? "",
+			reviewerId: doc.reviewerId?.toString(),
+			mentorId: doc.mentorId?.toString(),
+			sessionId: doc.sessionId?.toString() ?? "",
 			rating: doc.rating,
 			comment: doc.comment,
 			createdAt: doc.createdAt ?? new Date(),

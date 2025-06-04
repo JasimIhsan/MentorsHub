@@ -24,6 +24,7 @@ import { mentorSessionRouter } from "./presentation/routes/mentors/mentor.sessio
 import { SessionModel } from "./infrastructure/database/models/session/session.model";
 import initializeSocket from "./infrastructure/socket/socket.io";
 import { notificationRouter } from "./presentation/routes/common/notification.routes";
+import { reviewRouter } from "./presentation/routes/user/review.routes";
 
 dotenv.config();
 
@@ -50,7 +51,7 @@ app.use(
 	cors({
 		origin: ["http://localhost:5173"],
 		methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-		credentials: true,	
+		credentials: true,
 	})
 );
 
@@ -63,6 +64,7 @@ app.use("/api/user/auth", googleAuthRouter);
 app.use("/api/user/user-profile", userProfileRoutes);
 app.use("/api/user/sessions", sessionRouter);
 app.use("/api/user/mentor", userSideMentorRouter);
+app.use("/api/user/reviews", reviewRouter);
 
 app.use("/api/admin", adminAuthRouter);
 app.use("/api/admin/users", usertabRouter);

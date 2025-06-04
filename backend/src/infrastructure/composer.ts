@@ -20,6 +20,8 @@ import { S3Service } from "./cloud/S3 bucket/s3.implementation";
 import { IS3Service } from "../domain/interface/s3.service.interface";
 import { INotificationRepository } from "../domain/repositories/notification.repository";
 import { NotificationRepositoryImpl } from "./database/implementation/notification.repository.impl";
+import { IReviewRepository } from "../domain/repositories/review.repository";
+import { ReviewRepositoryImpl } from "./database/implementation/review.repository.impl";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -28,6 +30,7 @@ export const adminRepository: IAdminRepository = new AdminRepositoryImpl();
 export const mentorRepository: IMentorProfileRepository = new MentorDetailsRepositoryImpl()
 export const sessionRepository: ISessionRepository = new SessionRepositoryImpl();
 export const notificationRepository: INotificationRepository = new NotificationRepositoryImpl();
+export const reviewRepository: IReviewRepository = new ReviewRepositoryImpl()
 
 // Initialize services implementation
 export const tokenInterface: ITokenService = new TokenServicesImpl();
