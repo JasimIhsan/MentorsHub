@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, Video, MessageSquare, FileText, MoreHorizontal, Search, CreditCard, ChevronDown, CheckCircle, ArrowRight, Download } from "lucide-react";
+import { CalendarDays, Clock, Video, MessageSquare, FileText, MoreHorizontal, Search, CreditCard, ChevronDown, CheckCircle, ArrowRight, Download, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Textarea } from "@/components/ui/textarea";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
@@ -37,6 +38,8 @@ export function SessionsPage() {
 	const [itemsPerPage] = useState(5);
 	const [showCancelDialog, setShowCancelDialog] = useState(false);
 	const [sessionToCancel, setSessionToCancel] = useState<ISessionUserDTO | null>(null);
+	const [showReviewModal, setShowReviewModal] = useState(false);
+	const [sessionToReview, setSessionToReview] = useState<ISessionUserDTO | null>(null);
 	const user = useSelector((state: RootState) => state.userAuth.user);
 
 	// Load Razorpay script
@@ -192,6 +195,8 @@ export function SessionsPage() {
 									setSelectedSession={setSelectedSession}
 									setShowCancelDialog={setShowCancelDialog}
 									setSessionToCancel={setSessionToCancel}
+									setShowReviewModal={setShowReviewModal}
+									setSessionToReview={setSessionToReview}
 								/>
 							))}
 							{currentSessions.length === 0 && (
@@ -257,6 +262,16 @@ export function SessionsPage() {
 				/>
 			)}
 			{selectedSession && <SessionDetailsModal session={selectedSession} onClose={() => setSelectedSession(null)} />}
+			{sessionToReview && (
+				<ReviewModal
+					isOpen={showReviewModal}
+					onClose={() => {
+						setShowReviewModal(false);
+						setSessionToReview(null);
+					}}
+					session={sessionToReview}
+				/>
+			)}
 			<Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
 				<DialogContent>
 					<DialogHeader>
@@ -288,9 +303,11 @@ interface SessionCardProps {
 	setSelectedSession: (session: ISessionUserDTO) => void;
 	setShowCancelDialog: (value: boolean) => void;
 	setSessionToCancel: (session: ISessionUserDTO | null) => void;
+	setShowReviewModal: (value: boolean) => void;
+	setSessionToReview: (session: ISessionUserDTO | null) => void;
 }
 
-function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayLoaded, setSelectedSession, setShowCancelDialog, setSessionToCancel }: SessionCardProps) {
+function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayLoaded, setSelectedSession, setShowCancelDialog, setSessionToCancel, setShowReviewModal, setSessionToReview }: SessionCardProps) {
 	const [isPaying, setIsPaying] = useState(false);
 	const [isReasonOpen, setIsReasonOpen] = useState(false);
 	const user = useSelector((state: RootState) => state.userAuth.user);
@@ -484,8 +501,13 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 										<Badge variant="outline" className="bg-primary/5 text-primary">
 											Completed
 										</Badge>
-										<Button variant="outline" asChild>
-											<Link to={`/sessions/${session.id}/review`}>Leave Review</Link>
+										<Button
+											variant="outline"
+											onClick={() => {
+												setSessionToReview(session);
+												setShowReviewModal(true);
+											}}>
+											Leave Review
 										</Button>
 										<Button variant="ghost" size="icon" onClick={() => setSelectedSession(session)}>
 											<FileText className="h-4 w-4" />
@@ -633,6 +655,93 @@ function PaymentSuccessModal({ isOpen, onClose, session }: PaymentSuccessModalPr
 						<Link to="/dashboard">Back to Dashboard</Link>
 					</Button>
 				</div>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+interface ReviewModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+	session: ISessionUserDTO;
+}
+
+function ReviewModal({ isOpen, onClose, session }: ReviewModalProps) {
+	const [rating, setRating] = useState(0);
+	const [hoverRating, setHoverRating] = useState(0);
+	const [feedback, setFeedback] = useState("");
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const user = useSelector((state: RootState) => state.userAuth.user);
+
+	const handleSubmitReview = async () => {
+		if (!user?.id || !session.id) {
+			toast.error("User or session not found.");
+			return;
+		}
+
+		if (rating === 0) {
+			toast.error("Please provide a rating.");
+			return;
+		}
+
+		setIsSubmitting(true);
+		try {
+			const response = await axiosInstance.post("/user/reviews/create", {
+				reviewerId: user.id,
+				sessionId: session.id,
+				mentorId: session.mentor._id,
+				rating,
+				comment: feedback,
+			});
+			if (response.data.success) {
+				toast.success("Review submitted successfully!");
+				onClose();
+			} else {
+				toast.error(response.data.message || "Failed to submit review.");
+			}
+		} catch (error: any) {
+			toast.error(error.response?.data?.message || "Failed to submit review.");
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
+	return (
+		<Dialog open={isOpen} onOpenChange={onClose}>
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<DialogTitle>Leave a Review</DialogTitle>
+					<DialogDescription>
+						Share your feedback for your session with {session.mentor.firstName} {session.mentor.lastName} on {formatDate(session.date)} at {formatTime(session.time)}.
+					</DialogDescription>
+				</DialogHeader>
+				<div className="space-y-4">
+					<div className="flex justify-center gap-1">
+						{[1, 2, 3, 4, 5].map((star) => (
+							<Star
+								key={star}
+								className={`h-6 w-6 cursor-pointer ${star <= (hoverRating || rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+								onClick={() => setRating(star)}
+								onMouseEnter={() => setHoverRating(star)}
+								onMouseLeave={() => setHoverRating(0)}
+							/>
+						))}
+					</div>
+					<div>
+						<label htmlFor="feedback" className="text-sm font-medium">
+							Your Feedback
+						</label>
+						<Textarea id="feedback" placeholder="Share your experience..." value={feedback} onChange={(e) => setFeedback(e.target.value)} className="mt-1" rows={4} />
+					</div>
+				</div>
+				<DialogFooter>
+					<Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+						Cancel
+					</Button>
+					<Button onClick={handleSubmitReview} disabled={isSubmitting}>
+						{isSubmitting ? "Submitting..." : "Submit Review"}
+					</Button>
+				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	);

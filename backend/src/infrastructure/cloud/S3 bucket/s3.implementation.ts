@@ -15,8 +15,8 @@ export class S3Service implements IS3Service {
 			ContentType: mimeType,
 		};
 
-		const data = await s3.upload(params).promise();
-		return data.Location;
+		await s3.upload(params).promise();
+		return fullKey;
 	}
 
 	async getSignedUrl(key: string, expiresIn: number): Promise<string> {

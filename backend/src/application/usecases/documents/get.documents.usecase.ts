@@ -8,18 +8,23 @@ import { IGetDocumentsUseCase } from "../../interfaces/documents";
 
 interface Input {
 	mentorId: string;
-	user: UserEntity | AdminEntity;
+	user: any;
 }
 
 export class GetDocumentsUseCase implements IGetDocumentsUseCase{
 	constructor(private mentorRepo: IMentorProfileRepository, private s3Service: IS3Service) {}
 
 	async execute({ mentorId, user }: Input): Promise<string[]> {
+		console.log('user: ', user);
+		console.log(`mentorId: ${mentorId}`);	
 		const mentor = await this.mentorRepo.findMentorByUserId(mentorId);
 		if (!mentor) throw new Error("Mentor not found");
 
-		const isAdmin = user.getProfile().role === "admin" ? true : user.getProfile().role === "super-admin" ? true : false;
-		const isOwner = mentor.userId.toString() === user.getId();
+		const isAdmin = user.role === "admin" ? true : user.role === "super-admin" ? true : false;
+		const isOwner = mentor.userId.toString() === user.id;
+		
+		console.log('isOwner: ', isOwner);
+		console.log('isAdmin: ', isAdmin);
 
 		if (!isOwner && !isAdmin) throw new Error("Access denied");
 

@@ -93,7 +93,8 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 				status: mentor.userId.status,
 				mentorRequestStatus: mentor.userId.mentorRequestStatus,
 				isVerified: mentor.userId.isVerified,
-				rating: mentor.userId.rating,
+				averageRating: mentor.userId.averageRating,
+				totalReviews: mentor.userId.totalReviews,
 				sessionCompleted: mentor.userId.sessionCompleted,
 				featuredMentor: mentor.userId.featuredMentor,
 				badges: mentor.userId.badges,
@@ -137,6 +138,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			const mentorDTOs: IMentorDTO[] = approvedMentors
 				.filter((mentor: any) => mentor.userId)
 				.map((mentor: any) => ({
+					id: mentor._id,
 					email: mentor.userId.email,
 					password: mentor.userId.password,
 					firstName: mentor.userId.firstName,
@@ -150,7 +152,8 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 					status: mentor.userId.status,
 					mentorRequestStatus: mentor.userId.mentorRequestStatus,
 					isVerified: mentor.userId.isVerified,
-					rating: mentor.userId.rating,
+					averageRating: mentor.userId.averageRating,
+					totalReviews: mentor.userId.totalReviews,
 					sessionCompleted: mentor.userId.sessionCompleted,
 					featuredMentor: mentor.userId.featuredMentor,
 					badges: mentor.userId.badges,
@@ -186,6 +189,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			const user = mentor.userId as any;
 
 			const mentorDTOs: IMentorDTO = {
+				id: user._id,
 				email: user.email,
 				password: user.password,
 				firstName: user.firstName,
@@ -199,7 +203,8 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 				status: user.status,
 				mentorRequestStatus: user.mentorRequestStatus,
 				isVerified: user.isVerified,
-				rating: user.rating,
+				averageRating: user.averageRating,
+				totalReviews: user.totalReviews,
 				sessionCompleted: user.sessionCompleted,
 				featuredMentor: user.featuredMentor,
 				badges: user.badges,

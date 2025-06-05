@@ -3,20 +3,192 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, MessageSquare, Star, Users, Briefcase, GraduationCap, Award, User, Heart} from "lucide-react";
+import { Clock, MessageSquare, Star, Users, Briefcase, GraduationCap, Award, User, Heart } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { useState } from "react"; // Removed unused useEffect
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useMentor } from "@/hooks/useMentor";
 import { motion } from "framer-motion";
 import { WeekDay } from "@/interfaces/IMentorDTO";
 import { formatTime } from "@/utility/time-data-formater";
+import axiosInstance from "@/api/config/api.config";
+import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
+// Define interface for reviewer
+export interface ReviewerDTO {
+	id: string;
+	firstName: string;
+	lastName: string;
+	avatar?: string;
+}
+
+// Define interface for review
+export interface ReviewDTO {
+	id: string;
+	reviewerId: ReviewerDTO;
+	mentorId: string;
+	sessionId: string;
+	rating: number;
+	comment: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+// Define interface for modal props
+interface MentorReviewModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+	setReviews: React.Dispatch<React.SetStateAction<ReviewDTO[]>>;
+	mentor: {
+		id: string;
+		firstName: string;
+		lastName: string;
+	};
+}
+
+// Mentor Review Modal Component
+export function MentorReviewModal({ isOpen, onClose, mentor, setReviews }: MentorReviewModalProps) {
+	const [rating, setRating] = useState(0);
+	const [hoverRating, setHoverRating] = useState(0);
+	const [feedback, setFeedback] = useState("");
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const user = useSelector((state: RootState) => state.userAuth.user);
+
+	const handleSubmitReview = async () => {
+		if (!user?.id || !mentor.id) {
+			toast.error("User, session, or mentor not found.");
+			return;
+		}
+
+		if (rating === 0) {
+			toast.error("Please provide a rating.");
+			return;
+		}
+
+		setIsSubmitting(true);
+		try {
+			const response = await axiosInstance.post("/user/reviews/create", {
+				reviewerId: user.id,
+				mentorId: mentor.id,
+				rating,
+				comment: feedback,
+			});
+			if (response.data.success) {
+				const review = response.data.review;
+				setReviews((prevReviews) => [{ ...review }, ...prevReviews]);
+				toast.success("Review submitted successfully!");
+				onClose();
+			} else {
+				toast.error(response.data.message || "Failed to submit review.");
+			}
+		} catch (error: any) {
+			toast.error(error.response?.data?.message || "Failed to submit review.");
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
+	return (
+		<Dialog open={isOpen} onOpenChange={onClose}>
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<DialogTitle>Rate Your Mentor</DialogTitle>
+					<DialogDescription>
+						Share your feedback for your session with {mentor.firstName} {mentor.lastName}.
+					</DialogDescription>
+				</DialogHeader>
+				<div className="space-y-4">
+					<div className="flex justify-center gap-1">
+						{[1, 2, 3, 4, 5].map((star) => (
+							<Star
+								key={star}
+								className={`h-6 w-6 cursor-pointer ${star <= (hoverRating || rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+								onClick={() => setRating(star)}
+								onMouseEnter={() => setHoverRating(star)}
+								onMouseLeave={() => setHoverRating(0)}
+							/>
+						))}
+					</div>
+					<div>
+						<label htmlFor="feedback" className="text-sm font-medium">
+							Your Feedback
+						</label>
+						<Textarea id="feedback" placeholder="Share your experience..." value={feedback} onChange={(e) => setFeedback(e.target.value)} className="mt-1" rows={4} />
+					</div>
+				</div>
+				<DialogFooter>
+					<Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+						Cancel
+					</Button>
+					<Button onClick={handleSubmitReview} disabled={isSubmitting}>
+						{isSubmitting ? "Submitting..." : "Submit Review"}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+// Mentor Details Page Component
 export function MentorDetailsPage() {
 	const [isAvatarOpen, setIsAvatarOpen] = useState(false);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [reviews, setReviews] = useState<ReviewDTO[]>([]);
+	const [reviewsLoading, setReviewsLoading] = useState(true);
+	const [currentPage, setCurrentPage] = useState(1); // Track current page
+	const [totalPages, setTotalPages] = useState(1); // Track total pages
+	const [selectedRating, setSelectedRating] = useState<number | null>(null); // Track selected rating filter
 	const { mentorId } = useParams<{ mentorId: string }>();
-	const { mentor, loading } = useMentor(mentorId as string); // Removed unused error
+	const { mentor, loading } = useMentor(mentorId as string);
 	const [_selectedDay, setSelectedDay] = useState<WeekDay>(WeekDay.Monday);
+	const reviewsPerPage = 5; // Number of reviews per page
+
+	// Fetch reviews with pagination and optional rating filter
+	useEffect(() => {
+		const fetchReviews = async () => {
+			if (!mentorId) return;
+			setReviewsLoading(true);
+			try {
+				const params: { page: number; limit: number; rating?: number } = {
+					page: currentPage,
+					limit: reviewsPerPage,
+				};
+				if (selectedRating) {
+					params.rating = selectedRating;
+				}
+				const response = await axiosInstance.get(`/user/reviews/${mentorId}`, { params });
+				if (response.data?.reviews) {
+					setReviews(response.data.reviews);
+					setTotalPages(Math.ceil(response.data.total / reviewsPerPage) || 1);
+				}
+			} catch (err: any) {
+				toast.error(err.response?.data?.message || "Failed to load reviews.");
+			} finally {
+				setReviewsLoading(false);
+			}
+		};
+		fetchReviews();
+	}, [mentorId, currentPage, selectedRating]);
+
+	// Handle page change
+	const handlePageChange = (page: number) => {
+		if (page >= 1 && page <= totalPages) {
+			setCurrentPage(page);
+		}
+	};
+
+	// Handle rating filter click
+	const handleRatingFilter = (rating: number) => {
+		if (selectedRating === rating) {
+			setSelectedRating(null); // Clear filter if same rating is clicked
+		} else {
+			setSelectedRating(rating);
+			setCurrentPage(1); // Reset to first page when filter changes
+		}
+	};
 
 	if (loading) {
 		return (
@@ -74,7 +246,7 @@ export function MentorDetailsPage() {
 								</h1>
 								<div className="flex items-center">
 									<Star className="ml-2 mr-1 h-5 w-5 fill-yellow-400 text-yellow-400" />
-									<span className="font-medium">{mentor.rating ?? "N/A"}</span>
+									<span className="font-medium">{mentor.averageRating ?? "N/A"}</span>
 								</div>
 							</div>
 							<p className="text-xl text-muted-foreground">{mentor.professionalTitle || "No title provided"}</p>
@@ -247,16 +419,111 @@ export function MentorDetailsPage() {
 						<Card>
 							<CardHeader>
 								<CardTitle>Reviews</CardTitle>
+								<CardDescription>Feedback from mentees about their sessions with {mentor.firstName || "this mentor"}</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<p className="text-muted-foreground">No reviews available at this time.</p>
+								{reviewsLoading ? (
+									<div className="flex items-center justify-center py-8">
+										<motion.div className="text-muted-foreground" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}>
+											<Star className="h-8 w-8" />
+										</motion.div>
+									</div>
+								) : (
+									<>
+										{/* Total Review Progress Section */}
+										<div className="mb-8">
+											<div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
+												<div className="flex items-center gap-2">
+													<span className="text-4xl font-bold">{mentor.averageRating ? mentor.averageRating.toFixed(1) : "N/A"}</span>
+													<Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
+												</div>
+												<div className="mt-2 sm:mt-0">
+													<p className="text-sm text-muted-foreground">
+														{reviews.length.toLocaleString()} Ratings & {reviews.length.toLocaleString()} Reviews
+													</p>
+												</div>
+											</div>
+											<div className="mt-4 space-y-2">
+												{[5, 4, 3, 2, 1].map((star) => {
+													const count = reviews.filter((review) => review.rating === star).length;
+													const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+													return (
+														<button key={star} className={`flex items-center gap-2 w-full ${selectedRating === star ? "bg-gray-100" : ""} hover:bg-gray-50 rounded-md p-1 transition-colors`} onClick={() => handleRatingFilter(star)}>
+															<span className="w-8 text-sm">{star} ★</span>
+															<div className="w-xl h-2 bg-gray-200 rounded-full overflow-hidden">
+																<div
+																	className={`h-full rounded-full ${star === 5 ? "bg-green-500" : star === 4 ? "bg-green-400" : star === 3 ? "bg-yellow-400" : star === 2 ? "bg-orange-400" : "bg-red-400"}`}
+																	style={{ width: `${percentage}%` }}
+																/>
+															</div>
+															<span className="w-16 text-sm text-right">{count.toLocaleString()}</span>
+														</button>
+													);
+												})}
+											</div>
+											<Button variant="outline" className="mt-4" onClick={() => setIsModalOpen(true)}>
+												Rate Mentor
+											</Button>
+										</div>
+
+										{/* Individual Reviews */}
+										{reviews.length > 0 ? (
+											<div className="space-y-6">
+												{reviews.map((review) => (
+													<div key={review.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+														<div className="flex items-start gap-4">
+															<Avatar className="h-10 w-10">
+																<AvatarImage src={review.reviewerId.avatar} alt={review.reviewerId.firstName} />
+																<AvatarFallback>{review.reviewerId.firstName.charAt(0)}</AvatarFallback>
+															</Avatar>
+															<div className="flex-1">
+																<div className="flex items-center justify-between">
+																	<div>
+																		<h4 className="font-medium">{`${review.reviewerId.firstName} ${review.reviewerId.lastName}`}</h4>
+																		<p className="text-xs text-muted-foreground">{new Date(review.createdAt).toLocaleDateString()}</p>
+																	</div>
+																	<div className="flex items-center gap-1">
+																		{[...Array(5)].map((_, i) => (
+																			<Star key={i} className={`h-4 w-4 ${i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} />
+																		))}
+																	</div>
+																</div>
+																<p className="mt-2 text-sm">{review.comment || "No feedback provided."}</p>
+															</div>
+														</div>
+													</div>
+												))}
+											</div>
+										) : (
+											<div className="text-center py-8">
+												<Star className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
+												<p className="text-muted-foreground">No reviews available at this time.</p>
+											</div>
+										)}
+
+										{/* Pagination Controls */}
+										{totalPages > 1 && (
+											<div className="mt-6 flex justify-center gap-2">
+												<Button variant="outline" disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>
+													Previous
+												</Button>
+												<span className="flex items-center">
+													Page {currentPage} of {totalPages}
+												</span>
+												<Button variant="outline" disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)}>
+													Next
+												</Button>
+											</div>
+										)}
+									</>
+								)}
 							</CardContent>
 						</Card>
 					</TabsContent>
 
 					<TabsContent value="availability" className="mt-6">
 						<div>
-							<Card className="w-full  shadow-lg">
+							<Card className="w-full shadow-lg">
 								<CardHeader>
 									<CardTitle className="text-2xl font-bold text-gray-800">Available Time Slots</CardTitle>
 									<CardDescription className="text-gray-600">View the mentor's available times for sessions</CardDescription>
@@ -298,6 +565,8 @@ export function MentorDetailsPage() {
 						</div>
 					</TabsContent>
 				</Tabs>
+
+				<MentorReviewModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} mentor={{ id: mentor.id, firstName: mentor.firstName, lastName: mentor.lastName }} setReviews={setReviews} />
 			</div>
 		</div>
 	);

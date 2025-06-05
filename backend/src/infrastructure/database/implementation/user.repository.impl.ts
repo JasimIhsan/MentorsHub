@@ -95,6 +95,7 @@ export class UserRepositoryImpl implements IUserRepository {
 	async updateUser(userId: string, user: UserEntity): Promise<UserEntity> {
 		try {
 			const updatedUser = await UserModel.findByIdAndUpdate(userId, user.getProfile(true), { new: true });
+			console.log('updatedUser: ', updatedUser);
 			return UserEntity.fromDBDocument(updatedUser);
 		} catch (error) {
 			return handleError(error, "Error updating user");
