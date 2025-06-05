@@ -24,10 +24,23 @@ export class NotificationRepositoryImpl implements INotificationRepository {
 		}).toObject();
 	}
 
-	async getUserNotifications(userId: string): Promise<INotificationEntity[]> {
-		const notifications: INotificationDocument[] = await NotificationModel.find({
-			recipientId: userId,
-		}).sort({ createdAt: -1 });
+	async getUserNotifications(params: { userId: string; page: number; limit: number; isRead?: boolean; search?: string }): Promise<INotificationEntity[]> {
+		const { userId, page, limit, isRead, search } = params;
+
+		const query: any = { recipientId: userId };
+
+		if (isRead !== undefined) {
+			query.isRead = isRead;
+		}
+
+		if (search) {
+			query.$or = [{ title: { $regex: search, $options: "i" } }, { message: { $regex: search, $options: "i" } }];
+		}
+
+		const notifications = await NotificationModel.find(query)
+			.sort({ createdAt: -1 })
+			.skip((page - 1) * limit)
+			.limit(limit);
 
 		return notifications.map((n) =>
 			new NotificationEntity({
@@ -43,8 +56,24 @@ export class NotificationRepositoryImpl implements INotificationRepository {
 		);
 	}
 
+	async countUserNotifications(params: { userId: string; isRead?: boolean; search?: string }): Promise<number> {
+		const { userId, isRead, search } = params;
+
+		const query: any = { recipientId: userId };
+
+		if (isRead !== undefined) {
+			query.isRead = isRead;
+		}
+
+		if (search) {
+			query.$or = [{ title: { $regex: search, $options: "i" } }, { message: { $regex: search, $options: "i" } }];
+		}
+
+		return await NotificationModel.countDocuments(query);
+	}
+
 	async markAsRead(notificationId: string): Promise<void> {
-		await NotificationModel.findByIdAndUpdate(notificationId, { isRead: true });
+		await NotificationModel.updateOne({ _id: notificationId }, { isRead: true });
 	}
 
 	async markAllAsRead(userId: string): Promise<void> {

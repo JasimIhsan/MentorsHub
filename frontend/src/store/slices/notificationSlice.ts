@@ -2,30 +2,59 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { INotification } from "@/interfaces/INotification";
 import { getUserNotificationsAPI, markNotificationAsReadAPI, markAllNotificationsAsReadAPI } from "@/api/notification.api.service";
 
+// Interface for backend response
+interface PaginatedResponse {
+	success: boolean;
+	data: {
+		notifications: INotification[];
+		total: number;
+		currentPage: number;
+		totalPages: number;
+	};
+}
+
+// Interface for notifications state
 interface NotificationsState {
 	notifications: INotification[];
 	unreadCount: number;
 	isLoading: boolean;
 	error: string | null;
+	totalPages: number;
 }
 
+// Initial state
 const initialState: NotificationsState = {
 	notifications: [],
 	unreadCount: 0,
 	isLoading: false,
 	error: null,
+	totalPages: 1,
 };
 
-// Async thunks
-export const fetchNotificationsThunk = createAsyncThunk("notifications/fetchNotifications", async (userId: string, { rejectWithValue }) => {
+// Interface for fetch parameters
+interface FetchParams {
+	userId: string;
+	page?: number;
+	limit?: number;
+	search?: string;
+	isRead?: boolean;
+}
+
+// Thunk to fetch notifications
+export const fetchNotificationsThunk = createAsyncThunk("notifications/fetchNotifications", async (params: FetchParams, { rejectWithValue }) => {
 	try {
-		const data = await getUserNotificationsAPI(userId);
-		return data as INotification[];
+		const response = await getUserNotificationsAPI(params);
+		// Ensure response has the expected structure
+		if (!response.success || !response.data) {
+			throw new Error("Invalid response structure from API");
+		}
+		return response as PaginatedResponse;
 	} catch (error: any) {
 		return rejectWithValue(error.message || "Failed to fetch notifications");
 	}
 });
 
+// Thunk to mark a notification as read
 export const markNotificationAsReadThunk = createAsyncThunk("notifications/markNotificationAsRead", async (id: string, { rejectWithValue }) => {
 	try {
 		await markNotificationAsReadAPI(id);
@@ -35,6 +64,7 @@ export const markNotificationAsReadThunk = createAsyncThunk("notifications/markN
 	}
 });
 
+// Thunk to mark all notifications as read
 export const markAllNotificationsAsReadThunk = createAsyncThunk("notifications/markAllAsRead", async (userId: string, { rejectWithValue }) => {
 	try {
 		await markAllNotificationsAsReadAPI(userId);
@@ -44,17 +74,16 @@ export const markAllNotificationsAsReadThunk = createAsyncThunk("notifications/m
 	}
 });
 
+// Notifications slice
 const notificationsSlice = createSlice({
 	name: "notifications",
 	initialState,
 	reducers: {
+		// Add a new notification
 		addNotification(state, action: PayloadAction<INotification>) {
 			const exists = state.notifications.some((n) => n.id === action.payload.id);
 			if (!exists) {
 				state.notifications.unshift(action.payload);
-				if (state.notifications.length > 5) {
-					state.notifications.pop();
-				}
 				if (!action.payload.isRead) {
 					state.unreadCount++;
 				}
@@ -67,9 +96,10 @@ const notificationsSlice = createSlice({
 				state.isLoading = true;
 				state.error = null;
 			})
-			.addCase(fetchNotificationsThunk.fulfilled, (state, action: PayloadAction<INotification[]>) => {
-				state.notifications = action.payload.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
-				state.unreadCount = state.notifications.filter((n) => !n.isRead).length;
+			.addCase(fetchNotificationsThunk.fulfilled, (state, action: PayloadAction<PaginatedResponse>) => {
+				state.notifications = action.payload.data.notifications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+				state.unreadCount = action.payload.data.notifications.filter((n) => !n.isRead).length;
+				state.totalPages = action.payload.data.totalPages || 1;
 				state.isLoading = false;
 			})
 			.addCase(fetchNotificationsThunk.rejected, (state, action) => {
@@ -105,3 +135,4 @@ export const selectNotifications = (state: { notifications: NotificationsState }
 export const selectUnreadCount = (state: { notifications: NotificationsState }) => state.notifications.unreadCount;
 export const selectNotificationsLoading = (state: { notifications: NotificationsState }) => state.notifications.isLoading;
 export const selectNotificationsError = (state: { notifications: NotificationsState }) => state.notifications.error;
+export const selectTotalPages = (state: { notifications: NotificationsState }) => state.notifications.totalPages;

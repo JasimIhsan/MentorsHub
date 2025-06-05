@@ -6,7 +6,12 @@ export interface ICreateNotificationUseCase {
 }
 
 export interface IGetUserNotificationsUseCase {
-	execute(userId: string): Promise<INotificationEntity[]>;
+	execute(params: { userId: string; page: number; limit: number; isRead?: boolean; search?: string }): Promise<{
+		notifications: INotificationEntity[];
+		total: number;
+		currentPage: number;
+		totalPages: number;
+	}>;
 }
 
 export interface IMarkAsReadUseCase {
