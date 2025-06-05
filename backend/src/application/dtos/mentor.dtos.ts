@@ -1,6 +1,7 @@
 import { Availability } from "../../domain/entities/mentor.detailes.entity";
 
 export interface IMentorDTO {
+	id: string;
 	email: string;
 	password: string;
 	firstName: string;

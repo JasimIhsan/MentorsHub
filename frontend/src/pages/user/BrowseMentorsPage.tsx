@@ -25,8 +25,8 @@ interface Mentor {
 	name: string;
 	title: string;
 	avatar: string | null;
-	rating: number | null;
-	reviewCount: number | null;
+	averageRating: number | null;
+	totalReviews: number | null;
 	joinDate: string;
 	interests: string[];
 	rate: number;
@@ -69,8 +69,6 @@ export default function BrowseMentorsPage() {
 
 		const matchesInterest = selectedInterests.length === 0 || mentor.interests.some((interest) => selectedInterests.includes(interest));
 
-		console.log(`Mentor: ${mentor.name}, Rate: ${mentor.rate}, MentorRate: ${mentorRate}, MatchesPrice: ${matchesPrice}, IsVerified: ${mentor.isVerified}`);
-
 		return matchesSearch && matchesPrice && matchesInterest;
 	});
 
@@ -86,9 +84,9 @@ export default function BrowseMentorsPage() {
 			console.log(`Sorting price-high: ${a.name} (${aRate}) vs ${b.name} (${bRate})`);
 			return bRate - aRate;
 		} else if (sortBy === "rating") {
-			return (b.rating ?? 0) - (a.rating ?? 0);
+			return (b.averageRating ?? 0) - (a.averageRating ?? 0);
 		} else if (sortBy === "reviews") {
-			return (b.reviewCount ?? 0) - (a.reviewCount ?? 0);
+			return (b.totalReviews ?? 0) - (a.totalReviews ?? 0);
 		} else if (sortBy === "newest") {
 			return new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime();
 		}
@@ -100,12 +98,6 @@ export default function BrowseMentorsPage() {
 	const startIndex = (currentPage - 1) * mentorsPerPage;
 	const endIndex = startIndex + mentorsPerPage;
 	const currentMentors = sortedMentors.slice(startIndex, endIndex);
-
-	// Debugging logs
-	console.log("filteredMentors length:", filteredMentors.length);
-	console.log("sortedMentors length:", sortedMentors.length);
-	console.log("currentMentors length:", currentMentors.length);
-	console.log("currentMentors:", currentMentors);
 
 	const handlePageChange = (page: number) => {
 		setCurrentPage(page);
@@ -176,8 +168,8 @@ export default function BrowseMentorsPage() {
 						name: `${mentor.firstName} ${mentor.lastName}`,
 						title: mentor.professionalTitle,
 						avatar: mentor.avatar,
-						rating: mentor.rating ?? null,
-						reviewCount: mentor.sessionCompleted ?? null,
+						averageRating: mentor.averageRating ?? null,
+						totalReviews: mentor.sessionCompleted ?? null,
 						joinDate: new Date(mentor.createdAt).toISOString(),
 						interests: Array.isArray(mentor.interests)
 							? mentor.interests.map(String) // Ensure all interests are strings
@@ -295,8 +287,8 @@ export default function BrowseMentorsPage() {
 											<div className="mt-5 flex items-center justify-between">
 												<div className="flex items-center gap-2">
 													<Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-													<span className="text-base font-medium text-gray-900">{mentor.rating ?? "N/A"}</span>
-													<span className="text-sm text-gray-500">({mentor.reviewCount ?? 0})</span>
+													<span className="text-base font-medium text-gray-900">{mentor.averageRating ?? "N/A"}</span>
+													<span className="text-sm text-gray-500">({mentor.totalReviews ?? 0})</span>
 												</div>
 												<span className="text-base font-semibold text-primary">{mentor.rate === 0 ? "FREE" : `₹${mentor.rate}/-`}</span>
 											</div>

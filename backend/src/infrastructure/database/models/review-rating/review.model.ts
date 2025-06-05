@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
 export interface IReviewDocument extends Document {
+	_id: ObjectId;
 	reviewerId: ObjectId; // User (mentee)
 	mentorId: ObjectId; // Mentor being reviewed
 	sessionId: ObjectId | null; // Optional: link to session

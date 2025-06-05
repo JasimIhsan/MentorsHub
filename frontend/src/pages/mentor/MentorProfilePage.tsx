@@ -112,7 +112,7 @@ export function MentorProfilePage() {
 								)}
 								<div className="mt-4 flex items-center gap-4">
 									<div className="flex items-center gap-1">
-										<Badge variant="secondary">{mentor.rating?.toFixed(1) || "N/A"}</Badge>
+										<Badge variant="secondary">{mentor.averageRating?.toFixed(1) || "N/A"}</Badge>
 										<span className="text-sm text-muted-foreground">({mentor.reviews?.length || 0} reviews)</span>
 									</div>
 									<span className="text-sm text-muted-foreground">|</span>

@@ -138,6 +138,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			const mentorDTOs: IMentorDTO[] = approvedMentors
 				.filter((mentor: any) => mentor.userId)
 				.map((mentor: any) => ({
+					id: mentor._id,
 					email: mentor.userId.email,
 					password: mentor.userId.password,
 					firstName: mentor.userId.firstName,
@@ -188,6 +189,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			const user = mentor.userId as any;
 
 			const mentorDTOs: IMentorDTO = {
+				id: user._id,
 				email: user.email,
 				password: user.password,
 				firstName: user.firstName,

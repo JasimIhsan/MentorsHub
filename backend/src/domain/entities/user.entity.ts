@@ -156,6 +156,8 @@ export class UserEntity {
 		if (updatedData.skills !== undefined) this.skills = updatedData.skills;
 		if (updatedData.badges !== undefined) this.badges = updatedData.badges;
 		if (updatedData.sessionCompleted !== undefined) this.sessionCompleted = updatedData.sessionCompleted;
+		if (updatedData.averageRating !== undefined) this.averageRating = updatedData.averageRating;
+		if (updatedData.totalReviews !== undefined) this.totalReviews = updatedData.totalReviews;
 		if (updatedData.mentorRequestStatus !== undefined) {
 			this.mentorRequestStatus = updatedData.mentorRequestStatus;
 		}
@@ -178,6 +180,10 @@ export class UserEntity {
 
 	getRole(): UserRole {
 		return this.role;
+	}
+
+	getAvatar(): string | null {
+		return this.avatar as string | null;
 	}
 
 	getFullName(): string {
@@ -216,6 +222,8 @@ export class UserEntity {
 			interests: this.interests,
 			skills: this.skills,
 			badges: this.badges,
+			averageRating: this.averageRating,
+			totalReviews: this.totalReviews,
 			sessionCompleted: this.sessionCompleted,
 			createdAt: this.createdAt,
 			updatedAt: this.updatedAt,

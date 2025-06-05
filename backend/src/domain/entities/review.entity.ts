@@ -1,8 +1,9 @@
+import { ReviewerDTO } from "../../application/dtos/review.dtos";
 import { IReviewDocument } from "../../infrastructure/database/models/review-rating/review.model";
 
 export interface IReviewEntity {
 	id?: string;
-	reviewerId: string;
+	reviewerId: ReviewerDTO;
 	mentorId: string;
 	sessionId?: string;
 	rating: number;
@@ -13,7 +14,7 @@ export interface IReviewEntity {
 
 export class ReviewEntity {
 	private _id?: string;
-	private reviewerId: string;
+	private reviewerId: ReviewerDTO;
 	private mentorId: string;
 	private sessionId?: string;
 	private rating: number;
@@ -38,7 +39,7 @@ export class ReviewEntity {
 		return this._id;
 	}
 
-	getReviewerId(): string {
+	getReviewer(): ReviewerDTO {
 		return this.reviewerId;
 	}
 
@@ -94,15 +95,39 @@ export class ReviewEntity {
 		};
 	}
 
+	updateReviewData(data: Partial<IReviewEntity>): void {
+		if(data.rating) this.updateRating(data.rating);
+		if(data.comment) this.updateComment(data.comment);
+		if(data.id) this._id = data.id;
+		if(data.mentorId) this.mentorId = data.mentorId;
+		if(data.sessionId) this.sessionId = data.sessionId;
+		if(data.reviewerId?.avatar) this.reviewerId.avatar = data.reviewerId.avatar;
+		if(data.reviewerId?.firstName) this.reviewerId.firstName = data.reviewerId.firstName;
+		if(data.reviewerId?.lastName) this.reviewerId.lastName = data.reviewerId.lastName;
+		if(data.reviewerId?.id) this.reviewerId.id = data.reviewerId.id;
+
+	}
+
+
 	static fromDBDocument(doc: IReviewDocument): ReviewEntity {
+		const reviewer = doc.reviewerId as any; // populated reviewer
+
+		const reviewerDto: ReviewerDTO = {
+			id: reviewer._id?.toString(),
+			firstName: reviewer.firstName,
+			lastName: reviewer.lastName,
+			avatar: reviewer.avatar ?? null,
+		};
+
 		return new ReviewEntity({
 			id: doc._id?.toString(),
-			reviewerId: doc.reviewerId?.toString(),
+			reviewerId: reviewerDto,
 			mentorId: doc.mentorId?.toString(),
 			sessionId: doc.sessionId?.toString() ?? "",
 			rating: doc.rating,
 			comment: doc.comment,
 			createdAt: doc.createdAt ?? new Date(),
+			// updatedAt: doc.updatedAt ?? new Date(),
 		});
 	}
 }
