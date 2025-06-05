@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 import { WalletModel } from "../models/wallet/wallet.model";
 import { IWalletTransactionDocument, WalletTransactionModel } from "../models/wallet/wallet.transaction.model";
 import { IWithdrawalRequestDocument, WithdrawalRequestModel } from "../models/wallet/wallet.withdrawel.request.model";
@@ -7,18 +7,18 @@ import { WalletTransactionEntity } from "../../../domain/entities/wallet.transac
 import { WithdrawalRequestEntity } from "../../../domain/entities/wallet.withdrawel.request.entity";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 
-export class WalletRepository implements IWalletRepository {
-	async findWalletByUserId(userId: ObjectId, role: string): Promise<WalletEntity | null> {
+export class WalletRepositoryImpl implements IWalletRepository {
+	async findWalletByUserId(userId: string, role: string): Promise<WalletEntity | null> {
 		const doc = await WalletModel.findOne({ userId, role });
 		return doc ? WalletEntity.fromDBDocument(doc) : null;
 	}
 
-	async createWallet(userId: ObjectId, role: string): Promise<WalletEntity> {
+	async createWallet(userId: string, role: string): Promise<WalletEntity> {
 		const doc = await WalletModel.create({ userId, role, balance: 0 });
 		return WalletEntity.fromDBDocument(doc);
 	}
 
-	async updateBalance(userId: ObjectId, role: string, amount: number): Promise<WalletEntity | null> {
+	async updateBalance(userId: string, role: string, amount: number): Promise<WalletEntity | null> {
 		const doc = await WalletModel.findOneAndUpdate({ userId, role }, { $inc: { balance: amount } }, { new: true });
 		return doc ? WalletEntity.fromDBDocument(doc) : null;
 	}
@@ -28,7 +28,7 @@ export class WalletRepository implements IWalletRepository {
 		return WalletTransactionEntity.fromDBDocument(doc);
 	}
 
-	async getTransactionsByUser(userId: ObjectId, role: string, page: number = 1, limit: number = 10, filter: Record<string, any> = {}): Promise<{ data: WalletTransactionEntity[]; total: number }> {
+	async getTransactionsByUser(userId: string, role: string, page: number = 1, limit: number = 10, filter: Record<string, any> = {}): Promise<{ data: WalletTransactionEntity[]; total: number }> {
 		const query = {
 			$or: [
 				{ fromUserId: userId, fromRole: role },
@@ -52,7 +52,7 @@ export class WalletRepository implements IWalletRepository {
 		return WithdrawalRequestEntity.fromDBDocument(doc);
 	}
 
-	async getWithdrawalRequests(mentorId: ObjectId, page: number = 1, limit: number = 10, filter: Record<string, any> = {}): Promise<{ data: WithdrawalRequestEntity[]; total: number }> {
+	async getWithdrawalRequests(mentorId: string, page: number = 1, limit: number = 10, filter: Record<string, any> = {}): Promise<{ data: WithdrawalRequestEntity[]; total: number }> {
 		const query = { mentorId, ...filter };
 
 		const total = await WithdrawalRequestModel.countDocuments(query);

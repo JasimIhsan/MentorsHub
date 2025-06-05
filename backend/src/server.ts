@@ -25,6 +25,7 @@ import { SessionModel } from "./infrastructure/database/models/session/session.m
 import initializeSocket from "./infrastructure/socket/socket.io";
 import { notificationRouter } from "./presentation/routes/common/notification.routes";
 import { reviewRouter } from "./presentation/routes/user/review.routes";
+import { userWalletRouter } from "./presentation/routes/user/wallet.routes";
 
 dotenv.config();
 
@@ -65,6 +66,7 @@ app.use("/api/user/user-profile", userProfileRoutes);
 app.use("/api/user/sessions", sessionRouter);
 app.use("/api/user/mentor", userSideMentorRouter);
 app.use("/api/user/reviews", reviewRouter);
+app.use('/api/user/wallet', userWalletRouter)
 
 app.use("/api/admin", adminAuthRouter);
 app.use("/api/admin/users", usertabRouter);

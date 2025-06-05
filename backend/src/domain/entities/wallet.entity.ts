@@ -36,8 +36,6 @@ export class WalletEntity {
 		return this.balance;
 	}
 
-	getCurrency() {
-	}
 
 	credit(amount: number) {
 		this.balance += amount;

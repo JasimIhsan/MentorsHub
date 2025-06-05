@@ -22,15 +22,18 @@ import { INotificationRepository } from "../domain/repositories/notification.rep
 import { NotificationRepositoryImpl } from "./database/implementation/notification.repository.impl";
 import { IReviewRepository } from "../domain/repositories/review.repository";
 import { ReviewRepositoryImpl } from "./database/implementation/review.repository.impl";
+import { IWalletRepository } from "../domain/repositories/wallet.repository";
+import { WalletRepositoryImpl } from "./database/implementation/wallet.repository.impl";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
 export const forgotResetRepository: IForgotPasswordTokensRepository = new ForgotPasswordResetTokenImpl();
 export const adminRepository: IAdminRepository = new AdminRepositoryImpl();
-export const mentorRepository: IMentorProfileRepository = new MentorDetailsRepositoryImpl()
+export const mentorRepository: IMentorProfileRepository = new MentorDetailsRepositoryImpl();
 export const sessionRepository: ISessionRepository = new SessionRepositoryImpl();
 export const notificationRepository: INotificationRepository = new NotificationRepositoryImpl();
-export const reviewRepository: IReviewRepository = new ReviewRepositoryImpl()
+export const reviewRepository: IReviewRepository = new ReviewRepositoryImpl();
+export const walletRepository: IWalletRepository = new WalletRepositoryImpl();
 
 // Initialize services implementation
 export const tokenInterface: ITokenService = new TokenServicesImpl();
