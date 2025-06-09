@@ -12,3 +12,7 @@ export interface IGetMentorReviewsUseCase {
 export interface IUpdateReviewUseCase {
 	execute(reviewId: string, data: { reviewerId: string; mentorId: string; sessionId?: string; rating: number; comment: string }): Promise<ReviewDTO>;
 }
+
+export interface IDeleteReviewUseCase {
+	execute(reviewId: string, mentorId: string, userId: string): Promise<void>;
+}

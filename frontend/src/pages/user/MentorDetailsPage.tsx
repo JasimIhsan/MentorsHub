@@ -81,7 +81,7 @@ export function MentorReviewModal({ isOpen, onClose, mentor, setReviews, reviewT
 			let response;
 			if (reviewToEdit) {
 				// Update existing review
-				response = await axiosInstance.put(`/user/reviews/edit-review/${reviewToEdit.id}`, {
+				response = await axiosInstance.put(`/user/reviews/${reviewToEdit.id}`, {
 					reviewerId: user.id,
 					mentorId: mentor.id,
 					rating,
@@ -227,7 +227,7 @@ export function MentorDetailsPage() {
 	// Handle delete review
 	const handleDeleteReview = async (reviewId: string) => {
 		try {
-			const response = await axiosInstance.delete(`/user/reviews/${reviewId}`);
+			const response = await axiosInstance.delete(`/user/reviews/${reviewId}/${mentorId}/${user?.id as string}`);
 			if (response.data.success) {
 				setReviews((prevReviews) => prevReviews.filter((r) => r.id !== reviewId));
 				toast.success("Review deleted successfully!");
