@@ -39,8 +39,17 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 		await ReviewModel.findByIdAndDelete(id);
 	}
 
-	async update(review: ReviewEntity): Promise<ReviewEntity> {
-		const updated = await ReviewModel.findByIdAndUpdate(review.id, review.toObject(), { new: true });
+	async update(
+		reviewId: string,
+		data: {
+			reviewerId: string;
+			mentorId: string;
+			sessionId?: string;
+			rating: number;
+			comment: string;
+		}
+	): Promise<ReviewEntity> {
+		const updated = await ReviewModel.findByIdAndUpdate(reviewId, data, { new: true });
 		if (!updated) throw new Error("Review not found");
 		return ReviewEntity.fromDBDocument(updated);
 	}

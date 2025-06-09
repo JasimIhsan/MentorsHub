@@ -3,10 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, MessageSquare, Star, Users, Briefcase, GraduationCap, Award, User, Heart } from "lucide-react";
+import { Clock, MessageSquare, Star, Users, Briefcase, GraduationCap, Award, User, Heart, MoreVertical } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useMentor } from "@/hooks/useMentor";
 import { motion } from "framer-motion";
 import { WeekDay } from "@/interfaces/IMentorDTO";
@@ -47,15 +48,22 @@ interface MentorReviewModalProps {
 		firstName: string;
 		lastName: string;
 	};
+	reviewToEdit?: ReviewDTO | null;
 }
 
 // Mentor Review Modal Component
-export function MentorReviewModal({ isOpen, onClose, mentor, setReviews }: MentorReviewModalProps) {
-	const [rating, setRating] = useState(0);
+export function MentorReviewModal({ isOpen, onClose, mentor, setReviews, reviewToEdit }: MentorReviewModalProps) {
+	const [rating, setRating] = useState(reviewToEdit?.rating || 0);
 	const [hoverRating, setHoverRating] = useState(0);
-	const [feedback, setFeedback] = useState("");
+	const [feedback, setFeedback] = useState(reviewToEdit?.comment || "");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const user = useSelector((state: RootState) => state.userAuth.user);
+
+	// Reset state when modal opens or reviewToEdit changes
+	useEffect(() => {
+		setRating(reviewToEdit?.rating || 0);
+		setFeedback(reviewToEdit?.comment || "");
+	}, [reviewToEdit, isOpen]);
 
 	const handleSubmitReview = async () => {
 		if (!user?.id || !mentor.id) {
@@ -70,16 +78,36 @@ export function MentorReviewModal({ isOpen, onClose, mentor, setReviews }: Mento
 
 		setIsSubmitting(true);
 		try {
-			const response = await axiosInstance.post("/user/reviews/create", {
-				reviewerId: user.id,
-				mentorId: mentor.id,
-				rating,
-				comment: feedback,
-			});
+			let response;
+			if (reviewToEdit) {
+				// Update existing review
+				response = await axiosInstance.put(`/user/reviews/edit-review/${reviewToEdit.id}`, {
+					reviewerId: user.id,
+					mentorId: mentor.id,
+					rating,
+					comment: feedback,
+				});
+			} else {
+				// Create new review
+				response = await axiosInstance.post("/user/reviews/create", {
+					reviewerId: user.id,
+					mentorId: mentor.id,
+					rating,
+					comment: feedback,
+				});
+			}
+
 			if (response.data.success) {
 				const review = response.data.review;
-				setReviews((prevReviews) => [{ ...review }, ...prevReviews]);
-				toast.success("Review submitted successfully!");
+				if (reviewToEdit) {
+					// Update existing review in state
+					setReviews((prevReviews) => prevReviews.map((r) => (r.id === review.id ? { ...review } : r)));
+					toast.success("Review updated successfully!");
+				} else {
+					// Add new review to state
+					setReviews((prevReviews) => [{ ...review }, ...prevReviews]);
+					toast.success("Review submitted successfully!");
+				}
 				onClose();
 			} else {
 				toast.error(response.data.message || "Failed to submit review.");
@@ -95,10 +123,8 @@ export function MentorReviewModal({ isOpen, onClose, mentor, setReviews }: Mento
 		<Dialog open={isOpen} onOpenChange={onClose}>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-					<DialogTitle>Rate Your Mentor</DialogTitle>
-					<DialogDescription>
-						Share your feedback for your session with {mentor.firstName} {mentor.lastName}.
-					</DialogDescription>
+					<DialogTitle>{reviewToEdit ? "Edit Review" : "Rate Your Mentor"}</DialogTitle>
+					<DialogDescription>{reviewToEdit ? `Edit your feedback for your session with ${mentor.firstName} ${mentor.lastName}.` : `Share your feedback for your session with ${mentor.firstName} ${mentor.lastName}.`}</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4">
 					<div className="flex justify-center gap-1">
@@ -124,7 +150,7 @@ export function MentorReviewModal({ isOpen, onClose, mentor, setReviews }: Mento
 						Cancel
 					</Button>
 					<Button onClick={handleSubmitReview} disabled={isSubmitting}>
-						{isSubmitting ? "Submitting..." : "Submit Review"}
+						{isSubmitting ? "Submitting..." : reviewToEdit ? "Update Review" : "Submit Review"}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
@@ -138,13 +164,15 @@ export function MentorDetailsPage() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [reviews, setReviews] = useState<ReviewDTO[]>([]);
 	const [reviewsLoading, setReviewsLoading] = useState(true);
-	const [currentPage, setCurrentPage] = useState(1); // Track current page
-	const [totalPages, setTotalPages] = useState(1); // Track total pages
-	const [selectedRating, setSelectedRating] = useState<number | null>(null); // Track selected rating filter
+	const [currentPage, setCurrentPage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const [selectedRating, setSelectedRating] = useState<number | null>(null);
+	const [reviewToEdit, setReviewToEdit] = useState<ReviewDTO | null>(null);
 	const { mentorId } = useParams<{ mentorId: string }>();
 	const { mentor, loading } = useMentor(mentorId as string);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 	const [_selectedDay, setSelectedDay] = useState<WeekDay>(WeekDay.Monday);
-	const reviewsPerPage = 5; // Number of reviews per page
+	const reviewsPerPage = 5;
 
 	// Fetch reviews with pagination and optional rating filter
 	useEffect(() => {
@@ -183,10 +211,31 @@ export function MentorDetailsPage() {
 	// Handle rating filter click
 	const handleRatingFilter = (rating: number) => {
 		if (selectedRating === rating) {
-			setSelectedRating(null); // Clear filter if same rating is clicked
+			setSelectedRating(null);
 		} else {
 			setSelectedRating(rating);
-			setCurrentPage(1); // Reset to first page when filter changes
+			setCurrentPage(1);
+		}
+	};
+
+	// Handle edit review
+	const handleEditReview = (review: ReviewDTO) => {
+		setReviewToEdit(review);
+		setIsModalOpen(true);
+	};
+
+	// Handle delete review
+	const handleDeleteReview = async (reviewId: string) => {
+		try {
+			const response = await axiosInstance.delete(`/user/reviews/${reviewId}`);
+			if (response.data.success) {
+				setReviews((prevReviews) => prevReviews.filter((r) => r.id !== reviewId));
+				toast.success("Review deleted successfully!");
+			} else {
+				toast.error(response.data.message || "Failed to delete review.");
+			}
+		} catch (error: any) {
+			toast.error(error.response?.data?.message || "Failed to delete review.");
 		}
 	};
 
@@ -395,18 +444,30 @@ export function MentorDetailsPage() {
 							<CardContent>
 								<div className="space-y-8">
 									{mentor.workExperiences && mentor.workExperiences.length > 0 ? (
-										mentor.workExperiences.map((work: { jobTitle: string; company: string; startDate: string; endDate: string | null; currentJob: boolean; description: string }, index: number) => (
-											<div key={index} className="relative border-l-2 border-muted pl-6">
-												<div className={`absolute -left-[9px] top-1 h-4 w-4 rounded-full ${index === 0 ? "bg-primary" : "bg-muted"}`}></div>
-												<div>
-													<h3 className="font-bold">{work.jobTitle || "Unknown Position"}</h3>
-													<p className="text-sm text-muted-foreground">
-														{work.company || "Unknown Company"} • {work.startDate || "N/A"} - {work.endDate || "Present"}
-													</p>
-													<p className="mt-2">{work.description || "No description provided"}</p>
+										mentor.workExperiences.map(
+											(
+												work: {
+													jobTitle: string;
+													company: string;
+													startDate: string;
+													endDate: string | null;
+													currentJob: boolean;
+													description: string;
+												},
+												index: number
+											) => (
+												<div key={index} className="relative border-l-2 border-muted pl-6">
+													<div className={`absolute -left-[9px] top-1 h-4 w-4 rounded-full ${index === 0 ? "bg-primary" : "bg-muted"}`}></div>
+													<div>
+														<h3 className="font-bold">{work.jobTitle || "Unknown Position"}</h3>
+														<p className="text-sm text-muted-foreground">
+															{work.company || "Unknown Company"} • {work.startDate || "N/A"} - {work.endDate || "Present"}
+														</p>
+														<p className="mt-2">{work.description || "No description provided"}</p>
+													</div>
 												</div>
-											</div>
-										))
+											)
+										)
 									) : (
 										<p className="text-muted-foreground">No work experience listed</p>
 									)}
@@ -461,7 +522,13 @@ export function MentorDetailsPage() {
 													);
 												})}
 											</div>
-											<Button variant="outline" className="mt-4" onClick={() => setIsModalOpen(true)}>
+											<Button
+												variant="outline"
+												className="mt-4"
+												onClick={() => {
+													setReviewToEdit(null);
+													setIsModalOpen(true);
+												}}>
 												Rate Mentor
 											</Button>
 										</div>
@@ -486,6 +553,21 @@ export function MentorDetailsPage() {
 																		{[...Array(5)].map((_, i) => (
 																			<Star key={i} className={`h-4 w-4 ${i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} />
 																		))}
+																		{user?.id === review.reviewerId.id && (
+																			<DropdownMenu>
+																				<DropdownMenuTrigger asChild>
+																					<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+																						<MoreVertical className="h-4 w-4" />
+																					</Button>
+																				</DropdownMenuTrigger>
+																				<DropdownMenuContent align="end">
+																					<DropdownMenuItem onClick={() => handleEditReview(review)}>Edit Review</DropdownMenuItem>
+																					<DropdownMenuItem onClick={() => handleDeleteReview(review.id)} className="text-red-600">
+																						Delete Review
+																					</DropdownMenuItem>
+																				</DropdownMenuContent>
+																			</DropdownMenu>
+																		)}
 																	</div>
 																</div>
 																<p className="mt-2 text-sm">{review.comment || "No feedback provided."}</p>
@@ -566,7 +648,16 @@ export function MentorDetailsPage() {
 					</TabsContent>
 				</Tabs>
 
-				<MentorReviewModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} mentor={{ id: mentor.id, firstName: mentor.firstName, lastName: mentor.lastName }} setReviews={setReviews} />
+				<MentorReviewModal
+					isOpen={isModalOpen}
+					onClose={() => {
+						setIsModalOpen(false);
+						setReviewToEdit(null);
+					}}
+					mentor={{ id: mentor.id, firstName: mentor.firstName, lastName: mentor.lastName }}
+					setReviews={setReviews}
+					reviewToEdit={reviewToEdit}
+				/>
 			</div>
 		</div>
 	);

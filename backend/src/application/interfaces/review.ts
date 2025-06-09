@@ -8,3 +8,7 @@ export interface ICreateReviewUseCase {
 export interface IGetMentorReviewsUseCase {
 	execute(mentorId: string, options?: { page?: number; limit?: number; rating?: number }): Promise<{ reviews: ReviewDTO[]; total: number }>;
 }
+
+export interface IUpdateReviewUseCase {
+	execute(reviewId: string, data: { reviewerId: string; mentorId: string; sessionId?: string; rating: number; comment: string }): Promise<ReviewDTO>;
+}
