@@ -1,4 +1,4 @@
-import { ReviewerDTO } from "../../application/dtos/review.dtos";
+import { ReviewDTO, ReviewerDTO } from "../../application/dtos/review.dtos";
 import { IReviewDocument } from "../../infrastructure/database/models/review-rating/review.model";
 
 export interface IReviewEntity {
@@ -129,5 +129,18 @@ export class ReviewEntity {
 			createdAt: doc.createdAt ?? new Date(),
 			// updatedAt: doc.updatedAt ?? new Date(),
 		});
+	}
+
+	static toDTO(review: ReviewEntity): ReviewDTO {
+		return {
+			id: review._id || "",
+			reviewerId: review.reviewerId,
+			mentorId: review.mentorId,
+			sessionId: review.sessionId || "",
+			rating: review.rating,
+			comment: review.comment,
+			createdAt: review.createdAt,
+			updatedAt: review.updatedAt,
+		}
 	}
 }

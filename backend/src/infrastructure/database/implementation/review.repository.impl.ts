@@ -12,7 +12,6 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 	}
 
 	async findByMentorId(mentorId: string, options?: { page?: number; limit?: number; rating?: number }): Promise<{ reviews: ReviewDTO[]; total: number }> {
-		console.log("options: ", options);
 		const page = options?.page ?? 1;
 		const limit = options?.limit ?? 10;
 		const skip = (page - 1) * limit;
@@ -39,8 +38,17 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 		await ReviewModel.findByIdAndDelete(id);
 	}
 
-	async update(review: ReviewEntity): Promise<ReviewEntity> {
-		const updated = await ReviewModel.findByIdAndUpdate(review.id, review.toObject(), { new: true });
+	async update(
+		reviewId: string,
+		data: {
+			reviewerId: string;
+			mentorId: string;
+			sessionId?: string;
+			rating: number;
+			comment: string;
+		}
+	): Promise<ReviewEntity> {
+		const updated = await ReviewModel.findByIdAndUpdate(reviewId, data, { new: true });
 		if (!updated) throw new Error("Review not found");
 		return ReviewEntity.fromDBDocument(updated);
 	}
@@ -83,5 +91,10 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 
 		if (result.length === 0) return { average: 0, total: 0 };
 		return { average: result[0].average.toFixed(1), total: result[0].total };
+	}
+
+	async findById(id: string): Promise<ReviewEntity | null> {
+		const doc = await ReviewModel.findById(id);
+		return doc ? ReviewEntity.fromDBDocument(doc) : null;
 	}
 }
