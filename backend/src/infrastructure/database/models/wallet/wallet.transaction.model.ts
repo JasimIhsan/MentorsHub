@@ -9,7 +9,7 @@ export interface IWalletTransactionDocument extends Document {
 	sessionId?: ObjectId;
 	amount: number;
 	type: "credit" | "debit";
-	purpose: "session_fee" | "platform_fee" | "refund" | "withdrawal";
+	purpose: "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";
 	description?: string;
 	createdAt: Date;
 	updatedAt: Date;
@@ -17,8 +17,8 @@ export interface IWalletTransactionDocument extends Document {
 
 const WalletTransactionSchema = new Schema<IWalletTransactionDocument>(
 	{
-		fromUserId: { type: Schema.Types.ObjectId, ref: "Users" , required: true },
-		toUserId: { type: Schema.Types.ObjectId, ref: "Users" , required: true },
+		fromUserId: { type: Schema.Types.ObjectId, ref: "Users" },
+		toUserId: { type: Schema.Types.ObjectId, ref: "Users", required: true },
 		fromRole: { type: String, enum: ["user", "mentor", "admin"] },
 		toRole: { type: String, enum: ["user", "mentor", "admin"] },
 		sessionId: { type: Schema.Types.ObjectId, ref: "Sessions" },
@@ -26,7 +26,7 @@ const WalletTransactionSchema = new Schema<IWalletTransactionDocument>(
 		type: { type: String, enum: ["credit", "debit"], required: true },
 		purpose: {
 			type: String,
-			enum: ["session_fee", "platform_fee", "refund", "withdrawal"],
+			enum: ["session_fee", "platform_fee", "refund", "withdrawal", "wallet_topup"],
 			required: true,
 		},
 		description: { type: String },

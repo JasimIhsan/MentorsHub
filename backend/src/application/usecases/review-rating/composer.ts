@@ -1,6 +1,8 @@
 import { reviewRepository, userRepository } from "../../../infrastructure/composer";
 import { CreateReviewUseCase } from "./create.review.usecase";
 import { GetMentorReviewsUseCase } from "./get.mentor.review.usecase";
+// import { UpdateReviewUsecase } from "./update.review.usecase";
 
 export const createReviewUsecase = new CreateReviewUseCase(reviewRepository, userRepository);
 export const getMentorReviewsUsecase = new GetMentorReviewsUseCase(reviewRepository);
+// export const updateReviewUsecase = new UpdateReviewUsecase(reviewRepository)

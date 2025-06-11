@@ -3,8 +3,10 @@ import { CreateTransactionUseCase } from "./create.transaction.usecase";
 import { CreateWalletUseCase } from "./create.wallet.usecase";
 import { CreateWithdrawalRequestUseCase } from "./create.withdrawel.usecase";
 import { GetTransactionsUseCase } from "./get.transactions.usecase";
+import { GetWalletUsecase } from "./get.wallet.usecase";
 import { GetWithdrawalRequestsUseCase } from "./get.withdrawel.requests.usecase";
 import { UpdateWalletBalanceUseCase } from "./update.wallet.balance.usecase";
+import { WalletTopUpUseCase } from "./wallet.topup.usecase";
 
 export const createWalletUsecase = new CreateWalletUseCase(walletRepository);
 export const createTransactionUsecase = new CreateTransactionUseCase(walletRepository);
@@ -12,3 +14,5 @@ export const createWithdrawalRequestUseCase = new CreateWithdrawalRequestUseCase
 export const getTransactionsUsecase = new GetTransactionsUseCase(walletRepository);
 export const getWithdrawalRequestsUsecase = new GetWithdrawalRequestsUseCase(walletRepository);
 export const updateWalletBalanceUseCase = new UpdateWalletBalanceUseCase(walletRepository);
+export const getWalletUsecase = new GetWalletUsecase(walletRepository);
+export const topupWalletUsecase = new WalletTopUpUseCase(walletRepository, createTransactionUsecase)

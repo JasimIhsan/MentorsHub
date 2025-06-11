@@ -17,6 +17,7 @@ import { CheckoutPage } from "@/pages/user/CheckoutPage";
 import { RequestConfirmationPage } from "@/pages/user/RequestConfirmationPage";
 import { SessionsPage } from "@/pages/user/SessionsPage";
 import { VideoCallPage } from "@/pages/user/VideoCallPage";
+import { WalletPage } from "@/pages/user/WalletPage";
 
 const UserRoutes = () => {
 	return (
@@ -116,6 +117,15 @@ const UserRoutes = () => {
 					element={
 						<ProtectedRoute>
 							<SessionsPage />
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="/wallet"
+					element={
+						<ProtectedRoute>
+							<WalletPage />
 						</ProtectedRoute>
 					}
 				/>
