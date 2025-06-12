@@ -39,9 +39,12 @@ export interface IWalletTransaction {
 	toRole: "user" | "mentor" | "admin";
 	amount: number;
 	type: "credit" | "debit";
-	purpose: "session_fee" | "platform_fee" | "refund" | "withdrawal";
+	purpose: "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";
 	description?: string;
-	sessionId?: string;
+	sessionId?: {
+		id: string;
+		topic: string;
+	} | null;
 	createdAt: Date;
 }
 
@@ -222,16 +225,16 @@ export function WalletPage() {
 		}
 	};
 
-	const getStatusIcon = (type: string) => {
-		switch (type) {
-			case "credit":
-				return <CheckCircle className="h-4 w-4 text-green-500" />;
-			case "debit":
-				return <XCircle className="h-4 w-4 text-red-500" />;
-			default:
-				return <Clock className="h-4 w-4 text-yellow-500" />;
-		}
-	};
+	// const getStatusIcon = (type: string) => {
+	// 	switch (type) {
+	// 		case "credit":
+	// 			return <CheckCircle className="h-4 w-4 text-green-500" />;
+	// 		case "debit":
+	// 			return <XCircle className="h-4 w-4 text-red-500" />;
+	// 		default:
+	// 			return <Clock className="h-4 w-4 text-yellow-500" />;
+	// 	}
+	// };
 
 	const getStatusBadge = (type: string) => {
 		const variants = {
@@ -487,11 +490,13 @@ export function WalletPage() {
 																	<div>
 																		<p className="font-medium text-gray-900">{getPurposeLabel(transaction.purpose)}</p>
 																		<p className="text-sm text-gray-500">{transaction.description || "No description"}</p>
-																		<p className="text-sm text-gray-500">To: {transaction.toUserId.name}</p>
+																		{transaction.purpose !== "wallet_topup" && (
+																			<p className="text-sm text-gray-500">{transaction.toUserId ? `To: ${transaction.toUserId.name}` : transaction.fromUserId ? `From: ${transaction.fromUserId.name}` : ""} </p>
+																		)}
 																		<p className="text-sm text-gray-500">{formatDate(String(transaction.createdAt))}</p>
 																	</div>
 																</div>
-																<div className="text-right space-y-1">
+																<div className="flex flex-col items-end space-y-1">
 																	<p className={`font-semibold ${transaction.type === "credit" ? "text-green-600" : "text-red-600"}`}>
 																		{transaction.type === "credit" ? "+" : "-"}₹
 																		{transaction.amount.toLocaleString("en-IN", {
@@ -499,7 +504,7 @@ export function WalletPage() {
 																		})}
 																	</p>
 																	<div className="flex items-center gap-2">
-																		{getStatusIcon(transaction.type)}
+																		{/* {getStatusIcon(transaction.type)} */}
 																		<Badge variant="outline" className={`text-xs ${getStatusBadge(transaction.type)}`}>
 																			{transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
 																		</Badge>

@@ -1,11 +1,9 @@
-import mongoose, { ObjectId } from "mongoose";
 import { WalletModel } from "../models/wallet/wallet.model";
-import { IWalletTransactionDocument, WalletTransactionModel } from "../models/wallet/wallet.transaction.model";
+import { WalletTransactionModel } from "../models/wallet/wallet.transaction.model";
 import { IWithdrawalRequestDocument, WithdrawalRequestModel } from "../models/wallet/wallet.withdrawel.request.model";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletTransactionDTO } from "../../../application/dtos/wallet.transation.dto";
 import { WalletEntity } from "../../../domain/entities/wallet.entity";
-import { WalletTransactionEntity } from "../../../domain/entities/wallet.transaction.entity";
 import { WithdrawalRequestEntity } from "../../../domain/entities/wallet.withdrawel.request.entity";
 
 export class WalletRepositoryImpl implements IWalletRepository {
@@ -35,32 +33,44 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		description?: string;
 		sessionId?: string | null;
 	}): Promise<IWalletTransactionDTO> {
-		const doc = await WalletTransactionModel.create(data);
+		const transaction = await WalletTransactionModel.create(data);
+		const doc = await WalletTransactionModel.findById(transaction._id).populate("fromUserId", "firstName lastName avatar").populate("toUserId", "firstName lastName avatar");
 		return this.mapToWalletTransactionDTO(doc);
 	}
 
 	async getTransactionsByUser(userId: string, page: number = 1, limit: number = 10, filter: Record<string, any> = {}) {
 		const query: any = {
-			$or: [{ fromUserId: userId }, { toUserId: userId }],
+			$or: [
+				{ fromUserId: userId, type: "debit" },
+				{ toUserId: userId, type: "credit" },
+			],
 		};
 
-		console.log(`filter : `, filter);
-
-		// Merge filters into the query
-		if (filter.type) filter.type === "all" ? (query.type = { $in: ["credit", "debit"] }) : (query.type = filter.type);
-		if (filter.createdAt) query.createdAt = filter.createdAt;
-
-		console.log(`query : `, query);
+		if (filter.type) {
+			query.type = filter.type === "all" ? { $in: ["credit", "debit"] } : filter.type;
+		}
+		if (filter.createdAt) {
+			query.createdAt = filter.createdAt;
+		}
 
 		const total = await WalletTransactionModel.countDocuments(query);
 
-		const docs = await WalletTransactionModel.find(query)
+		let queryBuilder = WalletTransactionModel.find(query)
 			.populate("fromUserId", "firstName lastName avatar")
 			.populate("toUserId", "firstName lastName avatar")
 			.sort({ createdAt: -1 })
 			.skip((page - 1) * limit)
 			.limit(limit);
-		console.log(`doc : `, docs);
+
+		// 👇 Conditionally populate sessionId only if it exists (not null or undefined)
+		queryBuilder = queryBuilder.populate({
+			path: "sessionId",
+			select: "topic", // change fields as per your schema
+			match: { sessionId: { $ne: null } }, // filters out null sessions, optional
+		});
+
+		const docs = await queryBuilder.exec();
+
 		const data = docs.map((doc) => this.mapToWalletTransactionDTO(doc));
 		return { data, total };
 	}
@@ -106,7 +116,13 @@ export class WalletRepositoryImpl implements IWalletRepository {
 			type: doc.type,
 			purpose: doc.purpose,
 			description: doc.description,
-			sessionId: doc.sessionId,
+			sessionId:
+				doc.sessionId && typeof doc.sessionId === "object"
+					? {
+							id: doc.sessionId._id.toString(),
+							topic: doc.sessionId.topic,
+					  }
+					: null,
 			createdAt: doc.createdAt,
 		};
 	}

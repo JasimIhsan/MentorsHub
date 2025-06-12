@@ -1,5 +1,4 @@
 import { WalletEntity } from "../../domain/entities/wallet.entity";
-import { WalletTransactionEntity } from "../../domain/entities/wallet.transaction.entity";
 import { WithdrawalRequestEntity } from "../../domain/entities/wallet.withdrawel.request.entity";
 import { IWalletTransactionDTO } from "../dtos/wallet.transation.dto";
 
@@ -34,7 +33,7 @@ export interface IGetWithdrawalRequestsUsecase {
 }
 
 export interface IUpdateWalletBalanceUsecase {
-	execute(userId: string, amount: number): Promise<WalletEntity | null>;
+	execute(userId: string, amount: number, type: string): Promise<WalletEntity | null>;
 }
 
 export interface IWalletTopUpUsecase {

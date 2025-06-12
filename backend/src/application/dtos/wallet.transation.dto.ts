@@ -16,6 +16,9 @@ export interface IWalletTransactionDTO {
 	type: "credit" | "debit";
 	purpose: "session_fee" | "platform_fee" | "refund" | "withdrawal";
 	description?: string;
-	sessionId?: string;
+	sessionId?: {
+		id: string;
+		topic: string;
+	} | null;
 	createdAt: Date;
 }
