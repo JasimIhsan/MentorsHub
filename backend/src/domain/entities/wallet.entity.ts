@@ -21,11 +21,11 @@ export class WalletEntity {
 	}
 
 	getId() {
-		return this._id;
+		return this._id?.toString();
 	}
 
 	getUserId() {
-		return this.userId;
+		return this.userId?.toString();
 	}
 
 	getRole() {

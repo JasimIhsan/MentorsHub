@@ -5,6 +5,7 @@ import { IWalletRepository } from "../../../domain/repositories/wallet.repositor
 import { IWalletTransactionDTO } from "../../../application/dtos/wallet.transation.dto";
 import { WalletEntity } from "../../../domain/entities/wallet.entity";
 import { WithdrawalRequestEntity } from "../../../domain/entities/wallet.withdrawel.request.entity";
+import { AdminModel } from "../models/admin/admin.model";
 
 export class WalletRepositoryImpl implements IWalletRepository {
 	async findWalletByUserId(userId: string): Promise<WalletEntity | null> {
@@ -17,9 +18,29 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		return WalletEntity.fromDBDocument(doc);
 	}
 
-	async updateBalance(userId: string, amount: number): Promise<WalletEntity | null> {
-		const doc = await WalletModel.findOneAndUpdate({ userId }, { $inc: { balance: amount } }, { new: true });
-		return doc ? WalletEntity.fromDBDocument(doc) : null;
+	async platformWallet(): Promise<WalletEntity> {
+		const admin = await AdminModel.findOne({ role: "super-admin" });
+		const adminWallet = await WalletModel.findOne({ userId: admin?._id, role: "admin" });
+		if (!adminWallet) throw new Error("Admin wallet not found");
+		return WalletEntity.fromDBDocument(adminWallet);
+	}
+
+	async updateBalance(userId: string, amount: number, type: "credit" | "debit" = "credit", role: "user" | "mentor" | "admin" = "user"): Promise<WalletEntity | null> {
+		console.log("userId in updateBalance: ", userId);
+		console.log("type in updateBalance: ", type);
+
+		let roleQuery: any;
+		if (role === "admin") {
+			roleQuery = "admin";
+		} else {
+			roleQuery = { $in: ["user", "mentor"] }; // Matches either "user" or "mentor"
+		}
+
+		const updateAmount = type === "credit" ? amount : -amount;
+
+		const wallet = await WalletModel.findOneAndUpdate({ userId, role: roleQuery }, { $inc: { balance: updateAmount } }, { new: true });
+
+		return wallet ? WalletEntity.fromDBDocument(wallet) : null;
 	}
 
 	async createTransaction(data: {
@@ -33,8 +54,22 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		description?: string;
 		sessionId?: string | null;
 	}): Promise<IWalletTransactionDTO> {
-		const transaction = await WalletTransactionModel.create(data);
-		const doc = await WalletTransactionModel.findById(transaction._id).populate("fromUserId", "firstName lastName avatar").populate("toUserId", "firstName lastName avatar");
+		const transaction = await WalletTransactionModel.create({
+			fromUserId: data.fromUserId,
+			toUserId: data.toUserId,
+			fromRole: data.fromRole,
+			toRole: data.toRole,
+			fromModel: data.fromRole === "admin" ? "admins" : "Users",
+			toModel: data.toRole === "admin" ? "admins" : "Users",
+			amount: data.amount,
+			type: data.type,
+			purpose: data.purpose,
+			description: data.description,
+			sessionId: data.sessionId || undefined,
+		});
+
+		const doc = await WalletTransactionModel.findById(transaction._id).populate("fromUserId", "firstName lastName name avatar").populate("toUserId", "firstName lastName name avatar");
+
 		return this.mapToWalletTransactionDTO(doc);
 	}
 
@@ -56,22 +91,22 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		const total = await WalletTransactionModel.countDocuments(query);
 
 		let queryBuilder = WalletTransactionModel.find(query)
-			.populate("fromUserId", "firstName lastName avatar")
-			.populate("toUserId", "firstName lastName avatar")
+			.populate("fromUserId", "firstName lastName name avatar")
+			.populate("toUserId", "firstName lastName name avatar")
 			.sort({ createdAt: -1 })
 			.skip((page - 1) * limit)
 			.limit(limit);
 
-		// 👇 Conditionally populate sessionId only if it exists (not null or undefined)
+		// Optional populate for sessionId
 		queryBuilder = queryBuilder.populate({
 			path: "sessionId",
-			select: "topic", // change fields as per your schema
-			match: { sessionId: { $ne: null } }, // filters out null sessions, optional
+			select: "topic",
+			match: { sessionId: { $ne: null } },
 		});
 
 		const docs = await queryBuilder.exec();
-
 		const data = docs.map((doc) => this.mapToWalletTransactionDTO(doc));
+
 		return { data, total };
 	}
 
@@ -99,14 +134,14 @@ export class WalletRepositoryImpl implements IWalletRepository {
 			fromUserId: doc.fromUserId
 				? {
 						id: doc.fromUserId._id.toString(),
-						name: doc.fromUserId.firstName + " " + doc.fromUserId.lastName,
+						name: doc.fromUserId.firstName && doc.fromUserId.lastName ? `${doc.fromUserId.firstName} ${doc.fromUserId.lastName}` : doc.fromUserId.name ?? "",
 						avatar: doc.fromUserId.avatar,
 				  }
 				: null,
 			toUserId: doc.toUserId
 				? {
 						id: doc.toUserId._id.toString(),
-						name: doc.toUserId.firstName + " " + doc.toUserId.lastName,
+						name: doc.toUserId.firstName && doc.toUserId.lastName ? `${doc.toUserId.firstName} ${doc.toUserId.lastName}` : doc.toUserId.name ?? "",
 						avatar: doc.toUserId.avatar,
 				  }
 				: null,
