@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Minus, ArrowUpRight, ArrowDownLeft, Filter, CalendarIcon, CheckCircle, XCircle, Clock, Wallet } from "lucide-react";
+import { Plus, Minus, ArrowUpRight, ArrowDownLeft, Filter, CalendarIcon, Wallet } from "lucide-react";
 import { format } from "date-fns";
 import { fetchTransactionsAPI, fetchWalletDataAPI, topupWalletAPI } from "@/api/wallet.api.service";
 import { useSelector } from "react-redux";
@@ -90,7 +90,7 @@ export function WalletPage() {
 		const fetchWalletData = async () => {
 			try {
 				setIsLoadingWallet(true);
-				const response = await fetchWalletDataAPI(user?.id as string, user?.role as string);
+				const response = await fetchWalletDataAPI(user?.id as string);
 				if (response.success) {
 					setIsWalletCreated(true);
 					setWalletBalance(response.wallet.balance);
