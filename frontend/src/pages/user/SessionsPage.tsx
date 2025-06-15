@@ -720,7 +720,7 @@ function ReviewModal({ isOpen, onClose, session }: ReviewModalProps) {
 						{[1, 2, 3, 4, 5].map((star) => (
 							<Star
 								key={star}
-								className={`h-6 w-6 cursor-pointer ${star <= (hoverRating || rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+								className={`h-9 w-9 cursor-pointer ${star <= (hoverRating || rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
 								onClick={() => setRating(star)}
 								onMouseEnter={() => setHoverRating(star)}
 								onMouseLeave={() => setHoverRating(0)}
