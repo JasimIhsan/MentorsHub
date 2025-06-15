@@ -331,7 +331,7 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 				description: `Payment for session with ${session.mentor.firstName} ${session.mentor.lastName}`,
 				handler: async function (response: any) {
 					try {
-						const paymentResponse = await axiosInstance.put("/user/sessions/pay", {
+						const paymentResponse = await axiosInstance.post("/user/sessions/pay", {
 							sessionId: session.id,
 							userId: user?.id,
 							paymentId: response.razorpay_payment_id,

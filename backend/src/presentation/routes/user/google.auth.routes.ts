@@ -8,17 +8,6 @@ import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 
 export const googleAuthRouter = Router();
 
-// Define user structure expected from Passport
-interface CustomUser {
-	user: any;
-	accessToken: string;
-	refreshToken: string;
-}
-
-interface AuthenticatedRequest extends Request {
-	user?: CustomUser | string | JwtPayload;
-}
-
 // Redirect to Google
 googleAuthRouter.post("/google", (req, res) => googleAuthController.handle(req, res));
 

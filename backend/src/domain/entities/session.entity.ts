@@ -35,7 +35,7 @@ export class SessionEntity {
 	private time: string;
 	private hours: number;
 	private message: string;
-	private status: string;
+	private status: SessionStatus;
 	private pricing: string;
 	private totalAmount?: number;
 	private rejectReason?: string;
@@ -90,6 +90,10 @@ export class SessionEntity {
 		return this.id;
 	}
 
+	getMentorId(): string {
+		return this.mentorId;
+	}
+
 	getParticipants(): ISessionParticipantDTO[] {
 		return this.participants;
 	}
@@ -102,7 +106,7 @@ export class SessionEntity {
 		return this.topic;
 	}
 
-	getStatus(): string {
+	getStatus(): SessionStatus {
 		return this.status;
 	}
 
@@ -118,8 +122,13 @@ export class SessionEntity {
 		return this.date;
 	}
 
-	getHours(): number{
+	getHours(): number {
 		return this.hours;
+	}
+
+	getfee(): number {
+		if (this.pricing === "free") return 0;
+		return this.totalAmount ? this.totalAmount : 0;
 	}
 
 	toObject() {

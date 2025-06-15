@@ -8,7 +8,7 @@ import { SignupUseCase } from "./authentication/signup.usecase";
 import { SendOtpUsecase } from "./authentication/send.otp.usecase";
 import { GoogleAuthUsecase } from "./authentication/google.auth.usecase";
 
-import { userRepository, forgotResetRepository, tokenInterface, emailService, redisService, cloudinaryService, mentorRepository, sessionRepository, s3BucketService } from "../../../infrastructure/composer";
+import { userRepository, forgotResetRepository, tokenInterface, emailService, redisService, cloudinaryService, mentorRepository, sessionRepository, s3BucketService, walletRepository } from "../../../infrastructure/composer";
 import { UpdateUserProfileUseCase } from "./user-profile/update.user.profile.usecase";
 import { UploadAvatarUseCase } from "./user-profile/upload.avatar.usecase";
 import { ChangePasswordUsecase } from "./user-profile/change.password.usecase";
@@ -41,5 +41,5 @@ export const getUserProfileUsecase = new GetUserProfileUseCase(userRepository);
 export const requestSessionUsecase = new RequestSessionUseCase(sessionRepository, mentorRepository);
 export const getSessionsByUserUsecase = new GetSessionsByUserUseCase(sessionRepository);
 export const getSessionByMentorUsecase = new GetSessionsByUserUseCase(sessionRepository);
-export const paySessionUsecase = new PaySessionUseCase(sessionRepository);
+export const paySessionUsecase = new PaySessionUseCase(sessionRepository, walletRepository);
 export const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository)

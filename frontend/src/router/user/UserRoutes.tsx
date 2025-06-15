@@ -17,7 +17,9 @@ import { CheckoutPage } from "@/pages/user/CheckoutPage";
 import { RequestConfirmationPage } from "@/pages/user/RequestConfirmationPage";
 import { SessionsPage } from "@/pages/user/SessionsPage";
 import { VideoCallPage } from "@/pages/user/VideoCallPage";
+import { WalletPage } from "@/pages/user/WalletPage";
 import { NotificationsPage } from "@/pages/common/NotificationPage";
+
 
 const UserRoutes = () => {
 	return (
@@ -122,6 +124,14 @@ const UserRoutes = () => {
 				/>
 
 				<Route
+					path="/wallet"
+					element={
+						<ProtectedRoute>
+							<WalletPage />
+            </ProtectedRoute>
+				/>
+              
+        <Route
 					path="/notifications"
 					element={
 						<ProtectedRoute>

@@ -15,4 +15,5 @@ export interface IUpdateReviewUseCase {
 
 export interface IDeleteReviewUseCase {
 	execute(reviewId: string, mentorId: string, userId: string): Promise<void>;
+
 }

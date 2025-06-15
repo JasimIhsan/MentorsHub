@@ -7,6 +7,7 @@ import AdminPageNotFound from "@/pages/admin/AdminPageNotFound";
 import AdminUsersTab from "@/pages/admin/AdminUsersTab";
 import { AdminAuthGuard } from "./AdminAuthGuard";
 import { AdminMentorApplicationsPage } from "@/pages/admin/AdminMentorRequestApplication";
+import { AdminWalletPage } from "@/pages/admin/AdminWalletPage";
 
 const AdminRoutes = () => {
 	return (
@@ -44,6 +45,15 @@ const AdminRoutes = () => {
 					element={
 						<AdminProtectedRoute>
 							<AdminMentorApplicationsPage />
+						</AdminProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="payments"
+					element={
+						<AdminProtectedRoute>
+							<AdminWalletPage />
 						</AdminProtectedRoute>
 					}
 				/>

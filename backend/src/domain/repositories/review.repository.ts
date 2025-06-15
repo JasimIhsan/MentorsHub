@@ -17,6 +17,7 @@ export interface IReviewRepository {
 	): Promise<ReviewEntity>;
 	findById(id: string): Promise<ReviewEntity | null>;
 
+
 	// findBySessionAndUser(sessionId: string, reviewerId: string): Promise<ReviewEntity | null>;
 	// findAllByMentor(mentorId: string): Promise<ReviewEntity[]>;
 	// Optional: helper

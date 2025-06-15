@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { UserInterface } from "@/interfaces/interfaces";
 import { logout } from "@/store/slices/userSlice";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings, User, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Alert } from "@/components/custom/alert";
@@ -65,6 +65,12 @@ export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
 							<Link to="/profile" className="cursor-pointer">
 								<User className="mr-2 h-4 w-4 hover:text-primary-foreground" />
 								<span>Profile</span>
+							</Link>
+						</DropdownMenuItem>
+						<DropdownMenuItem asChild>
+							<Link to="/wallet" className="cursor-pointer">
+								<Wallet className="mr-2 h-4 w-4 hover:text-primary-foreground" />
+								<span>Wallet</span>
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild>
