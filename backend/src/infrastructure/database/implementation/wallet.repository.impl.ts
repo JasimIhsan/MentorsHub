@@ -26,9 +26,6 @@ export class WalletRepositoryImpl implements IWalletRepository {
 	}
 
 	async updateBalance(userId: string, amount: number, type: "credit" | "debit" = "credit", role: "user" | "mentor" | "admin" = "user"): Promise<WalletEntity | null> {
-		console.log("userId in updateBalance: ", userId);
-		console.log("type in updateBalance: ", type);
-
 		let roleQuery: any;
 		if (role === "admin") {
 			roleQuery = "admin";
@@ -49,7 +46,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		fromRole: "user" | "mentor" | "admin";
 		toRole: "user" | "mentor" | "admin";
 		amount: number;
-		type: "credit" | "debit";
+		type: "credit" | "debit" | "withdrawal";
 		purpose: string;
 		description?: string;
 		sessionId?: string | null;
@@ -76,13 +73,13 @@ export class WalletRepositoryImpl implements IWalletRepository {
 	async getTransactionsByUser(userId: string, page: number = 1, limit: number = 10, filter: Record<string, any> = {}) {
 		const query: any = {
 			$or: [
-				{ fromUserId: userId, type: "debit" },
+				{ fromUserId: userId, type: { $in: ["debit", "withdrawal"] } },
 				{ toUserId: userId, type: "credit" },
 			],
 		};
 
 		if (filter.type) {
-			query.type = filter.type === "all" ? { $in: ["credit", "debit"] } : filter.type;
+			query.type = filter.type === "all" ? { $in: ["credit", "debit", "withdrawal"] } : filter.type;
 		}
 		if (filter.createdAt) {
 			query.createdAt = filter.createdAt;

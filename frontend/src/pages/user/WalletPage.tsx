@@ -12,10 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Minus, ArrowUpRight, ArrowDownLeft, Filter, CalendarIcon, Wallet } from "lucide-react";
 import { format } from "date-fns";
-import { fetchTransactionsAPI, fetchWalletDataAPI, topupWalletAPI } from "@/api/wallet.api.service";
+import { fetchTransactionsAPI, fetchWalletDataAPI, topupWalletAPI, withdrawWalletAPI } from "@/api/wallet.api.service";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { formatDate } from "@/utility/time-data-formater";
+import { useMotionValue } from "framer-motion";
 
 declare global {
 	interface Window {
@@ -38,7 +39,7 @@ export interface IWalletTransaction {
 	fromRole: "user" | "mentor" | "admin";
 	toRole: "user" | "mentor" | "admin";
 	amount: number;
-	type: "credit" | "debit";
+	type: "credit" | "debit" | "withdrawal";
 	purpose: "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";
 	description?: string;
 	sessionId?: {
@@ -65,9 +66,15 @@ export function WalletPage() {
 	const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 	const [amount, setAmount] = useState<string>("");
 	const [isAddMoneyModalOpen, setIsAddMoneyModalOpen] = useState(false);
+	const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+	const [withdrawAmount, setWithdrawAmount] = useState<string>("");
+
 
 	const user = useSelector((state: RootState) => state.userAuth.user);
 	const transactionsPerPage = 5;
+
+	// Swipe button state
+	const x = useMotionValue(0);
 
 	// Load Razorpay checkout script
 	useEffect(() => {
@@ -132,7 +139,6 @@ export function WalletPage() {
 	const handleCreateWallet = async () => {
 		try {
 			setIsLoadingWallet(true);
-			// Placeholder for wallet creation API call
 			setNotification({ type: "success", message: "Wallet creation request submitted successfully!" });
 			setTimeout(() => {
 				setIsWalletCreated(true);
@@ -149,17 +155,37 @@ export function WalletPage() {
 	};
 
 	const handleWithdraw = async () => {
-		try {
-			// Placeholder for withdrawal API call
-			setNotification({ type: "success", message: "Withdrawal request submitted successfully!" });
+		const amountNum = parseFloat(withdrawAmount);
+		if (!withdrawAmount || amountNum <= 0) {
+			setNotification({ type: "error", message: "Please enter a valid amount" });
 			setTimeout(() => setNotification(null), 3000);
+			return;
+		}
+		if (walletBalance !== null && amountNum > walletBalance) {
+			setNotification({ type: "error", message: "Insufficient balance" });
+			setTimeout(() => setNotification(null), 3000);
+			return;
+		}
+
+		try {
+			const response = await withdrawWalletAPI(user?.id as string, amountNum);
+			if (response.success) {
+				setWalletBalance(response.wallet.balance);
+				setTransactions((prev) => [response.transaction, ...prev]);
+				setNotification({ type: "success", message: "Withdrawal successfully!" });
+				setIsWithdrawModalOpen(false);
+				setWithdrawAmount("");
+			} else {
+				throw new Error("Failed to withdraw money");
+			}
 		} catch (error: any) {
 			setNotification({ type: "error", message: error.message || "Failed to withdraw money" });
 			setTimeout(() => setNotification(null), 3000);
 		}
 	};
 
-	// Handle Razorpay payment
+
+
 	const handleAddMoney = async () => {
 		if (!isRazorpayLoaded) {
 			setNotification({ type: "error", message: "Razorpay SDK not loaded" });
@@ -176,7 +202,7 @@ export function WalletPage() {
 
 		try {
 			const options = {
-				key: import.meta.env.VITE_RAZORPAY_KEY, // Add your Razorpay Key ID in .env
+				key: import.meta.env.VITE_RAZORPAY_KEY,
 				amount: amountInPaise,
 				currency: "INR",
 				name: "MentorHub Wallet Topup",
@@ -225,21 +251,11 @@ export function WalletPage() {
 		}
 	};
 
-	// const getStatusIcon = (type: string) => {
-	// 	switch (type) {
-	// 		case "credit":
-	// 			return <CheckCircle className="h-4 w-4 text-green-500" />;
-	// 		case "debit":
-	// 			return <XCircle className="h-4 w-4 text-red-500" />;
-	// 		default:
-	// 			return <Clock className="h-4 w-4 text-yellow-500" />;
-	// 	}
-	// };
-
 	const getStatusBadge = (type: string) => {
 		const variants = {
 			credit: "bg-green-100 text-green-800 border-green-200",
 			debit: "bg-red-100 text-red-800 border-red-200",
+			withdrawal: "bg-orange-100 text-orange-800 border-orange-200",
 		};
 		return variants[type as keyof typeof variants] || "bg-gray-100 text-gray-800";
 	};
@@ -267,7 +283,6 @@ export function WalletPage() {
 		setCurrentPage(1);
 	};
 
-	// Skeleton for Wallet Balance Card
 	const WalletBalanceSkeleton = () => (
 		<Card className="bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-xl lg:col-span-2">
 			<CardContent className="p-6 sm:p-8">
@@ -282,7 +297,6 @@ export function WalletPage() {
 		</Card>
 	);
 
-	// Skeleton for Transaction Card
 	const TransactionSkeleton = () => (
 		<Card className="border border-gray-200 py-1">
 			<CardContent className="p-4">
@@ -309,8 +323,8 @@ export function WalletPage() {
 	);
 
 	return (
-		<div className="container py-8 px-4 sm:px-6 lg:px-8 min-h-screen">
-			<div className="mx-auto max-w-7xl space-y-6">
+		<div className="flex flex-col items-center w-full py-8">
+			<div className="flex flex-col gap-4 px-10 md:px-20 xl:px-25 justify-center w-full min-h-screen">
 				{/* Header */}
 				<div className="mb-8">
 					<h1 className="text-3xl font-bold tracking-tight">My Wallet</h1>
@@ -370,7 +384,7 @@ export function WalletPage() {
 									<Plus className="h-6 w-6 mr-2" />
 									Add Money
 								</Button>
-								<Button onClick={handleWithdraw} variant="outline" className="flex-1 text-lg font-semibold border-2 border-blue-600 text-blue-600 hover:bg-blue-50 shadow-lg">
+								<Button onClick={() => setIsWithdrawModalOpen(true)} variant="outline" className="flex-1 text-lg font-semibold border-2 border-blue-600 text-blue-600 hover:bg-blue-50 shadow-lg">
 									<Minus className="h-6 w-6 mr-2" />
 									Withdraw
 								</Button>
@@ -400,6 +414,37 @@ export function WalletPage() {
 							</DialogContent>
 						</Dialog>
 
+						{/* Withdraw Money Dialog */}
+						<Dialog open={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen}>
+							<DialogContent className="max-w-lg">
+								<DialogHeader>
+									<DialogTitle>Withdraw Money</DialogTitle>
+								</DialogHeader>
+								<div className="space-y-6">
+									{/* Amount Input */}
+									<div className="space-y-2">
+										<Label htmlFor="withdraw-amount">Amount (₹)</Label>
+										<Input id="withdraw-amount" type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} placeholder="Enter amount" min="1" className="border-gray-300 focus:ring-blue-500" />
+									</div>
+
+									
+								</div>
+								<DialogFooter>
+									<Button onClick={handleWithdraw} disabled={!isRazorpayLoaded || !withdrawAmount || parseFloat(withdrawAmount) <= 0}>Withdraw</Button>
+									<Button
+										variant="outline"
+										onClick={() => {
+											setIsWithdrawModalOpen(false);
+											setWithdrawAmount("");
+											x.set(0);
+										}}
+										className="border-gray-300 hover:bg-gray-100">
+										Cancel
+									</Button>
+								</DialogFooter>
+							</DialogContent>
+						</Dialog>
+
 						{/* Transaction History Section */}
 						<Card className="shadow-lg">
 							<CardHeader>
@@ -411,13 +456,13 @@ export function WalletPage() {
 							</CardHeader>
 							<CardContent className="space-y-6">
 								{/* Filters */}
-								<div className="flex justify-between">
-									<div className="flex space-x-4">
-										<div className="space-y-2">
+								<div className="flex flex-col sm:flex-row justify-between gap-4">
+									<div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+										<div className="space-y-2 flex-1">
 											<Label htmlFor="date-range">Date Range</Label>
 											<Popover>
 												<PopoverTrigger asChild>
-													<Button id="date-range" variant="outline" className="w-full justify-start text-left font-normal">
+													<Button id="date-range" variant="outline" className="w-full justify-start text-left font-normal border-gray-300">
 														<CalendarIcon className="mr-2 h-4 w-4" />
 														{dateRange.from ? (
 															dateRange.to ? (
@@ -445,23 +490,26 @@ export function WalletPage() {
 											</Popover>
 										</div>
 
-										<div className="space-y-2">
+										<div className="space-y-2 flex-1">
 											<Label htmlFor="transaction-type">Transaction Type</Label>
 											<Select value={transactionType} onValueChange={setTransactionType}>
-												<SelectTrigger>
+												<SelectTrigger className="border-gray-300">
 													<SelectValue placeholder="Select type" />
 												</SelectTrigger>
 												<SelectContent>
 													<SelectItem value="all">All Transactions</SelectItem>
 													<SelectItem value="credit">Credit Only</SelectItem>
 													<SelectItem value="debit">Debit Only</SelectItem>
+													<SelectItem value="withdrawal">Withdrawal Only</SelectItem>
 												</SelectContent>
 											</Select>
 										</div>
 									</div>
 
 									<div className="flex items-end">
-										<Button onClick={handleClearFilters}>Clear Filters</Button>
+										<Button onClick={handleClearFilters} variant="outline" className="border-gray-300 hover:bg-gray-100">
+											Clear Filters
+										</Button>
 									</div>
 								</div>
 
@@ -484,7 +532,7 @@ export function WalletPage() {
 														<CardContent className="p-4">
 															<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 																<div className="flex items-center space-x-4">
-																	<div className={`p-2 rounded-full ${transaction.type === "credit" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}>
+																	<div className={`p-2 rounded-full ${transaction.type === "credit" ? "bg-green-100 text-green-600" : transaction.type === "withdrawal" ? "bg-orange-100 text-orange-600" : "bg-red-100 text-red-600"}`}>
 																		{transaction.type === "credit" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
 																	</div>
 																	<div>
@@ -497,14 +545,13 @@ export function WalletPage() {
 																	</div>
 																</div>
 																<div className="flex flex-col items-end space-y-1">
-																	<p className={`font-semibold ${transaction.type === "credit" ? "text-green-600" : "text-red-600"}`}>
+																	<p className={`font-semibold ${transaction.type === "credit" ? "text-green-600" : transaction.type === "withdrawal" ? "text-orange-600" : "text-red-600"}`}>
 																		{transaction.type === "credit" ? "+" : "-"}₹
 																		{transaction.amount.toLocaleString("en-IN", {
 																			minimumFractionDigits: 2,
 																		})}
 																	</p>
 																	<div className="flex items-center gap-2">
-																		{/* {getStatusIcon(transaction.type)} */}
 																		<Badge variant="outline" className={`text-xs ${getStatusBadge(transaction.type)}`}>
 																			{transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
 																		</Badge>
@@ -517,13 +564,13 @@ export function WalletPage() {
 											</div>
 											{/* Pagination Controls */}
 											<div className="flex justify-between items-center mt-4">
-												<Button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} variant="outline" className="text-sm">
+												<Button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} variant="outline" className="text-sm border-gray-300 hover:bg-gray-100">
 													Previous
 												</Button>
 												<p className="text-sm text-gray-600">
 													Page {currentPage} of {totalPages}
 												</p>
-												<Button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} variant="outline" className="text-sm">
+												<Button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} variant="outline" className="text-sm border-gray-300 hover:bg-gray-100">
 													Next
 												</Button>
 											</div>

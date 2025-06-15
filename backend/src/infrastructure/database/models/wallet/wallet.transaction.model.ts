@@ -11,7 +11,7 @@ export interface IWalletTransactionDocument extends Document {
 	toModel?: "Users" | "admins";
 	sessionId?: ObjectId;
 	amount: number;
-	type: "credit" | "debit";
+	type: "credit" | "debit" | "withdrawal";
 	purpose: "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";
 	description?: string;
 	createdAt: Date;
@@ -66,7 +66,7 @@ const WalletTransactionSchema = new Schema<IWalletTransactionDocument>(
 		},
 		type: {
 			type: String,
-			enum: ["credit", "debit"],
+			enum: ["credit", "debit", "withdrawal"],
 			required: true,
 		},
 		purpose: {

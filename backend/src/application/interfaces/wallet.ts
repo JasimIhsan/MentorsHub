@@ -1,6 +1,7 @@
 import { WalletEntity } from "../../domain/entities/wallet.entity";
 import { WithdrawalRequestEntity } from "../../domain/entities/wallet.withdrawel.request.entity";
 import { IWalletTransactionDTO } from "../dtos/wallet.transation.dto";
+import { RoleEnum } from "./role";
 
 export interface ICreateWalletUsecase {
 	execute(userId: string, role: string): Promise<WalletEntity>;
@@ -13,7 +14,7 @@ export interface ICreateTransactionUsecase {
 		fromRole: "user" | "mentor" | "admin";
 		toRole: "user" | "mentor" | "admin";
 		amount: number;
-		type: "credit" | "debit";
+		type: "credit" | "debit" | "withdrawal";
 		purpose: string;
 		description?: string;
 		sessionId?: string | null;
@@ -42,4 +43,8 @@ export interface IWalletTopUpUsecase {
 
 export interface IGetWalletUsecase {
 	execute(userId: string): Promise<WalletEntity | null>;
+}
+
+export interface IWithdrawWalletUsecase {
+	execute(userId: string, amount: number): Promise<{ wallet: WalletEntity; transaction: IWalletTransactionDTO }> 
 }

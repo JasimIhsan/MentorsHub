@@ -8,12 +8,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Filter, CalendarIcon, Wallet, ArrowDownLeft, ArrowUpRight, Minus, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Filter, CalendarIcon, Wallet, ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { format } from "date-fns";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { formatDate } from "@/utility/time-data-formater";
-import { fetchPlatformTransactionsAPI, fetchPlatformWalletDataAPI } from "@/api/wallet.api.service";
+import { fetchPlatformTransactionsAPI, fetchPlatformWalletDataAPI, withdrawPlatformWalletAPI } from "@/api/wallet.api.service";
 
 // Define admin transaction interface
 export interface IWalletTransaction {
@@ -54,9 +56,43 @@ export function AdminWalletPage() {
 	const [totalPages, setTotalPages] = useState(1);
 	const [isLoadingWallet, setIsLoadingWallet] = useState(true);
 	const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
+	const [withdrawAmount, setWithdrawAmount] = useState<string>("");
+	const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
 	const user = useSelector((state: RootState) => state.adminAuth.admin);
 	const transactionsPerPage = 5;
+
+	// Handle withdrawal
+	const handleWithdraw = async () => {
+		const amountNum = parseFloat(withdrawAmount);
+		console.log("withdrawAmount: ", withdrawAmount);
+		if (!withdrawAmount || amountNum <= 0) {
+			setNotification({ type: "error", message: "Please enter a valid amount" });
+			setTimeout(() => setNotification(null), 3000);
+			return;
+		}
+		if (walletBalance !== null && amountNum > walletBalance) {
+			setNotification({ type: "error", message: "Insufficient balance" });
+			setTimeout(() => setNotification(null), 3000);
+			return;
+		}
+
+		try {
+			const response = await withdrawPlatformWalletAPI(user?.id as string, amountNum);
+			if (response.success) {
+				setWalletBalance(response.wallet.balance);
+				setTransactions((prev) => [response.transaction, ...prev]);
+				setNotification({ type: "success", message: "Withdrawal successfully!" });
+				setIsWithdrawModalOpen(false);
+				setWithdrawAmount("");
+			} else {
+				throw new Error("Failed to withdraw money");
+			}
+		} catch (error: any) {
+			setNotification({ type: "error", message: error.message || "Failed to withdraw money" });
+			setTimeout(() => setNotification(null), 3000);
+		}
+	};
 
 	// Fetch admin wallet data
 	useEffect(() => {
@@ -118,9 +154,11 @@ export function AdminWalletPage() {
 
 	const getPurposeLabel = (purpose: string) => {
 		const labels = {
+			session_fee: "Session Fee",
 			platform_fee: "Platform Fee",
 			refund: "Refund",
-			admin_adjustment: "Admin Adjustment",
+			withdrawal: "Withdrawal",
+			wallet_topup: "Wallet Topup",
 		};
 		return labels[purpose as keyof typeof labels] || purpose;
 	};
@@ -139,7 +177,7 @@ export function AdminWalletPage() {
 
 	// Skeleton for Wallet Balance Card
 	const WalletBalanceSkeleton = () => (
-		<Card className="bg-gradient-to-br from-purple-600 to-purple-700 text-white shadow-xl lg:col-span-2">
+		<Card className="bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-xl lg:col-span-2">
 			<CardContent className="p-6 sm:p-8">
 				<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 					<div className="space-y-2">
@@ -195,35 +233,56 @@ export function AdminWalletPage() {
 				)}
 
 				{/* Wallet Balance */}
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-					{isLoadingWallet ? (
-						<WalletBalanceSkeleton />
-					) : (
-						<Card className="bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-xl lg:col-span-2">
-							<CardContent className="p-6 sm:p-8">
-								<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-									<div>
-										<p className="text-blue-100 text-sm font-medium mb-2">Current Balance</p>
-										<p className="text-4xl sm:text-5xl font-bold">{walletBalance !== null ? `₹${walletBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "Loading..."}</p>
-									</div>
+				{isLoadingWallet ? (
+					<WalletBalanceSkeleton />
+				) : (
+					<Card className="bg-gradient-to-br text-white from-blue-600 to-blue-700 shadow-xl rounded-2xl overflow-hidden">
+						<CardContent className="p-6 sm:p-8">
+							<div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+								<div className="flex items-center gap-4">
 									<div className="bg-white/20 p-4 rounded-full">
 										<Wallet className="h-8 w-8" />
+									</div>{" "}
+									<div>
+										<p className="text-blue-100 font-medium">Platform Balance</p>
+										<p className="text-4xl font-extrabold text-white-800">{walletBalance !== null ? `₹${walletBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "Loading..."}</p>
 									</div>
 								</div>
-							</CardContent>
-						</Card>
-					)}
-					<div className="flex flex-col gap-4">
-						<Button disabled={!user?.isSuperAdmin} className="flex-1 text-lg font-semibold bg-green-600 hover:bg-green-700 shadow-lg">
-							<Plus className="h-6 w-6 mr-2" />
-							{user?.isSuperAdmin ? "Add Money" : "Add Money (Super Admin Only)"}
-						</Button>
-						<Button disabled={!user?.isSuperAdmin} variant="outline" className="flex-1 text-lg font-semibold border-2 border-blue-600 text-blue-600 hover:bg-blue-50 shadow-lg">
-							<Minus className="h-6 w-6 mr-2" />
-							{user?.isSuperAdmin ? "Withdraw Money" : "Withdraw Money (Super Admin Only)"}
-						</Button>
-					</div>
-				</div>
+								<Button onClick={() => user?.isSuperAdmin && setIsWithdrawModalOpen(true)} disabled={!user?.isSuperAdmin} variant="outline" className={`${user?.isSuperAdmin ? "" : "cursor-not-allowed"} text-primary  font-bold px-6 py-3 `}>
+									Withdraw
+								</Button>
+							</div>
+						</CardContent>
+					</Card>
+				)}
+
+				{/* Withdraw Money Modal */}
+				<Dialog open={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen}>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>Withdraw Money from Platform Wallet</DialogTitle>
+						</DialogHeader>
+						<div className="space-y-4">
+							<div className="space-y-2">
+								<Label htmlFor="amount">Amount (₹)</Label>
+								<Input id="amount" type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} placeholder="Enter amount" min="1" />
+							</div>
+						</div>
+						<DialogFooter>
+							<Button
+								variant="outline"
+								onClick={() => {
+									setIsWithdrawModalOpen(false);
+									setWithdrawAmount("");
+								}}>
+								Cancel
+							</Button>
+							<Button onClick={handleWithdraw} disabled={!user?.isSuperAdmin || !withdrawAmount || parseFloat(withdrawAmount) <= 0}>
+								Confirm Withdrawal
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
 
 				{/* Transaction History Section */}
 				<Card className="shadow-lg">
@@ -262,7 +321,6 @@ export function AdminWalletPage() {
 										</PopoverContent>
 									</Popover>
 								</div>
-
 								<div className="space-y-2">
 									<Label htmlFor="transaction-type">Transaction Type</Label>
 									<Select value={transactionType} onValueChange={setTransactionType}>
@@ -277,7 +335,6 @@ export function AdminWalletPage() {
 									</Select>
 								</div>
 							</div>
-
 							<div className="flex items-end">
 								<Button onClick={handleClearFilters}>Clear Filters</Button>
 							</div>
@@ -308,8 +365,7 @@ export function AdminWalletPage() {
 															<div>
 																<p className="font-medium text-gray-900">{getPurposeLabel(transaction.purpose)}</p>
 																<p className="text-sm text-gray-500">{transaction.description || "No description"}</p>
-																{transaction.fromUserId && <p className="text-sm text-gray-500">From: {transaction.fromUserId.name}</p>}
-																{/* {transaction.toUserId && <p className="text-sm text-gray-500">To: {transaction.toUserId.name}</p>} */}
+																{transaction.fromUserId && transaction.purpose !== "withdrawal" && <p className="text-sm text-gray-500">From: {transaction.fromUserId.name}</p>}
 																<p className="text-sm text-gray-500">{formatDate(String(transaction.createdAt))}</p>
 															</div>
 														</div>

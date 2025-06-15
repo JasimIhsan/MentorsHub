@@ -48,6 +48,15 @@ export const topupWalletAPI = async (userId: string, data: { amount: number; pur
 	}
 };
 
+export const withdrawWalletAPI = async (userId: string, amount: number) => {
+	try {
+		const response = await axiosInstance.post(`/user/wallet/withdraw/${userId}`, { amount });
+		return response.data
+	} catch (error: any) {
+		return handleAPIError(error)
+	}
+}
+
 export const fetchPlatformWalletDataAPI = async (userId: string) => {
 	try {
 		const response = await axiosInstance.get(`/admin/wallet/${userId}`);
@@ -74,3 +83,12 @@ export const fetchPlatformTransactionsAPI = async (userId: string, page: number,
 		return handleAPIError(error); // Handle errors using utility function
 	}
 };
+
+export const withdrawPlatformWalletAPI = async (userId: string, amount: number) => {
+	try {
+		const response = await axiosInstance.post(`/admin/wallet/withdraw/${userId}`, { amount });
+		return response.data
+	} catch (error: any) {
+		return handleAPIError(error)
+	}
+}

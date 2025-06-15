@@ -6,6 +6,7 @@ import { AdminEntity } from "../../domain/entities/admin.entity";
 import { AdminRepositoryImpl } from "../../infrastructure/database/implementation/admin.repository.impl";
 import { HttpStatusCode } from "../../shared/constants/http.status.codes";
 import { CommonStringMessage } from "../../shared/constants/string.messages";
+import { RoleEnum } from "../../application/interfaces/role";
 
 export const tokenService = new TokenServicesImpl();
 const userRepo = new UserRepositoryImpl();
@@ -36,7 +37,7 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 				...adminData,
 				id: decoded.userId,
 			});
-			(req.user as any) = { ...admin, role: "admin" };
+			req.user = { id: admin.getId() as string, role: RoleEnum.ADMIN };
 			return next();
 		} else {
 			const user = await userRepo.findUserById(decoded.userId);
@@ -50,10 +51,11 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 				return;
 			}
 
-			(req.user as any) = {
-				...user,
-				role: user.getRole() === "mentor" ? "mentor" : "user",
+			req.user = {
+				id: user.getId() as string,
+				role: user.getRole() === "mentor" ? RoleEnum.MENTOR : RoleEnum.USER,
 			};
+
 			return next();
 		}
 	} catch (error) {

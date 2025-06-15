@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createTransactionController, createWalletController, createWithdrawalRequestController, getTransactionsController, getWalletController, topupWalletController } from "../../controllers/wallet/composer";
+import { createTransactionController, createWalletController, createWithdrawalRequestController, getTransactionsController, getWalletController, topupWalletController, withdrawWalletController } from "../../controllers/wallet/composer";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { requireRole } from "../../middlewares/require.role.middleware";
 export const userWalletRouter = Router();
@@ -15,3 +15,5 @@ userWalletRouter.post("/create-withdrawal-request", verifyAccessToken, requireRo
 userWalletRouter.get("/:userId", verifyAccessToken, requireRole("user", "mentor"), (req, res) => getWalletController.handle(req, res));
 
 userWalletRouter.post('/top-up/:userId', verifyAccessToken, requireRole("user", "mentor"), (req, res) => topupWalletController.handle(req, res));
+
+userWalletRouter.post("/withdraw/:userId", verifyAccessToken, requireRole("user", "mentor"), (req, res) => withdrawWalletController.handle(req, res));

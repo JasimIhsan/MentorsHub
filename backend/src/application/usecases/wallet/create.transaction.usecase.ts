@@ -11,7 +11,7 @@ export class CreateTransactionUseCase implements ICreateTransactionUsecase {
 		fromRole: "user" | "mentor" | "admin";
 		toRole: "user" | "mentor" | "admin";
 		amount: number;
-		type: "credit" | "debit";
+		type: "credit" | "debit" | "withdrawal";
 		purpose: string;
 		description?: string;
 		sessionId?: string | null;
