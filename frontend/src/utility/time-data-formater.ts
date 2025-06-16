@@ -8,7 +8,8 @@ export const formatDate = (date: string) => {
 };
 
 // Format time for display
-export const formatTime = (time: string) => {
+export const formatTime = (time: string | Date) => {
+	if(time instanceof Date) time = time.toString()
 	const [hour, minute] = time.split(":").map(Number);
 	const ampm = hour >= 12 ? "PM" : "AM";
 	const hour12 = hour % 12 || 12;

@@ -26,7 +26,6 @@ export const getUserNotificationsAPI = async ({ userId, page = 1, limit = 10, se
 				isRead,
 			},
 		});
-		console.log(`Response from getUserNotificationsAPI : `, res);
 		return res.data;
 	} catch (error) {
 		console.error("Error fetching notifications:", error);

@@ -82,6 +82,7 @@ const userSlice = createSlice({
 				state.user = { ...action.payload };
 			})
 			.addCase(fetchUserProfile.rejected, (state, action) => {
+				console.error("Error fetching user profile:", action.payload);
 				state.loading = false;
 				state.error = action.payload || "Unknown error";
 			});

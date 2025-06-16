@@ -2,18 +2,19 @@
 import { IMessageRepository } from "../../../domain/repositories/message.repository";
 import { MessageEntity } from "../../../domain/entities/message.entity";
 import { MessageModel } from "../models/text-message/message.model";
+import { ISendMessageDTO } from "../../../application/dtos/message.dto";
 
 export class MessageRepositoryImpl implements IMessageRepository {
-	async sendMessage(raw: Omit<MessageEntity, "id" | "createdAt" | "updatedAt">): Promise<MessageEntity> {
+	async sendMessage(raw: Omit<MessageEntity, "id" | "createdAt" | "updatedAt">): Promise<ISendMessageDTO> {
 		const doc = await MessageModel.create({
 			chatId: raw.chatId,
 			sender: raw.sender,
 			content: raw.content,
 			type: raw.type,
 			fileUrl: raw.fileUrl,
-			readBy: [raw.sender], // sender already read
+			readBy: [raw.sender],
 		});
-		return MessageEntity.mapToMessageEntity(doc);
+		return this.mapToMessageDTO(doc);
 	}
 
 	async getMessagesByChat(chatId: string, page = 1, limit = 20): Promise<MessageEntity[]> {
@@ -35,4 +36,21 @@ export class MessageRepositoryImpl implements IMessageRepository {
 			readBy: { $ne: userId },
 		});
 	}
+
+	mapToMessageDTO = (doc: any): ISendMessageDTO => ({
+		id: doc._id.toString(),
+		chatId: doc.chatId.toString(),
+		sender: {
+			id: doc.sender._id.toString(),
+			firstName: doc.sender.firstName,
+			lastName: doc.sender.lastName,
+			avatar: doc.sender.avatar,
+		},
+		content: doc.content,
+		type: doc.type,
+		fileUrl: doc.fileUrl,
+		readBy: doc.readBy.map((id: any) => id.toString()),
+		createdAt: doc.createdAt,
+		updatedAt: doc.updatedAt,
+	});
 }

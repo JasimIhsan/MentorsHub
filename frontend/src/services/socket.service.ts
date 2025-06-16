@@ -2,12 +2,14 @@ import { io, Socket } from "socket.io-client";
 import { INotification } from "@/interfaces/INotification";
 
 interface SocketEvents {
-	onNewNotification: (event: string, callback: (notification: INotification) => void) => () => void; // Updated to support event name
+	onNewNotification: (event: string, callback: (notification: INotification) => void) => () => void;
 	onVideoCallEvent: (event: string, callback: (data: any) => void) => () => void;
 	onMessageEvent: (event: string, callback: (data: any) => void) => () => void;
 	emit: (event: string, data: any) => void;
 	disconnect: () => void;
 	onConnectionChange: (callback: (isConnected: boolean) => void) => () => void;
+	on: (event: string, callback: (data: any) => void) => () => void; // Updated to return cleanup function
+	off: (event: string, callback?: (data: any) => void) => void; // Keep void as per Socket.IO
 }
 
 class SocketService {
@@ -28,7 +30,7 @@ class SocketService {
 	public initialize(userId: string): void {
 		if (this.isInitialized || !userId) return;
 
-		const socketUrl = import.meta.env.VITE_SERVER_URL;
+		const socketUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:5858";
 
 		this.socket = io(socketUrl, {
 			withCredentials: true,
@@ -37,6 +39,7 @@ class SocketService {
 			reconnectionAttempts: 5,
 			reconnectionDelay: 1000,
 			reconnectionDelayMax: 5000,
+			query: { userId },
 		});
 
 		this.socket.on("connect", () => {
@@ -95,6 +98,15 @@ class SocketService {
 
 	public isConnected(): boolean {
 		return !!this.socket?.connected;
+	}
+
+	public on(event: string, callback: (data: any) => void): () => void {
+		this.socket?.on(event, callback);
+		return () => this.socket?.off(event, callback);
+	}
+
+	public off(event: string, callback?: (data: any) => void): void {
+		this.socket?.off(event, callback);
 	}
 
 	public disconnect(): void {

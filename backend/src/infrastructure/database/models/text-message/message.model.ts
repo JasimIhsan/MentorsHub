@@ -17,7 +17,7 @@ export interface IMessage extends Document {
 const MessageSchema: Schema<IMessage> = new Schema(
 	{
 		chatId: { type: Schema.Types.ObjectId, ref: "Chat", required: true },
-		sender: { type: Schema.Types.ObjectId, ref: "User", required: true },
+		sender: { type: Schema.Types.ObjectId, ref: "Users", required: true },
 		content: { type: String, default: "" },
 		type: {
 			type: String,
@@ -25,7 +25,7 @@ const MessageSchema: Schema<IMessage> = new Schema(
 			default: "text",
 		},
 		fileUrl: { type: String },
-		readBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
+		readBy: [{ type: Schema.Types.ObjectId, ref: "Users" }],
 	},
 	{ timestamps: true }
 );

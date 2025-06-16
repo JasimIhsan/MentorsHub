@@ -1,6 +1,8 @@
 import { Server, Socket } from "socket.io";
 import { Model } from "mongoose";
 import { ISessionDocument } from "../database/models/session/session.model";
+import { MessageModel } from "../database/models/text-message/message.model";
+import { markMessageAsReadUsecase, sendMessageUsecase } from "../../application/usecases/text-message/composer";
 
 interface SessionParticipant {
 	userId: string;
@@ -207,6 +209,51 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 
 		socket.on("connect_error", (error: Error) => {
 			console.error(`Connection error for ${socket.id}: ${error.message}`);
+		});
+
+		// ============================================== MESSAGE LOGIC ============================================== //
+
+		// Join chat room
+		socket.on("join-chat-room", ({ chatId }) => {
+			socket.join(`chat_${chatId}`);
+			console.log(`✅ User joined chat room chat_${chatId}`);
+		});
+
+		// 1. Handle incoming message
+		socket.on("send-message", async (data) => {
+			const { chatId, senderId, receiverId, content, type = "text", fileUrl } = data;
+
+			console.log(`data in send-message: `, data);
+
+			try {
+				// 1. Call use case to handle message logic
+				const message = await sendMessageUsecase.execute({
+					chatId,
+					sender: senderId,
+					receiver: receiverId,
+					content,
+					type,
+					fileUrl,
+				});
+
+				// 2. Emit the message to all users in the chat room
+				io.to(chatId).emit("receive-message", message);
+			} catch (err) {
+				console.error("send-message error:", err);
+				socket.emit("error", { message: "Failed to send message" });
+			}
+		});
+
+		// 2. Mark as read
+		socket.on("mark-as-read", async ({ chatId, userId }) => {
+			try {
+				await markMessageAsReadUsecase.execute(chatId, userId);
+
+				// Optionally notify sender(s) that messages were read
+				io.to(chatId).emit("message-read", { chatId, userId });
+			} catch (err) {
+				console.error("mark-as-read error:", err);
+			}
 		});
 	});
 };
