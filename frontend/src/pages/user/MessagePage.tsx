@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { useSocket } from "@/context/SocketContext";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import axios from "axios";
 import { formatTime } from "@/utility/time-data-formater";
 import { useDebounce } from "@/hooks/useDebounce";
 import { IMentorDTO } from "@/interfaces/IMentorDTO";
@@ -108,8 +107,10 @@ export function MessagePage() {
 		const fetchMessages = async () => {
 			setLoading(true);
 			try {
-				const response = await axios.get(`http://localhost:5858/api/messages/${selectedChatId}`);
+				const response = await axiosInstance.get(`/user/messages/messages/${selectedChatId}`);
+        console.log('response messages: ', response);
 				setAllMessages(response.data.messages);
+				console.log(`allMessages : `, allMessages);
 			} catch (error) {
 				console.error("Failed to fetch messages:", error);
 			} finally {
@@ -456,7 +457,7 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 					<Avatar className="h-10 w-10">
 						<AvatarImage src={selectedChat.isGroupChat ? "/group-placeholder.svg" : selectedChat.participants[0]?.avatar || "/placeholder.svg"} alt={selectedChat.groupName || selectedChat.participants[0]?.name} />
 						<AvatarFallback>
-							{(selectedChat.isGroupChat ? selectedChat.groupName : selectedChat.participants[0]?.name)
+							{(selectedChat.isGroupChat ? selectedChat.groupName : selectedChat.participants[0]?.firstName)
 								?.split(" ")
 								.map((n) => n[0])
 								.join("")
@@ -467,9 +468,7 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 				</div>
 				<div className="ml-3 flex-1">
 					<h2 className="text-sm font-medium text-gray-900">{selectedChat.isGroupChat ? selectedChat.groupName : `${selectedChat.participants[0]?.firstName} ${selectedChat.participants[0]?.lastName || ""}`}</h2>
-					<p className="text-xs text-gray-500">
-						{selectedChat.isGroupChat ? `${selectedChat.participants.length} members` : selectedChat.participants[0]?.status === "online" ? "Online" : "Offline"}
-					</p>
+					<p className="text-xs text-gray-500">{selectedChat.isGroupChat ? `${selectedChat.participants.length} members` : selectedChat.participants[0]?.status === "online" ? "Online" : "Offline"}</p>
 				</div>
 				<div className="flex items-center space-x-2">
 					<Button variant="ghost" size="sm">
@@ -524,9 +523,6 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ message, isOwn, isGroupChat }: MessageBubbleProps) {
-	const formatMessageTime = (date: Date) => {
-		return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-	};
 
 	const getReadStatus = () => {
 		if (!isOwn || !isGroupChat) return null;
@@ -561,7 +557,7 @@ export function MessageBubble({ message, isOwn, isGroupChat }: MessageBubbleProp
 						</a>
 					)}
 					<div className={`flex items-center justify-end mt-1 space-x-1 ${isOwn ? "text-green-100" : "text-gray-500"}`}>
-						<span className="text-xs">{formatMessageTime(message.createdAt)}</span>
+						<span className="text-xs">{formatTime(message.createdAt)}</span>
 						{getReadStatus()}
 					</div>
 				</div>

@@ -17,13 +17,13 @@ export class MessageRepositoryImpl implements IMessageRepository {
 		return this.mapToMessageDTO(doc);
 	}
 
-	async getMessagesByChat(chatId: string, page = 1, limit = 20): Promise<MessageEntity[]> {
+	async getMessagesByChat(chatId: string, page = 1, limit = 20): Promise<ISendMessageDTO[]> {
 		const messages = await MessageModel.find({ chatId })
-			.sort({ createdAt: -1 })
+			.sort({ createdAt: 1 })
 			.skip((page - 1) * limit)
 			.limit(limit)
 			.exec();
-		return messages.map(MessageEntity.mapToMessageEntity);
+		return messages.map((doc) => this.mapToMessageDTO(doc));
 	}
 
 	async markMessageAsRead(messageId: string, userId: string): Promise<void> {

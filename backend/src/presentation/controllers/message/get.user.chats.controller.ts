@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IGetUserChatsUseCase } from "../../../application/interfaces/chats";
+import { IGetUserChatsUseCase } from "../../../application/interfaces/messages";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 
 export class GetUserChatsController {
