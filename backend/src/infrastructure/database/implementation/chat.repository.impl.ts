@@ -12,7 +12,6 @@ export class ChatRepositoryImpl implements IChatRepository {
 			participants: participantIds,
 			groupAdmin: isGroupChat ? groupAdmin : undefined,
 		});
-		console.log(`chat in repo : `, chat);
 		return await chat.save();
 	}
 
@@ -68,13 +67,8 @@ export class ChatRepositoryImpl implements IChatRepository {
 
 	private mapToChatDTO = (doc: IChat, currentUserId: string): IChatDTO => {
 		const allParticipants = Array.isArray(doc.participants) ? doc.participants.map((p: any) => this.mapToUserSummary(p)) : [];
-		console.log('allParticipants: ', allParticipants);
 
-		const visibleParticipants = doc.isGroupChat ? allParticipants : allParticipants.filter((p) => {
-			console.log(`p.id : `, p.id);
-			console.log(`currentUserId : `, currentUserId);
-			return p.id !== currentUserId;
-		});
+		const visibleParticipants = doc.isGroupChat ? allParticipants : allParticipants.filter((p) => p.id !== currentUserId);
 
 		return {
 			id: doc._id?.toString() as string,

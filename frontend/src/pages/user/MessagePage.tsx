@@ -12,6 +12,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import { fetchAllApprovedMentors } from "@/api/mentors.api.service";
 import axiosInstance from "@/api/config/api.config";
+import { toast } from "sonner";
 
 // Define interfaces
 export interface User {
@@ -107,8 +108,13 @@ export function MessagePage() {
 		const fetchMessages = async () => {
 			setLoading(true);
 			try {
-				const response = await axiosInstance.get(`/user/messages/messages/${selectedChatId}`);
-        console.log('response messages: ', response);
+				const response = await axiosInstance.get(`/user/messages/messages/${selectedChatId}`, {
+					params: {
+						page: 1,
+						limit: 100,
+					},
+				});
+				console.log("response messages: ", response);
 				setAllMessages(response.data.messages);
 				console.log(`allMessages : `, allMessages);
 			} catch (error) {
@@ -122,8 +128,13 @@ export function MessagePage() {
 
 	// Handle socket messages
 	useEffect(() => {
-		if (!socket || !selectedChatId) return;
+		if (!socket || !selectedChatId) {
+			console.log(`Socket or selectedChatId is null`);
+			return;
+		}
 		socket.on("receive-message", (socketMessage: IReceiveMessage) => {
+			console.log("Received message:", socketMessage);
+			console.log("Current selectedChatId:", selectedChatId);
 			if (socketMessage.chatId === selectedChatId) {
 				setAllMessages((prev) => [...prev, socketMessage]);
 			}
@@ -157,6 +168,9 @@ export function MessagePage() {
 		}
 		if (socket) {
 			socket.emit("join-chat-room", { chatId });
+			socket.on("joined-chat-room", ({ chatId: joinedChatId }) => {
+				toast.success(`Successfully joined chat room: chat_${joinedChatId}`);
+			});
 			console.log(`Emitted join-chat-room for chat_${chatId}`);
 		}
 	};
@@ -206,27 +220,9 @@ export function MessagePage() {
 			type: "text",
 		};
 
-		console.log(`message : `, message);
-
 		try {
 			// Emit message via socket
 			socket.emit("send-message", message);
-			// Optimistically update UI with the sent message
-			const receivedMessage: IReceiveMessage = {
-				...message,
-				chatId: chatId || "",
-				sender: {
-					id: user.id,
-					firstName: user?.firstName || "Unknown",
-					lastName: user?.lastName || "",
-					avatar: user?.avatar as string,
-				},
-				readBy: selectedChat.isGroupChat ? [user.id] : [],
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			};
-			setAllMessages((prev) => [...prev, receivedMessage]);
-			setChats((prev) => prev.map((chat) => (chat.id === chatId ? { ...chat, lastMessage: receivedMessage } : chat)));
 		} catch (error) {
 			console.error("Failed to send message via socket:", error);
 		}
@@ -523,7 +519,6 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ message, isOwn, isGroupChat }: MessageBubbleProps) {
-
 	const getReadStatus = () => {
 		if (!isOwn || !isGroupChat) return null;
 		const readCount = message.readBy.length;

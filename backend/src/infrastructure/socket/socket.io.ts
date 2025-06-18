@@ -217,13 +217,11 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 		socket.on("join-chat-room", ({ chatId }) => {
 			socket.join(`chat_${chatId}`);
 			console.log(`✅ User joined chat room chat_${chatId}`);
+			socket.emit("joined-chat-room", { chatId }); // Confirm room joining
 		});
-
 		// 1. Handle incoming message
 		socket.on("send-message", async (data) => {
 			const { chatId, senderId, receiverId, content, type = "text", fileUrl } = data;
-
-			console.log(`data in send-message: `, data);
 
 			try {
 				// 1. Call use case to handle message logic
@@ -237,7 +235,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 				});
 
 				// 2. Emit the message to all users in the chat room
-				io.to(chatId).emit("receive-message", message);
+				io.to(`chat_${chatId}`).emit("receive-message", message);
 			} catch (err) {
 				console.error("send-message error:", err);
 				socket.emit("error", { message: "Failed to send message" });

@@ -10,7 +10,7 @@ export class SendMessageUseCase {
 	async execute(data: { chatId?: string; sender: string; receiver: string; content: string; type: MessageType; fileUrl?: string }): Promise<ISendMessageDTO> {
 		let chatId = data.chatId;
 
-		// 1️⃣ If no chatId is provided or chat doesn't exist, create new chat
+		// 1. If no chatId is provided or chat doesn't exist, create new chat
 		if (!chatId || !(await this.chatRepo.findChatById(chatId))) {
 			const existingChat = await this.chatRepo.findPrivateChatBetweenUsers(data.sender, data.receiver);
 			if (existingChat) {
@@ -23,7 +23,7 @@ export class SendMessageUseCase {
 
 		if (!chatId) throw new Error("Chat not found");
 
-		// 2️⃣ Create message
+		// 22. Create message
 		const message = new MessageEntity({
 			id: "",
 			chatId,
@@ -32,14 +32,12 @@ export class SendMessageUseCase {
 			type: data.type,
 			fileUrl: data.fileUrl,
 			readBy: [data.sender],
-			createdAt: new Date(),
-			updatedAt: new Date(),
 		});
 
-		// 3️⃣ Send message
+		// 3.Send message
 		const savedMessage = await this.messageRepo.sendMessage(message);
 
-		// 4️⃣ Update chat's last message
+		// 4. Update chat's last message
 		await this.chatRepo.updateLastMessage(chatId, savedMessage.id);
 
 		return savedMessage;

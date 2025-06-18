@@ -15,7 +15,7 @@ export class MessageEntity {
 	private readonly _createdAt: Date;
 	private _updatedAt: Date;
 
-	constructor(props: { id: string; chatId: string; sender: string; content: string; type: MessageType; fileUrl?: string; readBy: string[]; createdAt: Date; updatedAt: Date }) {
+	constructor(props: { id: string; chatId: string; sender: string; content: string; type: MessageType; fileUrl?: string; readBy: string[]; createdAt?: Date; updatedAt?: Date }) {
 		this._id = props.id;
 		this._chatId = props.chatId;
 		this._sender = props.sender;
@@ -23,8 +23,8 @@ export class MessageEntity {
 		this._type = props.type;
 		this._fileUrl = props.fileUrl;
 		this._readBy = props.readBy;
-		this._createdAt = props.createdAt;
-		this._updatedAt = props.updatedAt;
+		this._createdAt = props?.createdAt ?? new Date();
+		this._updatedAt = props.updatedAt ?? new Date();
 	}
 
 	// 🔓 Getters
