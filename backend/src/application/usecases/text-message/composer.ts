@@ -1,4 +1,5 @@
 import { chatRepository, messageRepository } from "../../../infrastructure/composer";
+import { DeleteMessageUseCase } from "./delete.message.usecase";
 import { GetUserChatsUseCase } from "./get.chats.usecase";
 import { GetMessagesByChatUseCase } from "./get.message.by.chat.usecase";
 import { MarkMessageReadUseCase } from "./mark.messages.as.read.usecase";
@@ -8,3 +9,4 @@ export const sendMessageUsecase = new SendMessageUseCase(messageRepository, chat
 export const markMessageAsReadUsecase = new MarkMessageReadUseCase(messageRepository);
 export const getUserChatsUsecase = new GetUserChatsUseCase(chatRepository);
 export const getMessagesByChatUsecase = new GetMessagesByChatUseCase(messageRepository);
+export const deleteMessageUseCase = new DeleteMessageUseCase(messageRepository, chatRepository);

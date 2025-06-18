@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, Plus, MessageCircle, ArrowLeft, MoreVertical, Paperclip, Phone, Send, Smile, Video, Check, CheckCheck } from "lucide-react";
+import { Search, Plus, MessageCircle, ArrowLeft, MoreVertical, Paperclip, Phone, Send, Smile, Video, Check, CheckCheck, Trash2, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,6 +13,8 @@ import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import { fetchAllApprovedMentors } from "@/api/mentors.api.service";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Alert } from "@/components/custom/alert";
 
 // Define interfaces
 export interface User {
@@ -69,7 +71,7 @@ export function MessagePage() {
 	const [isMobile, setIsMobile] = useState(false);
 	const [showChat, setShowChat] = useState(false);
 	const [loading, setLoading] = useState(false);
-	const [statusSyncLoading, setStatusSyncLoading] = useState(true); // New state for status sync
+	const [statusSyncLoading, setStatusSyncLoading] = useState(true);
 	const { socket } = useSocket();
 	const user = useSelector((state: RootState) => state.userAuth.user);
 
@@ -149,8 +151,17 @@ export function MessagePage() {
 				socket.emit("mark-as-read", { chatId: socketMessage.chatId, userId: user?.id });
 			}
 		});
+
+		// Handle message deletion
+		socket.on("message-deleted", ({ messageId }: { messageId: string }) => {
+			setAllMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+			setChats((prev) => prev.map((chat) => (chat.lastMessage?.id === messageId ? { ...chat, lastMessage: undefined } : chat)));
+			toast.success("Message deleted successfully");
+		});
+
 		return () => {
 			socket.off("receive-message");
+			socket.off("message-deleted");
 		};
 	}, [socket, selectedChatId, user?.id]);
 
@@ -190,7 +201,7 @@ export function MessagePage() {
 		socket.on("online-users", (onlineUsers: { userId: string; status: "online" | "offline" }[]) => {
 			console.log("Received online-users:", onlineUsers);
 			onlineUsers.forEach(({ userId, status }) => handleUserStatusUpdate({ userId, status }));
-			setStatusSyncLoading(false); // Mark sync as complete
+			setStatusSyncLoading(false);
 		});
 
 		// Ensure initial sync if socket is already connected
@@ -271,6 +282,15 @@ export function MessagePage() {
 		}
 	};
 
+	const handleDeleteMessage = (messageId: string, chatId: string) => {
+		if (!socket || !user?.id) return;
+		socket.emit("delete-message", {
+			messageId,
+			chatId,
+			senderId: user.id,
+		});
+	};
+
 	return (
 		<div className="flex bg-gray-100 w-full h-[calc(100vh-4rem)] px-10 md:px-20 xl:px-25">
 			{isMobile ? (
@@ -281,7 +301,7 @@ export function MessagePage() {
 						</div>
 					) : (
 						<div className="w-full h-full">
-							<ChatWindow user={user} selectedChat={selectedChat} messages={allMessages} onBack={handleBack} onSendMessage={handleSendMessage} isMobile={isMobile} loading={loading} />
+							<ChatWindow user={user} selectedChat={selectedChat} messages={allMessages} onBack={handleBack} onSendMessage={handleSendMessage} onDeleteMessage={handleDeleteMessage} isMobile={isMobile} loading={loading} />
 						</div>
 					)}
 				</>
@@ -291,7 +311,7 @@ export function MessagePage() {
 						<ChatSidebar chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading || statusSyncLoading} />
 					</div>
 					<div className="flex-1 h-full">
-						<ChatWindow user={user} selectedChat={selectedChat} messages={allMessages} onBack={handleBack} onSendMessage={handleSendMessage} isMobile={isMobile} loading={loading} />
+						<ChatWindow user={user} selectedChat={selectedChat} messages={allMessages} onBack={handleBack} onSendMessage={handleSendMessage} onDeleteMessage={handleDeleteMessage} isMobile={isMobile} loading={loading} />
 					</div>
 				</>
 			)}
@@ -304,7 +324,6 @@ interface ChatSidebarProps {
 	selectedChatId?: string;
 	onChatSelect: (chatId: string) => void;
 	onMentorSelect: (mentor: IMentorDTO) => void;
-	// onNewChat: () => void;
 	loading: boolean;
 }
 
@@ -337,9 +356,6 @@ export function ChatSidebar({ chats, selectedChatId, onChatSelect, onMentorSelec
 		};
 		fetchMentors();
 	}, [debouncedSearchQuery]);
-
-	// const chats = chats.filter((chat) => (chat.isGroupChat ? chat.groupName?.toLowerCase().includes(searchQuery.toLowerCase()) : chat.participants[0]?.firstName?.toLowerCase().includes(searchQuery.toLowerCase())));
-	// console.log('chats: ', chats);
 
 	return (
 		<div className="flex flex-col h-full bg-white border-r border-gray-200">
@@ -436,11 +452,12 @@ interface ChatWindowProps {
 	messages: IReceiveMessage[];
 	onBack: () => void;
 	onSendMessage: (content: string) => void;
+	onDeleteMessage: (messageId: string, chatId: string) => void;
 	isMobile?: boolean;
 	loading: boolean;
 }
 
-export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage, isMobile, loading }: ChatWindowProps) {
+export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage, onDeleteMessage, isMobile, loading }: ChatWindowProps) {
 	const [newMessage, setNewMessage] = useState("");
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -531,7 +548,7 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 						<p className="text-gray-500">No messages yet. Start the conversation!</p>
 					</div>
 				) : (
-					userMessages.map((message) => <MessageBubble key={message.id} message={message} isOwn={message.sender.id === user?.id} isGroupChat={selectedChat.isGroupChat} />)
+					userMessages.map((message) => <MessageBubble key={message.id} message={message} isOwn={message.sender.id === user?.id} isGroupChat={selectedChat.isGroupChat} onDeleteMessage={() => onDeleteMessage(message.id, message.chatId)} />)
 				)}
 				<div ref={messagesEndRef} />
 			</div>
@@ -559,9 +576,12 @@ interface MessageBubbleProps {
 	message: IReceiveMessage;
 	isOwn: boolean;
 	isGroupChat?: boolean;
+	onDeleteMessage: () => void;
 }
 
-export function MessageBubble({ message, isOwn, isGroupChat }: MessageBubbleProps) {
+export function MessageBubble({ message, isOwn, isGroupChat, onDeleteMessage }: MessageBubbleProps) {
+	const [isOpen, setIsOpen] = useState(false);
+
 	const getReadStatus = () => {
 		if (!isOwn || !isGroupChat) return null;
 		const readCount = message.readBy.length;
@@ -570,36 +590,71 @@ export function MessageBubble({ message, isOwn, isGroupChat }: MessageBubbleProp
 		return <CheckCheck className="h-3 w-3 text-blue-500" />;
 	};
 
+	const handleInfoClick = () => {
+		toast.info(`Message sent at ${formatTime(message.createdAt)} by ${message.sender.firstName} ${message.sender.lastName}`);
+	};
+
 	return (
-		<div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-4`}>
-			<div className="flex flex-col max-w-xs lg:max-w-md">
-				{isGroupChat && !isOwn && (
-					<div className="flex items-center mb-1">
-						<Avatar className="h-6 w-6 mr-2">
-							<AvatarImage src={message.sender.avatar || "/placeholder.svg"} alt={`${message.sender.firstName} ${message.sender.lastName}`} />
-							<AvatarFallback>{`${message.sender.firstName[0]}${message.sender.lastName[0]}`.toUpperCase()}</AvatarFallback>
-						</Avatar>
-						<p className="text-xs font-medium text-gray-700">{`${message.sender.firstName} ${message.sender.lastName}`}</p>
+		<div
+			className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-4`}
+			onContextMenu={(e) => {
+				e.preventDefault();
+				setIsOpen(true);
+			}}>
+			<DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+				<DropdownMenuTrigger asChild>
+					<div className="flex flex-col max-w-xs lg:max-w-md">
+						{isGroupChat && !isOwn && (
+							<div className="flex items-center mb-1">
+								<Avatar className="h-6 w-6 mr-2">
+									<AvatarImage src={message.sender.avatar || "/placeholder.svg"} alt={`${message.sender.firstName} ${message.sender.lastName}`} />
+									<AvatarFallback>{`${message.sender.firstName[0]}${message.sender.lastName[0]}`.toUpperCase()}</AvatarFallback>
+								</Avatar>
+								<p className="text-xs font-medium text-gray-700">{`${message.sender.firstName} ${message.sender.lastName}`}</p>
+							</div>
+						)}
+						<div className={`px-4 py-2 rounded-lg ${isOwn ? "bg-green-600 text-white rounded-br-sm" : "bg-gray-200 text-gray-900 rounded-bl-sm"}`}>
+							{message.type === "text" ? (
+								<p className="text-sm">{message.content}</p>
+							) : message.type === "image" ? (
+								<img src={message.fileUrl} alt="Image" className="max-w-full h-auto rounded" />
+							) : message.type === "video" ? (
+								<video src={message.fileUrl} controls className="max-w-full h-auto rounded" />
+							) : (
+								<a href={message.fileUrl} className="text-sm underline" download>
+									Download File
+								</a>
+							)}
+							<div className={`flex items-center justify-end mt-1 space-x-1 ${isOwn ? "text-green-100" : "text-gray-500"}`}>
+								<span className="text-xs">{formatTime(message.createdAt)}</span>
+								{getReadStatus()}
+							</div>
+						</div>
 					</div>
-				)}
-				<div className={`px-4 py-2 rounded-lg ${isOwn ? "bg-green-600 text-white rounded-br-sm" : "bg-gray-200 text-gray-900 rounded-bl-sm"}`}>
-					{message.type === "text" ? (
-						<p className="text-sm">{message.content}</p>
-					) : message.type === "image" ? (
-						<img src={message.fileUrl} alt="Image" className="max-w-full h-auto rounded" />
-					) : message.type === "video" ? (
-						<video src={message.fileUrl} controls className="max-w-full h-auto rounded" />
-					) : (
-						<a href={message.fileUrl} className="text-sm underline" download>
-							Download File
-						</a>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align={isOwn ? "end" : "start"} className="w-40">
+					<DropdownMenuItem onSelect={handleInfoClick}>
+						<Info className="mr-2 h-4 w-4" />
+						<span>Info</span>
+					</DropdownMenuItem>
+					{isOwn && (
+						<Alert
+							triggerElement={
+								<div className="w-full">
+									<DropdownMenuItem className="hover:bg-red-600 hover:text-white w-full" onSelect={(e) => e.preventDefault()}>
+										<Trash2 className="mr-2 h-4 w-4" />
+										<span>Delete</span>
+									</DropdownMenuItem>
+								</div>
+							}
+							contentTitle="Confirm Delete"
+							contentDescription="Are you sure you want to delete this message? This action cannot be undone."
+							actionText="Delete"
+							onConfirm={onDeleteMessage}
+						/>
 					)}
-					<div className={`flex items-center justify-end mt-1 space-x-1 ${isOwn ? "text-green-100" : "text-gray-500"}`}>
-						<span className="text-xs">{formatTime(message.createdAt)}</span>
-						{getReadStatus()}
-					</div>
-				</div>
-			</div>
+				</DropdownMenuContent>
+			</DropdownMenu>
 		</div>
 	);
 }

@@ -3,6 +3,7 @@ import { Model } from "mongoose";
 import { ISessionDocument } from "../database/models/session/session.model";
 import { MessageModel } from "../database/models/text-message/message.model";
 import { markMessageAsReadUsecase, sendMessageUsecase } from "../../application/usecases/text-message/composer";
+import { deleteMessageHandler } from "./handlers/delete.message.handler";
 
 interface SessionParticipant {
 	userId: string;
@@ -53,8 +54,8 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 			if (userId) {
 				const wasOffline = !connectedUsers[userId];
 				connectedUsers[userId] = socket.id;
-				socket.data = socket.data || {}
-				socket.data.userId = userId
+				socket.data = socket.data || {};
+				socket.data.userId = userId;
 				console.log(`User ${userId} registered with socket ${socket.id}`);
 
 				// Broadcast online status to all connected users
@@ -269,6 +270,8 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 				console.error("mark-as-read error:", err);
 			}
 		});
+
+		deleteMessageHandler(io, socket);
 	});
 };
 

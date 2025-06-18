@@ -37,6 +37,21 @@ export class MessageRepositoryImpl implements IMessageRepository {
 		});
 	}
 
+	async deleteMessage(messageId: string): Promise<void> {
+		const message = await MessageModel.deleteOne({ _id: messageId });
+		if (!message) throw new Error("Message not found");
+	}
+
+	async findById(id: string): Promise<MessageEntity | null> {
+		const message = await MessageModel.findById(id);
+		return message ? MessageEntity.mapToMessageEntity(message) : null;
+	}
+
+	async findLastMessageByChatId (chatId: string): Promise<MessageEntity | null> {
+		const lastMessage = await MessageModel.findOne({ chatId }).sort({ createdAt: -1 }).exec();
+		return lastMessage ? MessageEntity.mapToMessageEntity(lastMessage) : null;
+	}
+
 	mapToMessageDTO = (doc: any): ISendMessageDTO => ({
 		id: doc._id.toString(),
 		chatId: doc.chatId.toString(),
