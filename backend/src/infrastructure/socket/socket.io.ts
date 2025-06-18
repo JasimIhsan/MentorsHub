@@ -51,9 +51,25 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 		// Register user on connection
 		socket.on("register-user", (userId: string) => {
 			if (userId) {
+				const wasOffline = !connectedUsers[userId];
 				connectedUsers[userId] = socket.id;
+				socket.data = socket.data || {}
+				socket.data.userId = userId
 				console.log(`User ${userId} registered with socket ${socket.id}`);
+
+				// Broadcast online status to all connected users
+				if (wasOffline) {
+					io.emit("user-status-update", { userId, status: "online" }); // Broadcast to all clients
+				}
 			}
+		});
+
+		socket.on("get-online-users", () => {
+			const onlineUsers = Object.keys(connectedUsers).map((userId) => ({
+				userId,
+				status: "online",
+			}));
+			socket.emit("online-users", onlineUsers); // Send back to the requesting client
 		});
 
 		socket.on("join-session", async ({ sessionId, userId, peerId, role, name, avatar }) => {
@@ -173,13 +189,13 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 
 		socket.on("disconnect", (reason) => {
 			const { sessionId, userId, role } = socket.data;
-			// Remove from connectedUsers
-			for (const uid in connectedUsers) {
-				if (connectedUsers[uid] === socket.id) {
-					delete connectedUsers[uid];
-					console.log(`User ${uid} disconnected from connectedUsers`);
-					break;
-				}
+
+			// Handle user disconnection from connectedUsers and onlineUsers
+			if (userId && connectedUsers[userId]) {
+				delete connectedUsers[userId];
+				console.log(`User ${userId} disconnected from connectedUsers`);
+				io.emit("user-status-update", { userId, status: "offline" });
+				// ... session disconnection logic
 			}
 			// Handle session disconnection
 			if (!sessionId || !userId) return;

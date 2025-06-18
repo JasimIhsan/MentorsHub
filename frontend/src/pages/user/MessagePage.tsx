@@ -69,6 +69,7 @@ export function MessagePage() {
 	const [isMobile, setIsMobile] = useState(false);
 	const [showChat, setShowChat] = useState(false);
 	const [loading, setLoading] = useState(false);
+	const [statusSyncLoading, setStatusSyncLoading] = useState(true); // New state for status sync
 	const { socket } = useSocket();
 	const user = useSelector((state: RootState) => state.userAuth.user);
 
@@ -89,7 +90,6 @@ export function MessagePage() {
 			setLoading(true);
 			try {
 				const response = await axiosInstance.get(`/user/messages/chats/${user.id}`);
-				console.log("response: ", response);
 				if (response.data.success) {
 					setChats(response.data.chats);
 				}
@@ -114,9 +114,7 @@ export function MessagePage() {
 						limit: 100,
 					},
 				});
-				console.log("response messages: ", response);
 				setAllMessages(response.data.messages);
-				console.log(`allMessages : `, allMessages);
 			} catch (error) {
 				console.error("Failed to fetch messages:", error);
 			} finally {
@@ -133,8 +131,6 @@ export function MessagePage() {
 			return;
 		}
 		socket.on("receive-message", (socketMessage: IReceiveMessage) => {
-			console.log("Received message:", socketMessage);
-			console.log("Current selectedChatId:", selectedChatId);
 			if (socketMessage.chatId === selectedChatId) {
 				setAllMessages((prev) => [...prev, socketMessage]);
 			}
@@ -150,13 +146,63 @@ export function MessagePage() {
 				)
 			);
 			if (socketMessage.chatId === selectedChatId && !socketMessage.readBy.includes(user?.id as string)) {
-				socket.emit("message-read", { chatId: socketMessage.chatId, messageId: socketMessage.id, userId: user?.id });
+				socket.emit("mark-as-read", { chatId: socketMessage.chatId, userId: user?.id });
 			}
 		});
 		return () => {
 			socket.off("receive-message");
 		};
 	}, [socket, selectedChatId, user?.id]);
+
+	// Handle user status updates
+	useEffect(() => {
+		if (!socket) return;
+
+		const handleUserStatusUpdate = ({ userId, status }: { userId: string; status: "online" | "offline" }) => {
+			console.log(`User status update: ${userId} is ${status}`);
+			setChats((prevChats) =>
+				prevChats.map((chat) => {
+					if (chat.isGroupChat) return chat;
+					const participant = chat.participants.find((p) => p.id === userId);
+					if (participant) {
+						return {
+							...chat,
+							participants: chat.participants.map((p) => (p.id === userId ? { ...p, status } : p)),
+						};
+					}
+					return chat;
+				})
+			);
+
+			setTempChat((prevTempChat) =>
+				prevTempChat && prevTempChat.participants.some((p) => p.id === userId)
+					? {
+							...prevTempChat,
+							participants: prevTempChat.participants.map((p) => (p.id === userId ? { ...p, status } : p)),
+					  }
+					: prevTempChat
+			);
+		};
+
+		socket.on("user-status-update", handleUserStatusUpdate);
+
+		// Handle initial online users and set status sync loading
+		socket.on("online-users", (onlineUsers: { userId: string; status: "online" | "offline" }[]) => {
+			console.log("Received online-users:", onlineUsers);
+			onlineUsers.forEach(({ userId, status }) => handleUserStatusUpdate({ userId, status }));
+			setStatusSyncLoading(false); // Mark sync as complete
+		});
+
+		// Ensure initial sync if socket is already connected
+		if (socket) {
+			socket.emit("get-online-users");
+		}
+
+		return () => {
+			socket.off("user-status-update", handleUserStatusUpdate);
+			socket.off("online-users");
+		};
+	}, [socket]);
 
 	const selectedChat = tempChat || (selectedChatId ? chats.find((chat) => chat.id === selectedChatId) : undefined);
 
@@ -204,13 +250,11 @@ export function MessagePage() {
 		}
 	};
 
-	// Handle sending a message via socket
 	const handleSendMessage = async (content: string) => {
 		if (!selectedChat || !socket || !user?.id) return;
 
 		const chatId = selectedChatId;
 
-		// Prepare message to send via socket
 		const message: ISendMessage = {
 			id: "",
 			chatId: chatId,
@@ -221,7 +265,6 @@ export function MessagePage() {
 		};
 
 		try {
-			// Emit message via socket
 			socket.emit("send-message", message);
 		} catch (error) {
 			console.error("Failed to send message via socket:", error);
@@ -234,7 +277,7 @@ export function MessagePage() {
 				<>
 					{!showChat ? (
 						<div className="w-full h-full">
-							<ChatSidebar chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading} />
+							<ChatSidebar chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading || statusSyncLoading} />
 						</div>
 					) : (
 						<div className="w-full h-full">
@@ -245,7 +288,7 @@ export function MessagePage() {
 			) : (
 				<>
 					<div className="w-1/3 min-w-[320px] max-w-[400px] h-full">
-						<ChatSidebar chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading} />
+						<ChatSidebar chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading || statusSyncLoading} />
 					</div>
 					<div className="flex-1 h-full">
 						<ChatWindow user={user} selectedChat={selectedChat} messages={allMessages} onBack={handleBack} onSendMessage={handleSendMessage} isMobile={isMobile} loading={loading} />

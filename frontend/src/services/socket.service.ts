@@ -5,7 +5,7 @@ interface SocketEvents {
 	onNewNotification: (event: string, callback: (notification: INotification) => void) => () => void;
 	onVideoCallEvent: (event: string, callback: (data: any) => void) => () => void;
 	onMessageEvent: (event: string, callback: (data: any) => void) => () => void;
-	emit: (event: string, data: any) => void;
+	emit: (event: string, data?: any) => void;
 	disconnect: () => void;
 	onConnectionChange: (callback: (isConnected: boolean) => void) => () => void;
 	on: (event: string, callback: (data: any) => void) => () => void; // Updated to return cleanup function
@@ -45,6 +45,8 @@ class SocketService {
 		this.socket.on("connect", () => {
 			console.log("Socket connected:", this.socket?.id);
 			this.socket?.emit("join", userId);
+			this.socket?.emit("register-user", userId);
+			this.socket?.emit("get-online-users");
 			this.notifyConnectionChange(true);
 		});
 
@@ -57,6 +59,8 @@ class SocketService {
 			console.log("Socket disconnected");
 			this.notifyConnectionChange(false);
 		});
+
+		
 
 		this.isInitialized = true;
 	}

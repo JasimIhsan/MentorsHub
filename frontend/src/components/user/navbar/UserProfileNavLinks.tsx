@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Alert } from "@/components/custom/alert";
 import { NotificationDropdown } from "@/components/custom/NotificationDropdown";
 import { useDispatch } from "react-redux";
+import { socketService } from "@/services/socket.service";
 
 interface UserProfileNavLinksProps {
 	user: UserInterface;
@@ -20,6 +21,12 @@ export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
 
 	const handleLogout = async () => {
 		try {
+			console.log(`Login out...`);
+			console.log(`isConnected : `, socketService.isConnected());
+			if (socketService.isConnected()) {
+				console.log(`Disconnecting socket...`);
+				socketService.disconnect();
+			}
 			const response = await logoutSession();
 			if (response.success) {
 				localStorage.removeItem("persist:root");
@@ -48,7 +55,7 @@ export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
 					<Button variant="ghost" className="relative h-8 w-8 rounded-full">
 						<Avatar className="h-8 w-8">
 							<AvatarImage src={user.avatar as string} alt="User" />
-							<AvatarFallback>{user.firstName ? user.firstName.charAt(0): "AB" }</AvatarFallback>
+							<AvatarFallback>{user.firstName ? user.firstName.charAt(0) : "AB"}</AvatarFallback>
 						</Avatar>
 					</Button>
 				</DropdownMenuTrigger>
