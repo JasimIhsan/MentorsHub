@@ -47,9 +47,18 @@ export class MessageRepositoryImpl implements IMessageRepository {
 		return message ? MessageEntity.mapToMessageEntity(message) : null;
 	}
 
-	async findLastMessageByChatId (chatId: string): Promise<MessageEntity | null> {
+	async findLastMessageByChatId(chatId: string): Promise<MessageEntity | null> {
 		const lastMessage = await MessageModel.findOne({ chatId }).sort({ createdAt: -1 }).exec();
 		return lastMessage ? MessageEntity.mapToMessageEntity(lastMessage) : null;
+	}
+
+	async findUnreadMessages(chatId: string, userId: string): Promise<MessageEntity[]> {
+		const unreadDocs = await MessageModel.find({
+			chatId,
+			readBy: { $ne: userId },
+		}).exec();
+
+		return unreadDocs.map((doc) => MessageEntity.mapToMessageEntity(doc));
 	}
 
 	mapToMessageDTO = (doc: any): ISendMessageDTO => ({

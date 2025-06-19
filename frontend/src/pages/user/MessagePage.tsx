@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, Plus, MessageCircle, ArrowLeft, MoreVertical, Paperclip, Phone, Send, Smile, Video, Check, CheckCheck, Trash2, Info } from "lucide-react";
+import { Search, Plus, MessageCircle, ArrowLeft, MoreVertical, Paperclip, Phone, Send, Smile, Video, CheckCheck, Trash2, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -170,7 +170,6 @@ export function MessagePage() {
 		if (!socket) return;
 
 		const handleUserStatusUpdate = ({ userId, status }: { userId: string; status: "online" | "offline" }) => {
-			console.log(`User status update: ${userId} is ${status}`);
 			setChats((prevChats) =>
 				prevChats.map((chat) => {
 					if (chat.isGroupChat) return chat;
@@ -199,7 +198,6 @@ export function MessagePage() {
 
 		// Handle initial online users and set status sync loading
 		socket.on("online-users", (onlineUsers: { userId: string; status: "online" | "offline" }[]) => {
-			console.log("Received online-users:", onlineUsers);
 			onlineUsers.forEach(({ userId, status }) => handleUserStatusUpdate({ userId, status }));
 			setStatusSyncLoading(false);
 		});
@@ -225,10 +223,7 @@ export function MessagePage() {
 		}
 		if (socket) {
 			socket.emit("join-chat-room", { chatId });
-			socket.on("joined-chat-room", ({ chatId: joinedChatId }) => {
-				toast.success(`Successfully joined chat room: chat_${joinedChatId}`);
-			});
-			console.log(`Emitted join-chat-room for chat_${chatId}`);
+			socket.emit("mark-chat-as-read", { chatId, userId: user?.id });
 		}
 	};
 
@@ -301,7 +296,18 @@ export function MessagePage() {
 						</div>
 					) : (
 						<div className="w-full h-full">
-							<ChatWindow user={user} selectedChat={selectedChat} messages={allMessages} onBack={handleBack} onSendMessage={handleSendMessage} onDeleteMessage={handleDeleteMessage} isMobile={isMobile} loading={loading} />
+							<ChatWindow
+								user={user}
+								selectedChat={selectedChat}
+								messages={allMessages}
+								onBack={handleBack}
+								onSendMessage={handleSendMessage}
+								onDeleteMessage={handleDeleteMessage}
+								isMobile={isMobile}
+								loading={loading}
+								socket={socket}
+								setAllMessages={setAllMessages}
+							/>{" "}
 						</div>
 					)}
 				</>
@@ -311,7 +317,18 @@ export function MessagePage() {
 						<ChatSidebar chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading || statusSyncLoading} />
 					</div>
 					<div className="flex-1 h-full">
-						<ChatWindow user={user} selectedChat={selectedChat} messages={allMessages} onBack={handleBack} onSendMessage={handleSendMessage} onDeleteMessage={handleDeleteMessage} isMobile={isMobile} loading={loading} />
+						<ChatWindow
+							user={user}
+							selectedChat={selectedChat}
+							messages={allMessages}
+							onBack={handleBack}
+							onSendMessage={handleSendMessage}
+							onDeleteMessage={handleDeleteMessage}
+							isMobile={isMobile}
+							loading={loading}
+							socket={socket}
+							setAllMessages={setAllMessages}
+						/>{" "}
 					</div>
 				</>
 			)}
@@ -455,15 +472,40 @@ interface ChatWindowProps {
 	onDeleteMessage: (messageId: string, chatId: string) => void;
 	isMobile?: boolean;
 	loading: boolean;
+	socket: any; // Replace with Socket type from 'socket.io-client' if available
+	setAllMessages: React.Dispatch<React.SetStateAction<IReceiveMessage[]>>;
 }
 
-export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage, onDeleteMessage, isMobile, loading }: ChatWindowProps) {
+export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage, onDeleteMessage, isMobile, loading, socket, setAllMessages }: ChatWindowProps) {
 	const [newMessage, setNewMessage] = useState("");
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
 	const scrollToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	};
+
+	// Handle messages read update
+	useEffect(() => {
+		if (!socket) return;
+
+		const handleMessagesReadUpdate = ({ chatId, readerId, messageIds }: { chatId: string; readerId: string; messageIds: string[] }) => {
+			console.log(`Received messages-read-update: chatId=${chatId}, readerId=${readerId}, messageIds=`, messageIds);
+
+			if (chatId === selectedChat?.id) {
+				setAllMessages((prevMessages: IReceiveMessage[]) => {
+					const updatedMessages = prevMessages.map((msg: IReceiveMessage) => (messageIds.includes(msg.id) && !msg.readBy.includes(readerId) ? { ...msg, readBy: [...msg.readBy, readerId] } : msg));
+					console.log("Updated messages:", updatedMessages);
+					return updatedMessages;
+				});
+			}
+		};
+
+		socket.on("messages-read-update", handleMessagesReadUpdate);
+
+		return () => {
+			socket.off("messages-read-update", handleMessagesReadUpdate);
+		};
+	}, [socket, selectedChat?.id, setAllMessages]);
 
 	useEffect(() => {
 		scrollToBottom();
@@ -500,6 +542,8 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 	}
 
 	const userMessages = messages.filter((msg) => msg.chatId === selectedChat.id);
+
+	console.log("userMessages: ", userMessages[userMessages.length - 1]);
 
 	return (
 		<div className="flex flex-col h-full bg-white">
@@ -548,7 +592,9 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 						<p className="text-gray-500">No messages yet. Start the conversation!</p>
 					</div>
 				) : (
-					userMessages.map((message) => <MessageBubble key={message.id} message={message} isOwn={message.sender.id === user?.id} isGroupChat={selectedChat.isGroupChat} onDeleteMessage={() => onDeleteMessage(message.id, message.chatId)} />)
+					userMessages.map((message) => (
+						<MessageBubble key={message.id} chat={selectedChat} message={message} isOwn={message.sender.id === user?.id} isGroupChat={selectedChat.isGroupChat} onDeleteMessage={() => onDeleteMessage(message.id, message.chatId)} />
+					))
 				)}
 				<div ref={messagesEndRef} />
 			</div>
@@ -573,21 +619,30 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 }
 
 interface MessageBubbleProps {
+	chat: Chat;
 	message: IReceiveMessage;
 	isOwn: boolean;
 	isGroupChat?: boolean;
 	onDeleteMessage: () => void;
 }
 
-export function MessageBubble({ message, isOwn, isGroupChat, onDeleteMessage }: MessageBubbleProps) {
+export function MessageBubble({ chat, message, isOwn, isGroupChat, onDeleteMessage }: MessageBubbleProps) {
 	const [isOpen, setIsOpen] = useState(false);
 
+	// Determine tick status for messages
 	const getReadStatus = () => {
-		if (!isOwn || !isGroupChat) return null;
+		if (!isOwn) return null; // Only show ticks for your own messages
+
 		const readCount = message.readBy.length;
-		if (readCount === 0) return <Check className="h-3 w-3 text-gray-400" />;
-		if (readCount > 0 && readCount < message.readBy.length) return <CheckCheck className="h-3 w-3 text-gray-400" />;
-		return <CheckCheck className="h-3 w-3 text-blue-500" />;
+		const expectedReadCount = isGroupChat ? chat.participants.length : 2;
+
+		// ✅ All participants have read the message
+		if (readCount === expectedReadCount) {
+			return <CheckCheck className="h-4 w-4 text-blue-500" />;
+		}
+
+		// ✅ Message has been sent (even if no one else read it yet)
+		return <CheckCheck className="h-4 w-4 text-gray-300" />;
 	};
 
 	const handleInfoClick = () => {

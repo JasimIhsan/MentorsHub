@@ -4,6 +4,7 @@ import { ISessionDocument } from "../database/models/session/session.model";
 import { MessageModel } from "../database/models/text-message/message.model";
 import { markMessageAsReadUsecase, sendMessageUsecase } from "../../application/usecases/text-message/composer";
 import { deleteMessageHandler } from "./handlers/delete.message.handler";
+import { registerMessageReadHandlers } from "./handlers/update.readby.handler";
 
 interface SessionParticipant {
 	userId: string;
@@ -272,6 +273,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 		});
 
 		deleteMessageHandler(io, socket);
+		registerMessageReadHandlers(io, socket);
 	});
 };
 
