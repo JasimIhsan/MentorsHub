@@ -1,9 +1,9 @@
 import { IMessageRepository } from "../../../domain/repositories/message.repository";
 
-export class GetUnreadCountUseCase {
+export class GetMessageUnreadCountUseCase {
 	constructor(private readonly messageRepo: IMessageRepository) {}
 
-	async execute(chatId: string, userId: string): Promise<number> {
-		return await this.messageRepo.getUnreadCount(chatId, userId);
+	async execute(userId: string, chatIds: string[]): Promise<{ [chatId: string]: number }> {
+		return await this.messageRepo.getUnreadCountsByUser(userId, chatIds);
 	}
 }

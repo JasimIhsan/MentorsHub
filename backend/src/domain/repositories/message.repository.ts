@@ -9,6 +9,6 @@ export interface IMessageRepository {
 	getMessagesByChat(chatId: string, page: number, limit: number): Promise<ISendMessageDTO[]>;
 	markMessageAsRead(messageId: string, userId: string): Promise<void>;
 	findUnreadMessages(chatId: string, userId: string): Promise<MessageEntity[]>;
-	getUnreadCount(chatId: string, userId: string): Promise<number>;
+	getUnreadCountsByUser(userId: string, chatIds: string[]): Promise<{ [chatId: string]: number }>;
 	deleteMessage(messageId: string): Promise<void>;
 }

@@ -85,15 +85,19 @@ export function MessagePage() {
 		return () => window.removeEventListener("resize", checkIsMobile);
 	}, []);
 
-	// Fetch chats from API
+	// Fetch chats and unread counts from API
 	useEffect(() => {
-		if (!user?.id) return;
+		if (!user?.id || !socket) return;
 		const fetchChats = async () => {
 			setLoading(true);
 			try {
 				const response = await axiosInstance.get(`/user/messages/chats/${user.id}`);
 				if (response.data.success) {
-					setChats(response.data.chats);
+					const fetchedChats = response.data.chats;
+					setChats(fetchedChats);
+					// Fetch unread counts for all chats
+					const chatIds = fetchedChats.map((chat: Chat) => chat.id);
+					socket.emit("get-unread-counts", { userId: user.id, chatIds });
 				}
 			} catch (error) {
 				console.error("Failed to fetch chats:", error);
@@ -102,7 +106,31 @@ export function MessagePage() {
 			}
 		};
 		fetchChats();
-	}, [user?.id]);
+	}, [user?.id, socket]);
+
+	// Handle socket unread counts response
+	useEffect(() => {
+		if (!socket) return;
+
+		socket.on("unread-counts-response", (counts: { [chatId: string]: number }) => {
+			setChats((prev) =>
+				prev.map((chat) => ({
+					...chat,
+					unreadCount: counts[chat.id] || 0,
+				}))
+			);
+		});
+
+		socket.on("unread-counts-error", (error: { message: string }) => {
+			console.error("Unread counts error:", error.message);
+			toast.error(error.message);
+		});
+
+		return () => {
+			socket.off("unread-counts-response");
+			socket.off("unread-counts-error");
+		};
+	}, [socket]);
 
 	// Fetch messages for the selected chat
 	useEffect(() => {
@@ -128,8 +156,8 @@ export function MessagePage() {
 
 	// Handle socket messages
 	useEffect(() => {
-		if (!socket || !selectedChatId) {
-			console.log(`Socket or selectedChatId is null`);
+		if (!socket || !user?.id) {
+			console.log(`Socket or user.id is null`);
 			return;
 		}
 		socket.on("receive-message", (socketMessage: IReceiveMessage) => {
@@ -142,13 +170,14 @@ export function MessagePage() {
 						? {
 								...chat,
 								lastMessage: socketMessage,
-								unreadCount: chat.id === selectedChatId ? 0 : chat.unreadCount + 1,
+								unreadCount: chat.id === selectedChatId ? 0 : chat.unreadCount + 1, // Increment unread count if not in the selected chat
 						  }
 						: chat
 				)
 			);
-			if (socketMessage.chatId === selectedChatId && !socketMessage.readBy.includes(user?.id as string)) {
-				socket.emit("mark-as-read", { chatId: socketMessage.chatId, userId: user?.id });
+			if (socketMessage.chatId === selectedChatId && !socketMessage.readBy.includes(user.id as string)) {
+				socket.emit("mark-as-read", { chatId: socketMessage.chatId, userId: user.id });
+				socket.emit("mark-chat-as-read", { chatId: socketMessage.chatId, userId: user.id });
 			}
 		});
 
@@ -224,6 +253,8 @@ export function MessagePage() {
 		if (socket) {
 			socket.emit("join-chat-room", { chatId });
 			socket.emit("mark-chat-as-read", { chatId, userId: user?.id });
+			// Update unread count to 0 for the selected chat
+			setChats((prev) => prev.map((chat) => (chat.id === chatId ? { ...chat, unreadCount: 0 } : chat)));
 		}
 	};
 
@@ -307,7 +338,7 @@ export function MessagePage() {
 								loading={loading}
 								socket={socket}
 								setAllMessages={setAllMessages}
-							/>{" "}
+							/>
 						</div>
 					)}
 				</>
@@ -328,7 +359,7 @@ export function MessagePage() {
 							loading={loading}
 							socket={socket}
 							setAllMessages={setAllMessages}
-						/>{" "}
+						/>
 					</div>
 				</>
 			)}

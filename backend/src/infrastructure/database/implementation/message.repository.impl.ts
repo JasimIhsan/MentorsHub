@@ -3,6 +3,7 @@ import { IMessageRepository } from "../../../domain/repositories/message.reposit
 import { MessageEntity } from "../../../domain/entities/message.entity";
 import { MessageModel } from "../models/text-message/message.model";
 import { ISendMessageDTO } from "../../../application/dtos/message.dto";
+import mongoose from "mongoose";
 
 export class MessageRepositoryImpl implements IMessageRepository {
 	async sendMessage(raw: Omit<MessageEntity, "id" | "createdAt" | "updatedAt">): Promise<ISendMessageDTO> {
@@ -30,11 +31,37 @@ export class MessageRepositoryImpl implements IMessageRepository {
 		await MessageModel.updateOne({ _id: messageId, readBy: { $ne: userId } }, { $push: { readBy: userId } });
 	}
 
-	async getUnreadCount(chatId: string, userId: string): Promise<number> {
-		return MessageModel.countDocuments({
-			chatId,
-			readBy: { $ne: userId },
-		});
+	async getUnreadCountsByUser(userId: string, chatIds: string[]): Promise<{ [chatId: string]: number }> {
+		const userObjectId = new mongoose.Types.ObjectId(userId);
+		console.log('userObjectId: ', userObjectId);
+
+		const results = await MessageModel.aggregate([
+			{
+				$match: {
+					chatId: { $in: chatIds.map((id) => new mongoose.Types.ObjectId(id)) },
+					readBy: { $ne: userObjectId },
+				},
+			},
+			{
+				$group: {
+					_id: "$chatId",
+					unreadCount: { $sum: 1 },
+				},
+			},
+		]);
+
+		const countMap: { [chatId: string]: number } = {};
+		for (const result of results) {
+			countMap[result._id.toString()] = result.unreadCount;
+		}
+
+		for (const chatId of chatIds) {
+			if (!(chatId in countMap)) {
+				countMap[chatId] = 0;
+			}
+		}
+
+		return countMap;
 	}
 
 	async deleteMessage(messageId: string): Promise<void> {
