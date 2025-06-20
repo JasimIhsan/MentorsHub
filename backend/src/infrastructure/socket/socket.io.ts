@@ -1,6 +1,11 @@
 import { Server, Socket } from "socket.io";
 import { Model } from "mongoose";
 import { ISessionDocument } from "../database/models/session/session.model";
+import { MessageModel } from "../database/models/text-message/message.model";
+import { markMessageAsReadUsecase, sendMessageUsecase } from "../../application/usecases/text-message/composer";
+import { deleteMessageHandler } from "./handlers/delete.message.handler";
+import { registerMessageReadHandlers } from "./handlers/update.readby.handler";
+import { getMessageUnreadCountHandler } from "./handlers/get.message.unread.count.handler";
 
 interface SessionParticipant {
 	userId: string;
@@ -49,9 +54,25 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 		// Register user on connection
 		socket.on("register-user", (userId: string) => {
 			if (userId) {
+				const wasOffline = !connectedUsers[userId];
 				connectedUsers[userId] = socket.id;
+				socket.data = socket.data || {};
+				socket.data.userId = userId;
 				console.log(`User ${userId} registered with socket ${socket.id}`);
+
+				// Broadcast online status to all connected users
+				if (wasOffline) {
+					io.emit("user-status-update", { userId, status: "online" }); // Broadcast to all clients
+				}
 			}
+		});
+
+		socket.on("get-online-users", () => {
+			const onlineUsers = Object.keys(connectedUsers).map((userId) => ({
+				userId,
+				status: "online",
+			}));
+			socket.emit("online-users", onlineUsers); // Send back to the requesting client
 		});
 
 		socket.on("join-session", async ({ sessionId, userId, peerId, role, name, avatar }) => {
@@ -171,13 +192,13 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 
 		socket.on("disconnect", (reason) => {
 			const { sessionId, userId, role } = socket.data;
-			// Remove from connectedUsers
-			for (const uid in connectedUsers) {
-				if (connectedUsers[uid] === socket.id) {
-					delete connectedUsers[uid];
-					console.log(`User ${uid} disconnected from connectedUsers`);
-					break;
-				}
+
+			// Handle user disconnection from connectedUsers and onlineUsers
+			if (userId && connectedUsers[userId]) {
+				delete connectedUsers[userId];
+				console.log(`User ${userId} disconnected from connectedUsers`);
+				io.emit("user-status-update", { userId, status: "offline" });
+				// ... session disconnection logic
 			}
 			// Handle session disconnection
 			if (!sessionId || !userId) return;
@@ -208,6 +229,53 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 		socket.on("connect_error", (error: Error) => {
 			console.error(`Connection error for ${socket.id}: ${error.message}`);
 		});
+
+		// ============================================== MESSAGE LOGIC ============================================== //
+
+		// Join chat room
+		socket.on("join-chat-room", ({ chatId }) => {
+			socket.join(`chat_${chatId}`);
+			console.log(`✅ User joined chat room chat_${chatId}`);
+			socket.emit("joined-chat-room", { chatId }); // Confirm room joining
+		});
+		// 1. Handle incoming message
+		socket.on("send-message", async (data) => {
+			const { chatId, senderId, receiverId, content, type = "text", fileUrl } = data;
+
+			try {
+				// 1. Call use case to handle message logic
+				const message = await sendMessageUsecase.execute({
+					chatId,
+					sender: senderId,
+					receiver: receiverId,
+					content,
+					type,
+					fileUrl,
+				});
+
+				// 2. Emit the message to all users in the chat room
+				io.to(`chat_${chatId}`).emit("receive-message", message);
+			} catch (err) {
+				console.error("send-message error:", err);
+				socket.emit("error", { message: "Failed to send message" });
+			}
+		});
+
+		// 2. Mark as read
+		socket.on("mark-as-read", async ({ chatId, userId }) => {
+			try {
+				await markMessageAsReadUsecase.execute(chatId, userId);
+
+				// Optionally notify sender(s) that messages were read
+				io.to(chatId).emit("message-read", { chatId, userId });
+			} catch (err) {
+				console.error("mark-as-read error:", err);
+			}
+		});
+
+		deleteMessageHandler(io, socket);
+		registerMessageReadHandlers(io, socket);
+		getMessageUnreadCountHandler(io, socket);
 	});
 };
 

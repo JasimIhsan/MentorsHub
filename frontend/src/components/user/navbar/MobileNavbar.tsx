@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,6 +9,7 @@ import { logoutSession } from "@/api/user/authentication.api.service";
 import { logout } from "@/store/slices/userSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
+import { socketService } from "@/services/socket.service";
 
 export function MobileNav() {
 	const [open, setOpen] = useState(false);
@@ -20,6 +19,12 @@ export function MobileNav() {
 
 	const handleLogout = async () => {
 		try {
+			console.log(`Login out...`);
+			console.log(`isConnected : `, socketService.isConnected());
+			if (socketService.isConnected()) {
+				console.log(`Disconnecting socket...`);
+				socketService.disconnect();
+			}
 			const response = await logoutSession();
 			if (response.success) {
 				localStorage.removeItem("persist:root");
@@ -81,7 +86,7 @@ export function MobileNav() {
 					</div>
 					<nav className="mt-5 flex flex-col gap-4">
 						{routes.map((route) => (
-							<Button variant="ghost" key={route.to} className={(pathname === route.to ? "font-bold justify-start px-8" : "justify-start px-8")}>
+							<Button variant="ghost" key={route.to} className={pathname === route.to ? "font-bold justify-start px-8" : "justify-start px-8"}>
 								<Link key={route.to} to={route.to} onClick={() => setOpen(false)}>
 									{route.label}
 								</Link>

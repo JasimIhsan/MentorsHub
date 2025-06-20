@@ -39,6 +39,8 @@ export function SocketProvider({ userId, children }: SocketProviderProps) {
 			emit: (event, data) => socketService.emit(event, data),
 			disconnect: () => socketService.disconnect(),
 			onConnectionChange: (callback) => socketService.onConnectionChange(callback),
+			on: (event, callback) => socketService.on(event, callback),
+			off: (event, callback) => socketService.off(event, callback),
 		},
 		isConnected,
 	};

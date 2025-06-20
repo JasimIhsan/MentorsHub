@@ -6,7 +6,7 @@ module.exports = {
 	theme: {
 		extend: {
 			fontFamily: {
-				sans:['Winky Sans', 'Poppins', "V"],
+				sans: ["Winky Sans", "Poppins", "V"],
 			},
 		},
 	},
