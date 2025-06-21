@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { ITokenService, Payload } from "../../../application/interfaces/user/token.service.interface";
+import { ICacheRepository } from "../../../domain/repositories/cache.respository";
 
 dotenv.config();
 
@@ -12,6 +13,8 @@ if (!JWT_ACCESS_TOKEN || !JWT_REFRESH_TOKEN) {
 }
 
 export class TokenServicesImpl implements ITokenService {
+	constructor(private redisService: ICacheRepository) {}
+
 	generateAccessToken(userId: string, isAdmin: boolean = false): string {
 		const payload = isAdmin ? { userId, isAdmin } : { userId };
 		return jwt.sign(payload, JWT_ACCESS_TOKEN, { expiresIn: "5m" });
@@ -36,5 +39,14 @@ export class TokenServicesImpl implements ITokenService {
 		} catch (error) {
 			return null;
 		}
+	}
+
+	async isTokenBlacklisted(token: string): Promise<boolean> {
+		const result = await this.redisService.getCachedData(`bl_${token}`);
+		return !!result;
+	}
+
+	async blacklistToken(token: string, expirySeconds: number): Promise<void> {
+		await this.redisService.setCachedData(`bl_${token}`, "blacklisted", expirySeconds);
 	}
 }

@@ -10,4 +10,6 @@ export interface ITokenService {
 	validateAccessToken(token: string): string | Payload | null;
 	generateRefreshToken(id: string, isAdmin?: boolean): string;
 	validateRefreshToken(token: string): string | Payload | null;
+	isTokenBlacklisted(token: string): Promise<boolean>;
+	blacklistToken(token: string, expirySeconds: number): Promise<void>;
 }
