@@ -13,8 +13,21 @@ export class GoogleAuthController {
 				res.status(HttpStatusCode.UNAUTHORIZED).json({ message: "Unauthorized" });
 				return;
 			}
-			res.cookie("access_token", accessToken, { httpOnly: true, secure: true, sameSite: "strict" });
-			res.cookie("refresh_token", refreshToken, { httpOnly: true, secure: true, sameSite: "strict" });
+
+			res.cookie("access_token", accessToken, {
+				httpOnly: true,
+				sameSite: "strict",
+				secure: true,
+				maxAge: parseInt(process.env.JWT_ACCESS_TOKEN_EXPIRES as string), // 5 minutes
+			});
+
+			res.cookie("refresh_token", refreshToken, {
+				httpOnly: true,
+				sameSite: "strict",
+				secure: true,
+				maxAge: parseInt(process.env.JWT_REFRESH_TOKEN_EXPIRES as string), // 24 hours
+			});
+
 			res.status(HttpStatusCode.OK).json({ success: true, user: user });
 		} catch (error) {
 			if (error instanceof Error) {

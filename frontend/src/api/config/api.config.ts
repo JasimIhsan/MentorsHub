@@ -70,21 +70,21 @@ axiosInstance.interceptors.response.use(
 				// resend the original request with the new access token
 				return axiosInstance(originalRequest);
 			} catch (refreshError) {
-				localStorage.removeItem("persist:root");
-				window.location.href = "/authenticate";
+				// localStorage.removeItem("persist:root");
+				// window.location.href = "/authenticate";
 				return Promise.reject(refreshError); // handle the token refresh error
 			}
 		} else if (error.response.status === 403) {
-			localStorage.removeItem("persist:root");
+			// localStorage.removeItem("persist:root");
 
 			if (error.response.data.blocked) {
 				setTimeout(() => {
-					window.location.href = "/authenticate";
+					// window.location.href = "/authenticate";
 				}, 3000);
 
 				return Promise.reject(error); // Don't propagate the 403 error further
 			} else {
-				window.location.href = "/authenticate";
+				// window.location.href = "/authenticate";
 				return Promise.reject(error); // Handle non-blocked 403 as well
 			}
 		}

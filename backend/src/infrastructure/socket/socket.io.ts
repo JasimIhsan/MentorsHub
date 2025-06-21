@@ -3,9 +3,9 @@ import { Model } from "mongoose";
 import { ISessionDocument } from "../database/models/session/session.model";
 import { MessageModel } from "../database/models/text-message/message.model";
 import { markMessageAsReadUsecase, sendMessageUsecase } from "../../application/usecases/text-message/composer";
-import { deleteMessageHandler } from "./handlers/delete.message.handler";
-import { registerMessageReadHandlers } from "./handlers/update.readby.handler";
-import { getMessageUnreadCountHandler } from "./handlers/get.message.unread.count.handler";
+import { deleteMessageHandler } from "./socket/delete.message.handler";
+import { registerMessageReadHandlers } from "./socket/update.readby.handler";
+import { getMessageUnreadCountHandler } from "./socket/get.message.unread.count.handler";
 
 interface SessionParticipant {
 	userId: string;

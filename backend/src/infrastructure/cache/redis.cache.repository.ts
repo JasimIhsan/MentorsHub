@@ -2,7 +2,7 @@ import { createClient } from "redis";
 import { ICacheRepository } from "../../domain/repositories/cache.respository";
 
 export class RedisCacheRepository implements ICacheRepository {
-	private client = createClient({ url: "redis://mentorshub_redis:6379" });
+	private client = createClient({ url: process.env.REDIS_URL as string });
 	constructor() {
 		this.client.on("error", (err) => {
 			console.error("Redis connected: ❌❌❌\n", err);
@@ -21,9 +21,9 @@ export class RedisCacheRepository implements ICacheRepository {
 
 	async getCachedData(key: string): Promise<string | null> {
 		const data = await this.client.get(key);
-		if(!data){
-			console.warn(`Redis key "${key}" not found in cache`)
-			return null 
+		if (!data) {
+			console.warn(`Redis key "${key}" not found in cache`);
+			return null;
 		}
 		return data.toString();
 	}
