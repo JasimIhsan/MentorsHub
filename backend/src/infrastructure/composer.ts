@@ -38,12 +38,12 @@ export const sessionRepository: ISessionRepository = new SessionRepositoryImpl()
 export const notificationRepository: INotificationRepository = new NotificationRepositoryImpl();
 export const reviewRepository: IReviewRepository = new ReviewRepositoryImpl();
 export const walletRepository: IWalletRepository = new WalletRepositoryImpl();
-export const messageRepository: IMessageRepository = new MessageRepositoryImpl()
-export const chatRepository: IChatRepository = new ChatRepositoryImpl()
- 
+export const messageRepository: IMessageRepository = new MessageRepositoryImpl();
+export const chatRepository: IChatRepository = new ChatRepositoryImpl();
+
 // Initialize services implementation
-export const tokenInterface: ITokenService = new TokenServicesImpl();
 export const emailService: IEmailService = new EmailServiceImpl();
 export const redisService: ICacheRepository = new RedisCacheRepository();
+export const tokenInterface: ITokenService = new TokenServicesImpl(redisService);
 export const cloudinaryService: ICloudinaryService = new CloudinaryService();
 export const s3BucketService: IS3Service = new S3Service();

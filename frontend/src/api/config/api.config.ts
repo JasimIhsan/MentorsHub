@@ -1,94 +1,118 @@
 import axios from "axios";
 import { toast } from "sonner";
 
-// base URL for your API
+// Base URL of your backend API
 const baseURL = `${import.meta.env.VITE_SERVER_URL}/api`;
 
-//create axios instance
+// Create axios instance
 const axiosInstance = axios.create({
 	baseURL: baseURL,
-	withCredentials: true,
+	withCredentials: true, // for cookies (access/refresh tokens)
 });
 
-//Function to refresh the access token
-const refreshAccessToken = async () => {
+// === 🔁 Token Refresh Queue Mechanism ===
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+function subscribeTokenRefresh(cb: (token: string) => void) {
+	refreshSubscribers.push(cb);
+}
+
+function onRefreshed(token: string) {
+	refreshSubscribers.forEach((cb) => cb(token));
+	refreshSubscribers = [];
+}
+
+// === 🔄 Function to Refresh Access Token ===
+const refreshAccessToken = async (): Promise<string> => {
 	try {
 		const response = await axiosInstance.post("/user/refresh-token");
 		const { accessToken } = response.data;
-		// Set the new access token in the cookie (should be secure and same-site)
+
+		// Set new token globally for future requests
 		axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+
 		return accessToken;
 	} catch (error) {
-		if (axios.isAxiosError(error) && error.response?.status === 401) {
-			localStorage.removeItem("persist:root");
-			window.location.href = "/authenticate";
-			return;
-		}
+		// Redirect to login if refresh token is expired/invalid
+		localStorage.removeItem("persist:root");
+		window.location.href = "/authenticate";
 		throw error;
 	}
 };
 
-// Request interseptor to add access token from the cookies to the request headers before the request is sent
+// === 📤 Request Interceptor ===
 axiosInstance.interceptors.request.use(
 	async (config) => {
-		// extract the access token from cookies
 		const accessToken = document.cookie
 			.split("; ")
 			.find((row) => row.startsWith("access_token="))
 			?.split("=")[1];
 
-		// if the access token exist , set it in the request headers
 		if (accessToken) {
 			config.headers.Authorization = `Bearer ${accessToken}`;
 		}
+
 		return config;
 	},
-	(error) => {
-		return Promise.reject(error); // handle request errors
-	}
+	(error) => Promise.reject(error)
 );
 
-// Response interceptor hadles the response and errors
+// === 📥 Response Interceptor ===
 axiosInstance.interceptors.response.use(
-	(response) => {
-		return response; // return the response if there is no error
-	},
-	// may be the response has an error because of the access token expiration or something, so refresh it
+	(response) => response,
 	async (error) => {
-		// originalRequest._retry: A custom flag to ensure the original request is retried only once.
 		const originalRequest = error.config;
-		// if the response status is 401 (unauthorized) and the request hasn't been retried
-		if (error.response.status === 401 && !originalRequest._retry) {
+
+		// === 🔐 Handle Expired Access Token ===
+		if (error.response?.status === 401 && !originalRequest._retry) {
 			originalRequest._retry = true;
-			try {
-				// refresh the access token
-				const newAccessToken = await refreshAccessToken();
-				// update the default authorization header with the new access token
-				axios.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
-				// resend the original request with the new access token
-				return axiosInstance(originalRequest);
-			} catch (refreshError) {
-				localStorage.removeItem("persist:root");
-				window.location.href = "/authenticate";
-				return Promise.reject(refreshError); // handle the token refresh error
+
+			if (isRefreshing) {
+				// Wait in queue if already refreshing
+				return new Promise((resolve) => {
+					subscribeTokenRefresh((token: string) => {
+						originalRequest.headers["Authorization"] = `Bearer ${token}`;
+						resolve(axiosInstance(originalRequest));
+					});
+				});
 			}
-		} else if (error.response.status === 403) {
+
+			// Refresh token now
+			isRefreshing = true;
+
+			try {
+				const newAccessToken = await refreshAccessToken();
+
+				onRefreshed(newAccessToken); // Let others retry
+				originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+
+				return axiosInstance(originalRequest); // Retry failed request
+			} catch (refreshError) {
+				// Already handled inside refreshAccessToken
+				return Promise.reject(refreshError);
+			} finally {
+				isRefreshing = false;
+			}
+		}
+
+		// === ⛔ Handle Forbidden (Blocked User) ===
+		if (error.response?.status === 403) {
 			localStorage.removeItem("persist:root");
 
-			if (error.response.data.blocked) {
+			if (error.response.data?.blocked) {
 				toast.error("Your account has been blocked.");
 				setTimeout(() => {
 					window.location.href = "/authenticate";
 				}, 3000);
-
-				return Promise.reject(error); // Don't propagate the 403 error further
 			} else {
 				window.location.href = "/authenticate";
-				return Promise.reject(error); // Handle non-blocked 403 as well
 			}
+
+			return Promise.reject(error);
 		}
 
-		// If error status isn't 401 or 403, propagate the error
+		// Other errors
 		return Promise.reject(error);
 	}
 );
