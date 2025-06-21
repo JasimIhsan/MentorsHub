@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "sonner";
 
 // base URL for your API
 const baseURL = `${import.meta.env.VITE_SERVER_URL}/api`;
@@ -12,10 +13,7 @@ const axiosInstance = axios.create({
 //Function to refresh the access token
 const refreshAccessToken = async () => {
 	try {
-		const response = await axios.post(`${baseURL}/user/refresh-token`, null, {
-			withCredentials: true, // include cookies in the request
-		});
-
+		const response = await axiosInstance.post("/user/refresh-token");
 		const { accessToken } = response.data;
 		// Set the new access token in the cookie (should be secure and same-site)
 		axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
@@ -70,21 +68,22 @@ axiosInstance.interceptors.response.use(
 				// resend the original request with the new access token
 				return axiosInstance(originalRequest);
 			} catch (refreshError) {
-				// localStorage.removeItem("persist:root");
-				// window.location.href = "/authenticate";
+				localStorage.removeItem("persist:root");
+				window.location.href = "/authenticate";
 				return Promise.reject(refreshError); // handle the token refresh error
 			}
 		} else if (error.response.status === 403) {
-			// localStorage.removeItem("persist:root");
+			localStorage.removeItem("persist:root");
 
 			if (error.response.data.blocked) {
+				toast.error("Your account has been blocked.");
 				setTimeout(() => {
-					// window.location.href = "/authenticate";
+					window.location.href = "/authenticate";
 				}, 3000);
 
 				return Promise.reject(error); // Don't propagate the 403 error further
 			} else {
-				// window.location.href = "/authenticate";
+				window.location.href = "/authenticate";
 				return Promise.reject(error); // Handle non-blocked 403 as well
 			}
 		}

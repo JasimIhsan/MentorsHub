@@ -37,9 +37,9 @@ const UserRoutes = () => {
 				<Route
 					path="dashboard"
 					element={
-						// <ProtectedRoute>
+						<ProtectedRoute>
 							<DashboardPage />
-						// </ProtectedRoute>
+						</ProtectedRoute>
 					}
 				/>
 				<Route
