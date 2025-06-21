@@ -10,7 +10,14 @@ export class RefreshTokenController {
 		const user = req.user as Payload;
 		const newAccessToken = this.refreshUsecase.execute(user.userId, user.isAdmin as boolean);
 		res.clearCookie("access_token");
-		res.cookie("access_token", newAccessToken, { httpOnly: true, secure: true, sameSite: "strict", maxAge: 60 * 5 * 1000 });
+
+		res.cookie("access_token", newAccessToken, {
+			httpOnly: true,
+			sameSite: "strict",
+			secure: true,
+			maxAge: parseInt(process.env.JWT_ACCESS_TOKEN_EXPIRES as string), // 5 minutes
+		});
+
 		res.status(HttpStatusCode.OK).json({ success: true, accessToken: newAccessToken, message: "New access token generated" });
 	}
 }

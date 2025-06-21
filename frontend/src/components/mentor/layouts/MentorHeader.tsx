@@ -1,4 +1,4 @@
-import { ArrowRightLeft, Calendar, LogOut, Settings, User } from "lucide-react";
+import { ArrowRightLeft, Calendar, LogOut, Settings, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -97,6 +97,12 @@ export function MentorHeader() {
 								<Link to="/mentor/profile" className="cursor-pointer flex items-center">
 									<User className="mr-2 h-4 w-4" />
 									<span>Profile</span>
+								</Link>
+							</DropdownMenuItem>
+							<DropdownMenuItem asChild>
+								<Link to="/wallet" className="cursor-pointer flex items-center">
+									<Wallet className="mr-2 h-4 w-4" />
+									<span>Wallet</span>
 								</Link>
 							</DropdownMenuItem>
 							<DropdownMenuItem asChild>

@@ -11,8 +11,19 @@ export class SignupController {
 
 			const { user, refreshToken, accessToken } = await this.signupUseCase.execute(otp, signupData.firstName, signupData.lastName, signupData.email, signupData.password);
 
-			res.cookie("refresh_token", refreshToken, { httpOnly: true, sameSite: "strict", maxAge: 60 * 15 * 1000 });
-			res.cookie("access_token", accessToken, { httpOnly: true, sameSite: "strict", maxAge: 60 * 5 * 1000 });
+			res.cookie("access_token", accessToken, {
+				httpOnly: true,
+				sameSite: "strict",
+				secure: true,
+				maxAge: parseInt(process.env.JWT_ACCESS_TOKEN_EXPIRES as string), // 5 minutes
+			});
+
+			res.cookie("refresh_token", refreshToken, {
+				httpOnly: true,
+				sameSite: "strict",
+				secure: true,
+				maxAge: parseInt(process.env.JWT_REFRESH_TOKEN_EXPIRES as string), // 24 hours
+			});
 
 			res.status(HttpStatusCode.CREATED).json({ success: true, user });
 		} catch (error: any) {

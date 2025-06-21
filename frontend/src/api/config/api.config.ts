@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "sonner";
 
 // base URL for your API
 const baseURL = `${import.meta.env.VITE_SERVER_URL}/api`;
@@ -12,10 +13,7 @@ const axiosInstance = axios.create({
 //Function to refresh the access token
 const refreshAccessToken = async () => {
 	try {
-		const response = await axios.post(`${baseURL}/user/refresh-token`, null, {
-			withCredentials: true, // include cookies in the request
-		});
-
+		const response = await axiosInstance.post("/user/refresh-token");
 		const { accessToken } = response.data;
 		// Set the new access token in the cookie (should be secure and same-site)
 		axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
@@ -78,6 +76,7 @@ axiosInstance.interceptors.response.use(
 			localStorage.removeItem("persist:root");
 
 			if (error.response.data.blocked) {
+				toast.error("Your account has been blocked.");
 				setTimeout(() => {
 					window.location.href = "/authenticate";
 				}, 3000);

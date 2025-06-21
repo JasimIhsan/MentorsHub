@@ -69,7 +69,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 				case "today":
 					query.date = {
 						$gte: today,
-						$lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
+						$lt: new Date(today.getTime() + parseInt(process.env.JWT_REFRESH_TOKEN_EXPIRES as string)),
 					};
 					break;
 				case "week":
