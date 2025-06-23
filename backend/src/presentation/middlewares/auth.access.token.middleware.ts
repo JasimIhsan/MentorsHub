@@ -37,6 +37,7 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 			const admin = new AdminEntity({
 				...adminData,
 				id: decoded.userId,
+				role: RoleEnum.ADMIN,
 			});
 			req.user = { id: admin.getId() as string, role: RoleEnum.ADMIN };
 			return next();
