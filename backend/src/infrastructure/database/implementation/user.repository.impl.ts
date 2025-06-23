@@ -1,14 +1,9 @@
-import { UserEntity, UserInterface } from "../../../domain/entities/user.entity";
+import { UserEntity } from "../../../domain/entities/user.entity";
 import { FindUsersParams, IUserRepository, PaginatedUsers } from "../../../domain/repositories/user.repository";
+import { handleExceptionError } from "../../utils/handle.exception.error";
 import { UserModel } from "../models/user/user.model";
 import mongoose from "mongoose";
-import { IUserDTO, UserDTO } from "../../../application/dtos/user.dtos";
 
-// Helper function for error handling
-export const handleError = (error: unknown, message: string): never => {
-	console.error(`${message}:`, error);
-	throw new Error(error instanceof Error ? error.message : message);
-};
 
 export class UserRepositoryImpl implements IUserRepository {
 	async createUser(user: UserEntity): Promise<UserEntity> {
@@ -17,7 +12,7 @@ export class UserRepositoryImpl implements IUserRepository {
 			const savedUser = await newUser.save();
 			return UserEntity.fromDBDocument(savedUser);
 		} catch (error) {
-			return handleError(error, "Error creating user");
+			return handleExceptionError(error, "Error creating user");
 		}
 	}
 
@@ -26,7 +21,7 @@ export class UserRepositoryImpl implements IUserRepository {
 			const userDoc = await UserModel.findOne({ email });
 			return userDoc ? UserEntity.fromDBDocument(userDoc) : null;
 		} catch (error) {
-			return handleError(error, "Error finding user by email");
+			return handleExceptionError(error, "Error finding user by email");
 		}
 	}
 
@@ -36,14 +31,14 @@ export class UserRepositoryImpl implements IUserRepository {
 			const userDoc = await UserModel.findById(id);
 			return userDoc ? UserEntity.fromDBDocument(userDoc) : null;
 		} catch (error) {
-			return handleError(error, "Error finding user by ID");
+			return handleExceptionError(error, "Error finding user by ID");
 		}
 	}
 	async save(user: UserEntity): Promise<void> {
 		try {
 			await UserModel.findByIdAndUpdate(user.getId(), user.getProfile(true), { upsert: true, new: true });
 		} catch (error) {
-			handleError(error, "Error saving user");
+			handleExceptionError(error, "Error saving user");
 		}
 	}
 
@@ -88,7 +83,7 @@ export class UserRepositoryImpl implements IUserRepository {
 				currentPage: page,
 			};
 		} catch (error) {
-			return handleError(error, "Error getting all users");
+			return handleExceptionError(error, "Error getting all users");
 		}
 	}
 
@@ -98,7 +93,7 @@ export class UserRepositoryImpl implements IUserRepository {
 			console.log('updatedUser: ', updatedUser);
 			return UserEntity.fromDBDocument(updatedUser);
 		} catch (error) {
-			return handleError(error, "Error updating user");
+			return handleExceptionError(error, "Error updating user");
 		}
 	}
 
@@ -106,7 +101,7 @@ export class UserRepositoryImpl implements IUserRepository {
 		try {
 			return await UserModel.findByIdAndDelete(id);
 		} catch (error) {
-			handleError(error, "Error deleting user");
+			handleExceptionError(error, "Error deleting user");
 		}
 	}
 }

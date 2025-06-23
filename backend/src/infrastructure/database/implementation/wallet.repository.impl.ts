@@ -6,38 +6,48 @@ import { IWalletTransactionDTO } from "../../../application/dtos/wallet.transati
 import { WalletEntity } from "../../../domain/entities/wallet.entity";
 import { WithdrawalRequestEntity } from "../../../domain/entities/wallet.withdrawel.request.entity";
 import { AdminModel } from "../models/admin/admin.model";
+import { handleExceptionError } from "../../utils/handle.exception.error";
 
 export class WalletRepositoryImpl implements IWalletRepository {
 	async findWalletByUserId(userId: string): Promise<WalletEntity | null> {
-		const doc = await WalletModel.findOne({ userId });
-		return doc ? WalletEntity.fromDBDocument(doc) : null;
+		try {
+			const doc = await WalletModel.findOne({ userId });
+			return doc ? WalletEntity.fromDBDocument(doc) : null;
+		} catch (error) {
+			return handleExceptionError(error, "Error finding wallet by userId");
+		}
 	}
 
 	async createWallet(userId: string): Promise<WalletEntity> {
-		const doc = await WalletModel.create({ userId, balance: 0 });
-		return WalletEntity.fromDBDocument(doc);
+		try {
+			const doc = await WalletModel.create({ userId, balance: 0 });
+			return WalletEntity.fromDBDocument(doc);
+		} catch (error) {
+			return handleExceptionError(error, "Error creating wallet");
+		}
 	}
 
 	async platformWallet(): Promise<WalletEntity> {
-		const admin = await AdminModel.findOne({ role: "super-admin" });
-		const adminWallet = await WalletModel.findOne({ userId: admin?._id, role: "admin" });
-		if (!adminWallet) throw new Error("Admin wallet not found");
-		return WalletEntity.fromDBDocument(adminWallet);
+		try {
+			const admin = await AdminModel.findOne({ role: "super-admin" });
+			const adminWallet = await WalletModel.findOne({ userId: admin?._id, role: "admin" });
+			if (!adminWallet) throw new Error("Admin wallet not found");
+			return WalletEntity.fromDBDocument(adminWallet);
+		} catch (error) {
+			return handleExceptionError(error, "Error fetching platform wallet");
+		}
 	}
 
 	async updateBalance(userId: string, amount: number, type: "credit" | "debit" = "credit", role: "user" | "mentor" | "admin" = "user"): Promise<WalletEntity | null> {
-		let roleQuery: any;
-		if (role === "admin") {
-			roleQuery = "admin";
-		} else {
-			roleQuery = { $in: ["user", "mentor"] }; // Matches either "user" or "mentor"
+		try {
+			let roleQuery: any = role === "admin" ? "admin" : { $in: ["user", "mentor"] };
+			const updateAmount = type === "credit" ? amount : -amount;
+
+			const wallet = await WalletModel.findOneAndUpdate({ userId, role: roleQuery }, { $inc: { balance: updateAmount } }, { new: true });
+			return wallet ? WalletEntity.fromDBDocument(wallet) : null;
+		} catch (error) {
+			return handleExceptionError(error, "Error updating wallet balance");
 		}
-
-		const updateAmount = type === "credit" ? amount : -amount;
-
-		const wallet = await WalletModel.findOneAndUpdate({ userId, role: roleQuery }, { $inc: { balance: updateAmount } }, { new: true });
-
-		return wallet ? WalletEntity.fromDBDocument(wallet) : null;
 	}
 
 	async createTransaction(data: {
@@ -51,78 +61,92 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		description?: string;
 		sessionId?: string | null;
 	}): Promise<IWalletTransactionDTO> {
-		const transaction = await WalletTransactionModel.create({
-			fromUserId: data.fromUserId,
-			toUserId: data.toUserId,
-			fromRole: data.fromRole,
-			toRole: data.toRole,
-			fromModel: data.fromRole === "admin" ? "admins" : "Users",
-			toModel: data.toRole === "admin" ? "admins" : "Users",
-			amount: data.amount,
-			type: data.type,
-			purpose: data.purpose,
-			description: data.description,
-			sessionId: data.sessionId || undefined,
-		});
+		try {
+			const transaction = await WalletTransactionModel.create({
+				fromUserId: data.fromUserId,
+				toUserId: data.toUserId,
+				fromRole: data.fromRole,
+				toRole: data.toRole,
+				fromModel: data.fromRole === "admin" ? "admins" : "Users",
+				toModel: data.toRole === "admin" ? "admins" : "Users",
+				amount: data.amount,
+				type: data.type,
+				purpose: data.purpose,
+				description: data.description,
+				sessionId: data.sessionId || undefined,
+			});
 
-		const doc = await WalletTransactionModel.findById(transaction._id).populate("fromUserId", "firstName lastName name avatar").populate("toUserId", "firstName lastName name avatar");
+			const doc = await WalletTransactionModel.findById(transaction._id).populate("fromUserId", "firstName lastName name avatar").populate("toUserId", "firstName lastName name avatar");
 
-		return this.mapToWalletTransactionDTO(doc);
+			return this.mapToWalletTransactionDTO(doc);
+		} catch (error) {
+			return handleExceptionError(error, "Error creating wallet transaction");
+		}
 	}
 
-	async getTransactionsByUser(userId: string, page: number = 1, limit: number = 10, filter: Record<string, any> = {}) {
-		const query: any = {
-			$or: [
-				{ fromUserId: userId, type: { $in: ["debit", "withdrawal"] } },
-				{ toUserId: userId, type: "credit" },
-			],
-		};
+	async getTransactionsByUser(userId: string, page: number = 1, limit: number = 10, filter: Record<string, any> = {}): Promise<{ data: IWalletTransactionDTO[]; total: number }> {
+		try {
+			const query: any = {
+				$or: [
+					{ fromUserId: userId, type: { $in: ["debit", "withdrawal"] } },
+					{ toUserId: userId, type: "credit" },
+				],
+			};
 
-		if (filter.type) {
-			query.type = filter.type === "all" ? { $in: ["credit", "debit", "withdrawal"] } : filter.type;
+			if (filter.type) {
+				query.type = filter.type === "all" ? { $in: ["credit", "debit", "withdrawal"] } : filter.type;
+			}
+			if (filter.createdAt) {
+				query.createdAt = filter.createdAt;
+			}
+
+			const total = await WalletTransactionModel.countDocuments(query);
+
+			let queryBuilder = WalletTransactionModel.find(query)
+				.populate("fromUserId", "firstName lastName name avatar")
+				.populate("toUserId", "firstName lastName name avatar")
+				.sort({ createdAt: -1 })
+				.skip((page - 1) * limit)
+				.limit(limit);
+
+			queryBuilder = queryBuilder.populate({
+				path: "sessionId",
+				select: "topic",
+				match: { sessionId: { $ne: null } },
+			});
+
+			const docs = await queryBuilder.exec();
+			const data = docs.map((doc) => this.mapToWalletTransactionDTO(doc));
+
+			return { data, total };
+		} catch (error) {
+			return handleExceptionError(error, "Error fetching wallet transactions");
 		}
-		if (filter.createdAt) {
-			query.createdAt = filter.createdAt;
-		}
-
-		const total = await WalletTransactionModel.countDocuments(query);
-
-		let queryBuilder = WalletTransactionModel.find(query)
-			.populate("fromUserId", "firstName lastName name avatar")
-			.populate("toUserId", "firstName lastName name avatar")
-			.sort({ createdAt: -1 })
-			.skip((page - 1) * limit)
-			.limit(limit);
-
-		// Optional populate for sessionId
-		queryBuilder = queryBuilder.populate({
-			path: "sessionId",
-			select: "topic",
-			match: { sessionId: { $ne: null } },
-		});
-
-		const docs = await queryBuilder.exec();
-		const data = docs.map((doc) => this.mapToWalletTransactionDTO(doc));
-
-		return { data, total };
 	}
 
 	async createWithdrawalRequest(data: Partial<IWithdrawalRequestDocument>): Promise<WithdrawalRequestEntity> {
-		const doc = await WithdrawalRequestModel.create(data);
-		return WithdrawalRequestEntity.fromDBDocument(doc);
+		try {
+			const doc = await WithdrawalRequestModel.create(data);
+			return WithdrawalRequestEntity.fromDBDocument(doc);
+		} catch (error) {
+			return handleExceptionError(error, "Error creating withdrawal request");
+		}
 	}
 
 	async getWithdrawalRequests(mentorId: string, page: number = 1, limit: number = 10, filter: Record<string, any> = {}): Promise<{ data: WithdrawalRequestEntity[]; total: number }> {
-		const query = { mentorId, ...filter };
+		try {
+			const query = { mentorId, ...filter };
+			const total = await WithdrawalRequestModel.countDocuments(query);
+			const docs = await WithdrawalRequestModel.find(query)
+				.sort({ createdAt: -1 })
+				.skip((page - 1) * limit)
+				.limit(limit);
 
-		const total = await WithdrawalRequestModel.countDocuments(query);
-		const docs = await WithdrawalRequestModel.find(query)
-			.sort({ createdAt: -1 })
-			.skip((page - 1) * limit)
-			.limit(limit);
-
-		const data = docs.map((doc) => WithdrawalRequestEntity.fromDBDocument(doc));
-		return { data, total };
+			const data = docs.map((doc) => WithdrawalRequestEntity.fromDBDocument(doc));
+			return { data, total };
+		} catch (error) {
+			return handleExceptionError(error, "Error fetching withdrawal requests");
+		}
 	}
 
 	mapToWalletTransactionDTO(doc: any): IWalletTransactionDTO {

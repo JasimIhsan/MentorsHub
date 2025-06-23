@@ -6,7 +6,7 @@ import { IUsers, UserModel } from "../models/user/user.model";
 import { IAvailabilityDTO } from "../../../application/dtos/availability.dto";
 
 // Error handler
-const handleError = (error: unknown, message: string): never => {
+const handleExceptionError = (error: unknown, message: string): never => {
 	console.error(`${message}:`, error);
 	throw new Error(error instanceof Error ? error.message : message);
 };
@@ -17,7 +17,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			const result = await MentorProfileModel.findOne({ userId });
 			return result ? MentorProfileEntity.fromDBDocument(result) : null;
 		} catch (error) {
-			return handleError(error, "Error finding mentor details by user ID");
+			return handleExceptionError(error, "Error finding mentor details by user ID");
 		}
 	}
 
@@ -27,7 +27,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			if (!updated) throw new Error("Mentor profile not found");
 			return MentorProfileEntity.fromDBDocument(updated);
 		} catch (error) {
-			return handleError(error, "Error updating mentor details");
+			return handleExceptionError(error, "Error updating mentor details");
 		}
 	}
 
@@ -37,7 +37,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			const saved = await mentor.save();
 			return MentorProfileEntity.fromDBDocument(saved);
 		} catch (error) {
-			return handleError(error, "Error creating mentor profile");
+			return handleExceptionError(error, "Error creating mentor profile");
 		}
 	}
 
@@ -120,7 +120,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 
 			return { mentors: mentorDTOs, total };
 		} catch (error) {
-			throw handleError(error, "Error finding all mentors");
+			throw handleExceptionError(error, "Error finding all mentors");
 		}
 	}
 
@@ -177,7 +177,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 
 			return mentorDTOs;
 		} catch (error) {
-			throw handleError(error, "Error finding all approved mentors");
+			throw handleExceptionError(error, "Error finding all approved mentors");
 		}
 	}
 
@@ -228,7 +228,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 
 			return mentorDTOs;
 		} catch (error) {
-			throw handleError(error, "Error finding mentor by user ID");
+			throw handleExceptionError(error, "Error finding mentor by user ID");
 		}
 	}
 
@@ -238,7 +238,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			if (!result) return null;
 			return { userId, availability: result.availability };
 		} catch (error) {
-			throw handleError(error, "Error finding mentor availability");
+			throw handleExceptionError(error, "Error finding mentor availability");
 		}
 	}
 }

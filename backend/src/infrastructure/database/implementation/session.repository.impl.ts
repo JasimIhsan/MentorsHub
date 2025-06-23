@@ -1,8 +1,8 @@
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { ISessionDocument, SessionModel } from "../models/session/session.model";
 import { SessionEntity } from "../../../domain/entities/session.entity";
-import { handleError } from "./user.repository.impl";
 import { ISessionUserDTO, ISessionMentorDTO } from "../../../application/dtos/session.dto";
+import { handleExceptionError } from "../../utils/handle.exception.error";
 
 export class SessionRepositoryImpl implements ISessionRepository {
 	async createSession(session: SessionEntity): Promise<SessionEntity> {
@@ -18,7 +18,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			const savedSession = await newSession.save();
 			return SessionEntity.fromDBDocument(savedSession);
 		} catch (error) {
-			return handleError(error, "Error creating session");
+			return handleExceptionError(error, "Error creating session");
 		}
 	}
 
@@ -27,16 +27,19 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			const session = await SessionModel.findById(sessionId);
 			return session ? SessionEntity.fromDBDocument(session) : null;
 		} catch (error) {
-			return handleError(error, "Error geting session by id");
+			return handleExceptionError(error, "Error getting session by ID");
 		}
 	}
 
 	async getSessionsByUser(userId: string): Promise<ISessionUserDTO[]> {
 		try {
-			const sessions = await SessionModel.find({ "participants.userId": userId }).populate("participants.userId", "firstName lastName avatar").populate("mentorId", "firstName lastName avatar");
+			const sessions = await SessionModel.find({ "participants.userId": userId })
+				.populate("participants.userId", "firstName lastName avatar")
+				.populate("mentorId", "firstName lastName avatar");
+
 			return sessions.map((session) => this.mapSessionToUserDTO(session, userId));
 		} catch (error) {
-			return handleError(error, "Error geting sessions by user");
+			return handleExceptionError(error, "Error getting sessions by user");
 		}
 	}
 
@@ -51,13 +54,9 @@ export class SessionRepositoryImpl implements ISessionRepository {
 	): Promise<{ sessions: ISessionMentorDTO[]; total: number }> {
 		try {
 			const { filterOption, page, limit, status } = queryParams;
-			console.log("queryParams: ", queryParams);
-
 			const query: any = { mentorId };
-
-			// Apply filters based on the single filterOption value
 			const today = new Date();
-			today.setHours(0, 0, 0, 0); // set to midnight
+			today.setHours(0, 0, 0, 0);
 
 			switch (filterOption) {
 				case "free":
@@ -69,66 +68,61 @@ export class SessionRepositoryImpl implements ISessionRepository {
 				case "today":
 					query.date = {
 						$gte: today,
-						$lt: new Date(today.getTime() + parseInt(process.env.JWT_REFRESH_TOKEN_EXPIRES as string)),
+						$lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
 					};
 					break;
 				case "week":
 					const startOfWeek = new Date(today);
-					startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
+					startOfWeek.setDate(today.getDate() - today.getDay());
 					const endOfWeek = new Date(startOfWeek);
-					endOfWeek.setDate(startOfWeek.getDate() + 7); // next Sunday
-
-					query.date = {
-						$gte: startOfWeek,
-						$lt: endOfWeek,
-					};
+					endOfWeek.setDate(startOfWeek.getDate() + 7);
+					query.date = { $gte: startOfWeek, $lt: endOfWeek };
 					break;
 				case "month":
 					const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 					const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-
-					query.date = {
-						$gte: startOfMonth,
-						$lt: endOfMonth,
-					};
-					break;
-				case "all":
-				default:
+					query.date = { $gte: startOfMonth, $lt: endOfMonth };
 					break;
 			}
 
-			if (status) {
-				query.status = status;
-			}
+			if (status) query.status = status;
 
 			const total = await SessionModel.countDocuments(query);
-
 			const sessionsData = await SessionModel.find(query)
 				.populate("participants.userId", "firstName lastName avatar")
 				.skip((page - 1) * limit)
 				.limit(limit);
 
 			const sessions = sessionsData.map(this.mapSessionToMentorDTO);
-
 			return { sessions, total };
 		} catch (error) {
-			throw new Error(`Error getting session requests by mentor: ${error instanceof Error ? error.message : "Unknown error"}`);
+			return handleExceptionError(error, "Error getting sessions by mentor");
 		}
 	}
 
 	async updateSessionStatus(sessionId: string, status: string, rejectReason?: string): Promise<SessionEntity> {
 		try {
-			const updatedSession = await SessionModel.findByIdAndUpdate(sessionId, { status, rejectReason }, { new: true });
+			const updatedSession = await SessionModel.findByIdAndUpdate(
+				sessionId,
+				{ status, rejectReason },
+				{ new: true }
+			);
 			if (!updatedSession) throw new Error("Session not found");
 			return SessionEntity.fromDBDocument(updatedSession);
 		} catch (error) {
-			return handleError(error, "Error updating session request status");
+			return handleExceptionError(error, "Error updating session status");
 		}
 	}
 
-	async paySession(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void> {
+	async paySession(
+		sessionId: string,
+		userId: string,
+		paymentId: string,
+		paymentStatus: string,
+		status: string
+	): Promise<void> {
 		try {
-			const updatedSession = await SessionModel.findOneAndUpdate(
+			const updated = await SessionModel.findOneAndUpdate(
 				{ _id: sessionId, "participants.userId": userId },
 				{
 					$set: {
@@ -139,58 +133,62 @@ export class SessionRepositoryImpl implements ISessionRepository {
 				},
 				{ new: true }
 			);
-			if (!updatedSession) throw new Error("Session or participant not found");
+			if (!updated) throw new Error("Session or participant not found");
 		} catch (error) {
-			return handleError(error, "Error updating session payment status");
+			return handleExceptionError(error, "Error updating session payment");
 		}
 	}
 
 	async getSessions(mentorId: string): Promise<ISessionMentorDTO[]> {
 		try {
 			const sessions = await SessionModel.find({ mentorId }).populate("participants.userId", "firstName lastName avatar");
-			const mappedSessions = sessions.map(this.mapSessionToMentorDTO);
-			return mappedSessions;
+			return sessions.map(this.mapSessionToMentorDTO);
 		} catch (error) {
-			return handleError(error, "Error geting sessions");
+			return handleExceptionError(error, "Error getting all mentor sessions");
 		}
 	}
 
 	async getSessionToExpire(): Promise<ISessionDocument[]> {
-		const sessions = await SessionModel.find({
-			status: { $in: ["pending", "approved", "upcoming"] },
-		});
-		return sessions;
+		try {
+			return await SessionModel.find({
+				status: { $in: ["pending", "approved", "upcoming"] },
+			});
+		} catch (error) {
+			return handleExceptionError(error, "Error finding sessions to expire");
+		}
 	}
 
 	async expireSession(sessionId: string): Promise<void> {
-		await SessionModel.findByIdAndDelete(sessionId, { status: "expired" });
+		try {
+			await SessionModel.findByIdAndDelete(sessionId);
+		} catch (error) {
+			return handleExceptionError(error, "Error expiring session");
+		}
 	}
 
 	async getSessionByDate(mentorId: string, date: Date): Promise<SessionEntity[] | null> {
 		try {
-			// Create start and end of the day for the given date
 			const startOfDay = new Date(date);
-			startOfDay.setUTCHours(0, 0, 0, 0); // Set to midnight UTC
+			startOfDay.setUTCHours(0, 0, 0, 0);
 			const endOfDay = new Date(date);
-			endOfDay.setUTCHours(23, 59, 59, 999); // Set to end of day UTC
+			endOfDay.setUTCHours(23, 59, 59, 999);
 
-			// Query sessions within the date range
 			const sessions = await SessionModel.find({
 				mentorId,
-				date: {
-					$gte: startOfDay,
-					$lte: endOfDay,
-				},
+				date: { $gte: startOfDay, $lte: endOfDay },
 			});
 
-			return sessions.length > 0 ? sessions.map((s) => SessionEntity.fromDBDocument(s)) : null;
+			return sessions.length > 0 ? sessions.map(SessionEntity.fromDBDocument) : null;
 		} catch (error) {
-			return handleError(error, "Error getting session by date and status");
+			return handleExceptionError(error, "Error getting sessions by date");
 		}
 	}
 
 	private mapSessionToUserDTO(session: any, userId: string): ISessionUserDTO {
-		const participant = session.participants.find((p: any) => p.userId._id?.toString?.() === userId || p.userId?.toString() === userId);
+		const participant = session.participants.find((p: any) =>
+			p.userId._id?.toString?.() === userId || p.userId?.toString() === userId
+		);
+
 		return {
 			id: session._id.toString(),
 			mentor: {
@@ -237,8 +235,6 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			hours: session.hours,
 			message: session.message,
 			status: session.status,
-			paymentStatus: session.participants?.paymentStatus,
-			paymentId: session.participants?.paymentId,
 			rejectReason: session.rejectReason,
 			pricing: session.pricing,
 			totalAmount: session.totalAmount,
