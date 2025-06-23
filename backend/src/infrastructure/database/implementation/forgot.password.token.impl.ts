@@ -3,7 +3,7 @@ import { IForgotPasswordTokensRepository } from "../../../domain/repositories/fo
 import { ForgotPasswordTokenEntity, IForgotPasswordTokens } from "../../../domain/entities/forgot.password.token.entity";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { ForgotTokenModel } from "../models/user/forgot.password.reset.token.model";
-import { handleError } from "./user.repository.impl";
+import { handleExceptionError } from "../../utils/handle.exception.error";
 
 export class ForgotPasswordResetTokenImpl implements IForgotPasswordTokensRepository {
 	async createToken(userId: string, token: string, expiresInMinutes: number): Promise<IForgotPasswordTokens> {
@@ -17,7 +17,7 @@ export class ForgotPasswordResetTokenImpl implements IForgotPasswordTokensReposi
 			await createdToken.save();
 			return tokenEntity.toDBDocument();
 		} catch (error) {
-			return handleError(error, "Error creating forgot password token");
+			return handleExceptionError(error, "Error creating forgot password token");
 		}
 	}
 
@@ -27,7 +27,7 @@ export class ForgotPasswordResetTokenImpl implements IForgotPasswordTokensReposi
 			if (!tokenDoc || !tokenDoc.userId) return null;
 			return ForgotPasswordTokenDTO.fromEntity(tokenDoc);
 		} catch (error) {
-			return handleError(error, "Error finding forgot password token");
+			return handleExceptionError(error, "Error finding forgot password token");
 		}
 	}
 
@@ -37,7 +37,7 @@ export class ForgotPasswordResetTokenImpl implements IForgotPasswordTokensReposi
 			if (!tokenDoc) return null;
 			return ForgotPasswordTokenEntity.fromDBDocument({ token: tokenDoc.token, userId: tokenDoc.userId.toString(), expiresAt: tokenDoc.expires });
 		} catch (error) {
-			return handleError(error, "Error finding forgot password token");
+			return handleExceptionError(error, "Error finding forgot password token");
 		}
 	}
 
@@ -48,7 +48,7 @@ export class ForgotPasswordResetTokenImpl implements IForgotPasswordTokensReposi
 
 			return UserEntity.fromDBDocument(tokenDoc.userId);
 		} catch (error) {
-			return handleError(error, "Error finding user by forgot password token");
+			return handleExceptionError(error, "Error finding user by forgot password token");
 		}
 	}
 }
