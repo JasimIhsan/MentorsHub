@@ -4,6 +4,8 @@ import { IMentorProfileRepository } from "../../../../domain/repositories/mentor
 import { ISessionParticipantDTO, SessionEntity } from "../../../../domain/entities/session.entity";
 import { IRequestSessionUseCase } from "../../../interfaces/session";
 import { SessionFormat, SessionPaymentStatus, PricingType, SessionStatus } from "../../../../infrastructure/database/models/session/session.model";
+import { IGetAvailabilityUseCase } from "../../../interfaces/mentors/mentors.interface";
+import dayjs from "dayjs";
 
 export interface SessionDTO {
 	mentorId: string;
@@ -18,18 +20,28 @@ export interface SessionDTO {
 	totalAmount: number;
 	pricing: PricingType;
 }
-
 export class RequestSessionUseCase implements IRequestSessionUseCase {
-	constructor(private sessionRepo: ISessionRepository, private mentorRepo: IMentorProfileRepository) {}
+	constructor(private sessionRepo: ISessionRepository, private mentorRepo: IMentorProfileRepository, private getMentorAvailabilityUseCase: IGetAvailabilityUseCase) {}
 
 	async execute(data: SessionDTO) {
 		const mentor = await this.mentorRepo.findMentorByUserId(data.mentorId);
 		if (!mentor) {
 			throw new Error("Mentor not found");
 		}
-		let userPaymentStatus: SessionPaymentStatus = data.pricing === "free" ? "completed" : "pending";
 
-		const participants = [
+		// Get available slots for the selected date
+		const availableSlots: string[] = await this.getMentorAvailabilityUseCase.execute(data.mentorId, data.date);
+		console.log("availableSlots: ", availableSlots);
+
+		// Check if the requested slot is available
+		if (!availableSlots.includes(data.time)) {
+			throw new Error("The requested slot is already booked or unavailable.");
+		}
+
+		// Proceed to create session
+		const userPaymentStatus: SessionPaymentStatus = data.pricing === "free" ? "completed" : "pending";
+
+		const participants: ISessionParticipantDTO[] = [
 			{
 				userId: data.userId,
 				paymentStatus: userPaymentStatus,
@@ -37,11 +49,11 @@ export class RequestSessionUseCase implements IRequestSessionUseCase {
 		];
 
 		const sessionEntity = new SessionEntity({
-			participants: participants as ISessionParticipantDTO[],
+			participants,
 			mentorId: data.mentorId,
 			topic: data.topic,
 			sessionType: data.sessionType,
-			sessionFormat: "one-on-one",
+			sessionFormat: data.sessionFormat || "one-on-one",
 			date: data.date,
 			time: data.time,
 			hours: data.hours,
