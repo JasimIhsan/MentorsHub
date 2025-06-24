@@ -1,11 +1,12 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IGetAllUsersUsecase } from "../../../../application/interfaces/admin/admin.usertab.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { logger } from "../../../../infrastructure/utils/logger";
 
 export class GetAllUsersController {
 	constructor(private getAllUsersUsecase: IGetAllUsersUsecase) {}
 
-	async handle(req: Request, res: Response): Promise<void> {
+	async handle(req: Request, res: Response, next: NextFunction): Promise<void> {
 		try {
 			const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
 			const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
@@ -37,12 +38,9 @@ export class GetAllUsersController {
 				totalPages: result.totalPages,
 				currentPage: result.currentPage,
 			});
-		} catch (error) {
-			if (error instanceof Error) {
-				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: error.message });
-			} else {
-				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "An unexpected error occurred" });
-			}
+		} catch (error: any) {
+			logger.error(`❌ Error in GetAllUsersController: ${error.message}`);
+			next(error);
 		}
 	}
 }

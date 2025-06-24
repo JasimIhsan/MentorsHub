@@ -1,17 +1,17 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IGetAllApprovedMentorsUsecase } from "../../../application/interfaces/mentors/mentors.interface";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
+import { logger } from "../../../infrastructure/utils/logger";
 
 export class GetAllApprovedMentorsController {
 	constructor(private getAllApprovedMentorsUsecase: IGetAllApprovedMentorsUsecase) {}
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const mentors = await this.getAllApprovedMentorsUsecase.execute();
 			res.status(HttpStatusCode.OK).json({ success: true, mentors });
-		} catch (error) {
-			if (error instanceof Error) {
-				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
-			}
+		} catch (error: any) {
+			logger.error(`❌ Error in GetAllApprovedMentorsController: ${error.message}`);
+			next(error);
 		}
 	}
 }

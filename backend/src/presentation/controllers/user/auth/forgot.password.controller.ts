@@ -1,11 +1,12 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IForgotPasswordUseCase } from "../../../../application/interfaces/user/auth.usecases.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { logger } from "../../../../infrastructure/utils/logger";
 
 export class ForgotPasswrodController {
 	constructor(private forgotUseCase: IForgotPasswordUseCase) {}
 
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { email } = req.body;
 			if (!email) {
@@ -14,9 +15,9 @@ export class ForgotPasswrodController {
 			}
 			await this.forgotUseCase.execute(email);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Password reset link sent to your email" });
-		} catch (error) {
-			console.error("Forgot password error:", error);
-			if (error instanceof Error) res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message || "Failed to send magic link" });
+		} catch (error: any) {
+			logger.error(`❌ Error in ForgotPasswrodController: ${error.message}`);
+			next(error);
 		}
 	}
 }

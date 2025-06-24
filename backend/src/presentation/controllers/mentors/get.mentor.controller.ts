@@ -1,18 +1,18 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IGetMentorUsecase } from "../../../application/interfaces/mentors/mentors.interface";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
+import { logger } from "../../../infrastructure/utils/logger";
 
 export class GetMentorController {
 	constructor(private getMentorUsecase: IGetMentorUsecase) {}
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const userId = req.params.mentorId;
 			const mentor = await this.getMentorUsecase.execute(userId);
 			res.status(HttpStatusCode.OK).json({ success: true, mentor });
-		} catch (error) {
-			if (error instanceof Error) {
-				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
-			}
+	} catch (error: any) {
+			logger.error(`❌ Error in GetMentorController: ${error.message}`);
+			next(error);
 		}
 	}
 }

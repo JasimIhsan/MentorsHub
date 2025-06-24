@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ICreateTransactionUsecase } from "../../../application/interfaces/wallet";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 
 export class CreateTransactionController {
   constructor(private createTransactionUseCase: ICreateTransactionUsecase) {}
 
-  async handle(req: Request, res: Response) {
+  async handle(req: Request, res: Response, next: NextFunction) {
 	console.log(`req.body : `, req.body);
 	
     try {

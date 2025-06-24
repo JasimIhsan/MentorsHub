@@ -1,25 +1,21 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IChangePasswordUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
+import { logger } from "../../../../infrastructure/utils/logger";
 
 export class ChangePasswordController {
 	constructor(private changePasswordUsecase: IChangePasswordUseCase) {}
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { userId, oldPassword, newPassword } = req.body;
 
 			const user = await this.changePasswordUsecase.execute(userId, oldPassword, newPassword);
 
 			res.status(HttpStatusCode.OK).json({ success: true, user });
-		} catch (error) {
-			if (error instanceof Error) {
-				res.status(HttpStatusCode.BAD_REQUEST).json({ message: error.message });
-				return;
-			}
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: CommonStringMessage.SERVER_ERROR_MESSAGE });
+		} catch (error: any) {
+			logger.error(`❌ Error in ChangePasswordController: ${error.message}`);
+			next(error);
 		}
 	}
-
 }
-

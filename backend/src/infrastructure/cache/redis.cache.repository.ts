@@ -1,14 +1,15 @@
 import { createClient } from "redis";
 import { ICacheRepository } from "../../domain/repositories/cache.respository";
+import { logger } from "../utils/logger";
 
 export class RedisCacheRepository implements ICacheRepository {
 	private client = createClient({ url: process.env.REDIS_URL as string });
 	constructor() {
 		this.client.on("error", (err) => {
-			console.error("Redis connected: ❌❌❌\n", err);
+			logger.error(`Redis connection error ❌❌❌: ${err.message}`);
 		});
 		this.connectRedis();
-		this.client.on("connect", () => console.log(" Redis connected    : ✅✅✅"));
+		this.client.on("connect", () => logger.info(" Redis connected    : ✅✅✅"));
 	}
 
 	private async connectRedis() {

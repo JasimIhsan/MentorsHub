@@ -5,12 +5,12 @@ import { verifyAccessToken } from "../../middlewares/auth.access.token.middlewar
 import { requireRole } from "../../middlewares/require.role.middleware";
 export const userProfileRoutes = Router();
 
-userProfileRoutes.get("/:userId", verifyAccessToken, requireRole("mentor", "user"), (req, res) => getUserProfileController.handle(req, res));
+userProfileRoutes.get("/:userId", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => getUserProfileController.handle(req, res, next));
 
-userProfileRoutes.put("/edit-profile", verifyAccessToken, requireRole("mentor", "user"), upload.single("avatar"), (req, res) => updateUseProfileController.handle(req, res));
+userProfileRoutes.put("/edit-profile", verifyAccessToken, requireRole("mentor", "user"), upload.single("avatar"), (req, res, next) => updateUseProfileController.handle(req, res, next));
 
-userProfileRoutes.put("/change-password", verifyAccessToken, requireRole("mentor", "user"), (req, res) => changePasswordController.handle(req, res));
+userProfileRoutes.put("/change-password", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => changePasswordController.handle(req, res, next));
 
-userProfileRoutes.post("/mentor-application", verifyAccessToken, requireRole("user"), upload.array("documents"), (req, res) => becomeMentorApplicationController.handle(req, res));
+userProfileRoutes.post("/mentor-application", verifyAccessToken, requireRole("user"), upload.array("documents"), (req, res, next) => becomeMentorApplicationController.handle(req, res, next));
 
-userProfileRoutes.post("/mentor-application/resend", verifyAccessToken, requireRole("user"), upload.array("documents"), (req, res) => reApplyMentorApplicationController.handle(req, res));
+userProfileRoutes.post("/mentor-application/resend", verifyAccessToken, requireRole("user"), upload.array("documents"), (req, res, next) => reApplyMentorApplicationController.handle(req, res, next));

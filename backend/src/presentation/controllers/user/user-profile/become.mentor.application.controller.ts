@@ -1,14 +1,15 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IBecomeMentorUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { logger } from "../../../../infrastructure/utils/logger";
 
 export class BecomeMentorController {
 	constructor(private becomeMentorUseCase: IBecomeMentorUseCase) {}
 
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { userId, firstName, lastName, bio, professionalTitle, languages, primaryExpertise, skills, yearsExperience, workExperiences, educations, certifications, sessionFormat, sessionTypes, pricing, hourlyRate, availability, hoursPerWeek } =
-			req.body;
+				req.body;
 			// Parse stringified fields
 			const parsedData = {
 				languages: JSON.parse(languages || "[]"),
@@ -63,11 +64,8 @@ export class BecomeMentorController {
 				mentorProfile,
 			});
 		} catch (error: any) {
-			console.error("Error in mentor application:", error.message);
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-				success: false,
-				message: error.message,
-			});
+			logger.error("Error in mentor application:", error.message);
+			next(error);
 		}
 	}
 }

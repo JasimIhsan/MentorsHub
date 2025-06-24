@@ -1,12 +1,13 @@
 // src/interfaces/http/controllers/mentors/get.all.mentors.controller.ts
 import { IGetAllMentorsUsecase } from "../../../application/interfaces/mentors/mentors.interface";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
+import { logger } from "../../../infrastructure/utils/logger";
 
 export class GetAllMentorsController {
 	constructor(private getAllMentorsUsecase: IGetAllMentorsUsecase) {}
 
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { page, limit, search, status } = req.query;
 			const mentors = await this.getAllMentorsUsecase.execute({
@@ -16,12 +17,9 @@ export class GetAllMentorsController {
 				status: status as string,
 			});
 			res.status(HttpStatusCode.OK).json({ success: true, ...mentors });
-		} catch (error) {
-			if (error instanceof Error) {
-				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: error.message });
-			} else {
-				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Unexpected error" });
-			}
+		} catch (error: any) {
+			logger.error(`❌ Error in GetAllMentorsController: ${error.message}`);
+			next(error);
 		}
 	}
 }

@@ -1,10 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IGetMentorReviewsUseCase } from "../../../application/interfaces/review";
+import { logger } from "../../../infrastructure/utils/logger";
 
 export class GetMentorReviewsController {
 	constructor(private getMentorReviewsUseCase: IGetMentorReviewsUseCase) {}
 
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const mentorId = req.params.mentorId;
 			const { page, limit, rating } = req.query;
@@ -21,8 +22,9 @@ export class GetMentorReviewsController {
 			});
 
 			res.status(200).json({ success: true, ...reviews });
-		} catch (err: any) {
-			res.status(500).json({ success: false, message: err.message });
+		} catch (error: any) {
+			logger.error(`❌ Error in GetMentorReviewsController: ${error.message}`);
+			next(error);
 		}
 	}
 }

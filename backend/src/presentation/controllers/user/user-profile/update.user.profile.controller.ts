@@ -1,10 +1,12 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { ICloudinaryService, IUpdateUserProfileUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { logger } from "../../../../infrastructure/utils/logger";
 
 export class UpdateUserProfileController {
 	constructor(private updateUserProfileUseCase: IUpdateUserProfileUseCase, private uploadAvatarUseCase: ICloudinaryService) {}
-	async handle(req: Request, res: Response) {
+
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { userId, firstName, lastName, email, skills, interests, bio } = req.body;
 			const avatar = req.file;
@@ -20,6 +22,7 @@ export class UpdateUserProfileController {
 			};
 
 			let user = null;
+
 			if (avatar) {
 				const imageUrl = await this.uploadAvatarUseCase.uploadProfilePicture(avatar);
 				user = await this.updateUserProfileUseCase.execute(userId, data, imageUrl);
@@ -28,12 +31,9 @@ export class UpdateUserProfileController {
 			}
 
 			res.status(HttpStatusCode.OK).json({ success: true, user });
-		} catch (error) {
-			console.log("error from update profile controller:  ", error);
-
-			if (error instanceof Error) {
-				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ error: error.message });
-			}
+		} catch (error: any) {
+			logger.error(`❌ Error in UpdateUserProfileController: ${error.message}`);
+			next(error);
 		}
 	}
 }

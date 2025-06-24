@@ -1,13 +1,13 @@
 // GetTransactionsController.ts
 
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IGetTransactionsUsecase } from "../../../application/interfaces/wallet";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 
 export class GetTransactionsController {
 	constructor(private getTransactionsUseCase: IGetTransactionsUsecase) {}
 
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		const { userId } = req.params;
 		const { role, type, from, to } = req.query;
 		const page = parseInt(req.query.page as string) || 1;

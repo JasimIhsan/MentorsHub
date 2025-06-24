@@ -7,4 +7,4 @@ dotenv.config();
 
 export const documentsRouter = Router();
 
-documentsRouter.get("/:id/documents", verifyAccessToken, (req, res) => getDocumentsController.handle(req, res));
+documentsRouter.get("/:id/documents", verifyAccessToken, (req, res, next) => getDocumentsController.handle(req, res, next));

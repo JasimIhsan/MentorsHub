@@ -1,13 +1,13 @@
 // interfaces/controllers/wallet/topup.wallet.controller.ts
 
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { IWalletTopUpUsecase } from "../../../application/interfaces/wallet";
 
 export class WalletTopUpController {
 	constructor(private topUpUseCase: IWalletTopUpUsecase) {}
 
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { userId } = req.params;
 			const { amount, purpose, description } = req.body;

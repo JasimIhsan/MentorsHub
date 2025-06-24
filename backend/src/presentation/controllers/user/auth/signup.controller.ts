@@ -1,11 +1,12 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ISignupUseCase } from "../../../../application/interfaces/user/auth.usecases.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { logger } from "../../../../infrastructure/utils/logger";
 
 export class SignupController {
 	constructor(private signupUseCase: ISignupUseCase) {}
 
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { otp, signupData } = req.body;
 
@@ -27,7 +28,8 @@ export class SignupController {
 
 			res.status(HttpStatusCode.CREATED).json({ success: true, user });
 		} catch (error: any) {
-			res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: error.message });
+			logger.error(`❌ Error in SignupController: ${error.message}`);
+			next(error);
 		}
 	}
 }
