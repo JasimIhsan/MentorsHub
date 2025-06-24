@@ -1,10 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IGoogleAuthUsecase } from "../../../../application/interfaces/user/auth.usecases.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { logger } from "../../../../infrastructure/utils/logger";
 
 export class GoogleAuthController {
 	constructor(private googleAuthUsecase: IGoogleAuthUsecase) {}
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { credential } = req.body;
 
@@ -29,15 +30,9 @@ export class GoogleAuthController {
 			});
 
 			res.status(HttpStatusCode.OK).json({ success: true, user: user });
-		} catch (error) {
-			if (error instanceof Error) {
-				console.log("error from controller: ", error.message);
-				res.status(HttpStatusCode.BAD_REQUEST).json({ message: error.message });
-				return;
-			}
-			console.log("An error occurred while google authentication: ", error);
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while google authentication" });
-			return;
+		} catch (error: any) {
+			logger.error(`❌ Error in GoogleAuthController: ${error.message}`);
+			next(error);
 		}
 	}
 }

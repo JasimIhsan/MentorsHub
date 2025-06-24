@@ -1,11 +1,12 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IReApplyMentorApplicationUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { logger } from "../../../../infrastructure/utils/logger";
 
 export class ReApplyMentorApplicationController {
 	constructor(private upsertMentorApplicationUseCase: IReApplyMentorApplicationUseCase) {}
 
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { userId, firstName, lastName, bio, professionalTitle, languages, primaryExpertise, skills, yearsExperience, workExperiences, educations, certifications, sessionFormat, sessionTypes, pricing, hourlyRate, availability } = req.body;
 
@@ -63,11 +64,8 @@ export class ReApplyMentorApplicationController {
 				mentorProfile,
 			});
 		} catch (error: any) {
-			console.error("Error in upsert mentor application:", error.message);
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-				success: false,
-				message: error.message,
-			});
+			logger.error("Error in upsert mentor application:", error.message);
+			next(error);
 		}
 	}
 }

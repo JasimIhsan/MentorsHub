@@ -3,7 +3,7 @@ import { createNotificationController, getUserNotificationsController, markNotif
 
 export const notificationRouter = express.Router();
 
-notificationRouter.post("/", (req, res) => createNotificationController.handle(req, res));
-notificationRouter.get("/:userId", (req, res) => getUserNotificationsController.handle(req, res));
-notificationRouter.patch("/read/:notificationId", (req, res) => markNotificationAsReadController.handle(req, res));
-notificationRouter.patch("/read-all/:userId", (req, res) => markAllNotificationAsReadController.handle(req, res));
+notificationRouter.post("/", (req, res, next) => createNotificationController.handle(req, res, next));
+notificationRouter.get("/:userId", (req, res, next) => getUserNotificationsController.handle(req, res, next));
+notificationRouter.patch("/read/:notificationId", (req, res, next) => markNotificationAsReadController.handle(req, res, next));
+notificationRouter.patch("/read-all/:userId", (req, res, next) => markAllNotificationAsReadController.handle(req, res, next));

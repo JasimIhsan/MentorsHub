@@ -1,11 +1,11 @@
-// import { Request, Response } from "express";
+// import { NextFunction, Request, Response } from "express";
 // import { IUpdateWalletBalanceUsecase } from "../../../application/interfaces/wallet";
 // import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 
 // export class UpdateWalletBalanceController {
 // 	constructor(private updateWalletBalanceUseCase: IUpdateWalletBalanceUsecase) {}
 
-// 	async handle(req: Request, res: Response) {
+// 	async handle(req: Request, res: Response, next: NextFunction) {
 // 		const { userId, amount } = req.body;
 // 		try {
 // 			const wallet = await this.updateWalletBalanceUseCase.execute(userId, amount);

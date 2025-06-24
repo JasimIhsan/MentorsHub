@@ -9,6 +9,6 @@ import { requireRole } from "../../middlewares/require.role.middleware";
 
 export const mentorRouter = Router();
 
-mentorRouter.get("/:mentorId", verifyAccessToken, requireRole("mentor", "user"), (req, res) => getMentorController.handle(req, res));
+mentorRouter.get("/:mentorId", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => getMentorController.handle(req, res, next));
 
-mentorRouter.get("/availability/:mentorId", verifyAccessToken, requireRole("mentor", "user"), (req, res) => getAvailabilityController.handle(req, res));
+mentorRouter.get("/availability/:mentorId", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => getAvailabilityController.handle(req, res, next));

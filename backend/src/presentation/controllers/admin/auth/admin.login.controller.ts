@@ -1,12 +1,13 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IAdminAuthUsecase } from "../../../../application/interfaces/admin/admin.auth.interface";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
+import { logger } from "../../../../infrastructure/utils/logger";
 
 export class AdminLoginController {
 	constructor(private adminLoginUsecase: IAdminAuthUsecase) {}
 
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { username, password } = req.body;
 
@@ -27,12 +28,9 @@ export class AdminLoginController {
 			});
 
 			res.status(HttpStatusCode.OK).json({ success: true, admin });
-		} catch (error) {
-			if (error instanceof Error) {
-				res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: error.message });
-				return;
-			}
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: CommonStringMessage.SERVER_ERROR_MESSAGE });
+		} catch (error: any) {
+			logger.error(`❌ Error in AdminLoginController: ${error.message}`);
+			next(error);
 		}
 	}
 }

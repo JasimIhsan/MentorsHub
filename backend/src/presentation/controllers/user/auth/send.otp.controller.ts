@@ -1,12 +1,12 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ISendOtpUsecase } from "../../../../application/interfaces/user/auth.usecases.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
-import { CommonStringMessage } from "../../../../shared/constants/string.messages";
+import { logger } from "../../../../infrastructure/utils/logger";
 
 export class SendOtpController {
 	constructor(private sendOtpUseCase: ISendOtpUsecase) {}
 
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { email } = req.body;
 
@@ -16,13 +16,9 @@ export class SendOtpController {
 			}
 			await this.sendOtpUseCase.execute(email);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "OTP sent successfully" });
-		} catch (error) {
-			if (error instanceof Error) {
-				console.error("Send OTP error:", error.message);
-				res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: error.message });
-				return;
-			}
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: CommonStringMessage.SERVER_ERROR_MESSAGE });
+		} catch (error: any) {
+			logger.error(`❌ Error in SendOtpController: ${error.message}`);
+			next(error);
 		}
 	}
 }

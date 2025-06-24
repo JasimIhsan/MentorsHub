@@ -1,9 +1,10 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { tokenService } from "../../../middlewares/auth.access.token.middleware";
+import { logger } from "../../../../infrastructure/utils/logger";
 
 export class LogoutController {
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const refreshToken = req.cookies.refresh_token;
 
@@ -18,15 +19,9 @@ export class LogoutController {
 			res.clearCookie("refresh_token");
 
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Logged out successfully" });
-		} catch (error) {
-			if (error instanceof Error) {
-				console.log("Error from LogoutController: ", error.message);
-				res.status(HttpStatusCode.BAD_REQUEST).json({ message: error.message });
-				return;
-			}
-			console.log("An error occurred while logging out: ", error);
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while logging out" });
-			return;
+		} catch (error: any) {
+			logger.error(`❌ Error in LogoutController: ${error.message}`);
+			next(error);
 		}
 	}
 }

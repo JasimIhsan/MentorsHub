@@ -6,7 +6,7 @@ import { verifyAccessToken } from "../../middlewares/auth.access.token.middlewar
 import { requireRole } from "../../middlewares/require.role.middleware";
 export const userRouter = Router();
 
-userRouter.get("/:userId", verifyAccessToken, requireRole("mentor", "user"), async (req: Request, res: Response) => {
+userRouter.get("/:userId", verifyAccessToken, requireRole("mentor", "user"), async (req: Request, res: Response, next: NextFunction) => {
 	const userId = req.params.userId;
 	const mentor = await MentorProfileModel.findOne({ userId }).populate("userId");
 	if (!mentor || !mentor.userId) null;

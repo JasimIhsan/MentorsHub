@@ -5,10 +5,10 @@ import { requireRole } from "../../middlewares/require.role.middleware";
 
 export const mentorSessionRouter = Router();
 
-mentorSessionRouter.get("/:mentorId/requests", verifyAccessToken, requireRole("mentor"), async (req, res) => getSessionsRequestsController.handle(req, res));
+mentorSessionRouter.get("/:mentorId/requests", verifyAccessToken, requireRole("mentor"), async (req, res, next) => getSessionsRequestsController.handle(req, res, next));
 
-mentorSessionRouter.put("/:requestId/status", verifyAccessToken, requireRole("mentor"), (req, res) => updateSessionStatusController.handle(req, res));
+mentorSessionRouter.put("/:requestId/status", verifyAccessToken, requireRole("mentor"), (req, res, next) => updateSessionStatusController.handle(req, res, next));
 
-mentorSessionRouter.get("/:mentorId/upcoming", verifyAccessToken, requireRole("mentor"), (req, res) => getUpcomingSessionMentorController.handle(req, res));
+mentorSessionRouter.get("/:mentorId/upcoming", verifyAccessToken, requireRole("mentor"), (req, res, next) => getUpcomingSessionMentorController.handle(req, res, next));
 
-mentorSessionRouter.get("/:mentorId/session-history", verifyAccessToken, requireRole("mentor"), (req, res) => getSessionHistoryController.handle(req, res));
+mentorSessionRouter.get("/:mentorId/session-history", verifyAccessToken, requireRole("mentor"), (req, res, next) => getSessionHistoryController.handle(req, res, next));

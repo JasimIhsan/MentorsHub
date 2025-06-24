@@ -8,26 +8,26 @@ import { requireRole } from "../../middlewares/require.role.middleware";
 const authRouter = Router();
 
 // Authentication Routes
-authRouter.post("/register", (req, res) => signupController.handle(req, res));
+authRouter.post("/register", (req, res, next) => signupController.handle(req, res, next));
 
-authRouter.post("/login", checkUserStatusInLogin, (req, res) => signinController.handle(req, res));
+authRouter.post("/login", checkUserStatusInLogin, (req, res, next) => signinController.handle(req, res, next));
 
-authRouter.post("/refresh-token", verifyRefreshToken, (req, res) => refreshController.handle(req, res));
+authRouter.post("/refresh-token", verifyRefreshToken, (req, res, next) => refreshController.handle(req, res, next));
 
-authRouter.post("/forgot-password", checkUserStatusInLogin, (req, res) => forgotPasswordController.handle(req, res));
+authRouter.post("/forgot-password", checkUserStatusInLogin, (req, res, next) => forgotPasswordController.handle(req, res, next));
 
-authRouter.get("/verify-reset-token/:token", (req, res) => verifyResetTokenController.handle(req, res));
+authRouter.get("/verify-reset-token/:token", (req, res, next) => verifyResetTokenController.handle(req, res, next));
 
-authRouter.post("/reset-password", (req, res) => resetPasswordController.handle(req, res));
+authRouter.post("/reset-password", (req, res, next) => resetPasswordController.handle(req, res, next));
 
-authRouter.post("/logout", (req, res) => logoutController.handle(req, res));
+authRouter.post("/logout", (req, res, next) => logoutController.handle(req, res, next));
 
-authRouter.post("/send-otp", (req, res) => sendOtpController.handle(req, res));
+authRouter.post("/send-otp", (req, res, next) => sendOtpController.handle(req, res, next));
 
-authRouter.post("/resend-otp", (req, res) => sendOtpController.handle(req, res));
+authRouter.post("/resend-otp", (req, res, next) => sendOtpController.handle(req, res, next));
 
 // Test Route
-authRouter.get("/test", verifyAccessToken, requireRole("mentor", "user"), (req, res) => {
+authRouter.get("/test", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => {
 	res.json({ success: true, message: "Hello, authenticated user!" });
 });
 

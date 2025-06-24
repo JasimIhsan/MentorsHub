@@ -1,11 +1,12 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IGetUserNotificationsUseCase } from "../../../application/interfaces/notification";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
+import { logger } from "../../../infrastructure/utils/logger";
 
 export class GetUserNotificationsController {
 	constructor(private getUserNotificationsUseCase: IGetUserNotificationsUseCase) {}
 
-	async handle(req: Request, res: Response): Promise<void> {
+	async handle(req: Request, res: Response, next: NextFunction): Promise<void> {
 		try {
 			const userId = req.params.userId;
 			const page = parseInt(req.query.page as string) || 1;
@@ -25,9 +26,9 @@ export class GetUserNotificationsController {
 				success: true,
 				data: result,
 			});
-		} catch (error) {
-			console.error(error);
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to fetch notifications" });
+	} catch (error: any) {
+			logger.error(`❌ Error in GetUserNotificationsController: ${error.message}`);
+			next(error);
 		}
 	}
 }

@@ -1,12 +1,12 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ISignInUseCase } from "../../../../application/interfaces/user/auth.usecases.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
-import { CommonStringMessage } from "../../../../shared/constants/string.messages";
+import { logger } from "../../../../infrastructure/utils/logger";
 
 export class SigninController {
 	constructor(private signinUseCase: ISignInUseCase) {}
 
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { email, password } = req.body;
 			const { user, accessToken, refreshToken } = await this.signinUseCase.execute(email, password);
@@ -29,12 +29,9 @@ export class SigninController {
 			});
 
 			res.status(HttpStatusCode.OK).json({ success: true, user, accessToken, refreshToken });
-		} catch (error) {
-			if (error instanceof Error) {
-				res.status(HttpStatusCode.NOT_FOUND).json({ success: false, message: error.message });
-				return;
-			}
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: CommonStringMessage.SERVER_ERROR_MESSAGE });
+	} catch (error: any) {
+			logger.error(`❌ Error in SigninController: ${error.message}`);
+			next(error);
 		}
 	}
 }

@@ -8,6 +8,7 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import connectDB from "./infrastructure/database/models/config/database.config";
 import authRouter from "./presentation/routes/user/auth.routes";
+import { logger } from "./infrastructure/utils/logger";
 import passport from "passport";
 import { googleAuthRouter } from "./presentation/routes/user/google.auth.routes";
 import { configurePassport } from "./infrastructure/auth/passport/passport.config";
@@ -28,6 +29,7 @@ import { reviewRouter } from "./presentation/routes/user/review.routes";
 import { userWalletRouter } from "./presentation/routes/user/wallet.routes";
 import { adminWalletRouter } from "./presentation/routes/admin/admin.wallet.routes";
 import { messageRouter } from "./presentation/routes/user/message.routes";
+import { errorHandler } from "./presentation/middlewares/error.handler.middleware";
 
 dotenv.config();
 
@@ -58,8 +60,17 @@ app.use(
 	})
 );
 
-connectDB();
+//  Winston and Morgan as logger
 app.use(morgan("dev"));
+app.use(
+	morgan(":method :url :status :res[content-length] - :response-time ms", {
+		stream: {
+			write: (message) => logger.http(message.trim()),
+		},
+	})
+);
+
+connectDB();
 
 // Routes
 app.use("/api/user", authRouter);
@@ -69,7 +80,7 @@ app.use("/api/user/sessions", sessionRouter);
 app.use("/api/user/mentor", userSideMentorRouter);
 app.use("/api/user/reviews", reviewRouter);
 app.use("/api/user/wallet", userWalletRouter);
-app.use("/api/user/messages", messageRouter)
+app.use("/api/user/messages", messageRouter);
 
 app.use("/api/admin", adminAuthRouter);
 app.use("/api/admin/users", usertabRouter);
@@ -82,8 +93,11 @@ app.use("/api/mentor/sessions", mentorSessionRouter);
 app.use("/api/documents", documentsRouter);
 app.use("/api/notifications", notificationRouter);
 
+// Error handling middleware
+app.use(errorHandler);
+
 // Start the server
 const PORT = process.env.PORT || 5858;
 server.listen(PORT, () => {
-	console.log(`Server is running on port ${PORT} : ✅✅✅`);
+	logger.info(`Server is running on port ${PORT} : ✅✅✅`);
 });

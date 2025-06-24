@@ -6,6 +6,6 @@ import { requireRole } from "../../middlewares/require.role.middleware";
 
 export const adminAuthRouter = Router();
 
-adminAuthRouter.post("/login", (req, res) => adminLoginController.handle(req, res));
+adminAuthRouter.post("/login", (req, res, next) => adminLoginController.handle(req, res, next));
 
-adminAuthRouter.post("/logout", verifyAccessToken, requireRole("admin"), (req, res) => logoutController.handle(req, res));
+adminAuthRouter.post("/logout", verifyAccessToken, requireRole("admin"), (req, res, next) => logoutController.handle(req, res, next));

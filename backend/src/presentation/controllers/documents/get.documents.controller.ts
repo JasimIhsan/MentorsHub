@@ -1,10 +1,11 @@
 // src/interfaces/controllers/documents/get.documents.controller.ts
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { AdminEntity } from "../../../domain/entities/admin.entity";
 import { IGetMentorUsecase } from "../../../application/interfaces/mentors/mentors.interface";
 import { IGetDocumentsUseCase } from "../../../application/interfaces/documents";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
+import { logger } from "../../../infrastructure/utils/logger";
 
 export interface CustomRequest extends Request {
 	user: UserEntity | AdminEntity;
@@ -12,7 +13,7 @@ export interface CustomRequest extends Request {
 
 export class GetDocumentsController {
 	constructor(private getDocumentsUseCase: IGetDocumentsUseCase) {}
-	async handle(req: Request, res: Response) {
+	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const customReq = req as CustomRequest;
 			const mentorId = req.params.id;
@@ -21,8 +22,9 @@ export class GetDocumentsController {
 			const documents = await this.getDocumentsUseCase.execute({ mentorId, user });
 
 			res.json({ success: true, documents });
-		} catch (error) {
-			if (error instanceof Error) res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
+		} catch (error: any) {
+			logger.error(`❌ Error in GetDocumentsController: ${error.message}`);
+			next(error);
 		}
 	}
 }
