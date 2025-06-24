@@ -1,4 +1,3 @@
-import { handleAPIError } from "@/utility/handleApiError";
 import axiosInstance from "./config/api.config";
 
 export const fetchWalletDataAPI = async (userId: string) => {
@@ -6,89 +5,71 @@ export const fetchWalletDataAPI = async (userId: string) => {
 		const response = await axiosInstance.get(`/user/wallet/${userId}`);
 		return response.data;
 	} catch (error: any) {
-		return handleAPIError(error);
+		console.error("Error in fetchWalletDataAPI:", error);
+		throw new Error(error.response.data.message);
 	}
 };
 
 export const fetchTransactionsAPI = async (userId: string, page: number, limit: number, type: string, from: string, to: string) => {
 	try {
-		// Send GET request with all filter parameters
 		const response = await axiosInstance.get(`/user/wallet/transactions/${userId}`, {
-			params: {
-				page,
-				limit,
-				type,
-				from,
-				to,
-			},
+			params: { page, limit, type, from, to },
 		});
-		return response.data; // Return the API response
+		return response.data;
 	} catch (error: any) {
-		return handleAPIError(error); // Handle errors using utility function
+		console.error("Error in fetchTransactionsAPI:", error);
+		throw new Error(error.response.data.message);
 	}
 };
 
-// const topUpData = {
-// 	amount: number
-// 	purpose: "wallet_topup",
-// 	description: "Wallet topup",
-// 	razorpay_payment_id: response.razorpay_payment_id,
-// 	razorpay_order_id: response.razorpay_order_id,
-// 	razorpay_signature: response.razorpay_signature,
-// };
-
-// const topUpResponse = await axiosInstance.post(`/user/wallet/top-up/${user?.id}`, topUpData);
-
 export const topupWalletAPI = async (userId: string, data: { amount: number; purpose: string; description: string }) => {
 	try {
-		const response = await axiosInstance.post(`/user/wallet/top-up/${userId}`, data); // Send POST request with the amount
-		return response.data; // Return the API response
+		const response = await axiosInstance.post(`/user/wallet/top-up/${userId}`, data);
+		return response.data;
 	} catch (error: any) {
-		return handleAPIError(error); // Handle errors using utility function
+		console.error("Error in topupWalletAPI:", error);
+		throw new Error(error.response.data.message);
 	}
 };
 
 export const withdrawWalletAPI = async (userId: string, amount: number) => {
 	try {
 		const response = await axiosInstance.post(`/user/wallet/withdraw/${userId}`, { amount });
-		return response.data
+		return response.data;
 	} catch (error: any) {
-		return handleAPIError(error)
+		console.error("Error in withdrawWalletAPI:", error);
+		throw new Error(error.response.data.message);
 	}
-}
+};
 
 export const fetchPlatformWalletDataAPI = async (userId: string) => {
 	try {
 		const response = await axiosInstance.get(`/admin/wallet/${userId}`);
 		return response.data;
 	} catch (error: any) {
-		return handleAPIError(error);
+		console.error("Error in fetchPlatformWalletDataAPI:", error);
+		throw new Error(error.response.data.message);
 	}
 };
 
 export const fetchPlatformTransactionsAPI = async (userId: string, page: number, limit: number, type: string, from: string, to: string) => {
 	try {
-		// Send GET request with all filter parameters
 		const response = await axiosInstance.get(`/admin/wallet/transactions/${userId}`, {
-			params: {
-				page,
-				limit,
-				type,
-				from,
-				to,
-			},
+			params: { page, limit, type, from, to },
 		});
-		return response.data; // Return the API response
+		return response.data;
 	} catch (error: any) {
-		return handleAPIError(error); // Handle errors using utility function
+		console.error("Error in fetchPlatformTransactionsAPI:", error);
+		throw new Error(error.response.data.message);
 	}
 };
 
 export const withdrawPlatformWalletAPI = async (userId: string, amount: number) => {
 	try {
 		const response = await axiosInstance.post(`/admin/wallet/withdraw/${userId}`, { amount });
-		return response.data
+		return response.data;
 	} catch (error: any) {
-		return handleAPIError(error)
+		console.error("Error in withdrawPlatformWalletAPI:", error);
+		throw new Error(error.response.data.message);
 	}
-}
+};

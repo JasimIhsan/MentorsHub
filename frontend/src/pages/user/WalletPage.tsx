@@ -17,6 +17,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { formatDate } from "@/utility/time-data-formater";
 import { useMotionValue } from "framer-motion";
+import { toast } from "sonner";
 
 declare global {
 	interface Window {
@@ -68,7 +69,6 @@ export function WalletPage() {
 	const [isAddMoneyModalOpen, setIsAddMoneyModalOpen] = useState(false);
 	const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 	const [withdrawAmount, setWithdrawAmount] = useState<string>("");
-
 
 	const user = useSelector((state: RootState) => state.userAuth.user);
 	const transactionsPerPage = 5;
@@ -175,16 +175,14 @@ export function WalletPage() {
 				setNotification({ type: "success", message: "Withdrawal successfully!" });
 				setIsWithdrawModalOpen(false);
 				setWithdrawAmount("");
-			} else {
-				throw new Error("Failed to withdraw money");
 			}
-		} catch (error: any) {
-			setNotification({ type: "error", message: error.message || "Failed to withdraw money" });
-			setTimeout(() => setNotification(null), 3000);
+		} catch (error) {
+			console.log(`Error  : `, error);
+			if (error instanceof Error) {
+				toast.error(error.message);
+			}
 		}
 	};
-
-
 
 	const handleAddMoney = async () => {
 		if (!isRazorpayLoaded) {
@@ -426,11 +424,11 @@ export function WalletPage() {
 										<Label htmlFor="withdraw-amount">Amount (₹)</Label>
 										<Input id="withdraw-amount" type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} placeholder="Enter amount" min="1" className="border-gray-300 focus:ring-blue-500" />
 									</div>
-
-									
 								</div>
 								<DialogFooter>
-									<Button onClick={handleWithdraw} disabled={!isRazorpayLoaded || !withdrawAmount || parseFloat(withdrawAmount) <= 0}>Withdraw</Button>
+									<Button onClick={handleWithdraw} disabled={!isRazorpayLoaded || !withdrawAmount || parseFloat(withdrawAmount) <= 0}>
+										Withdraw
+									</Button>
 									<Button
 										variant="outline"
 										onClick={() => {
