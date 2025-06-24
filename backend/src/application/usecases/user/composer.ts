@@ -20,6 +20,8 @@ import { PaySessionUseCase } from "./session/pay.session.usecase";
 import { UploadMentorDocumentUseCase } from "../documents/upload.mentor.document.usecase";
 import { ReApplyMentorApplicationUseCase } from "./user-profile/re.apply.mentor.application.usecase";
 import { CancelSessionUseCase } from "./session/cancel.session.usecase";
+import { get } from "axios";
+import { getAvailabilityUsecase } from "../mentors/composer";
 
 // Initialize UseCases
 export const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
@@ -38,8 +40,8 @@ export const uploadMentorDocumentUseCase = new UploadMentorDocumentUseCase(s3Buc
 export const becomeMentorUseCase = new BecomeMentorUseCase(mentorRepository, userRepository, uploadMentorDocumentUseCase);
 export const reApplyMentorApplicationUseCase = new ReApplyMentorApplicationUseCase(mentorRepository, userRepository, uploadMentorDocumentUseCase);
 export const getUserProfileUsecase = new GetUserProfileUseCase(userRepository);
-export const requestSessionUsecase = new RequestSessionUseCase(sessionRepository, mentorRepository);
+export const requestSessionUsecase = new RequestSessionUseCase(sessionRepository, mentorRepository, getAvailabilityUsecase);
 export const getSessionsByUserUsecase = new GetSessionsByUserUseCase(sessionRepository);
 export const getSessionByMentorUsecase = new GetSessionsByUserUseCase(sessionRepository);
 export const paySessionUsecase = new PaySessionUseCase(sessionRepository, walletRepository);
-export const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository)
+export const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository);
