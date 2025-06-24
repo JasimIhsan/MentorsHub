@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ICreateWithdrawalRequestUsecase } from "../../../application/interfaces/wallet";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
+import { logger } from "../../../infrastructure/utils/logger";
 
 export class CreateWithdrawalRequestController {
 	constructor(private createWithdrawalRequestUseCase: ICreateWithdrawalRequestUsecase) {}
@@ -9,8 +10,9 @@ export class CreateWithdrawalRequestController {
 		try {
 			const request = await this.createWithdrawalRequestUseCase.execute(req.body);
 			res.status(HttpStatusCode.CREATED).json({ success: true, request });
-		} catch (error) {
-			res.status(500).json({ error: "Failed to create withdrawal request" });
+		} catch (error: any) {
+			logger.error(`❌ Error in CreateWithdrawalRequestController: ${error.message}`);
+			next(error);
 		}
 	}
 }

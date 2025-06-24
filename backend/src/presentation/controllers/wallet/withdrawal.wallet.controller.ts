@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { IWithdrawWalletUsecase } from "../../../application/interfaces/wallet";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
+import { logger } from "../../../infrastructure/utils/logger";
 
 export class WithdrawWalletController {
 	constructor(private withdrawWalletUseCase: IWithdrawWalletUsecase) {}
@@ -10,11 +11,9 @@ export class WithdrawWalletController {
 			const { amount } = req.body;
 			const wallet = await this.withdrawWalletUseCase.execute(userId, amount);
 			res.status(HttpStatusCode.OK).json({ success: true, wallet: wallet.wallet, transaction: wallet.transaction });
-		} catch (error) {
-			console.log('Error from withdrawalWalletController: ', error);
-			if (error instanceof Error) {
-				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
-			}
+		} catch (error: any) {
+			logger.error(`❌ Error in WithdrawWalletController: ${error.message}`);
+			next(error);
 		}
 	}
 }

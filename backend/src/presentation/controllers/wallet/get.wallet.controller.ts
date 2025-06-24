@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { IGetWalletUsecase } from "../../../application/interfaces/wallet";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
+import { logger } from "../../../infrastructure/utils/logger";
 
 export class GetWalletController {
 	constructor(private getWalletUseCase: IGetWalletUsecase) {}
@@ -10,10 +11,9 @@ export class GetWalletController {
 
 			const wallet = await this.getWalletUseCase.execute(userId);
 			res.status(HttpStatusCode.OK).json({ success: true, wallet });
-		} catch (error) {
-			if (error instanceof Error) {
-				res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
-			}
+		} catch (error: any) {
+			logger.error(`❌ Error in GetWalletController: ${error.message}`);
+			next(error);
 		}
 	}
 }
