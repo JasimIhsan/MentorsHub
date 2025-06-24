@@ -3,6 +3,7 @@
 import { NextFunction, Request, Response } from "express";
 import { IGetTransactionsUsecase } from "../../../application/interfaces/wallet";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
+import { logger } from "../../../infrastructure/utils/logger";
 
 export class GetTransactionsController {
 	constructor(private getTransactionsUseCase: IGetTransactionsUsecase) {}
@@ -26,9 +27,9 @@ export class GetTransactionsController {
 		try {
 			const result = await this.getTransactionsUseCase.execute(userId, role as string, page, limit, filter);
 			res.status(HttpStatusCode.OK).json({ success: true, transactions: result.data, total: result.total });
-		} catch (error) {
-			console.error("Transaction fetch error:", error);
-			res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to fetch transactions" });
+		} catch (error: any) {
+			logger.error(`❌ Error in GetTransactionsController: ${error.message}`);
+			next(error);
 		}
 	}
 }

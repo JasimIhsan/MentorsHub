@@ -3,6 +3,7 @@
 import { NextFunction, Request, Response } from "express";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { IWalletTopUpUsecase } from "../../../application/interfaces/wallet";
+import { logger } from "../../../infrastructure/utils/logger";
 
 export class WalletTopUpController {
 	constructor(private topUpUseCase: IWalletTopUpUsecase) {}
@@ -14,7 +15,7 @@ export class WalletTopUpController {
 			console.log(`req.body : `, req.body);
 			console.log(`userId : `, userId);
 
-			if(!amount || !purpose || !description || !userId) throw new Error("Missing required fields.");
+			if (!amount || !purpose || !description || !userId) throw new Error("Missing required fields.");
 
 			const result = await this.topUpUseCase.execute({ userId, amount, purpose, description });
 
@@ -24,10 +25,8 @@ export class WalletTopUpController {
 				data: result,
 			});
 		} catch (error: any) {
-			res.status(HttpStatusCode.BAD_REQUEST).json({
-				success: false,
-				message: error.message || "Failed to top up wallet",
-			});
+			logger.error(`❌ Error in WalletTopUpController: ${error.message}`);
+			next(error);
 		}
 	}
 }
