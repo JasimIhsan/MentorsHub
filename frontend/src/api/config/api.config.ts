@@ -62,7 +62,6 @@ axiosInstance.interceptors.response.use(
 	},
 	// may be the response has an error because of the access token expiration or something, so refresh it
 	async (error) => {
-		console.log("error in api config : ", error);
 
 		// originalRequest._retry: A custom flag to ensure the original request is retried only once.
 		const originalRequest = error.config;

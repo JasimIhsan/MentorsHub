@@ -8,7 +8,7 @@ import { SignupUseCase } from "./authentication/signup.usecase";
 import { SendOtpUsecase } from "./authentication/send.otp.usecase";
 import { GoogleAuthUsecase } from "./authentication/google.auth.usecase";
 
-import { userRepository, forgotResetRepository, tokenInterface, emailService, redisService, cloudinaryService, mentorRepository, sessionRepository, s3BucketService, walletRepository } from "../../../infrastructure/composer";
+import { userRepository, forgotResetRepository, tokenInterface, emailService, redisService, cloudinaryService, mentorRepository, sessionRepository, s3BucketService, walletRepository, paymentGatewayService } from "../../../infrastructure/composer";
 import { UpdateUserProfileUseCase } from "./user-profile/update.user.profile.usecase";
 import { UploadAvatarUseCase } from "./user-profile/upload.avatar.usecase";
 import { ChangePasswordUsecase } from "./user-profile/change.password.usecase";
@@ -22,6 +22,8 @@ import { ReApplyMentorApplicationUseCase } from "./user-profile/re.apply.mentor.
 import { CancelSessionUseCase } from "./session/cancel.session.usecase";
 import { get } from "axios";
 import { getAvailabilityUsecase } from "../mentors/composer";
+import { VerifySessionPaymentUseCase } from "./session/verify.session.payment.usecase";
+import { CreateSessionPaymentOrderUseCase } from "./session/create.session.payment.order.usecase";
 
 // Initialize UseCases
 export const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
@@ -45,3 +47,5 @@ export const getSessionsByUserUsecase = new GetSessionsByUserUseCase(sessionRepo
 export const getSessionByMentorUsecase = new GetSessionsByUserUseCase(sessionRepository);
 export const paySessionUsecase = new PaySessionUseCase(sessionRepository, walletRepository);
 export const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository);
+export const verifySessionPaymentUseCase = new VerifySessionPaymentUseCase(sessionRepository);
+export const createSessionPaymentOrderUsecase = new CreateSessionPaymentOrderUseCase(sessionRepository, paymentGatewayService);

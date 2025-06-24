@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { cancelSessionController, createSessionController, getAvailabilityController, getSessionsByUserController, paySessionController } from "../../controllers/user/composer";
+import { cancelSessionController, createSessionController, createSessionPaymentOrderController, getAvailabilityController, getSessionsByUserController, paySessionController, verifySessionPaymentController } from "../../controllers/user/composer";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { SessionModel } from "../../../infrastructure/database/models/session/session.model";
 import { requireRole } from "../../middlewares/require.role.middleware";
@@ -8,6 +8,10 @@ export const sessionRouter = Router();
 sessionRouter.post("/create-session", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => createSessionController.handle(req, res, next));
 
 sessionRouter.get("/all/:userId", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => getSessionsByUserController.handle(req, res, next));
+
+sessionRouter.get("/verify-payment", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => verifySessionPaymentController.handle(req, res, next));
+
+sessionRouter.post("/create-payment-order", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => createSessionPaymentOrderController.handle(req, res, next));
 
 sessionRouter.post("/pay", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => paySessionController.handle(req, res, next));
 
