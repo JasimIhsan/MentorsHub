@@ -28,6 +28,7 @@ import { IMessageRepository } from "../domain/repositories/message.repository";
 import { MessageRepositoryImpl } from "./database/implementation/message.repository.impl";
 import { IChatRepository } from "../domain/repositories/chat.repository";
 import { ChatRepositoryImpl } from "./database/implementation/chat.repository.impl";
+import { RazorpayGatewayImpl } from "./services/payment/razorpay.gateway.impl";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -47,3 +48,4 @@ export const redisService: ICacheRepository = new RedisCacheRepository();
 export const tokenInterface: ITokenService = new TokenServicesImpl(redisService);
 export const cloudinaryService: ICloudinaryService = new CloudinaryService();
 export const s3BucketService: IS3Service = new S3Service();
+export const paymentGatewayService = new RazorpayGatewayImpl();

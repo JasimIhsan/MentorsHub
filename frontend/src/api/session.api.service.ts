@@ -52,3 +52,28 @@ export const fetchSessionHistoryAPI = async (mentorId: string, status: string, p
 		throw new Error(error.response?.data?.message || "Failed to load session history.");
 	}
 };
+
+export const createRazorpayOrderAPI = async (sessionId: string, userId: string) => {
+	try {
+		const res = await axiosInstance.post("/user/sessions/create-payment-order", {
+			sessionId,
+			userId,
+		});
+		console.log(`response : `, res);
+		return res.data.order;
+	} catch (error: any) {
+		console.log(`Error from createRazorpayOrderAPI : `, error);
+		throw new Error(error.response?.data?.message || "Failed to create Razorpay order.");
+	}
+};
+
+export const verifySessionPaymentAPI = async (sessionId: string, userId: string) => {
+	try {
+		const res = await axiosInstance.get("/user/sessions/verify-payment", {
+			params: { sessionId, userId },
+		});
+		return res.data;
+	} catch (error: any) {
+		throw new Error(error.response?.data?.message || "Failed to verify session payment.");
+	}
+};

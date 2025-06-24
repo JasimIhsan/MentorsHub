@@ -237,7 +237,7 @@ export function WalletPage() {
 					email: user?.email || "",
 				},
 				theme: {
-					color: "#3399cc",
+					color: "#112d4e",
 				},
 			};
 

@@ -18,6 +18,7 @@ import { ISessionUserDTO } from "@/interfaces/ISessionDTO";
 import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
 import { formatDate, formatTime } from "@/utility/time-data-formater";
 import { isSessionExpired } from "@/utility/is-session-expired";
+import { createRazorpayOrderAPI } from "@/api/session.api.service";
 
 declare global {
 	interface Window {
@@ -320,21 +321,36 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 			toast.error("Payment gateway not loaded. Please try again later.");
 			return;
 		}
-
 		setIsPaying(true);
+
+		let order;
+		try {
+			order = await createRazorpayOrderAPI(session.id, user?.id as string);
+			if (!order || !order.id || !order.amount) {
+				throw new Error("Invalid order details received from server.");
+			}
+		} catch (error: any) {
+			if (error instanceof Error) toast.error(error.message);
+			setIsPaying(false);
+			return;
+		}
+
 		try {
 			const options = {
 				key: import.meta.env.VITE_RAZORPAY_KEY,
-				amount: session.totalAmount ? session.totalAmount * 100 : 0,
+				amount: order.amount,
 				currency: "INR",
 				name: "Mentor Session Payment",
 				description: `Payment for session with ${session.mentor.firstName} ${session.mentor.lastName}`,
+				order_id: order.id,
 				handler: async function (response: any) {
 					try {
 						const paymentResponse = await axiosInstance.post("/user/sessions/pay", {
 							sessionId: session.id,
 							userId: user?.id,
 							paymentId: response.razorpay_payment_id,
+							orderId: response.razorpay_order_id,
+							signature: response.razorpay_signature,
 							paymentStatus: "completed",
 							status: "upcoming",
 						});
@@ -374,7 +390,7 @@ function SessionCard({ session, setShowPaymentModal, setPaidSession, isRazorpayL
 			});
 			rzp.open();
 		} catch (error) {
-			toast.error("Failed to initialize payment. Please try again.");
+			if (error instanceof Error) toast.error(error.message);
 			setIsPaying(false);
 		}
 	};

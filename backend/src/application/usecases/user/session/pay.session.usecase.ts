@@ -8,8 +8,11 @@ export class PaySessionUseCase implements IPaySessionUseCase {
 	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void> {
 		// 1. Fetch the session details
 		const session = await this.sessionRepo.getSessionById(sessionId);
+		console.log("session in pay session usecase: ", session);
 		if (!session) throw new Error("Session not found");
-		if (session.getStatus() === "completed") throw new Error("Session already booked");
+		const user = session.getParticipants().find((p) => p.userId === userId);
+		if (!user) throw new Error("Unauthorized: User is not a participant in this session");
+		if (user.paymentStatus === "completed") throw new Error("Session already booked");
 
 		const sessionFee = session.getfee();
 		const mentorId = session.getMentorId();
@@ -17,12 +20,6 @@ export class PaySessionUseCase implements IPaySessionUseCase {
 		const platformCommission = sessionFee * 0.15; // round to nearest int
 		const totalPlatformFee = platformFeeFixed + platformCommission;
 		const mentorEarning = sessionFee - totalPlatformFee;
-
-		// console.log("mentorId: ", mentorId);
-		// console.log(`\n\nsessionFee : `, sessionFee);
-		// console.log(`\n\nmentorEarning : `, mentorEarning);
-		// console.log(`\n\nplatformCommission : `, platformCommission);
-		// console.log(`\n\nTotalplatformFee : `, totalPlatformFee);
 
 		// 2. Check user wallet balance
 		const userWallet = await this.walletRepo.findWalletByUserId(userId);

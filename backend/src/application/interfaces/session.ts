@@ -25,3 +25,11 @@ export interface IStartSessionUseCase {
 export interface ICancelSessionUseCase {
 	execute(sessionId: string , userId: string): Promise<SessionEntity>;
 }
+
+export interface IVerifySessionPaymentUseCase {
+	execute(sessionId: string, userId: string): Promise<boolean>;
+}
+
+export interface ICreateSessionPaymentOrderUseCase {
+	execute(sessionId: string, userId: string): Promise<string>;
+}
