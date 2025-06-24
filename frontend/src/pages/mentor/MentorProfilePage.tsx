@@ -17,34 +17,43 @@ import { RootState } from "@/store/store";
 import { useMentor } from "@/hooks/useMentor";
 import { toast } from "sonner";
 import { extractDocumentName } from "@/utility/extractDocumentName";
-import { fetchDocumentUrlsAPI } from "@/api/admin/common/fetchDocuments";
+import { downloadFromS3Key } from "@/utility/download.s3.documents";
 
 export function MentorProfilePage() {
 	const [isEditing, setIsEditing] = useState(false);
 	const [newSkill, setNewSkill] = useState("");
 	const user = useSelector((state: RootState) => state.userAuth.user);
 	const { error, loading, mentor } = useMentor(user?.id as string);
-	const [documentUrls, setDocumentUrls] = useState<string[]>([]);
+	// const [documentUrls, setDocumentUrls] = useState<string[]>([]);
 
 	const handleAddSkill = () => {};
 
 	const handleRemoveSkill = (_skill: string) => {};
 
-	useEffect(() => {
-		if (!user?.id) return;
-		const fetchDocumentUrls = async () => {
-			try {
-				const response = await fetchDocumentUrlsAPI(user?.id as string);
-				if (response.success) {
-					setDocumentUrls(response.documents);
-				}
-			} catch (error) {
-				console.error("Error fetching document URLs:", error);
-				if (error instanceof Error) toast.error(error.message);
-			}
-		};
-		fetchDocumentUrls();
-	}, [user?.id]);
+	// useEffect(() => {
+	// 	if (!user?.id) return;
+	// 	const fetchDocumentUrls = async () => {
+	// 		try {
+	// 			const response = await fetchDocumentUrlsAPI(user?.id as string);
+	// 			if (response.success) {
+	// 				setDocumentUrls(response.documents);
+	// 			}
+	// 		} catch (error) {
+	// 			console.error("Error fetching document URLs:", error);
+	// 			if (error instanceof Error) toast.error(error.message);
+	// 		}
+	// 	};
+	// 	fetchDocumentUrls();
+	// }, [user?.id]);
+
+	const handleDownload = async (key: string) => {
+		try {
+			await downloadFromS3Key(key);
+		} catch (error) {
+			console.error("Download failed:", error);
+			toast.error("Unable to download the document.");
+		}
+	};
 
 	useEffect(() => {
 		if (error) {
@@ -132,9 +141,9 @@ export function MentorProfilePage() {
 												<SelectItem value="away">Away</SelectItem>
 											</SelectContent>
 										</Select>
-									// ) : mentor.availability > 0 ? (
-									// 	"Available for Sessions"
 									) : (
+										// ) : mentor.availability > 0 ? (
+										// 	"Available for Sessions"
 										"Currently Busy"
 									)}
 								</Badge>
@@ -490,15 +499,13 @@ export function MentorProfilePage() {
 								</div> */}
 
 								<div className="grid gap-4">
-									{documentUrls.length > 0 ? (
-										documentUrls.map((url, i) => (
+									{mentor.documents.length > 0 ? (
+										mentor.documents.map((url, i) => (
 											<div key={i} className="flex items-center justify-between">
 												<p className="text-sm">{extractDocumentName(url)}</p>
-												<Button variant="outline" size="sm" asChild>
-													<a href={url} download target="_blank" rel="noopener noreferrer">
-														<Download className="mr-2 h-4 w-4" />
-														Download
-													</a>
+												<Button variant="outline" size="sm" onClick={() => handleDownload(url)}>
+													<Download className="mr-2 h-4 w-4" />
+													Download
 												</Button>
 											</div>
 										))

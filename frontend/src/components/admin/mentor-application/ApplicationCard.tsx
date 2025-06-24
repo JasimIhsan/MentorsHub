@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,11 +8,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { BriefcaseBusiness, Calendar, Check, Download, Eye, GraduationCap, X } from "lucide-react";
 import { toast } from "sonner";
-import {Alert} from "@/components/custom/alert";
+import { Alert } from "@/components/custom/alert";
 import StatusBadge from "./StatusBadge";
-import { fetchDocumentUrlsAPI } from "@/api/admin/common/fetchDocuments";
 import { extractDocumentName } from "@/utility/extractDocumentName";
 import { getUniqueKey, renderItem } from "@/utility/uniqueKey";
+import { downloadFromS3Key } from "@/utility/download.s3.documents";
 
 interface ApplicationCardProps {
 	application: IMentorDTO;
@@ -20,26 +20,35 @@ interface ApplicationCardProps {
 	onViewDetails: (mentor: IMentorDTO) => void;
 }
 
-export default function ApplicationCard({ application, updateMentorStatus , onViewDetails}: ApplicationCardProps) {
+export default function ApplicationCard({ application, updateMentorStatus, onViewDetails }: ApplicationCardProps) {
 	const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
 	const [isDocumentsDialogOpen, setIsDocumentsDialogOpen] = useState(false);
 	const [rejectionReason, setRejectionReason] = useState("");
-	const [documentUrls, setDocumentUrls] = useState<string[]>([]);
-	const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
+	// const [documentUrls, setDocumentUrls] = useState<string[]>([]);
+	// const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
 
-	const fetchDocumentUrls = async () => {
-		setIsLoadingDocuments(true);
+	// const fetchDocumentUrls = async () => {
+	// 	setIsLoadingDocuments(true);
+	// 	try {
+	// 		const response = await fetchDocumentUrlsAPI(application.userId);
+	// 		if (response.success) {
+	// 			setDocumentUrls(response.documents);
+	// 			toast.success("Documents fetched successfully!");
+	// 		}
+	// 	} catch (error) {
+	// 		console.error("Error fetching document URLs:", error);
+	// 		if (error instanceof Error) toast.error(error.message);
+	// 	} finally {
+	// 		setIsLoadingDocuments(false);
+	// 	}
+	// };
+
+	const handleDownload = async (key: string) => {
 		try {
-			const response = await fetchDocumentUrlsAPI(application.userId);
-			if (response.success) {
-				setDocumentUrls(response.documents);
-				toast.success("Documents fetched successfully!");
-			}
+			await downloadFromS3Key(key);
 		} catch (error) {
-			console.error("Error fetching document URLs:", error);
-			if (error instanceof Error) toast.error(error.message);
-		} finally {
-			setIsLoadingDocuments(false);
+			console.error("Download failed:", error);
+			toast.error("Unable to download the document.");
 		}
 	};
 
@@ -53,11 +62,9 @@ export default function ApplicationCard({ application, updateMentorStatus , onVi
 		setRejectionReason("");
 	};
 
-	useEffect(() => {
-		if (isDocumentsDialogOpen) {
-			fetchDocumentUrls();
-		}
-	}, [isDocumentsDialogOpen]);
+	// useEffect(() => {
+	// 	if (isDocumentsDialogOpen) fetchDocumentUrls();
+	// }, [isDocumentsDialogOpen]);
 
 	return (
 		<Card className="overflow-hidden">
@@ -65,6 +72,7 @@ export default function ApplicationCard({ application, updateMentorStatus , onVi
 				<div className="flex flex-col md:flex-row">
 					<div className="px-6 flex-1">
 						<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+							{/* ── Mentor info ─────────────────────── */}
 							<div className="flex items-start gap-4">
 								<Avatar className="h-12 w-12">
 									<AvatarImage src={application.avatar || undefined} />
@@ -75,6 +83,8 @@ export default function ApplicationCard({ application, updateMentorStatus , onVi
 										{application.firstName} {application.lastName}
 									</h3>
 									<p className="text-muted-foreground">{application.professionalTitle}</p>
+
+									{/* meta */}
 									<div className="mt-2 flex flex-wrap items-center gap-4">
 										<div className="flex items-center gap-1">
 											<Calendar className="h-4 w-4 text-muted-foreground" />
@@ -91,23 +101,29 @@ export default function ApplicationCard({ application, updateMentorStatus , onVi
 											</div>
 										)}
 									</div>
+
+									{/* skills */}
 									<div className="mt-2 flex flex-wrap gap-2">
-										{application.skills &&
-											application.skills.map((skill, i) => (
-												<Badge key={getUniqueKey(skill, i)} variant="default">
-													{renderItem(skill)}
-												</Badge>
-											))}
+										{application.skills?.map((skill, i) => (
+											<Badge key={getUniqueKey(skill, i)} variant="default">
+												{renderItem(skill)}
+											</Badge>
+										))}
 									</div>
 								</div>
 							</div>
+
+							{/* ── Actions & Status ────────────────── */}
 							<div className="flex flex-col gap-2">
 								<StatusBadge status={application.mentorRequestStatus} />
 								<div className="flex gap-2">
+									{/* View profile */}
 									<Button variant="outline" size="sm" onClick={() => onViewDetails(application)}>
 										<Eye className="mr-2 h-4 w-4" />
 										View Profile
 									</Button>
+
+									{/* Documents dialog */}
 									<Dialog open={isDocumentsDialogOpen} onOpenChange={setIsDocumentsDialogOpen}>
 										<DialogTrigger asChild>
 											<Button variant="outline" size="sm">
@@ -122,18 +138,15 @@ export default function ApplicationCard({ application, updateMentorStatus , onVi
 													Documents submitted by {application.firstName} {application.lastName}
 												</DialogDescription>
 											</DialogHeader>
+
 											<div className="grid gap-4">
-												{isLoadingDocuments ? (
-													<p className="text-sm text-muted-foreground">Loading documents...</p>
-												) : documentUrls.length > 0 ? (
-													documentUrls.map((url, i) => (
+												{application.documents.length > 0 ? (
+													application.documents.map((url, i) => (
 														<div key={getUniqueKey(url, i)} className="flex items-center justify-between">
 															<p className="text-sm">{extractDocumentName(url)}</p>
-															<Button variant="outline" size="sm" asChild>
-																<a href={url} download target="_blank" rel="noopener noreferrer">
-																	<Download className="mr-2 h-4 w-4" />
-																	Download
-																</a>
+															<Button variant="outline" size="sm" onClick={() => handleDownload(url)}>
+																<Download className="mr-2 h-4 w-4" />
+																Download
 															</Button>
 														</div>
 													))
@@ -141,6 +154,7 @@ export default function ApplicationCard({ application, updateMentorStatus , onVi
 													<p className="text-sm text-muted-foreground">No documents available</p>
 												)}
 											</div>
+
 											<DialogFooter>
 												<Button variant="outline" onClick={() => setIsDocumentsDialogOpen(false)}>
 													Close
@@ -148,8 +162,11 @@ export default function ApplicationCard({ application, updateMentorStatus , onVi
 											</DialogFooter>
 										</DialogContent>
 									</Dialog>
+
+									{/* Approve / Reject (only if pending) */}
 									{application.mentorRequestStatus === "pending" && (
 										<>
+											{/* Approve */}
 											<Alert
 												triggerElement={
 													<Button variant="default" size="sm">
@@ -162,6 +179,8 @@ export default function ApplicationCard({ application, updateMentorStatus , onVi
 												actionText="Confirm"
 												onConfirm={handleApprove}
 											/>
+
+											{/* Reject */}
 											<Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
 												<DialogTrigger asChild>
 													<Button variant="destructive" size="sm">
@@ -173,10 +192,13 @@ export default function ApplicationCard({ application, updateMentorStatus , onVi
 													<DialogHeader>
 														<DialogTitle>Reject Mentor Application</DialogTitle>
 														<DialogDescription>
-															Please provide a reason for rejecting {application.firstName} {application.lastName}'s application (optional).
+															Please provide a reason for rejecting {application.firstName} {application.lastName}
+															&apos;s application (optional).
 														</DialogDescription>
 													</DialogHeader>
+
 													<Textarea placeholder="Enter rejection reason..." value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} className="mt-4" />
+
 													<DialogFooter>
 														<Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>
 															Cancel
