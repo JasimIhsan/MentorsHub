@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, Check, X } from "lucide-react";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
-import { formatTime } from "@/utility/time-data-formater";
+import { formatTime } from "@/utility/time-data-formatter";
 
 interface RequestCardProps {
 	request: ISessionMentorDTO;

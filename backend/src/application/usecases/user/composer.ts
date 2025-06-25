@@ -16,7 +16,7 @@ import { BecomeMentorUseCase } from "./user-profile/become.mentor.application.us
 import { GetUserProfileUseCase } from "./user-profile/get.user.profile.usecase";
 import { RequestSessionUseCase } from "./session/request.session.usecase";
 import { GetSessionsByUserUseCase } from "./session/get.sessions.by.user.usecase";
-import { PaySessionUseCase } from "./session/pay.session.usecase";
+import { PaySessionWithWalletUseCase } from "./session/pay.session.with.wallet.usecase";
 import { UploadMentorDocumentUseCase } from "../documents/upload.mentor.document.usecase";
 import { ReApplyMentorApplicationUseCase } from "./user-profile/re.apply.mentor.application.usecase";
 import { CancelSessionUseCase } from "./session/cancel.session.usecase";
@@ -24,6 +24,7 @@ import { get } from "axios";
 import { getAvailabilityUsecase } from "../mentors/composer";
 import { VerifySessionPaymentUseCase } from "./session/verify.session.payment.usecase";
 import { CreateSessionPaymentOrderUseCase } from "./session/create.session.payment.order.usecase";
+import { PaySessionWithGatewayUseCase } from "./session/pay.session.with.gateway.usecase";
 
 // Initialize UseCases
 export const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
@@ -45,7 +46,8 @@ export const getUserProfileUsecase = new GetUserProfileUseCase(userRepository);
 export const requestSessionUsecase = new RequestSessionUseCase(sessionRepository, mentorRepository, getAvailabilityUsecase);
 export const getSessionsByUserUsecase = new GetSessionsByUserUseCase(sessionRepository);
 export const getSessionByMentorUsecase = new GetSessionsByUserUseCase(sessionRepository);
-export const paySessionUsecase = new PaySessionUseCase(sessionRepository, walletRepository);
+export const paySessionWithWalletUseCase = new PaySessionWithWalletUseCase(sessionRepository, walletRepository);
+export const paySessionWithGatewayUsecase = new PaySessionWithGatewayUseCase(sessionRepository, walletRepository);
 export const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository);
 export const verifySessionPaymentUseCase = new VerifySessionPaymentUseCase(sessionRepository);
 export const createSessionPaymentOrderUsecase = new CreateSessionPaymentOrderUseCase(sessionRepository, paymentGatewayService);

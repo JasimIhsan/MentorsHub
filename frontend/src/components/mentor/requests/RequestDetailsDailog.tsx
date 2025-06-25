@@ -3,7 +3,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
-import { formatDate, formatTime } from "@/utility/time-data-formater";
+import { formatDate, formatTime } from "@/utility/time-data-formatter";
 
 interface RequestDetailsDialogProps {
 	selectedRequest: ISessionMentorDTO | null;

@@ -23,11 +23,12 @@ import {
 	getUserProfileUsecase,
 	requestSessionUsecase,
 	getSessionsByUserUsecase,
-	paySessionUsecase,
+	paySessionWithWalletUseCase,
 	reApplyMentorApplicationUseCase,
 	cancelSessionUseCase,
 	verifySessionPaymentUseCase,
 	createSessionPaymentOrderUsecase,
+	paySessionWithGatewayUsecase,
 } from "../../../application/usecases/user/composer";
 import { UpdateUserProfileController } from "./user-profile/update.user.profile.controller";
 import { cloudinaryService } from "../../../infrastructure/composer";
@@ -36,13 +37,14 @@ import { BecomeMentorController } from "./user-profile/become.mentor.application
 import { GetUserProfileController } from "./user-profile/get.user.profile.controller";
 import { RequestSessionController } from "./session/request.session.controller";
 import { GetSessionByUserController } from "./session/get.session.by.user.controller";
-import { PaySessionController } from "./session/pay.session.usecase.controller";
+import { PaySessionWithWalletController } from "./session/pay.session.usecase.controller";
 import { GetMentorAvailabilityController } from "./session/get.mentor.availability.controller";
 import { getAvailabilityUsecase } from "../../../application/usecases/mentors/composer";
 import { ReApplyMentorApplicationController } from "./user-profile/update.mentor.profile.controller";
 import { CancelSessionController } from "./session/cancel.session.controller";
 import { VerifySessionPaymentController } from "./session/verify.session.payment.controller";
 import { CreateSessionPaymentOrderController } from "./session/create.session.payment.order.controller";
+import { PaySessionWithGatewayController } from "./session/pay.session.with.gateway.controller";
 
 export const signupController = new SignupController(signupUseCase);
 export const signinController = new SigninController(signinUseCase);
@@ -60,7 +62,8 @@ export const reApplyMentorApplicationController = new ReApplyMentorApplicationCo
 export const getUserProfileController = new GetUserProfileController(getUserProfileUsecase);
 export const createSessionController = new RequestSessionController(requestSessionUsecase);
 export const getSessionsByUserController = new GetSessionByUserController(getSessionsByUserUsecase);
-export const paySessionController = new PaySessionController(paySessionUsecase);
+export const paySessionWithWalletController = new PaySessionWithWalletController(paySessionWithWalletUseCase);
+export const paySessionWithGatewayController = new PaySessionWithGatewayController(paySessionWithGatewayUsecase)
 export const getAvailabilityController = new GetMentorAvailabilityController(getAvailabilityUsecase);
 export const cancelSessionController = new CancelSessionController(cancelSessionUseCase);
 export const verifySessionPaymentController = new VerifySessionPaymentController(verifySessionPaymentUseCase);

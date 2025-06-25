@@ -1,15 +1,25 @@
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
-import { IPaySessionUseCase } from "../../../interfaces/session";
+import { IPaySessionWithWalletUseCase } from "../../../interfaces/session";
 
-export class PaySessionUseCase implements IPaySessionUseCase {
+export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase {
 	constructor(private sessionRepo: ISessionRepository, private walletRepo: IWalletRepository) {}
 
 	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void> {
 		// 1. Fetch the session details
 		const session = await this.sessionRepo.getSessionById(sessionId);
-		console.log("session in pay session usecase: ", session);
 		if (!session) throw new Error("Session not found");
+
+		// Check if session is expired
+		const sessionDate = new Date(session.getDate());
+		const [hour, minute] = session.getTime().split(":").map(Number);
+		sessionDate.setHours(hour);
+		sessionDate.setMinutes(minute);
+
+		if (sessionDate.getTime() < Date.now()) {
+			throw new Error("Session is already expired. You cannot make payment.");
+		}
+
 		const user = session.getParticipants().find((p) => p.userId === userId);
 		if (!user) throw new Error("Unauthorized: User is not a participant in this session");
 		if (user.paymentStatus === "completed") throw new Error("Session already booked");
@@ -17,7 +27,7 @@ export class PaySessionUseCase implements IPaySessionUseCase {
 		const sessionFee = session.getfee();
 		const mentorId = session.getMentorId();
 		const platformFeeFixed = 40;
-		const platformCommission = sessionFee * 0.15; // round to nearest int
+		const platformCommission = sessionFee * 0.15;
 		const totalPlatformFee = platformFeeFixed + platformCommission;
 		const mentorEarning = sessionFee - totalPlatformFee;
 
@@ -28,16 +38,13 @@ export class PaySessionUseCase implements IPaySessionUseCase {
 		}
 
 		// 3. Debit user wallet
-		const usewalet = await this.walletRepo.updateBalance(userId, sessionFee, "debit");
-		console.log("usewalet: ", usewalet);
+		await this.walletRepo.updateBalance(userId, sessionFee, "debit");
 
 		// 4. Credit mentor wallet
-		const mentorWallet = await this.walletRepo.updateBalance(mentorId, mentorEarning, "credit");
-		console.log("mentorWallet: ", mentorWallet);
+		await this.walletRepo.updateBalance(mentorId, mentorEarning, "credit");
 
 		const platformWallet = await this.walletRepo.platformWallet();
-		const adminWallet = await this.walletRepo.updateBalance(platformWallet.getUserId(), totalPlatformFee, "credit", "admin");
-		console.log("adminWallet: ", adminWallet);
+		await this.walletRepo.updateBalance(platformWallet.getUserId(), totalPlatformFee, "credit", "admin");
 
 		// 6. Create transactions
 
