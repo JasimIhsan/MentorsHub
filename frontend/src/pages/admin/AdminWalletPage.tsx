@@ -14,7 +14,7 @@ import { Filter, CalendarIcon, Wallet, ArrowDownLeft, ArrowUpRight } from "lucid
 import { format } from "date-fns";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { formatDate } from "@/utility/time-data-formater";
+import { formatDate } from "@/utility/time-data-formatter";
 import { fetchPlatformTransactionsAPI, fetchPlatformWalletDataAPI, withdrawPlatformWalletAPI } from "@/api/wallet.api.service";
 
 // Define admin transaction interface

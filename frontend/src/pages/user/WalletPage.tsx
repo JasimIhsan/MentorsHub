@@ -15,7 +15,7 @@ import { format } from "date-fns";
 import { fetchTransactionsAPI, fetchWalletDataAPI, topupWalletAPI, withdrawWalletAPI } from "@/api/wallet.api.service";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { formatDate } from "@/utility/time-data-formater";
+import { formatDate } from "@/utility/time-data-formatter";
 import { useMotionValue } from "framer-motion";
 import { toast } from "sonner";
 

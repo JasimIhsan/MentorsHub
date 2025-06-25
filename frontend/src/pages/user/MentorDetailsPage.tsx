@@ -11,7 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useMentor } from "@/hooks/useMentor";
 import { motion } from "framer-motion";
 import { WeekDay } from "@/interfaces/IMentorDTO";
-import { formatTime } from "@/utility/time-data-formater";
+import { formatTime } from "@/utility/time-data-formatter";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";

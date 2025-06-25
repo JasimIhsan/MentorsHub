@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { formatTime } from "@/utility/time-data-formater";
+import { formatTime } from "@/utility/time-data-formatter";
 import { MentorApplicationFormData, WeekDay } from "@/types/mentor.application";
 
 interface AvailabilityStepProps {

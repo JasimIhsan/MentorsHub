@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Clock, Video, IndianRupee } from "lucide-react";
 import { ISessionUserDTO, ISessionMentorDTO } from "@/interfaces/ISessionDTO";
-import { formatDate, formatTime } from "@/utility/time-data-formater";
+import { formatDate, formatTime } from "@/utility/time-data-formatter";
 
 interface SessionDetailsModalProps {
 	session: ISessionUserDTO | ISessionMentorDTO;

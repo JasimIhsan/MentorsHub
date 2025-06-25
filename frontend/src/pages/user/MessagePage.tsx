@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSocket } from "@/context/SocketContext";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { formatTime } from "@/utility/time-data-formater";
+import { formatTime } from "@/utility/time-data-formatter";
 import { useDebounce } from "@/hooks/useDebounce";
 import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import { fetchAllApprovedMentors } from "@/api/mentors.api.service";

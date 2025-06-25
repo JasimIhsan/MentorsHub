@@ -10,8 +10,18 @@ export class CreateSessionPaymentOrderUseCase implements ICreateSessionPaymentOr
 		const session = await this.sessionRepo.getSessionById(sessionId);
 		if (!session) throw new Error("Session not found");
 
+		// Check if session is expired
+		const sessionDate = new Date(session.getDate());
+		const [hour, minute] = session.getTime().split(":").map(Number);
+		sessionDate.setHours(hour);
+		sessionDate.setMinutes(minute);
+
+		if (sessionDate.getTime() < Date.now()) {
+			throw new Error("Session is already expired. You cannot make payment.");
+		}
+
 		const participant = session.getParticipants().find((p) => p.userId === userId);
-		if (!participant) throw new Error("Unauthorized");
+		if (!participant) throw new Error("Unauthorized: User is not a participant in this session");
 		if (participant.paymentStatus === "completed") throw new Error("Session already paid");
 
 		const amount = session.getfee() * 100;

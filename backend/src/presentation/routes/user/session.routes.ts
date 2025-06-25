@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { cancelSessionController, createSessionController, createSessionPaymentOrderController, getAvailabilityController, getSessionsByUserController, paySessionController, verifySessionPaymentController } from "../../controllers/user/composer";
+import { cancelSessionController, createSessionController, createSessionPaymentOrderController, getAvailabilityController, getSessionsByUserController, paySessionWithGatewayController, paySessionWithWalletController, verifySessionPaymentController } from "../../controllers/user/composer";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { SessionModel } from "../../../infrastructure/database/models/session/session.model";
 import { requireRole } from "../../middlewares/require.role.middleware";
@@ -13,7 +13,9 @@ sessionRouter.get("/verify-payment", verifyAccessToken, requireRole("mentor", "u
 
 sessionRouter.post("/create-payment-order", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => createSessionPaymentOrderController.handle(req, res, next));
 
-sessionRouter.post("/pay", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => paySessionController.handle(req, res, next));
+sessionRouter.post("/pay/wallet", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => paySessionWithWalletController.handle(req, res, next));
+
+sessionRouter.post("/pay/gateway", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => paySessionWithGatewayController.handle(req, res, next));
 
 sessionRouter.put("/cancel-session", verifyAccessToken, requireRole("user", "mentor"), (req, res, next) => cancelSessionController.handle(req, res, next));
 

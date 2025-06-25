@@ -14,7 +14,11 @@ export interface IUpdateSessionStatusUseCase {
 	execute(sessionId: string, status: string, rejectReason?: string): Promise<void>;
 }
 
-export interface IPaySessionUseCase {
+export interface IPaySessionWithWalletUseCase {
+	execute(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void>;
+}
+
+export interface IPaySessionWithGatewayUseCase {
 	execute(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void>;
 }
 
@@ -23,7 +27,7 @@ export interface IStartSessionUseCase {
 }
 
 export interface ICancelSessionUseCase {
-	execute(sessionId: string , userId: string): Promise<SessionEntity>;
+	execute(sessionId: string, userId: string): Promise<SessionEntity>;
 }
 
 export interface IVerifySessionPaymentUseCase {

@@ -5,7 +5,7 @@ import { CalendarDays, Clock, Video, Users, MessageSquare, IndianRupee, FileText
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
-import { formatTime } from "@/utility/time-data-formater";
+import { formatTime } from "@/utility/time-data-formatter";
 
 interface SessionCardProps {
 	session: ISessionMentorDTO;
