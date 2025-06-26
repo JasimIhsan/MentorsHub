@@ -29,6 +29,10 @@ import { MessageRepositoryImpl } from "./database/implementation/message.reposit
 import { IChatRepository } from "../domain/repositories/chat.repository";
 import { ChatRepositoryImpl } from "./database/implementation/chat.repository.impl";
 import { RazorpayGatewayImpl } from "./services/payment/razorpay.gateway.impl";
+import { GamificationTaskRepositoryImpl } from "./database/implementation/gamification/gamification.task.repository.impl";
+import { UserTaskProgressEntity } from "../domain/entities/gamification/user.task.progress.entity";
+import { UserTaskProgressRepositoryImpl } from "./database/implementation/gamification/user.task.progress.repository.impl";
+import { ActionTypeRepositoryImpl } from "./database/implementation/gamification/action.type.repository.imp";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -41,6 +45,9 @@ export const reviewRepository: IReviewRepository = new ReviewRepositoryImpl();
 export const walletRepository: IWalletRepository = new WalletRepositoryImpl();
 export const messageRepository: IMessageRepository = new MessageRepositoryImpl();
 export const chatRepository: IChatRepository = new ChatRepositoryImpl();
+export const gamificationTaskRepository = new GamificationTaskRepositoryImpl();
+export const userTaskProgressRepository = new UserTaskProgressRepositoryImpl();
+export const actionTypeRepository = new ActionTypeRepositoryImpl();
 
 // Initialize services implementation
 export const emailService: IEmailService = new EmailServiceImpl();

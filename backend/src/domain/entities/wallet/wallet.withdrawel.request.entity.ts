@@ -1,5 +1,5 @@
 import { ObjectId } from "mongoose";
-import { IWithdrawalRequestDocument } from "../../infrastructure/database/models/wallet/wallet.withdrawel.request.model";
+import { IWithdrawalRequestDocument } from "../../../infrastructure/database/models/wallet/wallet.withdrawel.request.model";
 
 export class WithdrawalRequestEntity {
 	private _id?: ObjectId;

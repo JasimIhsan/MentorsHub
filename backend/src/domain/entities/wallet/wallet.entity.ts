@@ -1,7 +1,7 @@
 // domain/entities/wallet.entity.ts
 
 import { ObjectId } from "mongoose";
-import { IWalletDocument } from "../../infrastructure/database/models/wallet/wallet.model";
+import { IWalletDocument } from "../../../infrastructure/database/models/wallet/wallet.model";
 
 export class WalletEntity {
 	private _id?: ObjectId;

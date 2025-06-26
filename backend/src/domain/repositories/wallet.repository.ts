@@ -1,7 +1,7 @@
 import { IWalletTransactionDTO } from "../../application/dtos/wallet.transation.dto";
-import { WalletEntity } from "../entities/wallet.entity";
-import { WalletTransactionEntity } from "../entities/wallet.transaction.entity";
-import { WithdrawalRequestEntity } from "../entities/wallet.withdrawel.request.entity";
+import { WalletEntity } from "../entities/wallet/wallet.entity";
+import { WalletTransactionEntity } from "../entities/wallet/wallet.transaction.entity";
+import { WithdrawalRequestEntity } from "../entities/wallet/wallet.withdrawel.request.entity";
 
 export interface IWalletRepository {
 	findWalletByUserId(userId: string): Promise<WalletEntity | null>;

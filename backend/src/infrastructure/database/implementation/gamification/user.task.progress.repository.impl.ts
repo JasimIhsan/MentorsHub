@@ -1,6 +1,6 @@
-import { UserTaskProgressEntity } from "../../../domain/entities/user.task.progress.entity";
-import { IUserTaskProgressRepository } from "../../../domain/repositories/user.task.progress.repository";
-import { UserTaskProgressModel } from "../models/gamification/user.task.progress.model";
+import { UserTaskProgressEntity } from "../../../../domain/entities/gamification/user.task.progress.entity";
+import { IUserTaskProgressRepository } from "../../../../domain/repositories/gamification/user.task.progress.repository";
+import { UserTaskProgressModel } from "../../models/gamification/user.task.progress.model";
 
 
 export class UserTaskProgressRepositoryImpl implements IUserTaskProgressRepository {

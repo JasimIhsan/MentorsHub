@@ -1,21 +1,19 @@
-export type GamificationTaskType = "COMPLETE_SESSION" | "GIVE_FEEDBACK";
-
 export interface IGamificationTask {
-	id: string;
+	id?: string;
 	title: string;
 	xpReward: number;
 	targetCount: number;
-	actionType: GamificationTaskType;
+	actionType: string;
 }
 
 export class GamificationTaskEntity {
-	private _id: string;
+	private _id?: string;
 	private _title: string;
 	private _xpReward: number;
 	private _targetCount: number;
-	private _actionType: GamificationTaskType;
+	private _actionType: string;
 
-	constructor(id: string, title: string, xpReward: number, targetCount: number, actionType: GamificationTaskType) {
+	constructor(id: string | undefined, title: string, xpReward: number, targetCount: number, actionType: string) {
 		this._id = id;
 		this._title = title;
 		this._xpReward = xpReward;
@@ -24,8 +22,8 @@ export class GamificationTaskEntity {
 	}
 
 	// Getters
-	get id(): string {
-		return this._id;
+	get id(): string | null {
+		return this._id ?? null;
 	}
 
 	get title(): string {
@@ -40,7 +38,7 @@ export class GamificationTaskEntity {
 		return this._targetCount;
 	}
 
-	get actionType(): GamificationTaskType {
+	get actionType(): string {
 		return this._actionType;
 	}
 
@@ -57,7 +55,7 @@ export class GamificationTaskEntity {
 		this._targetCount = targetCount;
 	}
 
-	set actionType(actionType: GamificationTaskType) {
+	set actionType(actionType: string) {
 		this._actionType = actionType;
 	}
 }

@@ -8,6 +8,7 @@ import AdminUsersTab from "@/pages/admin/AdminUsersTab";
 import { AdminAuthGuard } from "./AdminAuthGuard";
 import { AdminMentorApplicationsPage } from "@/pages/admin/AdminMentorRequestApplication";
 import { AdminWalletPage } from "@/pages/admin/AdminWalletPage";
+import AdminGamificationPage from "@/pages/admin/AdminGamificationPage";
 
 const AdminRoutes = () => {
 	return (
@@ -54,6 +55,15 @@ const AdminRoutes = () => {
 					element={
 						<AdminProtectedRoute>
 							<AdminWalletPage />
+						</AdminProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="gamification"
+					element={
+						<AdminProtectedRoute>
+							<AdminGamificationPage />
 						</AdminProtectedRoute>
 					}
 				/>
