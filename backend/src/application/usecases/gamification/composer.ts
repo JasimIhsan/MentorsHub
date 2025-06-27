@@ -5,6 +5,8 @@ import { GetAllGamificationTasksUseCase } from "./get.all.gamification.task.usec
 import { DeleteGamificationTaskUseCase } from "./delete.gamification.task.usecase";
 import { EditGamificationTaskUseCase } from "./edit.gamification.task.usecase";
 import { GetAllListedGamificationTasksUseCase } from "./get.all.listed.gamification.task.usecase";
+import { GetUserProgressUseCase } from "./get.user.progress.usecase";
+import { CreateUserProgressUseCase } from "./create.new.user.progress.usecase";
 
 export const createGamificationTaskUseCase = new CreateGamificationTaskUseCase(gamificationTaskRepository, actionTypeRepository);
 export const getAllGamificationTasksUseCase = new GetAllGamificationTasksUseCase(gamificationTaskRepository);
@@ -12,3 +14,5 @@ export const updateGamificationTaskStatusUseCase = new UpdateGamificationTaskSta
 export const deleteGamificationTaskUseCase = new DeleteGamificationTaskUseCase(gamificationTaskRepository);
 export const editGamificationTaskUseCase = new EditGamificationTaskUseCase(gamificationTaskRepository, actionTypeRepository);
 export const getAllListedGamificationTasksUseCase = new GetAllListedGamificationTasksUseCase(gamificationTaskRepository, userTaskprogressRepository);
+export const getUserProgressUseCase = new GetUserProgressUseCase(userProgressRepository);
+export const createUserProgressUseCase = new CreateUserProgressUseCase(userProgressRepository);

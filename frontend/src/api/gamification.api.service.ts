@@ -129,3 +129,13 @@ export const fetchListedGamificationTasks = async (userId: string, searchTerm: s
 		throw new Error(error.response?.data?.message || "Failed to fetch tasks");
 	}
 };
+
+export const fetchUserProgressAPI = async (userId: string) => {
+	try {
+		const response = await axiosInstance.get(`/user/gamification/progress/${userId}`);
+		return response.data;
+	} catch (error: any) {
+		console.error("Error fetching user progress:", error);
+		throw new Error(error.response?.data?.message || "Failed to fetch user progress");
+	}
+};

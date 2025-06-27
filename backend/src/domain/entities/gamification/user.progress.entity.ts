@@ -7,7 +7,7 @@ export interface IUserProgress {
 }
 
 export class UserProgressEntity {
-	constructor(private _userId: string, private _totalXP: number = 0, private _level: number = 1, private _tasksCompleted: number = 0, private _xpToNextLevel: number = 100) {}
+	constructor(private _userId: string, private _totalXP: number = 0, private _level: number = 1, private _tasksCompleted: number = 0, private _xpToNextLevel: number = 150) {}
 
 	get userId() {
 		return this._userId;

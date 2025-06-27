@@ -1,4 +1,5 @@
 import { GamificationTaskEntity } from "../../domain/entities/gamification/gamification.task.entity";
+import { UserProgressEntity } from "../../domain/entities/gamification/user.progress.entity";
 import { UserTaskProgressEntity } from "../../domain/entities/gamification/user.task.progress.entity";
 
 export interface IGamificationTaskDTO {
@@ -42,5 +43,23 @@ export function mapToUserTaskWithProgressDTO(task: GamificationTaskEntity, progr
 		actionType: task.actionType,
 		progress: progress?.currentCount ?? 0,
 		isCompleted: progress?.isCompleted ?? false,
+	};
+}
+
+export interface IUserProgressDTO {
+	userId: string;
+	totalXP: number;
+	level: number;
+	tasksCompleted: number;
+	xpToNextLevel: number;
+}
+
+export function mapToUserProgressDTO(entity: UserProgressEntity): IUserProgressDTO {
+	return {
+		userId: entity.userId,
+		totalXP: entity.totalXP,
+		level: entity.level,
+		tasksCompleted: entity.tasksCompleted,
+		xpToNextLevel: entity.xpToNextLevel,
 	};
 }

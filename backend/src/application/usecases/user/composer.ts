@@ -25,6 +25,7 @@ import { getAvailabilityUsecase } from "../mentors/composer";
 import { VerifySessionPaymentUseCase } from "./session/verify.session.payment.usecase";
 import { CreateSessionPaymentOrderUseCase } from "./session/create.session.payment.order.usecase";
 import { PaySessionWithGatewayUseCase } from "./session/pay.session.with.gateway.usecase";
+import { createUserProgressUseCase } from "../gamification/composer";
 
 // Initialize UseCases
 export const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
@@ -33,7 +34,7 @@ export const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, e
 export const verifyResetTokenUseCase = new VerifyResetTokenUseCase(forgotResetRepository);
 export const resetPasswordUseCase = new ResetPasswordUseCase(forgotResetRepository, userRepository);
 export const verifyOTPUsecase = new VerifyOtpUsecase(redisService);
-export const signupUseCase = new SignupUseCase(userRepository, tokenInterface, verifyOTPUsecase);
+export const signupUseCase = new SignupUseCase(userRepository, tokenInterface, verifyOTPUsecase, createUserProgressUseCase);
 export const sendOtpUseCase = new SendOtpUsecase(emailService, userRepository, redisService);
 export const googleAuthUsecase = new GoogleAuthUsecase(userRepository, tokenInterface);
 export const updateUserProfileUsecase = new UpdateUserProfileUseCase(userRepository);

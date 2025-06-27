@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { fetchListedGamificationTasks } from "@/api/gamification.api.service";
+import { fetchListedGamificationTasks, fetchUserProgressAPI } from "@/api/gamification.api.service";
 import { useDebounce } from "@/hooks/useDebounce";
+import axios from "axios"; // Import axios
 
 // Define TaskWithProgress interface
 export interface TaskWithProgress {
@@ -30,16 +31,6 @@ export interface UserStats {
 	tasksCompleted: number;
 	xpToNextLevel: number;
 }
-
-// Mock user stats data
-const mockUserStats: UserStats = {
-	totalXP: 45750,
-	level: 12,
-	tasksCompleted: 23,
-	xpToNextLevel: 4250,
-};
-
-// Define category colors
 
 // TaskCard component
 interface TaskCardProps {
@@ -93,6 +84,8 @@ interface UserStatsProps {
 }
 
 function UserStats({ stats }: UserStatsProps) {
+	console.log("stats: ", stats);
+
 	const levelProgress = ((stats.totalXP % stats.xpToNextLevel) / stats.xpToNextLevel) * 100;
 
 	return (
@@ -134,8 +127,9 @@ function UserStats({ stats }: UserStatsProps) {
 // GamificationDashboard component
 export default function GamificationPage() {
 	const [tasks, setTasks] = useState<TaskWithProgress[]>([]);
-	const [userStats, setUserStats] = useState<UserStats>(mockUserStats);
+	const [userStats, setUserStats] = useState<UserStats | null>(null); // Initialize as null
 	const [isRefreshing, setIsRefreshing] = useState(false);
+	const [isLoadingStats, setIsLoadingStats] = useState(false);
 	const [filter, setFilter] = useState<string>("all");
 	const [searchTerm, setSearchTerm] = useState("");
 	const [currentPage, setCurrentPage] = useState(1);
@@ -143,6 +137,21 @@ export default function GamificationPage() {
 	const [itemsPerPage] = useState(9); // 3x3 grid
 	const userId = useSelector((state: RootState) => state.userAuth.user?.id);
 	const debouncedSearchTerm = useDebounce(searchTerm, 1000);
+
+	// Fetch user stats from server
+	const fetchUserStats = async () => {
+		setIsLoadingStats(true);
+		try {
+			const response = await fetchUserProgressAPI(userId!);
+			if (response.success) {
+				setUserStats(response.progress);
+			}
+		} catch (error) {
+			if (error instanceof Error) toast.error(error.message);
+		} finally {
+			setIsLoadingStats(false);
+		}
+	};
 
 	// Fetch tasks from server
 	const fetchTasks = async (page: number = 1) => {
@@ -162,9 +171,12 @@ export default function GamificationPage() {
 		}
 	};
 
-	// Fetch tasks on component mount or when dependencies change
+	// Fetch tasks and stats on component mount or when userId changes
 	useEffect(() => {
-		fetchTasks(currentPage);
+		if (userId) {
+			fetchTasks(currentPage);
+			fetchUserStats();
+		}
 	}, [userId, filter, debouncedSearchTerm, currentPage]);
 
 	// Check for newly completed tasks
@@ -182,17 +194,21 @@ export default function GamificationPage() {
 			setTasks((prev) => prev.map((task) => (newlyCompleted.some((completed) => completed.id === task.id) ? { ...task, isCompleted: true } : task)));
 
 			const newXP = newlyCompleted.reduce((sum, task) => sum + task.xpReward, 0);
-			setUserStats((prev) => ({
-				...prev,
-				totalXP: prev.totalXP + newXP,
-				tasksCompleted: prev.tasksCompleted + newlyCompleted.length,
-			}));
+			setUserStats((prev) =>
+				prev
+					? {
+							...prev,
+							totalXP: prev.totalXP + newXP,
+							tasksCompleted: prev.tasksCompleted + newlyCompleted.length,
+					  }
+					: prev
+			);
 		}
 	}, [tasks]);
 
 	// Handle refresh
 	const handleRefresh = async () => {
-		await fetchTasks(currentPage);
+		await Promise.all([fetchTasks(currentPage), fetchUserStats()]);
 	};
 
 	// Handle page change
@@ -232,7 +248,17 @@ export default function GamificationPage() {
 					<p className="text-gray-600">Complete tasks, earn XP, and level up your skills!</p>
 				</motion.div>
 
-				<UserStats stats={userStats} />
+				{isLoadingStats ? (
+					<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-6">
+						<p>Loading user stats...</p>
+					</motion.div>
+				) : userStats ? (
+					<UserStats stats={userStats} />
+				) : (
+					<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-6">
+						<p className="text-red-500">Unable to load user stats.</p>
+					</motion.div>
+				)}
 
 				<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-col md:flex-row gap-4 mb-8">
 					<div className="relative flex-1">

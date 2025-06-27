@@ -5,9 +5,10 @@ import { ITokenService } from "../../../interfaces/user/token.service.interface"
 import { ICacheRepository } from "../../../../domain/repositories/cache.respository";
 import { ISignupUseCase, IVerifyOtpUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { emit } from "process";
+import { ICreateUserProgressUseCase } from "../../../interfaces/gamification";
 
 export class SignupUseCase implements ISignupUseCase {
-	constructor(private userRepository: IUserRepository, private tokenSerivice: ITokenService, private verifyOtp: IVerifyOtpUsecase) {}
+	constructor(private userRepository: IUserRepository, private tokenSerivice: ITokenService, private verifyOtp: IVerifyOtpUsecase, private createUserProgress: ICreateUserProgressUseCase) {}
 
 	async execute(otp: string, firstName: string, lastName: string, email: string, password: string) {
 		const isOTPValid = await this.verifyOtp.execute(email, otp);
@@ -23,9 +24,12 @@ export class SignupUseCase implements ISignupUseCase {
 		const savedUser = await this.userRepository.createUser(newUser);
 		const userId = savedUser.getId();
 		if (!userId) throw new Error("User ID is undefined after saving");
+
+		// Create gamification progress record
+		await this.createUserProgress.execute(userId);
+
 		const accessToken = this.tokenSerivice.generateAccessToken(userId);
 		const refreshToken = this.tokenSerivice.generateRefreshToken(userId);
 		return { user: savedUser, refreshToken, accessToken };
 	}
-	
 }
