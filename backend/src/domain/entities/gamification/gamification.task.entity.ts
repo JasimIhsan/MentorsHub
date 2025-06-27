@@ -5,6 +5,7 @@ export interface IGamificationTask {
 	targetCount: number;
 	actionType: string;
 	isListed: boolean;
+	createdAt?: Date;
 }
 
 export class GamificationTaskEntity {
@@ -14,14 +15,16 @@ export class GamificationTaskEntity {
 	private _targetCount: number;
 	private _actionType: string;
 	private _isListed: boolean;
+	private _createdAt?: Date;
 
-	constructor(id: string | undefined, title: string, xpReward: number, targetCount: number, actionType: string, isListed: boolean = true) {
+	constructor(id: string | undefined, title: string, xpReward: number, targetCount: number, actionType: string, isListed: boolean = true, createdAt?: Date) {
 		this._id = id;
 		this._title = title;
 		this._xpReward = xpReward;
 		this._targetCount = targetCount;
 		this._actionType = actionType;
 		this._isListed = isListed;
+		this._createdAt = createdAt;
 	}
 
 	// Getters
@@ -49,6 +52,10 @@ export class GamificationTaskEntity {
 		return this._isListed;
 	}
 
+	get createdAt(): Date | null {
+		return this._createdAt ?? null;
+	}
+
 	// Setters
 	set title(title: string) {
 		this._title = title;
@@ -68,5 +75,9 @@ export class GamificationTaskEntity {
 
 	set isListed(isListed: boolean) {
 		this._isListed = isListed;
+	}
+
+	set createdAt(createdAt: Date) {
+		this._createdAt = createdAt;
 	}
 }

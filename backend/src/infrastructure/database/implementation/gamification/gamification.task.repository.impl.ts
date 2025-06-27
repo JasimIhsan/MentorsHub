@@ -12,7 +12,7 @@ export class GamificationTaskRepositoryImpl implements IGamificationTaskReposito
 				actionType: task.actionType,
 				isListed: task.isListed,
 			});
-			return new GamificationTaskEntity(created._id.toString(), created.title, created.xpReward, created.targetCount, created.actionType, created.isListed);
+			return new GamificationTaskEntity(created._id.toString(), created.title, created.xpReward, created.targetCount, created.actionType, created.isListed, created.createdAt);
 		} else {
 			await GamificationTaskModel.findByIdAndUpdate(
 				task.id,
@@ -32,7 +32,7 @@ export class GamificationTaskRepositoryImpl implements IGamificationTaskReposito
 	async findById(taskId: string): Promise<GamificationTaskEntity | null> {
 		const task = await GamificationTaskModel.findById(taskId);
 		if (!task) return null;
-		return new GamificationTaskEntity(task._id, task.title, task.xpReward, task.targetCount, task.actionType, task.isListed);
+		return new GamificationTaskEntity(task._id, task.title, task.xpReward, task.targetCount, task.actionType, task.isListed, task.createdAt);
 	}
 
 	async findAll(params: { page?: number; limit?: number; actionType?: string }): Promise<GamificationTaskEntity[]> {
@@ -48,10 +48,14 @@ export class GamificationTaskRepositoryImpl implements IGamificationTaskReposito
 			.skip((page - 1) * limit)
 			.limit(limit);
 
-		return tasks.map((t) => new GamificationTaskEntity(t._id, t.title, t.xpReward, t.targetCount, t.actionType, t.isListed));
+		return tasks.map((t) => new GamificationTaskEntity(t._id, t.title, t.xpReward, t.targetCount, t.actionType, t.isListed, t.createdAt));
 	}
 	async findByActionType(actionType: string): Promise<GamificationTaskEntity[]> {
 		const tasks = await GamificationTaskModel.find({ actionType });
-		return tasks.map((t) => new GamificationTaskEntity(t._id, t.title, t.xpReward, t.targetCount, t.actionType, t.isListed));
+		return tasks.map((t) => new GamificationTaskEntity(t._id, t.title, t.xpReward, t.targetCount, t.actionType, t.isListed, t.createdAt));
+	}
+
+	async deleteById(taskId: string): Promise<void> {
+		await GamificationTaskModel.findByIdAndDelete(taskId);
 	}
 }

@@ -7,6 +7,7 @@ export interface IGamificationTaskDTO {
 	targetCount: number;
 	actionType: string;
 	isListed: boolean;
+	createdAt: Date | null;
 }
 
 export const mapToGamificationTaskDTO = (entity: GamificationTaskEntity): IGamificationTaskDTO => {
@@ -17,5 +18,6 @@ export const mapToGamificationTaskDTO = (entity: GamificationTaskEntity): IGamif
 		targetCount: entity.targetCount,
 		actionType: entity.actionType,
 		isListed: entity.isListed,
+		createdAt: entity.createdAt,
 	};
 };

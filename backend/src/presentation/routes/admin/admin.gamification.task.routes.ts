@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { actionTypeController, createGamificationTaskController, getAllGamificationTasksController, updateGamificationTaskStatusController } from "../../controllers/admin/gamification/composer";
+import { actionTypeController, createGamificationTaskController, deleteGamificationTaskController, getAllGamificationTasksController, updateGamificationTaskStatusController } from "../../controllers/admin/gamification/composer";
 
 export const adminGamificationTaskRouter = Router();
 
@@ -12,3 +12,5 @@ adminGamificationTaskRouter.post("/create-task", (req, res, next) => createGamif
 adminGamificationTaskRouter.get("/", (req, res, next) => getAllGamificationTasksController.handle(req, res, next));
 
 adminGamificationTaskRouter.patch("/tasks/:taskId/toggle-list", (req, res, next) => updateGamificationTaskStatusController.handle(req, res, next));
+
+adminGamificationTaskRouter.delete("/tasks/:taskId", (req, res, next) => deleteGamificationTaskController.handle(req, res, next));
