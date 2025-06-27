@@ -145,7 +145,8 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 		});
 
 		socket.on("video-status", ({ registrarId, status }) => {
-			socket.to(socket.data.sessionId).emit("video-status", { registrarId, status });
+			const isVideoOn = typeof status === "boolean" ? status : true;
+			socket.to(socket.data.sessionId).emit("video-status", { registrarId, isVideoOn });
 		});
 
 		socket.on("hand-raise-status", ({ userId, isHandRaised }) => {
