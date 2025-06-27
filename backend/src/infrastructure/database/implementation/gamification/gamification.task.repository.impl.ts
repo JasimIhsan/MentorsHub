@@ -58,4 +58,14 @@ export class GamificationTaskRepositoryImpl implements IGamificationTaskReposito
 	async deleteById(taskId: string): Promise<void> {
 		await GamificationTaskModel.findByIdAndDelete(taskId);
 	}
+
+	async update(task: GamificationTaskEntity): Promise<GamificationTaskEntity | null> {
+		return await GamificationTaskModel.findByIdAndUpdate(task.id, {
+			title: task.title,
+			xpReward: task.xpReward,
+			targetCount: task.targetCount,
+			actionType: task.actionType,
+			isListed: task.isListed,
+		});
+	}
 }

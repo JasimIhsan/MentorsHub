@@ -6,4 +6,5 @@ export interface IGamificationTaskRepository {
 	findAll(params: { page?: number; limit?: number; actionType?: string }): Promise<GamificationTaskEntity[]>;
 	findByActionType(actionType: string): Promise<GamificationTaskEntity[]>;
 	deleteById(taskId: string): Promise<void>;
+	update(task: GamificationTaskEntity): Promise<GamificationTaskEntity | null>;
 }

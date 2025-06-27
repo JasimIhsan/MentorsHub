@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Gamepad2, X, Plus, Minus, ChevronLeft, ChevronRight, Eye, EyeOff, Trash2 } from "lucide-react";
+import { Gamepad2, X, Plus, Minus, ChevronLeft, ChevronRight, Eye, EyeOff, Trash2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useForm, Controller } from "react-hook-form";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
-import { createActionTypeAdminAPI, getActionTypesAdminAPI, createGamificationTaskAdminAPI, getAllGamificationTasksAdminAPI, toggleTaskListStatusAdminAPI, deleteGamificationTaskAdminAPI } from "@/api/gamification.api.service";
+import { createActionTypeAdminAPI, getActionTypesAdminAPI, createGamificationTaskAdminAPI, getAllGamificationTasksAdminAPI, toggleTaskListStatusAdminAPI, deleteGamificationTaskAdminAPI, updateGamificationTaskAdminAPI } from "@/api/gamification.api.service";
 import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +18,7 @@ const createActionTypeSchema = z.object({
 	label: z.string().min(1, "Label is required").max(100, "Label must be 100 characters or less"),
 });
 
-const createTaskSchema = z.object({
+const taskSchema = z.object({
 	title: z.string().min(1, "Title is required").max(100, "Title must be 100 characters or less"),
 	xpReward: z.number().min(1, "XP Reward must be at least 1"),
 	targetCount: z.number().min(1, "Target Count must be at least 1"),
@@ -48,7 +48,6 @@ interface CreateActionTypeData {
 	label: string;
 }
 
-// Form data type for CreateActionTypeDialog
 interface ActionTypeFormData {
 	label: string;
 }
@@ -135,6 +134,130 @@ const CreateActionTypeDialog = ({ isOpen, onClose, onSubmit }: CreateActionTypeD
 	);
 };
 
+// Edit Task Dialog Component
+interface EditTaskDialogProps {
+	isOpen: boolean;
+	onClose: () => void;
+	task: GamificationTask | null;
+	actionTypes: CreateActionTypeData[];
+	onSubmit: (taskId: string, data: CreateTaskData) => void;
+}
+
+const EditTaskDialog = ({ isOpen, onClose, task, actionTypes, onSubmit }: EditTaskDialogProps) => {
+	const {
+		register,
+		handleSubmit,
+		control,
+		reset,
+		setValue,
+		formState: { errors },
+	} = useForm<CreateTaskData>({
+		resolver: zodResolver(taskSchema),
+		defaultValues: {
+			title: "",
+			xpReward: 0,
+			targetCount: 0,
+			actionType: "",
+		},
+	});
+
+	// Populate form with task data when dialog opens
+	useEffect(() => {
+		if (task) {
+			setValue("title", task.title);
+			setValue("xpReward", task.xpReward);
+			setValue("targetCount", task.targetCount);
+			setValue("actionType", task.actionType);
+		}
+	}, [task, setValue]);
+
+	const handleFormSubmit = async (data: CreateTaskData) => {
+		if (!task) return;
+		try {
+			await onSubmit(task.id, data);
+			reset();
+			onClose();
+			toast.success("Task updated successfully!");
+		} catch (err: any) {
+			toast.error(err.message || "Failed to update task.");
+		}
+	};
+
+	return (
+		<Dialog open={isOpen} onOpenChange={onClose}>
+			<DialogContent className="sm:max-w-lg w-full p-6 rounded-2xl bg-white shadow-2xl border border-gray-100">
+				<DialogHeader>
+					<DialogTitle className="text-2xl font-bold text-gray-800">Edit Task</DialogTitle>
+					<DialogClose asChild>
+						<Button variant="ghost" size="icon" className="absolute right-4 top-4 hover:bg-gray-100 rounded-full">
+							<X className="h-5 w-5 text-gray-600" />
+						</Button>
+					</DialogClose>
+				</DialogHeader>
+				<form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+					<div>
+						<Label htmlFor="title" className="text-sm font-medium text-gray-700">
+							Task Title
+						</Label>
+						<Input id="title" placeholder="e.g., Complete profile" className="mt-1 rounded-lg" {...register("title")} />
+						{errors.title && <p className="text-red-500 text-sm mt-2">{errors.title.message}</p>}
+					</div>
+					<div className="grid grid-cols-2 gap-4">
+						<div>
+							<Label htmlFor="xpReward" className="text-sm font-medium text-gray-700">
+								XP Reward
+							</Label>
+							<Input id="xpReward" type="number" placeholder="e.g., 100" className="mt-1 rounded-lg" {...register("xpReward", { valueAsNumber: true })} />
+							{errors.xpReward && <p className="text-red-500 text-sm mt-2">{errors.xpReward.message}</p>}
+						</div>
+						<div>
+							<Label htmlFor="targetCount" className="text-sm font-medium text-gray-700">
+								Target Count
+							</Label>
+							<Input id="targetCount" type="number" placeholder="e.g., 1" className="mt-1 rounded-lg" {...register("targetCount", { valueAsNumber: true })} />
+							{errors.targetCount && <p className="text-red-500 text-sm mt-2">{errors.targetCount.message}</p>}
+						</div>
+					</div>
+					<div>
+						<Label htmlFor="actionType" className="text-sm font-medium text-gray-700">
+							Action Type
+						</Label>
+						<Controller
+							name="actionType"
+							control={control}
+							render={({ field }) => (
+								<Select onValueChange={field.onChange} value={field.value}>
+									<SelectTrigger className="mt-1 rounded-lg px-3 py-2 text-gray-700">
+										<SelectValue placeholder="Select an action type" />
+									</SelectTrigger>
+									<SelectContent>
+										{actionTypes.length === 0 ? (
+											<div className="text-gray-500 p-2">No action types available</div>
+										) : (
+											actionTypes.map((type) => (
+												<SelectItem key={type.id} value={type.id}>
+													{type.label}
+												</SelectItem>
+											))
+										)}
+									</SelectContent>
+								</Select>
+							)}
+						/>
+						{errors.actionType && <p className="text-red-500 text-sm mt-2">{errors.actionType.message}</p>}
+					</div>
+					<div className="flex justify-end space-x-3 pt-4">
+						<Button type="button" variant="outline" onClick={onClose} className="rounded-lg border-gray-300 hover:bg-gray-50">
+							Cancel
+						</Button>
+						<Button type="submit">Update Task</Button>
+					</div>
+				</form>
+			</DialogContent>
+		</Dialog>
+	);
+};
+
 // Create Task Form Component
 const CreateTaskForm = ({ onTaskCreated }: { onTaskCreated: () => void }) => {
 	const {
@@ -144,7 +267,7 @@ const CreateTaskForm = ({ onTaskCreated }: { onTaskCreated: () => void }) => {
 		control,
 		formState: { errors },
 	} = useForm<CreateTaskData>({
-		resolver: zodResolver(createTaskSchema),
+		resolver: zodResolver(taskSchema),
 		defaultValues: {
 			xpReward: 0,
 			targetCount: 0,
@@ -293,6 +416,7 @@ interface TaskListProps {
 
 const TaskList = ({ refreshTrigger }: TaskListProps) => {
 	const [tasks, setTasks] = useState<GamificationTask[]>([]);
+	const [actionTypes, setActionTypes] = useState<CreateActionTypeData[]>([]);
 	const [pagination, setPagination] = useState({
 		page: 1,
 		limit: 10,
@@ -300,23 +424,34 @@ const TaskList = ({ refreshTrigger }: TaskListProps) => {
 		totalPages: 0,
 	});
 	const [isLoading, setIsLoading] = useState(true);
+	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+	const [selectedTask, setSelectedTask] = useState<GamificationTask | null>(null);
 
-	// Fetch tasks on mount and when refreshTrigger or page changes
+	// Fetch tasks and action types on mount and when refreshTrigger or page changes
 	useEffect(() => {
-		const fetchTasks = async () => {
+		const fetchData = async () => {
 			try {
 				setIsLoading(true);
-				const response = await getAllGamificationTasksAdminAPI(pagination.page, pagination.limit);
-				if (response.success) {
-					setTasks(response.tasks);
+				const [tasksResponse, actionTypesResponse] = await Promise.all([
+					getAllGamificationTasksAdminAPI(pagination.page, pagination.limit),
+					getActionTypesAdminAPI(),
+				]);
+				if (tasksResponse.success) {
+					setTasks(tasksResponse.tasks);
+					setPagination((prev) => ({
+						...prev,
+						total: tasksResponse.total,
+						totalPages: Math.ceil(tasksResponse.total / prev.limit),
+					}));
 				}
+				setActionTypes(actionTypesResponse);
 			} catch (err: any) {
-				toast.error(err.message || "Failed to load tasks.");
+				toast.error(err.message || "Failed to load data.");
 			} finally {
 				setIsLoading(false);
 			}
 		};
-		fetchTasks();
+		fetchData();
 	}, [refreshTrigger, pagination.page]);
 
 	// Toggle task listing status
@@ -344,6 +479,25 @@ const TaskList = ({ refreshTrigger }: TaskListProps) => {
 			toast.success("Task deleted successfully!");
 		} catch (err: any) {
 			toast.error(err.message || "Failed to delete task.");
+		}
+	};
+
+	// Edit task
+	const handleEditTask = async (taskId: string, data: CreateTaskData) => {
+		try {
+			const updatedTask = await updateGamificationTaskAdminAPI(taskId, {
+				title: data.title,
+				xpReward: Number(data.xpReward),
+				targetCount: Number(data.targetCount),
+				actionType: data.actionType,
+			});
+			setTasks((prevTasks) =>
+				prevTasks.map((task) =>
+					task.id === taskId ? { ...task, ...updatedTask } : task
+				)
+			);
+		} catch (err: any) {
+			throw err;
 		}
 	};
 
@@ -411,6 +565,18 @@ const TaskList = ({ refreshTrigger }: TaskListProps) => {
 											<TableCell className="text-gray-500">{formatDate(task.createdAt)}</TableCell>
 											<TableCell>
 												<div className="flex space-x-2">
+													<Button
+														variant="ghost"
+														size="icon"
+														onClick={() => {
+															setSelectedTask(task);
+															setIsEditDialogOpen(true);
+														}}
+														className="hover:bg-blue-100 rounded-full"
+														title="Edit Task"
+													>
+														<Edit className="h-4 w-4 text-blue-600" />
+													</Button>
 													<Button variant="ghost" size="icon" onClick={() => handleToggleList(task.id, task.isListed)} className="hover:bg-gray-100 rounded-full" title={task.isListed ? "Unlist Task" : "List Task"}>
 														{task.isListed ? <EyeOff className="h-4 w-4 text-gray-600" /> : <Eye className="h-4 w-4 text-gray-600" />}
 													</Button>
@@ -443,6 +609,16 @@ const TaskList = ({ refreshTrigger }: TaskListProps) => {
 						)}
 					</>
 				)}
+				<EditTaskDialog
+					isOpen={isEditDialogOpen}
+					onClose={() => {
+						setIsEditDialogOpen(false);
+						setSelectedTask(null);
+					}}
+					task={selectedTask}
+					actionTypes={actionTypes}
+					onSubmit={handleEditTask}
+				/>
 			</CardContent>
 		</Card>
 	);

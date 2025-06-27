@@ -16,3 +16,7 @@ export interface IUpdateGamificationTaskStatusUseCase {
 export interface IDeleteGamificationTaskUseCase {
 	execute(taskId: string): Promise<void>;
 }
+
+export interface IEditGamificationTaskUseCase {
+	execute(input: { taskId: string; title: string; xpReward: number; targetCount: number; actionType: string }): Promise<IGamificationTaskDTO>;
+}

@@ -102,3 +102,14 @@ export const deleteGamificationTaskAdminAPI = async (taskId: string) => {
 		throw new Error(error.response?.data?.message || "Failed to delete task");
 	}
 };
+
+export const updateGamificationTaskAdminAPI = async (taskId: string, data: { title: string; xpReward: number; targetCount: number; actionType: string }) => {
+	try {
+		const response = await axiosInstance.put<TaskResponse>(`/admin/gamification/tasks/${taskId}`, data);
+		console.log("updateGamificationTaskAdminAPI response:", response.data); // Debug log
+		return response.data.task;
+	} catch (error: any) {
+		console.error("Error in updateGamificationTaskAdminAPI:", error);
+		throw new Error(error.response?.data?.message || "Failed to update task");
+	}
+};
