@@ -32,7 +32,7 @@ export class CancelSessionUseCase implements ICancelSessionUseCase {
 
 		// For paid sessions, check payment status
 		if (session.toObject().pricing === "paid" && participant.paymentStatus === "completed") {
-			throw new Error("Cannot cancel a paid session without refund processing");
+			throw new Error("Cannot cancel session that has already been paid");
 		}
 
 		const updatedSession = await this.sessionRepository.updateSessionStatus(sessionId, "canceled");

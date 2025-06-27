@@ -1,5 +1,5 @@
 import { ObjectId } from "mongoose";
-import { IWalletTransactionDocument } from "../../infrastructure/database/models/wallet/wallet.transaction.model";
+import { IWalletTransactionDocument } from "../../../infrastructure/database/models/wallet/wallet.transaction.model";
 
 // Extend your purpose type to include wallet_topup
 export type WalletTransactionPurpose = "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";

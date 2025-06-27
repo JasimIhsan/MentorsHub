@@ -1,4 +1,4 @@
-import { WithdrawalRequestEntity } from "../../../domain/entities/wallet.withdrawel.request.entity";
+import { WithdrawalRequestEntity } from "../../../domain/entities/wallet/wallet.withdrawel.request.entity";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { ICreateWithdrawalRequestUsecase } from "../../interfaces/wallet";
 

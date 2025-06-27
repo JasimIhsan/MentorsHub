@@ -1,5 +1,5 @@
-import { WalletEntity } from "../../domain/entities/wallet.entity";
-import { WithdrawalRequestEntity } from "../../domain/entities/wallet.withdrawel.request.entity";
+import { WalletEntity } from "../../domain/entities/wallet/wallet.entity";
+import { WithdrawalRequestEntity } from "../../domain/entities/wallet/wallet.withdrawel.request.entity";
 import { IWalletTransactionDTO } from "../dtos/wallet.transation.dto";
 import { RoleEnum } from "./role";
 

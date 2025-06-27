@@ -45,6 +45,9 @@ import { CancelSessionController } from "./session/cancel.session.controller";
 import { VerifySessionPaymentController } from "./session/verify.session.payment.controller";
 import { CreateSessionPaymentOrderController } from "./session/create.session.payment.order.controller";
 import { PaySessionWithGatewayController } from "./session/pay.session.with.gateway.controller";
+import { GetAllListedGamificationTasksController } from "./gamification/get.all.listed.gamification.task.controller";
+import { getAllListedGamificationTasksUseCase, getUserProgressUseCase } from "../../../application/usecases/gamification/composer";
+import { GetUserProgressController } from "./gamification/get.user.progress.controller";
 
 export const signupController = new SignupController(signupUseCase);
 export const signinController = new SigninController(signinUseCase);
@@ -68,3 +71,5 @@ export const getAvailabilityController = new GetMentorAvailabilityController(get
 export const cancelSessionController = new CancelSessionController(cancelSessionUseCase);
 export const verifySessionPaymentController = new VerifySessionPaymentController(verifySessionPaymentUseCase);
 export const createSessionPaymentOrderController = new CreateSessionPaymentOrderController(createSessionPaymentOrderUsecase);
+export const getAllListedGamificationTasksController = new GetAllListedGamificationTasksController(getAllListedGamificationTasksUseCase)
+export const getUserProgressController = new GetUserProgressController(getUserProgressUseCase)

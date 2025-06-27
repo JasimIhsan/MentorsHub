@@ -3,9 +3,11 @@ import { IReviewRepository } from "../../../domain/repositories/review.repositor
 import { IUserRepository } from "../../../domain/repositories/user.repository"; // You need this
 import { ReviewEntity } from "../../../domain/entities/review.entity";
 import { UserEntity } from "../../../domain/entities/user.entity";
+import { IUpdateUserTaskProgressUseCase } from "../../interfaces/gamification";
+import { ActionType } from "../../dtos/gamification.dto";
 
 export class CreateReviewUseCase implements ICreateReviewUseCase {
-	constructor(private reviewRepo: IReviewRepository, private userRepo: IUserRepository) {}
+	constructor(private reviewRepo: IReviewRepository, private userRepo: IUserRepository, private updateUserProgress: IUpdateUserTaskProgressUseCase) {}
 
 	async execute(data: { reviewerId: string; mentorId: string; sessionId?: string; rating: number; comment: string }): Promise<ReviewEntity> {
 		if (!data.reviewerId) throw new Error("reviewerId is required");
@@ -38,6 +40,9 @@ export class CreateReviewUseCase implements ICreateReviewUseCase {
 				id: data.reviewerId,
 			},
 		});
+
+		// update gamification task completion progress
+		await this.updateUserProgress.execute(data.reviewerId, ActionType.GIVE_FEEDBACK);
 
 		return review;
 	}

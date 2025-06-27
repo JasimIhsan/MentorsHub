@@ -1,14 +1,119 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Award, Zap } from "lucide-react";
+import { Award, Zap, Star, Trophy, Medal } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { toast } from "sonner";
+import { fetchUserProgressAPI } from "@/api/gamification.api.service";
+
+// Define UserStats interface
+interface UserStats {
+	totalXP: number;
+	level: number;
+	xpToNextLevel: number;
+	streak?: number; // Optional, assuming API might return streak
+	badges?: string[]; // Added to store earned badges
+}
 
 interface GamificationCardProps {
 	onTestClick: () => Promise<void>;
 }
 
 const GamificationCard: React.FC<GamificationCardProps> = ({ onTestClick }) => {
+	const [userStats, setUserStats] = useState<UserStats | null>(null);
+	const [isLoading, setIsLoading] = useState(false);
+	const userId = useSelector((state: RootState) => state.userAuth.user?.id);
+
+	// Fetch user stats from API
+	useEffect(() => {
+		const fetchUserStats = async () => {
+			if (!userId) return;
+			setIsLoading(true);
+			try {
+				const response = await fetchUserProgressAPI(userId);
+				if (response.success) {
+					setUserStats(response.progress);
+				}
+			} catch (error) {
+				toast.error("Failed to fetch user stats");
+				console.error(error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchUserStats();
+	}, [userId]);
+
+	// Define level title ranges
+	const getLevelTitle = (level: number) => {
+		if (level >= 1 && level <= 3) return "Beginner";
+		if (level >= 4 && level <= 6) return "Apprentice";
+		if (level >= 7 && level <= 9) return "Journeyman";
+		if (level >= 10 && level <= 12) return "Expert";
+		if (level >= 13 && level <= 15) return "Master";
+		if (level >= 16 && level <= 18) return "Grandmaster";
+		if (level >= 19 && level <= 21) return "Legend";
+		if (level >= 22 && level <= 24) return "Mythic";
+		if (level >= 25 && level <= 27) return "Hero";
+		if (level >= 28 && level <= 30) return "Champion";
+		return `Titan`; // For levels 31+
+	};
+
+	// Define badge icons and descriptions
+	const getBadgeIcon = (badge: string) => {
+		switch (badge) {
+			case "FirstWin":
+				return <Star className="h-5 w-5 text-yellow-400" />;
+			case "StreakMaster":
+				return <Zap className="h-5 w-5 text-orange-400" />;
+			case "LevelUp":
+				return <Trophy className="h-5 w-5 text-gold-400" />;
+			case "Endurance":
+				return <Medal className="h-5 w-5 text-bronze-400" />;
+			default:
+				return <Award className="h-5 w-5 text-primary" />;
+		}
+	};
+
+	// Badge descriptions
+	const getBadgeDescription = (badge: string) => {
+		switch (badge) {
+			case "FirstWin":
+				return "Earned for completing your first challenge!";
+			case "StreakMaster":
+				return "Achieved a 7-day streak!";
+			case "LevelUp":
+				return "Reached level 5!";
+			case "Endurance":
+				return "Completed 10 challenges in a row!";
+			default:
+				return "Special achievement!";
+		}
+	};
+
+	if (isLoading) {
+		return (
+			<Card className="bg-gradient-to-r from-purple-900 to-purple-700">
+				<CardContent className="px-6 py-3">
+					<p className="text-muted text-center">Loading stats...</p>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	if (!userStats) {
+		return (
+			<Card className="bg-gradient-to-r from-purple-900 to-purple-700">
+				<CardContent className="px-6 py-3">
+					<p className="text-red-300 text-center">Unable to load stats</p>
+				</CardContent>
+			</Card>
+		);
+	}
+
 	return (
 		<Card className="bg-gradient-to-r from-purple-900 to-purple-700">
 			<CardContent className="px-6 py-3">
@@ -18,25 +123,39 @@ const GamificationCard: React.FC<GamificationCardProps> = ({ onTestClick }) => {
 							<Award className="h-6 w-6 text-primary" />
 						</div>
 						<div>
-							<h3 className="font-bold text-xl text-muted">Level 12 Growth Seeker</h3>
+							<h3 className="font-bold text-xl text-muted">
+								Level {userStats.level} {getLevelTitle(userStats.level)}
+							</h3>
 							<div className="flex items-center gap-2 text-sm text-muted">
-								<span>1,240 XP</span>
+								<span>{userStats.totalXP.toLocaleString()} XP</span>
 								<span>•</span>
-								<span>760 XP until Level 13</span>
+								<span>
+									{userStats.xpToNextLevel.toLocaleString()} XP until Level {userStats.level + 1}
+								</span>
 							</div>
 						</div>
 					</div>
 					<Button onClick={onTestClick}>Test</Button>
-					<div className="flex items-center gap-3">
-						<div className="flex items-center gap-1">
-							<Zap className="h-4 w-4 text-yellow-500" />
-							<span className="text-sm text-muted font-medium">8 Week Streak!</span>
-						</div>
+					<div className="flex flex-col gap-2">
 						<Button asChild size="sm" className="bg-background text-primary hover:bg-secondary">
 							<Link to="/gamification">View Progress</Link>
 						</Button>
 					</div>
 				</div>
+				{/* Display badges if available */}
+				{userStats.badges && userStats.badges.length > 0 && (
+					<div className="mt-4">
+						<h4 className="text-sm font-semibold text-muted">Awards</h4>
+						<div className="flex flex-wrap gap-2 mt-2">
+							{userStats.badges.map((badge, index) => (
+								<div key={index} className="flex items-center gap-2 bg-gray-800 px-3 py-1 rounded-full text-xs text-muted" title={getBadgeDescription(badge)}>
+									{getBadgeIcon(badge)}
+									<span>{badge}</span>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);

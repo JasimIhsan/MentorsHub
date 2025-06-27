@@ -1,4 +1,4 @@
-import { WalletTransactionEntity } from "../../../domain/entities/wallet.transaction.entity";
+import { WalletTransactionEntity } from "../../../domain/entities/wallet/wallet.transaction.entity";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletTransactionDTO } from "../../dtos/wallet.transation.dto";
 import { IGetTransactionsUsecase } from "../../interfaces/wallet";

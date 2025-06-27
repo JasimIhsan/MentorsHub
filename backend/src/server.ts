@@ -30,6 +30,8 @@ import { userWalletRouter } from "./presentation/routes/user/wallet.routes";
 import { adminWalletRouter } from "./presentation/routes/admin/admin.wallet.routes";
 import { messageRouter } from "./presentation/routes/user/message.routes";
 import { errorHandler } from "./presentation/middlewares/error.handler.middleware";
+import { adminGamificationTaskRouter } from "./presentation/routes/admin/admin.gamification.task.routes";
+import { gamificationRoute } from "./presentation/routes/user/gamification.routes";
 
 dotenv.config();
 
@@ -81,11 +83,13 @@ app.use("/api/user/mentor", userSideMentorRouter);
 app.use("/api/user/reviews", reviewRouter);
 app.use("/api/user/wallet", userWalletRouter);
 app.use("/api/user/messages", messageRouter);
+app.use("/api/user/gamification", gamificationRoute);
 
 app.use("/api/admin", adminAuthRouter);
 app.use("/api/admin/users", usertabRouter);
 app.use("/api/admin/mentor-application", mentorApplicationRouter);
 app.use("/api/admin/wallet", adminWalletRouter);
+app.use("/api/admin/gamification", adminGamificationTaskRouter);
 
 app.use("/api/mentor", mentorRouter);
 app.use("/api/mentor/sessions", mentorSessionRouter);

@@ -3,8 +3,8 @@ import { WalletTransactionModel } from "../models/wallet/wallet.transaction.mode
 import { IWithdrawalRequestDocument, WithdrawalRequestModel } from "../models/wallet/wallet.withdrawel.request.model";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletTransactionDTO } from "../../../application/dtos/wallet.transation.dto";
-import { WalletEntity } from "../../../domain/entities/wallet.entity";
-import { WithdrawalRequestEntity } from "../../../domain/entities/wallet.withdrawel.request.entity";
+import { WalletEntity } from "../../../domain/entities/wallet/wallet.entity";
+import { WithdrawalRequestEntity } from "../../../domain/entities/wallet/wallet.withdrawel.request.entity";
 import { AdminModel } from "../models/admin/admin.model";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 

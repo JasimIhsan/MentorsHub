@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Users, Calendar, CreditCard, Settings, FileBarChart, Home, Menu, BookPlus } from "lucide-react";
+import { Users, Calendar, CreditCard, Settings, FileBarChart, Home, Menu, BookPlus, Gamepad2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -104,6 +104,11 @@ const routes = [
 		label: "Payments",
 		icon: CreditCard,
 		href: "/admin/payments",
+	},
+	{
+		label: "Gamification",
+		icon: Gamepad2,
+		href: "/admin/gamification",
 	},
 	{
 		label: "Reports",

@@ -19,6 +19,7 @@ import { SessionsPage } from "@/pages/user/SessionsPage";
 import { VideoCallPage } from "@/pages/user/VideoCallPage";
 import { WalletPage } from "@/pages/user/WalletPage";
 import { MessagePage } from "@/pages/user/MessagePage";
+import GamificationPage from "@/pages/user/GamificaitonPage";
 
 const UserRoutes = () => {
 	return (
@@ -136,6 +137,15 @@ const UserRoutes = () => {
 					element={
 						<ProtectedRoute>
 							<MessagePage />
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="/gamification"
+					element={
+						<ProtectedRoute>
+							<GamificationPage />
 						</ProtectedRoute>
 					}
 				/>
