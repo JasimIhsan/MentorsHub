@@ -113,3 +113,19 @@ export const updateGamificationTaskAdminAPI = async (taskId: string, data: { tit
 		throw new Error(error.response?.data?.message || "Failed to update task");
 	}
 };
+
+export const fetchListedGamificationTasks = async (userId: string, searchTerm: string, page: number, limit: number) => {
+	try {
+		const response = await axiosInstance.get(`/user/gamification/listed/${userId}`, {
+			params: {
+				page,
+				limit,
+				searchTerm,
+			},
+		});
+		return response.data;
+	} catch (error: any) {
+		console.error("Error fetching tasks:", error);
+		throw new Error(error.response?.data?.message || "Failed to fetch tasks");
+	}
+};

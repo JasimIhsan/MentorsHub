@@ -33,6 +33,7 @@ import { GamificationTaskRepositoryImpl } from "./database/implementation/gamifi
 import { UserTaskProgressEntity } from "../domain/entities/gamification/user.task.progress.entity";
 import { UserTaskProgressRepositoryImpl } from "./database/implementation/gamification/user.task.progress.repository.impl";
 import { ActionTypeRepositoryImpl } from "./database/implementation/gamification/action.type.repository.imp";
+import { UserProgressRepositoryImpl } from "./database/implementation/gamification/user.progress.repository.imp";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -46,8 +47,9 @@ export const walletRepository: IWalletRepository = new WalletRepositoryImpl();
 export const messageRepository: IMessageRepository = new MessageRepositoryImpl();
 export const chatRepository: IChatRepository = new ChatRepositoryImpl();
 export const gamificationTaskRepository = new GamificationTaskRepositoryImpl();
-export const userTaskProgressRepository = new UserTaskProgressRepositoryImpl();
+export const userTaskprogressRepository = new UserTaskProgressRepositoryImpl();
 export const actionTypeRepository = new ActionTypeRepositoryImpl();
+export const userProgressRepository = new UserProgressRepositoryImpl();
 
 // Initialize services implementation
 export const emailService: IEmailService = new EmailServiceImpl();

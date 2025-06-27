@@ -6,6 +6,7 @@ export interface IUserTaskProgressDocument extends Document {
 	taskId: string;
 	currentCount: number;
 	completed: boolean;
+	completedAt?: Date;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -16,6 +17,7 @@ const UserTaskProgressSchema = new Schema(
 		taskId: { type: mongoose.Schema.Types.ObjectId, ref: "GamificationTask", required: true },
 		currentCount: { type: Number, default: 0 },
 		completed: { type: Boolean, default: false },
+		completedAt: { type: Date },
 	},
 	{
 		timestamps: true,

@@ -4,18 +4,31 @@ import { ActionTypeModel } from "../../models/gamification/action.type.model";
 
 export class ActionTypeRepositoryImpl implements IActionTypeRepository {
 	async findAll(): Promise<ActionTypeEntity[]> {
-		const docs = await ActionTypeModel.find();
-		return docs.map((doc) => new ActionTypeEntity(doc._id, doc.label));
+		try {
+			const docs = await ActionTypeModel.find();
+			return docs.map((doc) => new ActionTypeEntity(doc._id, doc.label));
+		} catch (error) {
+			throw new Error(`Error in findAll(): ${error}`);
+		}
 	}
 
 	async existsById(id: string): Promise<boolean> {
-		return await ActionTypeModel.exists({ _id: id }).then((res) => !!res);
+		try {
+			const exists = await ActionTypeModel.exists({ _id: id });
+			return !!exists;
+		} catch (error) {
+			throw new Error(`Error in existsById(): ${error}`);
+		}
 	}
 
 	async save(action: ActionTypeEntity): Promise<void> {
-		await ActionTypeModel.create({
-			_id: action.id,
-			label: action.label,
-		});
+		try {
+			await ActionTypeModel.create({
+				_id: action.id,
+				label: action.label,
+			});
+		} catch (error) {
+			throw new Error(`Error in save(): ${error}`);
+		}
 	}
 }

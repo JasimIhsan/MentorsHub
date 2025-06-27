@@ -3,6 +3,7 @@ export interface IUserTaskProgress {
 	taskId: string;
 	currentCount: number;
 	completed: boolean;
+	completedAt?: Date;
 }
 
 export class UserTaskProgressEntity {
@@ -10,12 +11,14 @@ export class UserTaskProgressEntity {
 	private _taskId: string;
 	private _currentCount: number;
 	private _completed: boolean;
+	private _completedAt?: Date;
 
-	constructor(userId: string, taskId: string, currentCount: number, completed: boolean = false) {
+	constructor(userId: string, taskId: string, currentCount: number, completed: boolean = false, completedAt?: Date) {
 		this._userId = userId;
 		this._taskId = taskId;
 		this._currentCount = currentCount;
 		this._completed = completed;
+		this._completedAt = completedAt;
 	}
 
 	// Getters
@@ -31,8 +34,12 @@ export class UserTaskProgressEntity {
 		return this._currentCount;
 	}
 
-	get completed(): boolean {
+	get isCompleted(): boolean {
 		return this._completed;
+	}
+
+	get completedAt(): Date | undefined {
+		return this._completedAt;
 	}
 
 	// Setters
@@ -40,12 +47,16 @@ export class UserTaskProgressEntity {
 		this._currentCount = count;
 	}
 
-	set completed(status: boolean) {
+	set isCompleted(status: boolean) {
 		this._completed = status;
 	}
 
+	set completedAt(completedAt: Date) {
+		this._completedAt = completedAt;
+	}
+
 	// Methods
-	increment(targetCount: number = 10): void {
+	incrementProgress(targetCount: number = 10): void {
 		if (!this._completed) {
 			this._currentCount++;
 			if (this._currentCount >= targetCount) {

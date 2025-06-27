@@ -1,5 +1,5 @@
 import { GamificationTaskEntity } from "../../domain/entities/gamification/gamification.task.entity";
-import { IGamificationTaskDTO } from "../dtos/gamification.dto";
+import { IGamificationTaskDTO, IUserTaskWithProgressDTO } from "../dtos/gamification.dto";
 
 export interface ICreateGamificationTaskUseCase {
 	execute(input: { title: string; xpReward: number; targetCount: number; actionType: string }): Promise<GamificationTaskEntity>;
@@ -19,4 +19,8 @@ export interface IDeleteGamificationTaskUseCase {
 
 export interface IEditGamificationTaskUseCase {
 	execute(input: { taskId: string; title: string; xpReward: number; targetCount: number; actionType: string }): Promise<IGamificationTaskDTO>;
+}
+
+export interface IGetAllListedGamificationTasksUseCase {
+	execute(userId: string, params: { page?: number; limit?: number; searchTerm?: string }): Promise<{ tasks: IUserTaskWithProgressDTO[]; totalCount: number }>;
 }
