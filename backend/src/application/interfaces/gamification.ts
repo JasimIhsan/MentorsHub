@@ -8,3 +8,7 @@ export interface ICreateGamificationTaskUseCase {
 export interface IGetAllGamificationTasksUseCase {
 	execute(params: { page?: number; limit?: number; actionType?: string }): Promise<IGamificationTaskDTO[]>;
 }
+
+export interface IUpdateGamificationTaskStatusUseCase {
+	execute(taskId: string, status: boolean): Promise<IGamificationTaskDTO>;
+}

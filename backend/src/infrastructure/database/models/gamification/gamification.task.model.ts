@@ -7,6 +7,7 @@ export interface IGamificationTaskDocument extends Document {
 	xpReward: number;
 	targetCount: number;
 	actionType: string;
+	isListed: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -17,6 +18,7 @@ const GamificationTaskSchema = new Schema(
 		xpReward: { type: Number, required: true },
 		targetCount: { type: Number, required: true },
 		actionType: { type: String, required: true },
+		isListed: { type: Boolean, default: true },
 	},
 	{
 		timestamps: true,

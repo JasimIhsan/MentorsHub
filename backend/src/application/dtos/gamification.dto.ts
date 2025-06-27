@@ -6,6 +6,7 @@ export interface IGamificationTaskDTO {
 	xpReward: number;
 	targetCount: number;
 	actionType: string;
+	isListed: boolean;
 }
 
 export const mapToGamificationTaskDTO = (entity: GamificationTaskEntity): IGamificationTaskDTO => {
@@ -15,5 +16,6 @@ export const mapToGamificationTaskDTO = (entity: GamificationTaskEntity): IGamif
 		xpReward: entity.xpReward,
 		targetCount: entity.targetCount,
 		actionType: entity.actionType,
+		isListed: entity.isListed,
 	};
 };

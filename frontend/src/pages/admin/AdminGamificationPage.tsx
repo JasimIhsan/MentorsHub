@@ -12,6 +12,7 @@ import { createActionTypeAdminAPI, getActionTypesAdminAPI, createGamificationTas
 import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { stat } from "fs";
 
 // Zod Schemas
 const createActionTypeSchema = z.object({
@@ -320,9 +321,9 @@ const TaskList = ({ refreshTrigger }: TaskListProps) => {
 	}, [refreshTrigger, pagination.page]);
 
 	// Toggle task listing status
-	const handleToggleList = async (taskId: string) => {
+	const handleToggleList = async (taskId: string, status: boolean) => {
 		try {
-			const updatedTask = await toggleTaskListStatusAdminAPI(taskId);
+			const updatedTask = await toggleTaskListStatusAdminAPI(taskId, !status);
 			setTasks((prevTasks) => prevTasks.map((task) => (task.id === taskId ? { ...task, isListed: updatedTask.isListed } : task)));
 			toast.success("Task status updated successfully!");
 		} catch (err: any) {
@@ -411,7 +412,7 @@ const TaskList = ({ refreshTrigger }: TaskListProps) => {
 											<TableCell className="text-gray-500">{formatDate(task.createdAt)}</TableCell>
 											<TableCell>
 												<div className="flex space-x-2">
-													<Button variant="ghost" size="icon" onClick={() => handleToggleList(task.id)} className="hover:bg-gray-100 rounded-full" title={task.isListed ? "Unlist Task" : "List Task"}>
+													<Button variant="ghost" size="icon" onClick={() => handleToggleList(task.id, task.isListed)} className="hover:bg-gray-100 rounded-full" title={task.isListed ? "Unlist Task" : "List Task"}>
 														{task.isListed ? <EyeOff className="h-4 w-4 text-gray-600" /> : <Eye className="h-4 w-4 text-gray-600" />}
 													</Button>
 													<Button variant="ghost" size="icon" onClick={() => handleDeleteTask(task.id)} className="hover:bg-red-100 rounded-full" title="Delete Task">

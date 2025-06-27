@@ -10,8 +10,9 @@ export class GamificationTaskRepositoryImpl implements IGamificationTaskReposito
 				xpReward: task.xpReward,
 				targetCount: task.targetCount,
 				actionType: task.actionType,
+				isListed: task.isListed,
 			});
-			return new GamificationTaskEntity(created._id.toString(), created.title, created.xpReward, created.targetCount, created.actionType);
+			return new GamificationTaskEntity(created._id.toString(), created.title, created.xpReward, created.targetCount, created.actionType, created.isListed);
 		} else {
 			await GamificationTaskModel.findByIdAndUpdate(
 				task.id,
@@ -20,6 +21,7 @@ export class GamificationTaskRepositoryImpl implements IGamificationTaskReposito
 					xpReward: task.xpReward,
 					targetCount: task.targetCount,
 					actionType: task.actionType,
+					isListed: task.isListed,
 				},
 				{ upsert: true }
 			);
@@ -30,7 +32,7 @@ export class GamificationTaskRepositoryImpl implements IGamificationTaskReposito
 	async findById(taskId: string): Promise<GamificationTaskEntity | null> {
 		const task = await GamificationTaskModel.findById(taskId);
 		if (!task) return null;
-		return new GamificationTaskEntity(task._id, task.title, task.xpReward, task.targetCount, task.actionType);
+		return new GamificationTaskEntity(task._id, task.title, task.xpReward, task.targetCount, task.actionType, task.isListed);
 	}
 
 	async findAll(params: { page?: number; limit?: number; actionType?: string }): Promise<GamificationTaskEntity[]> {
@@ -46,10 +48,10 @@ export class GamificationTaskRepositoryImpl implements IGamificationTaskReposito
 			.skip((page - 1) * limit)
 			.limit(limit);
 
-		return tasks.map((t) => new GamificationTaskEntity(t._id, t.title, t.xpReward, t.targetCount, t.actionType));
+		return tasks.map((t) => new GamificationTaskEntity(t._id, t.title, t.xpReward, t.targetCount, t.actionType, t.isListed));
 	}
 	async findByActionType(actionType: string): Promise<GamificationTaskEntity[]> {
 		const tasks = await GamificationTaskModel.find({ actionType });
-		return tasks.map((t) => new GamificationTaskEntity(t._id, t.title, t.xpReward, t.targetCount, t.actionType));
+		return tasks.map((t) => new GamificationTaskEntity(t._id, t.title, t.xpReward, t.targetCount, t.actionType, t.isListed));
 	}
 }

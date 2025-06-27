@@ -80,9 +80,9 @@ export const getAllGamificationTasksAdminAPI = async (page = 1, limit = 10) => {
 };
 
 // Toggle task listing status
-export const toggleTaskListStatusAdminAPI = async (taskId: string) => {
+export const toggleTaskListStatusAdminAPI = async (taskId: string, status: boolean) => {
 	try {
-		const response = await axiosInstance.patch<TaskResponse>(`/admin/gamification/tasks/${taskId}/toggle-list`);
+		const response = await axiosInstance.patch<TaskResponse>(`/admin/gamification/tasks/${taskId}/toggle-list`, { status });
 		console.log("toggleTaskListStatusAdminAPI response:", response.data); // Debug log
 		return response.data.task;
 	} catch (error: any) {
