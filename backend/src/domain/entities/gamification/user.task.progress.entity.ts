@@ -2,7 +2,7 @@ export interface IUserTaskProgress {
 	userId: string;
 	taskId: string;
 	currentCount: number;
-	completed: boolean;
+	isCompleted: boolean;
 	completedAt?: Date;
 }
 
@@ -13,11 +13,11 @@ export class UserTaskProgressEntity {
 	private _completed: boolean;
 	private _completedAt?: Date;
 
-	constructor(userId: string, taskId: string, currentCount: number, completed: boolean = false, completedAt?: Date) {
+	constructor(userId: string, taskId: string, currentCount: number, isCompleted: boolean = false, completedAt?: Date) {
 		this._userId = userId;
 		this._taskId = taskId;
 		this._currentCount = currentCount;
-		this._completed = completed;
+		this._completed = isCompleted;
 		this._completedAt = completedAt;
 	}
 

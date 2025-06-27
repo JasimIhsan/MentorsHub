@@ -31,7 +31,10 @@ export class UserProgressEntity {
 		while (this._totalXP >= this._xpToNextLevel) {
 			this._totalXP -= this._xpToNextLevel;
 			this._level++;
-			this._xpToNextLevel = this._level * 100; // example level formula
+			// 1.5x the current requirement
+			const rawXP = this._xpToNextLevel * 1.5;
+			// Round up to the next multiple of 50
+			this._xpToNextLevel = Math.ceil(rawXP / 50) * 50;
 		}
 		this._tasksCompleted++;
 	}

@@ -2,6 +2,13 @@ import { GamificationTaskEntity } from "../../domain/entities/gamification/gamif
 import { UserProgressEntity } from "../../domain/entities/gamification/user.progress.entity";
 import { UserTaskProgressEntity } from "../../domain/entities/gamification/user.task.progress.entity";
 
+
+export enum ActionType {
+	GIVE_FEEDBACK= "GIVE_FEEDBACK",
+	COMPLETE_SESSION = "COMPLETE_SESSION",
+}
+
+
 export interface IGamificationTaskDTO {
 	id: string;
 	title: string;

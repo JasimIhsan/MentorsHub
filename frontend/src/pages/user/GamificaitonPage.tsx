@@ -10,7 +10,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { fetchListedGamificationTasks, fetchUserProgressAPI } from "@/api/gamification.api.service";
 import { useDebounce } from "@/hooks/useDebounce";
-import axios from "axios"; // Import axios
 
 // Define TaskWithProgress interface
 export interface TaskWithProgress {
@@ -89,21 +88,21 @@ function UserStats({ stats }: UserStatsProps) {
 	const levelProgress = ((stats.totalXP % stats.xpToNextLevel) / stats.xpToNextLevel) * 100;
 
 	return (
-		<motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-6 text-white mb-8">
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+		<motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-r from-purple-900 to-purple-700 rounded-2xl p-6 text-white mb-8">
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
 				<div className="text-center">
 					<div className="flex items-center justify-center gap-2 mb-2">
 						<Zap className="w-6 h-6 text-yellow-300" aria-hidden="true" />
 						<span className="text-sm font-medium opacity-90">Total XP</span>
 					</div>
-					<div className="text-3xl font-bold">{stats.totalXP.toLocaleString()}</div>
+					<div className="text-3xl font-bold">{stats.totalXP.toLocaleString()} XP</div>
 				</div>
 				<div className="text-center">
 					<div className="flex items-center justify-center gap-2 mb-2">
-						<Trophy className="w-6 h-6 text-yellow-300" aria-hidden="true" />
-						<span className="text-sm font-medium opacity-90">Level</span>
+						<Trophy className="w-7 h-7 text-yellow-300" aria-hidden="true" />
+						<span className="text-3xl font-bold">Level - </span>
+						<div className="text-3xl font-bold">{stats.level}</div>
 					</div>
-					<div className="text-3xl font-bold">{stats.level}</div>
 					<div className="mt-2">
 						<Progress value={levelProgress} className="h-2 bg-white/20 [&>div]:bg-yellow-300" aria-label="Level progress" />
 						<div className="text-xs opacity-75 mt-1">{stats.xpToNextLevel.toLocaleString()} XP to next level</div>
@@ -177,7 +176,7 @@ export default function GamificationPage() {
 			fetchTasks(currentPage);
 			fetchUserStats();
 		}
-	}, [userId, filter, debouncedSearchTerm, currentPage]);
+	}, [userId, debouncedSearchTerm, currentPage]);
 
 	// Check for newly completed tasks
 	useEffect(() => {

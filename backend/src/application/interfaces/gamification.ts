@@ -32,3 +32,7 @@ export interface IGetUserProgressUseCase {
 export interface ICreateUserProgressUseCase {
 	execute(userId: string): Promise<void>;
 }
+
+export interface IUpdateUserTaskProgressUseCase {
+	execute(userId: string, actionType: string): Promise<void>;
+}

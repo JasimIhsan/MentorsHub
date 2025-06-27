@@ -23,9 +23,6 @@ export class UserTaskProgressRepositoryImpl implements IUserTaskProgressReposito
 		}
 	}
 
-	/* -------------------------------------------------- *
-	 *  Upsert (save) a progress record                   *
-	 * -------------------------------------------------- */
 	async save(progress: UserTaskProgressEntity): Promise<void> {
 		try {
 			await UserTaskProgressModel.updateOne(
@@ -33,6 +30,7 @@ export class UserTaskProgressRepositoryImpl implements IUserTaskProgressReposito
 				{
 					currentCount: progress.currentCount,
 					completed: progress.isCompleted,
+					completedAt: progress.completedAt,
 				},
 				{ upsert: true }
 			);
