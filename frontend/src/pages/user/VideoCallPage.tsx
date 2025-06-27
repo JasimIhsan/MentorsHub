@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon, ScreenShareIcon, HandIcon, ListIcon, PhoneOffIcon, UsersIcon } from "lucide-react";
+import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon, ScreenShareIcon, HandIcon, ListIcon, PhoneOffIcon, UsersIcon, CircleDotIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import axiosInstance from "@/api/config/api.config";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter, DrawerClose } from "@/components/ui/drawer";
@@ -40,6 +40,9 @@ export const VideoCallPage = () => {
 	const [rejectionMessage, setRejectionMessage] = useState<string | null>(null);
 	const [remoteParticipant, setRemoteParticipant] = useState<{ name: string; avatar: string }>({ name: "", avatar: "" });
 	const [role, setRole] = useState<"mentor" | "user" | null>(null);
+	const [isScreenRecording, setIsScreenRecording] = useState(false); // Track screen recording state
+	const screenRecorderRef = useRef<MediaRecorder | null>(null); // Reference to screen MediaRecorder
+	const screenRecordedChunksRef = useRef<Blob[]>([]); // Store screen recorded data chunks
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -66,6 +69,9 @@ export const VideoCallPage = () => {
 			if (localStreamRef.current) {
 				localStreamRef.current.getTracks().forEach((track) => track.stop());
 				localStreamRef.current = null;
+			}
+			if (screenRecorderRef.current && screenRecorderRef.current.state === "recording") {
+				screenRecorderRef.current.stop();
 			}
 		};
 	}, [isUserWaiting]);
@@ -398,11 +404,64 @@ export const VideoCallPage = () => {
 		}
 	};
 
+	// Start screen recording
+	const startScreenRecording = async () => {
+		try {
+			const screenStream = await navigator.mediaDevices.getDisplayMedia({
+				video: true,
+				audio: true,
+			});
+			screenRecordedChunksRef.current = [];
+			screenRecorderRef.current = new MediaRecorder(screenStream, { mimeType: "video/webm;codecs=vp8,opus" });
+
+			// Collect data chunks
+			screenRecorderRef.current.ondataavailable = (event) => {
+				if (event.data.size > 0) {
+					screenRecordedChunksRef.current.push(event.data);
+				}
+			};
+
+			// Handle recording stop and create downloadable file
+			screenRecorderRef.current.onstop = () => {
+				const blob = new Blob(screenRecordedChunksRef.current, { type: "video/webm" });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = `screen-recording-${new Date().toISOString()}.webm`;
+				a.click();
+				URL.revokeObjectURL(url);
+				screenRecordedChunksRef.current = [];
+				screenStream.getTracks().forEach((track) => track.stop());
+			};
+
+			screenRecorderRef.current.start();
+			setIsScreenRecording(true);
+			toast.success("Screen recording started");
+		} catch (error) {
+			console.error("Error starting screen recording:", error);
+			toast.error("Failed to start screen recording. Please check permissions.");
+		}
+	};
+
+	// Toggle screen recording
+	const toggleScreenRecording = () => {
+		if (isScreenRecording && screenRecorderRef.current) {
+			screenRecorderRef.current.stop();
+			setIsScreenRecording(false);
+			toast.info("Screen recording stopped and saved");
+		} else {
+			startScreenRecording();
+		}
+	};
+
 	const endCall = () => {
 		if (call) call.close();
 		if (localStreamRef.current) {
 			localStreamRef.current.getTracks().forEach((track) => track.stop());
 			localStreamRef.current = null;
+		}
+		if (screenRecorderRef.current && screenRecorderRef.current.state === "recording") {
+			screenRecorderRef.current.stop();
 		}
 		if (peer) peer.destroy();
 		if (role === "user") navigate("/sessions", { replace: true });
@@ -524,6 +583,7 @@ export const VideoCallPage = () => {
 					isScreenSharing={isScreenSharing}
 					isSidebarOpen={isSidebarOpen}
 					isHandRaised={isHandRaised}
+					isScreenRecording={isScreenRecording}
 					role={role}
 					joinRequestsCount={joinRequests.length}
 					onToggleMute={toggleMute}
@@ -531,6 +591,7 @@ export const VideoCallPage = () => {
 					onToggleScreenShare={toggleScreenShare}
 					onToggleSidebar={toggleSidebar}
 					onToggleRaiseHand={toggleRaiseHand}
+					onToggleScreenRecording={toggleScreenRecording}
 					onEndCall={endCall}
 					onOpenJoinRequests={() => setShowJoinRequestDrawer(true)}
 				/>
@@ -686,6 +747,7 @@ interface ControlBarProps {
 	isScreenSharing?: boolean;
 	isSidebarOpen?: boolean;
 	isHandRaised?: boolean;
+	isScreenRecording?: boolean;
 	role?: "mentor" | "user" | null;
 	joinRequestsCount?: number;
 	onToggleMute?: () => void;
@@ -693,6 +755,7 @@ interface ControlBarProps {
 	onToggleScreenShare?: () => void;
 	onToggleSidebar?: () => void;
 	onToggleRaiseHand?: () => void;
+	onToggleScreenRecording?: () => void;
 	onEndCall?: () => void;
 	onOpenJoinRequests?: () => void;
 }
@@ -703,6 +766,7 @@ const ControlBar = ({
 	isScreenSharing,
 	isSidebarOpen,
 	isHandRaised,
+	isScreenRecording,
 	role,
 	joinRequestsCount = 0,
 	onToggleMute,
@@ -710,6 +774,7 @@ const ControlBar = ({
 	onToggleScreenShare,
 	onToggleSidebar,
 	onToggleRaiseHand,
+	onToggleScreenRecording,
 	onEndCall,
 	onOpenJoinRequests,
 }: ControlBarProps) => {
@@ -746,6 +811,16 @@ const ControlBar = ({
 							</TooltipTrigger>
 							<TooltipContent>
 								<p>{isScreenSharing ? "Stop sharing" : "Share screen"}</p>
+							</TooltipContent>
+						</Tooltip>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant={isScreenRecording ? "destructive" : "secondary"} size="icon" onClick={onToggleScreenRecording} className="rounded-full h-12 w-12">
+									<CircleDotIcon />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>{isScreenRecording ? "Stop screen recording" : "Start screen recording"}</p>
 							</TooltipContent>
 						</Tooltip>
 					</div>
