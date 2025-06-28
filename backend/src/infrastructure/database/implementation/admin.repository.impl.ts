@@ -1,4 +1,3 @@
-import { AdminDTO } from "../../../application/dtos/admin.dtos";
 import { IAdminRepository } from "../../../domain/repositories/admin.repository";
 import { AdminEntity } from "../../../domain/entities/admin.entity";
 import { AdminModel } from "../models/admin/admin.model";
@@ -9,31 +8,29 @@ export class AdminRepositoryImpl implements IAdminRepository {
 		try {
 			const adminModel = new AdminModel(admin);
 			const savedAdmin = await adminModel.save();
-			return AdminEntity.fromDBDocument(savedAdmin);
+			return new AdminEntity(savedAdmin);
 		} catch (error) {
 			return handleExceptionError(error, "Error creating admin");
 		}
 	}
 
-	async findAdminById(id: string): Promise<AdminDTO | null> {
+	async findAdminById(id: string): Promise<AdminEntity | null> {
 		try {
 			const adminModel = await AdminModel.findById(id);
 			if (!adminModel) return null;
 
-			const adminEntity = AdminEntity.fromDBDocument(adminModel);
-			return AdminDTO.fromEntity(adminEntity);
+			return new AdminEntity(adminModel);
 		} catch (error) {
 			return handleExceptionError(error, "Error finding admin by ID");
 		}
 	}
 
-	async findAdminByUsername(username: string): Promise<AdminDTO | null> {
+	async findAdminByUsername(username: string): Promise<AdminEntity | null> {
 		try {
 			const adminModel = await AdminModel.findOne({ username });
 			if (!adminModel) return null;
 
-			const adminEntity = AdminEntity.fromDBDocument(adminModel);
-			return AdminDTO.fromEntity(adminEntity);
+			return new AdminEntity(adminModel);
 		} catch (error) {
 			return handleExceptionError(error, "Error finding admin by username");
 		}

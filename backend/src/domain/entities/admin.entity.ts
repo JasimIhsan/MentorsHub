@@ -33,17 +33,6 @@ export class AdminEntity {
 		});
 	}
 
-	static fromDBDocument(doc: AdminInterface): AdminEntity {
-		return new AdminEntity({
-			id: doc.id,
-			name: doc.name,
-			avatar: doc.avatar,
-			username: doc.username,
-			password: doc.password,
-			role: doc.role,
-		});
-	}
-
 	async comparePassword(password: string): Promise<boolean> {
 		return await bcrypt.compare(password, this.password);
 	}
