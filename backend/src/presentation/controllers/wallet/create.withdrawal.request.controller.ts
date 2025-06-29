@@ -10,8 +10,8 @@ export class CreateWithdrawalRequestController {
 		try {
 			const request = await this.createWithdrawalRequestUseCase.execute(req.body);
 			res.status(HttpStatusCode.CREATED).json({ success: true, request });
-		} catch (error: any) {
-			logger.error(`❌ Error in CreateWithdrawalRequestController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in CreateWithdrawalRequestController: ${error}`);
 			next(error);
 		}
 	}

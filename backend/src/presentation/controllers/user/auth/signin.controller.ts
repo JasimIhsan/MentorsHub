@@ -29,8 +29,8 @@ export class SigninController {
 			});
 
 			res.status(HttpStatusCode.OK).json({ success: true, user, accessToken, refreshToken });
-	} catch (error: any) {
-			logger.error(`❌ Error in SigninController: ${error.message}`);
+	} catch (error) {
+			logger.error(`❌ Error in SigninController: ${error}`);
 			next(error);
 		}
 	}

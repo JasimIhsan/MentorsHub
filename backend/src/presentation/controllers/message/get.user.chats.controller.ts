@@ -10,8 +10,8 @@ export class GetUserChatsController {
 			const { userId } = req.params;
 			const chats = await this.getUserChatsUseCase.execute(userId);
 			res.status(HttpStatusCode.OK).json({ success: true, chats });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetUserChatsController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetUserChatsController: ${error}`);
 			next(error);
 		}
 	}

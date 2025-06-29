@@ -11,8 +11,8 @@ export class UpdateUserStatusController {
 			const { userId } = req.params;
 			const updatedUser = await this.updateUserStatusUsecase.execute(userId);
 			res.status(HttpStatusCode.OK).json({ success: true, user: updatedUser });
-		} catch (error: any) {
-			logger.error(`❌ Error in UpdateUserStatusController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in UpdateUserStatusController: ${error}`);
 			next(error);
 		}
 	}

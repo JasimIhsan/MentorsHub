@@ -1,5 +1,6 @@
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IPaySessionWithGatewayUseCase } from "../../../interfaces/session";
 
 export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCase {
@@ -7,7 +8,7 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 
 	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void> {
 		const session = await this.sessionRepo.getSessionById(sessionId);
-		if (!session) throw new Error("Session not found");
+		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 
 		// ✅ Check if session is expired
 		const sessionDate = new Date(session.getDate());

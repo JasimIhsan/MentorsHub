@@ -1,8 +1,8 @@
 import { IMentorDTO } from "../../../application/dtos/mentor.dtos";
 import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
-import { Availability, IMentorInterface, MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
+import { MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
 import { MentorProfileModel } from "../models/user/mentor.details.model";
-import { IUsers, UserModel } from "../models/user/user.model";
+import { UserModel } from "../models/user/user.model";
 import { IAvailabilityDTO } from "../../../application/dtos/availability.dto";
 
 // Error handler

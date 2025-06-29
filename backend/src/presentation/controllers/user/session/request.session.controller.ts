@@ -12,8 +12,8 @@ export class RequestSessionController {
 
 			const session = await this.requestSessionUsecase.execute(requestData);
 			res.status(HttpStatusCode.OK).json({ success: true, session, message: "Session requested successfully" });
-		} catch (error: any) {
-			logger.error(`❌ Error in RequestSessionController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in RequestSessionController: ${error}`);
 			next(error);
 		}
 	}

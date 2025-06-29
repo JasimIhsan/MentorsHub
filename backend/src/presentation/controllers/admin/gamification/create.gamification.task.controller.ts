@@ -11,7 +11,7 @@ export class CreateGamificationTaskController {
 			const task = await this.useCase.execute({ title, xpReward, targetCount, actionType });
 
 			res.status(200).json({ success: true, message: "Task created successfully", task });
-		} catch (error: any) {
+		} catch (error) {
 			logger.error(`❌ Error in CreateGamificationTaskController: ${error}`);
 			next(error);
 		}

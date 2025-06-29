@@ -30,8 +30,8 @@ export class GoogleAuthController {
 			});
 
 			res.status(HttpStatusCode.OK).json({ success: true, user: user });
-		} catch (error: any) {
-			logger.error(`❌ Error in GoogleAuthController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GoogleAuthController: ${error}`);
 			next(error);
 		}
 	}

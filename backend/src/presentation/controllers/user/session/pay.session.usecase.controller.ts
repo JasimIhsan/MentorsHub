@@ -16,8 +16,8 @@ export class PaySessionWithWalletController {
 				success: true,
 				message: "Session paid successfully with wallet",
 			});
-		} catch (error: any) {
-			logger.error(`❌ Error in PayWithWalletController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in PayWithWalletController: ${error}`);
 			next(error);
 		}
 	}

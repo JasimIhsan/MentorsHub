@@ -37,8 +37,8 @@ export class DownloadDocumentsController {
 					console.error("Error fetching S3 file:", err);
 					res.status(500).send("Internal server error");
 				});
-		} catch (error: any) {
-			logger.error(`❌ Error in DownloadDocumentsController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in DownloadDocumentsController: ${error}`);
 			next(error);
 		}
 	}

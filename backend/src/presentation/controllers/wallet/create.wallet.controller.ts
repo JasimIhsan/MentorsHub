@@ -11,8 +11,8 @@ export class CreateWalletController {
 		try {
 			const wallet = await this.createWalletUseCase.execute(userId, role);
 			res.status(HttpStatusCode.CREATED).json({ success: true, wallet });
-		} catch (error: any) {
-			logger.error(`❌ Error in CreateWalletController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in CreateWalletController: ${error}`);
 			next(error);
 		}
 	}

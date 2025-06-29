@@ -16,8 +16,8 @@ export class SendOtpController {
 			}
 			await this.sendOtpUseCase.execute(email);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "OTP sent successfully" });
-		} catch (error: any) {
-			logger.error(`❌ Error in SendOtpController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in SendOtpController: ${error}`);
 			next(error);
 		}
 	}

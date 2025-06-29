@@ -9,7 +9,7 @@ const userRepo = new UserRepositoryImpl();
 
 export const checkUserStatus = (req: Request, res: Response, next: NextFunction) => {
 	const user = req.user as UserEntity;
-	if (user.getStatus() === "blocked") {
+	if (user.status === "blocked") {
 		res.status(HttpStatusCode.FORBIDDEN).json({ success: false, blocked: true, message: CommonStringMessage.BLOCKED });
 		return;
 	}
@@ -23,7 +23,7 @@ export const checkUserStatusInLogin = async (req: Request, res: Response, next: 
 		return next();
 	}
 
-	if (user.getStatus() === "blocked") {
+	if (user.status === "blocked") {
 		res.status(HttpStatusCode.FORBIDDEN).json({ success: false, blocked: true, message: CommonStringMessage.BLOCKED });
 		return;
 	}

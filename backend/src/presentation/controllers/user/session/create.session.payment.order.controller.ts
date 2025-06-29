@@ -14,8 +14,8 @@ export class CreateSessionPaymentOrderController {
 
 			const order = await this.createSessionPaymentOrderUseCase.execute(sessionId, userId);
 			res.status(HttpStatusCode.OK).json({ success: true, order });
-		} catch (error: any) {
-			logger.error(`❌ Error in CreateSessionPaymentOrderController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in CreateSessionPaymentOrderController: ${error}`);
 			next(error);
 		}
 	}

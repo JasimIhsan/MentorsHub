@@ -21,8 +21,8 @@ export class RefreshTokenController {
 			});
 
 			res.status(HttpStatusCode.OK).json({ success: true, accessToken: newAccessToken, message: "New access token generated" });
-		} catch (error: any) {
-			logger.error(`❌ Error in RefreshTokenController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in RefreshTokenController: ${error}`);
 			next(error);
 		}
 	}

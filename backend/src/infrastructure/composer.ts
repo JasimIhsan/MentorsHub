@@ -30,10 +30,11 @@ import { IChatRepository } from "../domain/repositories/chat.repository";
 import { ChatRepositoryImpl } from "./database/implementation/chat.repository.impl";
 import { RazorpayGatewayImpl } from "./services/payment/razorpay.gateway.impl";
 import { GamificationTaskRepositoryImpl } from "./database/implementation/gamification/gamification.task.repository.impl";
-import { UserTaskProgressEntity } from "../domain/entities/gamification/user.task.progress.entity";
 import { UserTaskProgressRepositoryImpl } from "./database/implementation/gamification/user.task.progress.repository.impl";
 import { ActionTypeRepositoryImpl } from "./database/implementation/gamification/action.type.repository.imp";
 import { UserProgressRepositoryImpl } from "./database/implementation/gamification/user.progress.repository.imp";
+import { IHashService } from "../application/interfaces/services/hash.service";
+import { HashServiceImpl } from "./services/hash-serveice/hash.service";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -52,6 +53,7 @@ export const actionTypeRepository = new ActionTypeRepositoryImpl();
 export const userProgressRepository = new UserProgressRepositoryImpl();
 
 // Initialize services implementation
+export const hashService: IHashService = new HashServiceImpl();
 export const emailService: IEmailService = new EmailServiceImpl();
 export const redisService: ICacheRepository = new RedisCacheRepository();
 export const tokenInterface: ITokenService = new TokenServicesImpl(redisService);

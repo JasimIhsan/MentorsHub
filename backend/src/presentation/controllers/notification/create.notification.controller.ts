@@ -11,8 +11,8 @@ export class CreateNotificationController {
 			const { userId, title, message, type } = req.body;
 			const notification = await this.createNotificationUseCase.execute(userId, title, message, type);
 			res.status(HttpStatusCode.OK).json({ success: true, data: notification });
-		} catch (error: any) {
-			logger.error(`❌ Error in CreateNotificationController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in CreateNotificationController: ${error}`);
 			next(error);
 		}
 	}

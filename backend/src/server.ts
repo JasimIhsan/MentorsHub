@@ -12,7 +12,7 @@ import { logger } from "./infrastructure/utils/logger";
 import passport from "passport";
 import { googleAuthRouter } from "./presentation/routes/user/google.auth.routes";
 import { configurePassport } from "./infrastructure/auth/passport/passport.config";
-import { tokenInterface, userRepository } from "./infrastructure/composer";
+import { hashService, tokenInterface, userRepository } from "./infrastructure/composer";
 import { adminAuthRouter } from "./presentation/routes/admin/admin.auth.routes";
 import { usertabRouter } from "./presentation/routes/admin/admin.usertab.routes";
 import { userProfileRoutes } from "./presentation/routes/user/user.profile.routes";
@@ -52,7 +52,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(passport.initialize());
-configurePassport(userRepository, tokenInterface);
+configurePassport(userRepository, tokenInterface, hashService);
 app.use(helmet());
 app.use(
 	cors({

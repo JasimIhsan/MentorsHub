@@ -17,8 +17,8 @@ export class GetAllMentorsController {
 				status: status as string,
 			});
 			res.status(HttpStatusCode.OK).json({ success: true, ...mentors });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetAllMentorsController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetAllMentorsController: ${error}`);
 			next(error);
 		}
 	}

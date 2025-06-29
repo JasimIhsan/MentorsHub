@@ -43,14 +43,14 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 				return;
 			}
 
-			if (user.getStatus() === "blocked") {
+			if (user.status === "blocked") {
 				res.status(HttpStatusCode.FORBIDDEN).json({ success: false, blocked: true, message: CommonStringMessage.BLOCKED });
 				return;
 			}
 
 			req.user = {
-				id: user.getId() as string,
-				role: user.getRole() === "mentor" ? RoleEnum.MENTOR : RoleEnum.USER,
+				id: user.id as string,
+				role: user.role === "mentor" ? RoleEnum.MENTOR : RoleEnum.USER,
 			};
 
 			return next();

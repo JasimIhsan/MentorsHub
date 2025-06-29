@@ -34,9 +34,9 @@ export class CreateReviewUseCase implements ICreateReviewUseCase {
 		// 5. Update review entity with reviewer info
 		review.updateReviewData({
 			reviewerId: {
-				firstName: reviewer.getFirstName(),
-				lastName: reviewer.getLastName(),
-				avatar: reviewer.getAvatar() ?? "",
+				firstName: reviewer.firstName,
+				lastName: reviewer.lastName,
+				avatar: reviewer.avatar ?? "",
 				id: data.reviewerId,
 			},
 		});

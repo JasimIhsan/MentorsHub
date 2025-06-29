@@ -47,9 +47,9 @@ export class UpdateReviewUseCase implements IUpdateReviewUseCase {
 		updatedReview.updateReviewData({
 			reviewerId: {
 				id: data.reviewerId,
-				firstName: reviewer.getFirstName(),
-				lastName: reviewer.getLastName(),
-				avatar: reviewer.getAvatar() ?? "",
+				firstName: reviewer.firstName,
+				lastName: reviewer.lastName,
+				avatar: reviewer.avatar ?? "",
 			},
 		});
 

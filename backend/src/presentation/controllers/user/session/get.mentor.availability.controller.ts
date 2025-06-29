@@ -19,8 +19,8 @@ export class GetMentorAvailabilityController {
 			console.log("availability: ", availability);
 
 			res.status(HttpStatusCode.OK).json({ success: true, availability });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetMentorAvailabilityController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetMentorAvailabilityController: ${error}`);
 			next(error);
 		}
 	}

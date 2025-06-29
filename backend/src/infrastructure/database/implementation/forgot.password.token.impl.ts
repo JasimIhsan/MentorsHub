@@ -41,12 +41,10 @@ export class ForgotPasswordResetTokenImpl implements IForgotPasswordTokensReposi
 		}
 	}
 
-	async findUserByResetToken(token: string): Promise<UserEntity | null> {
+	async isTokenValid(token: string): Promise<boolean> {
 		try {
-			const tokenDoc = await ForgotTokenModel.findOne({ token }).populate("userId");
-			if (!tokenDoc || !tokenDoc.userId) return null;
-
-			return UserEntity.fromDBDocument(tokenDoc.userId);
+			const tokenDoc = await ForgotTokenModel.findOne({ token });
+			return !!tokenDoc;
 		} catch (error) {
 			return handleExceptionError(error, "Error finding user by forgot password token");
 		}

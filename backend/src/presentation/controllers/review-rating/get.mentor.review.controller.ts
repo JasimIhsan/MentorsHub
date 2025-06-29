@@ -22,8 +22,8 @@ export class GetMentorReviewsController {
 			});
 
 			res.status(200).json({ success: true, ...reviews });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetMentorReviewsController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetMentorReviewsController: ${error}`);
 			next(error);
 		}
 	}

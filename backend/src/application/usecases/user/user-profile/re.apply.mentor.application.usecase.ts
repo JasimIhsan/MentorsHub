@@ -1,7 +1,7 @@
 import { IMentorProfileRepository } from "../../../../domain/repositories/mentor.details.repository";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { IMentorInterface, MentorProfileEntity } from "../../../../domain/entities/mentor.detailes.entity";
-import { UserEntity, UserInterface } from "../../../../domain/entities/user.entity";
+import { UserEntity, UserEntityProps } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IUploadMentorDocuments } from "../../../interfaces/documents";
 import { IReApplyMentorApplicationUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
@@ -9,13 +9,13 @@ import { IReApplyMentorApplicationUseCase } from "../../../interfaces/user/user.
 export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicationUseCase {
 	constructor(private mentorProfileRepo: IMentorProfileRepository, private userRepo: IUserRepository, private uploadDocumentUseCase: IUploadMentorDocuments) {}
 
-	async execute(userId: string, data: IMentorInterface, userData: Partial<UserInterface>, documents: Express.Multer.File[]): Promise<{ savedUser: UserEntity; mentorProfile: MentorProfileEntity }> {
-		const existingUser = await this.userRepo.findUserById(userId);
-		if (!existingUser) throw new Error(CommonStringMessage.USER_NOT_FOUND);
-		if (existingUser.getRole() === "mentor") {
+	async execute(userId: string, data: IMentorInterface, userData: Partial<UserEntityProps>, documents: Express.Multer.File[]): Promise<{ savedUser: UserEntity; mentorProfile: MentorProfileEntity }> {
+		const userEntity = await this.userRepo.findUserById(userId);
+		if (!userEntity) throw new Error(CommonStringMessage.USER_NOT_FOUND);
+		if (userEntity.role === "mentor") {
 			throw new Error("You are already a mentor");
 		}
-		if (existingUser.getMentorRequestStatus() === "pending" || existingUser.getMentorRequestStatus() === "approved") {
+		if (userEntity.mentorRequestStatus === "pending" || userEntity.mentorRequestStatus === "approved") {
 			throw new Error("Mentor request is already approved or in process");
 		}
 
@@ -34,7 +34,7 @@ export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicatio
 					})
 				)
 			);
-		} else if (existingProfile && existingUser.getMentorRequestStatus() === "rejected") {
+		} else if (existingProfile && userEntity.mentorRequestStatus === "rejected") {
 			documentUrls = existingProfile.getDocuments() || [];
 		}
 
@@ -46,7 +46,7 @@ export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicatio
 
 		let mentorProfile: MentorProfileEntity;
 
-		if (existingProfile && existingUser.getMentorRequestStatus() === "rejected") {
+		if (existingProfile && userEntity.mentorRequestStatus === "rejected") {
 			// Update existing mentor profile for re-application
 			existingProfile.updateMentorProfile(updateData);
 			mentorProfile = await this.mentorProfileRepo.updateMentorProfile(userId, existingProfile);
@@ -57,7 +57,7 @@ export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicatio
 		}
 
 		// Update user details with pending status
-		const updatedUserData: Partial<UserInterface> = {
+		const updatedUserData: Partial<UserEntityProps> = {
 			...userData,
 			mentorRequestStatus: "pending",
 		};

@@ -38,8 +38,8 @@ export class GetAllUsersController {
 				totalPages: result.totalPages,
 				currentPage: result.currentPage,
 			});
-		} catch (error: any) {
-			logger.error(`❌ Error in GetAllUsersController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetAllUsersController: ${error}`);
 			next(error);
 		}
 	}

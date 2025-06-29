@@ -11,7 +11,7 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
 	async execute(email: string): Promise<void> {
 		const user = await this.userRepo.findUserByEmail(email);
 		if (!user) throw new Error(CommonStringMessage.USER_NOT_FOUND);
-		const userId = user.getId();
+		const userId = user.id;
 		if(!userId) throw new Error(CommonStringMessage.USER_NOT_FOUND);
 		const token = crypto.randomBytes(32).toString("hex");
 		await this.tokenRepo.createToken(userId, token, 10);

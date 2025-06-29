@@ -1,11 +1,8 @@
-import { ObjectId } from "mongoose";
-import bcrypt from "bcrypt";
-// import { IMentorInterface } from "./mentor.detailes.entity";
-
 export type UserRole = "user" | "mentor";
+export type UserStatus = "blocked" | "unblocked";
+export type MentorRequestStatus = "pending" | "approved" | "rejected" | "not-requested";
 
-// Interface representing the user structure
-export interface UserInterface {
+export interface UserEntityProps {
 	id?: string;
 	email: string;
 	firstName: string;
@@ -13,226 +10,192 @@ export interface UserInterface {
 	password: string;
 	role?: UserRole;
 	avatar?: string | null;
-	status: "blocked" | "unblocked";
+	status?: UserStatus;
 	bio?: string | null;
 	interests?: string[] | null;
 	skills?: string[] | null;
-	badges?: ObjectId[] | null;
+	badges?: string[] | null;
 	sessionCompleted?: number;
-	averageRating: number | null;
-	totalReviews: number | null;
-	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
+	averageRating?: number | null;
+	totalReviews?: number | null;
+	mentorRequestStatus?: MentorRequestStatus;
 	googleId?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date | null;
 }
 
-// UserEntity Class
 export class UserEntity {
-	private id?: string;
-	private email: string;
-	private firstName: string;
-	private lastName: string;
-	private password: string;
-	private role: UserRole;
-	private avatar?: string | null;
-	private bio?: string | null;
-	private interests?: string[] | null;
-	private status: "blocked" | "unblocked";
-	private skills?: string[] | null;
-	private badges?: ObjectId[] | null;
-	private sessionCompleted?: number;
-	private averageRating: number | null;
-	private totalReviews: number | null;
-	private mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
-	private googleId?: string | null;
-	private createdAt: Date;
-	private updatedAt?: Date | null;
+	private _id?: string;
+	private _email: string;
+	private _firstName: string;
+	private _lastName: string;
+	private _password: string;
+	private _role: UserRole;
+	private _avatar?: string | null;
+	private _bio?: string | null;
+	private _interests?: string[] | null;
+	private _skills?: string[] | null;
+	private _badges?: string[] | null;
+	private _sessionCompleted: number;
+	private _averageRating: number | null;
+	private _totalReviews: number | null;
+	private _status: UserStatus;
+	private _mentorRequestStatus: MentorRequestStatus;
+	private _googleId?: string | null;
+	private _createdAt: Date;
+	private _updatedAt: Date | null;
 
-	constructor(user: UserInterface) {
-		this.id = user.id;
-		this.email = user.email;
-		this.firstName = user.firstName;
-		this.lastName = user.lastName;
-		this.password = user.password;
-		this.role = user.role || "user";
-		this.status = user.status || "unblocked";
-		this.avatar = user.avatar ?? null;
-		this.bio = user.bio ?? null;
-		this.interests = user.interests ?? null;
-		this.skills = user.skills ?? null;
-		this.badges = user.badges ?? null;
-		this.averageRating = user.averageRating ?? null;
-		this.totalReviews = user.totalReviews ?? null;
-		this.sessionCompleted = user.sessionCompleted ?? 0;
-		this.mentorRequestStatus = user.mentorRequestStatus || "not-requested";
-		this.googleId = user.googleId ?? null;
-		this.createdAt = user.createdAt ?? new Date();
-		this.updatedAt = user.updatedAt ?? null;
+	constructor(user: UserEntityProps) {
+		this._id = user.id;
+		this._email = user.email;
+		this._firstName = user.firstName;
+		this._lastName = user.lastName;
+		this._password = user.password;
+		this._role = user.role ?? "user";
+		this._status = user.status ?? "unblocked";
+		this._avatar = user.avatar ?? null;
+		this._bio = user.bio ?? null;
+		this._interests = user.interests ?? null;
+		this._skills = user.skills ?? null;
+		this._badges = user.badges ?? null;
+		this._sessionCompleted = user.sessionCompleted ?? 0;
+		this._averageRating = user.averageRating ?? null;
+		this._totalReviews = user.totalReviews ?? null;
+		this._mentorRequestStatus = user.mentorRequestStatus ?? "not-requested";
+		this._googleId = user.googleId ?? null;
+		this._createdAt = user.createdAt ?? new Date();
+		this._updatedAt = user.updatedAt ?? null;
 	}
 
-	// Static method to create a new user with hashed password
-
-	static async create(email: string, password: string, firstName: string, lastName: string, role: UserRole = "user"): Promise<UserEntity> {
-		const hashedPassword = await bcrypt.hash(password, 10);
-		return new UserEntity({
-			email,
-			password: hashedPassword,
-			firstName,
-			lastName,
-			status: "unblocked",
-			mentorRequestStatus: "not-requested",
-			role,
-			averageRating: 0,
-			totalReviews: 0,
-			sessionCompleted: 0,
-			createdAt: new Date(),
-		});
+	// ── Accessors ────────────────────────
+	get id(): string | undefined {
+		return this._id;
 	}
 
-	static async createWithGoogle(email: string, password: string, firstName: string, lastName: string, googleId: string, avatar: string): Promise<UserEntity> {
-		const hashedPassword = await bcrypt.hash(password, 10);
-		return new UserEntity({
-			email,
-			password: hashedPassword,
-			firstName,
-			lastName,
-			status: "unblocked",
-			sessionCompleted: 0,
-			averageRating: 0,
-			totalReviews: 0,
-			mentorRequestStatus: "not-requested",
-			googleId: googleId ?? null,
-			avatar,
-			createdAt: new Date(),
-		});
+	get email(): string {
+		return this._email;
 	}
 
-	// Convert MongoDB user document to UserEntity
-	static fromDBDocument(userDoc: any): UserEntity {
-		return new UserEntity({
-			id: userDoc._id?.toString(),
-			email: userDoc.email,
-			password: userDoc.password,
-			firstName: userDoc.firstName,
-			lastName: userDoc.lastName,
-			role: userDoc.role || "user",
-			avatar: userDoc.avatar ?? null,
-			bio: userDoc.bio ?? null,
-			interests: userDoc.interests ?? null,
-			skills: userDoc.skills ?? null,
-			status: userDoc.status || "unblocked",
-			averageRating: userDoc.averageRating ?? null,
-			totalReviews: userDoc.totalReviews ?? null,
-			googleId: userDoc.googleId ?? null,
-			mentorRequestStatus: userDoc.mentorRequestStatus || "not-requested",
-			sessionCompleted: userDoc.sessionCompleted ?? 0,
-			badges: userDoc.badges ?? null,
-			createdAt: userDoc.createdAt ?? new Date(),
-			updatedAt: userDoc.updatedAt ?? null,
-		});
+	get firstName(): string {
+		return this._firstName;
 	}
 
-	// Hash password
-	static async hashPassword(password: string): Promise<string> {
-		return await bcrypt.hash(password, 10);
+	get lastName(): string {
+		return this._lastName;
 	}
 
-	// Validate password
-	async isPasswordValid(plainPassword: string): Promise<boolean> {
-		return bcrypt.compare(plainPassword, this.password);
+	get fullName(): string {
+		return `${this._firstName} ${this._lastName}`;
 	}
 
-	// Update user details
-	updateUserDetails(updatedData: Partial<UserInterface>) {
-		if (updatedData.password !== undefined) this.password = updatedData.password;
-		if (updatedData.email !== undefined) this.email = updatedData.email;
-		if (updatedData.firstName !== undefined) this.firstName = updatedData.firstName;
-		if (updatedData.lastName !== undefined) this.lastName = updatedData.lastName;
-		if (updatedData.role !== undefined) this.role = updatedData.role;
-		if (updatedData.avatar !== undefined) this.avatar = updatedData.avatar;
-		if (updatedData.bio !== undefined) this.bio = updatedData.bio;
-		if (updatedData.interests !== undefined) this.interests = updatedData.interests;
-		if (updatedData.skills !== undefined) this.skills = updatedData.skills;
-		if (updatedData.badges !== undefined) this.badges = updatedData.badges;
-		if (updatedData.sessionCompleted !== undefined) this.sessionCompleted = updatedData.sessionCompleted;
-		if (updatedData.averageRating !== undefined) this.averageRating = updatedData.averageRating;
-		if (updatedData.totalReviews !== undefined) this.totalReviews = updatedData.totalReviews;
-		if (updatedData.mentorRequestStatus !== undefined) {
-			this.mentorRequestStatus = updatedData.mentorRequestStatus;
-		}
-		this.updatedAt = new Date();
+	get password(): string {
+		return this._password;
 	}
 
-	// Toggle active status
-	toggleStatus(status: "blocked" | "unblocked") {
-		this.status = status;
+	get role(): UserRole {
+		return this._role;
 	}
 
-	// Getters
-	getId(): string | undefined {
-		return this.id;
+	get avatar(): string | null {
+		return this._avatar ?? null;
 	}
 
-	getEmail(): string {
-		return this.email;
+	get bio(): string | null {
+		return this._bio ?? null;
 	}
 
-	getRole(): UserRole {
-		return this.role;
+	get interests(): string[] | null {
+		return this._interests ?? null;
 	}
 
-	getAvatar(): string | null {
-		return this.avatar as string | null;
+	get skills(): string[] | null {
+		return this._skills ?? null;
 	}
+
+	get badges(): string[] | null {
+		return this._badges ?? null;
+	}
+
+	get sessionCompleted(): number {
+		return this._sessionCompleted;
+	}
+
+	get averageRating(): number | null {
+		return this._averageRating;
+	}
+
+	get totalReviews(): number | null {
+		return this._totalReviews;
+	}
+
+	get status(): UserStatus {
+		return this._status;
+	}
+
+	get mentorRequestStatus(): MentorRequestStatus {
+		return this._mentorRequestStatus;
+	}
+
+	get googleId(): string | null {
+		return this._googleId ?? null;
+	}
+
+	get createdAt(): Date {
+		return this._createdAt;
+	}
+
+	get updatedAt(): Date | null {
+		return this._updatedAt;
+	}
+
+	// ── Business Logic ───────────────────────
 
 	getFullName(): string {
-		return `${this.firstName} ${this.lastName}`;
+		return `${this._firstName} ${this._lastName}`;
 	}
 
-	getFirstName(): string {
-		return this.firstName;
+	updateUserDetails(updated: Partial<UserEntityProps>): void {
+		if (updated.password !== undefined) this._password = updated.password;
+		if (updated.firstName !== undefined) this._firstName = updated.firstName;
+		if (updated.lastName !== undefined) this._lastName = updated.lastName;
+		if (updated.avatar !== undefined) this._avatar = updated.avatar;
+		if (updated.bio !== undefined) this._bio = updated.bio;
+		if (updated.interests !== undefined) this._interests = updated.interests;
+		if (updated.skills !== undefined) this._skills = updated.skills;
+		if (updated.badges !== undefined) this._badges = updated.badges;
+		if (updated.averageRating !== undefined) this._averageRating = updated.averageRating;
+		if (updated.totalReviews !== undefined) this._totalReviews = updated.totalReviews;
+		if (updated.sessionCompleted !== undefined) this._sessionCompleted = updated.sessionCompleted;
+		if (updated.mentorRequestStatus !== undefined) this._mentorRequestStatus = updated.mentorRequestStatus;
+		this._updatedAt = new Date();
 	}
 
-	getLastName(): string {
-		return this.lastName;
+	toggleStatus(status: UserStatus): void {
+		this._status = status;
+		this._updatedAt = new Date();
 	}
 
-	getStatus(): "blocked" | "unblocked" {
-		return this.status;
-	}
-
-	getrating(): number | null {
-		return this.averageRating;
-	}
-
-	getTotalReviews(): number | null {
-		return this.totalReviews;
-	}
-
-	getProfile(includePassword: boolean = false): Partial<UserInterface> {
+	toObject(): UserEntityProps {
 		return {
-			email: this.email,
-			firstName: this.firstName,
-			lastName: this.lastName,
-			role: this.role,
-			avatar: this.avatar,
-			status: this.status,
-			bio: this.bio,
-			interests: this.interests,
-			skills: this.skills,
-			badges: this.badges,
-			averageRating: this.averageRating,
-			totalReviews: this.totalReviews,
-			sessionCompleted: this.sessionCompleted,
-			createdAt: this.createdAt,
-			updatedAt: this.updatedAt,
-			mentorRequestStatus: this.mentorRequestStatus,
-			...(includePassword ? { password: this.password } : {}),
+			id: this._id,
+			email: this._email,
+			firstName: this._firstName,
+			lastName: this._lastName,
+			password: this._password,
+			role: this._role,
+			avatar: this._avatar,
+			bio: this._bio,
+			interests: this._interests,
+			skills: this._skills,
+			badges: this._badges,
+			sessionCompleted: this._sessionCompleted,
+			averageRating: this._averageRating,
+			totalReviews: this._totalReviews,
+			status: this._status,
+			mentorRequestStatus: this._mentorRequestStatus,
+			googleId: this._googleId,
+			createdAt: this._createdAt,
+			updatedAt: this._updatedAt,
 		};
-	}
-
-	getMentorRequestStatus(): "pending" | "approved" | "rejected" | "not-requested" {
-		return this.mentorRequestStatus;
 	}
 }

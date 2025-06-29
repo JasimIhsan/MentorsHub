@@ -63,8 +63,8 @@ export class BecomeMentorController {
 				message: "Mentor application submitted successfully",
 				mentorProfile,
 			});
-		} catch (error: any) {
-			logger.error("Error in mentor application:", error.message);
+		} catch (error) {
+			logger.error("Error in mentor application:", error);
 			next(error);
 		}
 	}

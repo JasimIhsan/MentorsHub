@@ -27,8 +27,8 @@ export class SignupController {
 			});
 
 			res.status(HttpStatusCode.CREATED).json({ success: true, user });
-		} catch (error: any) {
-			logger.error(`❌ Error in SignupController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in SignupController: ${error}`);
 			next(error);
 		}
 	}

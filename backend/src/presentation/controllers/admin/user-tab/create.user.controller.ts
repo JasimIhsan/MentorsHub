@@ -11,8 +11,8 @@ export class CreateUserController {
 			const { firstName, lastName, email, role } = req.body;
 			const user = await this.createUserUsecase.execute(firstName, lastName, email, role);
 			res.status(201).json({ success: true, user });
-		} catch (error: any) {
-			logger.error(`❌ Error in CreateUserController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in CreateUserController: ${error}`);
 			next(error);
 		}
 	}

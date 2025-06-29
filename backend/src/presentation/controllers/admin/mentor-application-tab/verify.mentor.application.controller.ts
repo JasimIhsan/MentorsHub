@@ -12,8 +12,8 @@ export class VerifyMentorApplicationController {
 
 			const user = await this.verifyMentorApplicationUsecase.execute(userId, mentorRequestStatus, rejectionReason);
 			res.status(HttpStatusCode.OK).json({ success: true, user });
-		} catch (error: any) {
-			logger.error(`❌ Error in VerifyMentorApplicationController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in VerifyMentorApplicationController: ${error}`);
 			next(error);
 		}
 	}

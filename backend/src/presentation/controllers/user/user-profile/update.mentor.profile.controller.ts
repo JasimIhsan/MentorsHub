@@ -63,8 +63,8 @@ export class ReApplyMentorApplicationController {
 				message: "Mentor application submitted successfully",
 				mentorProfile,
 			});
-		} catch (error: any) {
-			logger.error("Error in upsert mentor application:", error.message);
+		} catch (error) {
+			logger.error("Error in upsert mentor application:", error);
 			next(error);
 		}
 	}
