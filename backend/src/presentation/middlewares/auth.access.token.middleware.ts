@@ -28,18 +28,13 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 		}
 
 		if (decoded.isAdmin) {
-			const adminData = await adminRepo.findAdminById(decoded.userId);
-			if (!adminData) {
+			const adminEntity = await adminRepo.findAdminById(decoded.userId);
+			if (!adminEntity) {
 				res.status(HttpStatusCode.UNAUTHORIZED).json({ success: false, message: "Admin not found" });
 				return;
 			}
 
-			const admin = new AdminEntity({
-				...adminData,
-				id: decoded.userId,
-				role: RoleEnum.ADMIN,
-			});
-			req.user = { id: admin.getId() as string, role: RoleEnum.ADMIN };
+			req.user = { id: adminEntity.id, role: RoleEnum.ADMIN };
 			return next();
 		} else {
 			const user = await userRepo.findUserById(decoded.userId);
