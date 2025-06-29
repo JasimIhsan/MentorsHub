@@ -1,10 +1,8 @@
-import { ForgotPasswordTokenEntity, IForgotPasswordTokens } from "../entities/forgot.password.token.entity";
-import { UserEntity } from "../entities/user.entity";
-import { ForgotPasswordTokenDTO } from "../../application/dtos/forgot.token.dto";
+import { ForgotPasswordTokenEntity } from "../entities/forgot.password.token.entity";
 
 export interface IForgotPasswordTokensRepository {
-	createToken(userId: string, token: string, expiresInMinutes: number): Promise<IForgotPasswordTokens>;
+	createToken(userId: string, token: string, expiresInMinutes: number): Promise<ForgotPasswordTokenEntity>;
 	isTokenValid(token: string): Promise<boolean>;
-	findAllTokenDetails(token: string): Promise<ForgotPasswordTokenDTO | null>;
+	findAllTokenDetails(token: string): Promise<ForgotPasswordTokenEntity | null>;
 	findToken(token: string): Promise<ForgotPasswordTokenEntity | null>;
 }

@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, ObjectId } from "mongoose";
 interface IForgotPasswordTokens extends Document {
 	userId: ObjectId;
 	token: string;
-	expires: Date;
+	expiresAt: Date;
 }
 
 const ForgotPasswordResetTokenSchema: Schema = new Schema(

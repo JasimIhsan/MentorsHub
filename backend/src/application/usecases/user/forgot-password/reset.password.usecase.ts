@@ -10,7 +10,7 @@ export class ResetPasswordUseCase {
 		const tokenEntity = await this.restRepo.findToken(token);
 		if (!tokenEntity) throw new Error("Invalid reset token");
 
-		const user = await this.userRepo.findUserById(tokenEntity.getUserId());
+		const user = await this.userRepo.findUserById(tokenEntity.userId);
 		const tokenDetails = await this.restRepo.findAllTokenDetails(token);
 		if (!user || !tokenDetails?.token || !tokenDetails.expiresAt || tokenDetails.expiresAt.getTime() < Date.now()) {
 			throw new Error("Invalid or expired reset token");
