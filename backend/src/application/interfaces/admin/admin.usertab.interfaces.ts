@@ -3,7 +3,12 @@ import { FindUsersParams, PaginatedUsers } from "../../../domain/repositories/us
 import { IUserDTO } from "../../dtos/user.dtos";
 
 export interface IGetAllUsersUsecase {
-	execute(params: FindUsersParams): Promise<PaginatedUsers>;
+	execute(params: FindUsersParams): Promise<{
+	users: IUserDTO[];
+	totalUsers: number;
+	totalPages: number;
+	currentPage: number;
+}>;
 }
 export interface ICreateUserUsecase {
 	execute(firstName: string, lastName: string, email: string, role: string): Promise<IUserDTO>;
