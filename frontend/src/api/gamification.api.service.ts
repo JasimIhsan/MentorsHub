@@ -66,10 +66,10 @@ export const createGamificationTaskAdminAPI = async (data: { title: string; xpRe
 };
 
 // Get all gamification tasks with pagination
-export const getAllGamificationTasksAdminAPI = async (page = 1, limit = 10) => {
+export const getAllGamificationTasksAdminAPI = async (page = 1, limit = 10, actionType?: string, searchTerm?: string) => {
 	try {
 		const response = await axiosInstance.get("/admin/gamification/", {
-			params: { page, limit },
+			params: { page, limit, actionType, searchTerm },
 		});
 		console.log("getAllGamificationTasksAdminAPI response:", response.data); // Debug log
 		return response.data;
