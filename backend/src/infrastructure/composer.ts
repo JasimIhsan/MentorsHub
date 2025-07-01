@@ -35,6 +35,8 @@ import { ActionTypeRepositoryImpl } from "./database/implementation/gamification
 import { UserProgressRepositoryImpl } from "./database/implementation/gamification/user.progress.repository.imp";
 import { IHashService } from "../application/interfaces/services/hash.service";
 import { HashServiceImpl } from "./services/hash-serveice/hash.service";
+import { KmsServiceImpl } from "./services/kms-service/kms.service";
+import { IKmsService } from "../application/interfaces/services/kms.service";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -60,3 +62,4 @@ export const tokenService: ITokenService = new TokenServicesImpl(redisService);
 export const cloudinaryService: ICloudinaryService = new CloudinaryService();
 export const s3BucketService: IS3Service = new S3Service();
 export const paymentGatewayService = new RazorpayGatewayImpl();
+export const kmsService: IKmsService = new KmsServiceImpl();
