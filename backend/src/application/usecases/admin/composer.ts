@@ -1,5 +1,5 @@
 import { AdminLoginUsecase } from "./auth/authentication";
-import { adminRepository, hashService, mentorRepository, tokenInterface, userRepository } from "../../../infrastructure/composer";
+import { adminRepository, hashService, mentorRepository, tokenService, userRepository } from "../../../infrastructure/composer";
 import { GetAllUsersUsecase } from "./users.tab/get.all.users.usecase";
 import { CreateUserUsecase } from "./users.tab/add.new.user.usecase";
 import { UpdateUserStatusUsecase } from "./users.tab/update.status.user.usecase";
@@ -10,7 +10,7 @@ import { createNotificationUseCase } from "../notification/composer";
 import { io } from "../../../server";
 import { Server } from "socket.io";
 
-export const adminLoginUsecase = new AdminLoginUsecase(adminRepository, tokenInterface);
+export const adminLoginUsecase = new AdminLoginUsecase(adminRepository, tokenService);
 export const getAllUsersUsecase = new GetAllUsersUsecase(userRepository);
 export const createUserUsecase = new CreateUserUsecase(userRepository, hashService);
 export const updateUserStatusUseCase = new UpdateUserStatusUsecase(userRepository);

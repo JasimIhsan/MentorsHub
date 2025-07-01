@@ -11,7 +11,7 @@ import { GoogleAuthUsecase } from "./authentication/google.auth.usecase";
 import {
 	userRepository,
 	forgotResetRepository,
-	tokenInterface,
+	tokenService,
 	emailService,
 	redisService,
 	cloudinaryService,
@@ -41,15 +41,15 @@ import { PaySessionWithGatewayUseCase } from "./session/pay.session.with.gateway
 import { createUserProgressUseCase } from "../gamification/composer";
 
 // Initialize UseCases
-export const signinUseCase = new SigninUseCase(userRepository, tokenInterface, hashService);
-export const refreshUseCase = new RefreshTokenUseCase(tokenInterface);
+export const signinUseCase = new SigninUseCase(userRepository, tokenService, hashService);
+export const refreshUseCase = new RefreshTokenUseCase(tokenService);
 export const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, emailService, forgotResetRepository);
 export const verifyResetTokenUseCase = new VerifyResetTokenUseCase(forgotResetRepository);
 export const resetPasswordUseCase = new ResetPasswordUseCase(forgotResetRepository, userRepository, hashService);
 export const verifyOTPUsecase = new VerifyOtpUsecase(redisService);
-export const signupUseCase = new SignupUseCase(userRepository, tokenInterface, verifyOTPUsecase, createUserProgressUseCase, hashService);
+export const signupUseCase = new SignupUseCase(userRepository, tokenService, verifyOTPUsecase, createUserProgressUseCase, hashService);
 export const sendOtpUseCase = new SendOtpUsecase(emailService, userRepository, redisService);
-export const googleAuthUsecase = new GoogleAuthUsecase(userRepository, tokenInterface, hashService);
+export const googleAuthUsecase = new GoogleAuthUsecase(userRepository, tokenService, hashService);
 export const updateUserProfileUsecase = new UpdateUserProfileUseCase(userRepository);
 export const uploadImageCloudinaryUsecase = new UploadAvatarUseCase(cloudinaryService);
 export const changePasswordUsecase = new ChangePasswordUsecase(userRepository, hashService);
