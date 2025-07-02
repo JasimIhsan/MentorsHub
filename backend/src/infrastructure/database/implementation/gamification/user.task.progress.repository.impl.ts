@@ -32,7 +32,7 @@ export class UserTaskProgressRepositoryImpl implements IUserTaskProgressReposito
 					completed: progress.isCompleted,
 					completedAt: progress.completedAt,
 				},
-				{ upsert: true }
+				{ upsert: true },
 			);
 		} catch (error) {
 			throw new Error(`Error in save(): ${error}`);

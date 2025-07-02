@@ -7,9 +7,7 @@ export class DownloadDocumentsController {
 	constructor(private s3Service: IS3Service) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
-			console.log(`in download documents controller`);
 			const key = req.query.key as string;
-			console.log('key: ', key);
 
 			if (!key) {
 				res.status(400).json({ message: "Missing document key" });
@@ -17,7 +15,6 @@ export class DownloadDocumentsController {
 			}
 
 			const signedUrl = await this.s3Service.getSignedUrl(key, 60);
-			console.log('signedUrl: ', signedUrl);
 
 			https
 				.get(signedUrl, (s3Res) => {

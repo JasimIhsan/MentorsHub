@@ -27,7 +27,7 @@ const MessageSchema: Schema<IMessage> = new Schema(
 		fileUrl: { type: String },
 		readBy: [{ type: Schema.Types.ObjectId, ref: "Users" }],
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 // Indexes for performance

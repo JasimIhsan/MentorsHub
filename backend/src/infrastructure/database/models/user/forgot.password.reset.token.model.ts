@@ -12,7 +12,7 @@ const ForgotPasswordResetTokenSchema: Schema = new Schema(
 		token: { type: String, required: true },
 		expiresAt: { type: Date, required: true, index: { expires: 0 } },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const ForgotTokenModel = mongoose.model<IForgotPasswordTokens>("Forgot Password Reset Token", ForgotPasswordResetTokenSchema);

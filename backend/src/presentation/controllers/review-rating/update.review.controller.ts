@@ -9,7 +9,6 @@ export class UpdateReviewController {
 			const { reviewId } = req.params;
 			// const { reviewerId, mentorId, sessionId, rating, comment } = req.body;
 			const review = await this.updateReviewUseCase.execute(reviewId, req.body);
-			console.log('review: ', review);
 			res.status(200).json({ success: true, review,  message: "Review updated successfully" });
 		} catch (error) {
 			logger.error(`❌ Error in UpdateReviewController: ${error}`);

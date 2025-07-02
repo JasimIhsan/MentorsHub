@@ -7,8 +7,6 @@ export class CreateTransactionController {
 	constructor(private createTransactionUseCase: ICreateTransactionUsecase) {}
 
 	async handle(req: Request, res: Response, next: NextFunction) {
-		console.log(`req.body : `, req.body);
-
 		try {
 			const tx = await this.createTransactionUseCase.execute(req.body);
 			res.status(HttpStatusCode.CREATED).json({ success: true, data: tx });

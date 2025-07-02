@@ -55,7 +55,7 @@ export class BecomeMentorController {
 					bio,
 					skills: parsedData.skills,
 				},
-				documents
+				documents,
 			);
 
 			res.status(HttpStatusCode.OK).json({

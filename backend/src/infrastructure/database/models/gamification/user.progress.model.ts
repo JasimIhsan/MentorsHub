@@ -18,7 +18,7 @@ const UserProgressSchema = new Schema(
 		tasksCompleted: { type: Number, default: 0 },
 		xpToNextLevel: { type: Number, default: 100 },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const UserProgressModel = mongoose.model<IUserProgressDocument>("User_Progress", UserProgressSchema);

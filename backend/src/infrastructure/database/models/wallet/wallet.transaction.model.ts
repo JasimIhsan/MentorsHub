@@ -78,7 +78,7 @@ const WalletTransactionSchema = new Schema<IWalletTransactionDocument>(
 			type: String,
 		},
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 // 3. Model export

@@ -12,7 +12,7 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 		private mentorRepo: IMentorProfileRepository,
 		private userRepo: IUserRepository,
 		private createNotificationUseCase: ICreateNotificationUseCase,
-		private io?: Server // Optional io
+		private io?: Server, // Optional io
 	) {}
 
 	async execute(userId: string, status: "approved" | "rejected", reason?: string): Promise<UserEntity> {

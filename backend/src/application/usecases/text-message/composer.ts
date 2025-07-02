@@ -11,4 +11,4 @@ export const markMessageAsReadUsecase = new MarkMessageReadUseCase(messageReposi
 export const getUserChatsUsecase = new GetUserChatsUseCase(chatRepository);
 export const getMessagesByChatUsecase = new GetMessagesByChatUseCase(messageRepository);
 export const deleteMessageUseCase = new DeleteMessageUseCase(messageRepository, chatRepository);
-export const getMessageUnreadCountsByUser = new GetMessageUnreadCountUseCase(messageRepository)
+export const getMessageUnreadCountsByUser = new GetMessageUnreadCountUseCase(messageRepository);

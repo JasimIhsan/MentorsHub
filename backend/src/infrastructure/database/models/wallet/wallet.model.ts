@@ -15,7 +15,7 @@ const WalletSchema = new Schema<IWalletDocument>(
 		role: { type: String, enum: ["user", "mentor", "admin"], required: true },
 		balance: { type: Number, required: true, default: 0 },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 // Optional: one wallet per user-role combination

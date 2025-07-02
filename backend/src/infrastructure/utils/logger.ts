@@ -14,7 +14,7 @@ export const logger = createLogger({
 		format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
 		format.printf(({ timestamp, level, message }) => {
 			return `[${timestamp}] ${level.toUpperCase()}: ${message}`;
-		})
+		}),
 	),
 	transports: [
 		// ✅ Console will skip http logs

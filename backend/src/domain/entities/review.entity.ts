@@ -141,6 +141,6 @@ export class ReviewEntity {
 			comment: review.comment,
 			createdAt: review.createdAt,
 			updatedAt: review.updatedAt,
-		}
+		};
 	}
 }

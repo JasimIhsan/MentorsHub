@@ -32,7 +32,7 @@ export class GamificationTaskRepositoryImpl implements IGamificationTaskReposito
 					actionType: task.actionType,
 					isListed: task.isListed,
 				},
-				{ upsert: true }
+				{ upsert: true },
 			);
 
 			return task;

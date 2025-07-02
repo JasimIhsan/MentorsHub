@@ -6,11 +6,11 @@ export class MarkMessageReadUseCase {
 
 	async execute(chatId: string, userId: string): Promise<MessageEntity[]> {
 
-		const unreadMessages = await this.messageRepo.findUnreadMessages(chatId, userId)
+		const unreadMessages = await this.messageRepo.findUnreadMessages(chatId, userId);
 		for(let message of unreadMessages){
-			await this.messageRepo.markMessageAsRead(message.id, userId)
+			await this.messageRepo.markMessageAsRead(message.id, userId);
 		}
 
-		return unreadMessages
+		return unreadMessages;
 	}
 }

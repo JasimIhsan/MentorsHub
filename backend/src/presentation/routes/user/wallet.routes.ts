@@ -14,6 +14,6 @@ userWalletRouter.post("/create-withdrawal-request", verifyAccessToken, requireRo
 
 userWalletRouter.get("/:userId", verifyAccessToken, requireRole("user", "mentor"), (req, res, next) => getWalletController.handle(req, res, next));
 
-userWalletRouter.post('/top-up/:userId', verifyAccessToken, requireRole("user", "mentor"), (req, res, next) => topupWalletController.handle(req, res, next));
+userWalletRouter.post("/top-up/:userId", verifyAccessToken, requireRole("user", "mentor"), (req, res, next) => topupWalletController.handle(req, res, next));
 
 userWalletRouter.post("/withdraw/:userId", verifyAccessToken, requireRole("user", "mentor"), (req, res, next) => withdrawWalletController.handle(req, res, next));

@@ -12,7 +12,7 @@ export class SendOtpUsecase implements ISendOtpUsecase {
 		if (isExists) throw new Error("User already exists");
 		const otp = generateOtp();
   
-		console.log(`\n\nOTP : `, otp);
+		console.log("\n\nOTP : ", otp);
 
 		await this.redisService.setCachedData(`otp:${email}`, otp, 600);
 

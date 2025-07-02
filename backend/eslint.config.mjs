@@ -32,6 +32,17 @@ export default defineConfig([
 
 			// Disable base rule
 			"no-unused-vars": "off",
+			"no-console": [
+				"warn",
+				{
+					allow: ["warn", "error"], // allow console.warn and console.error
+				},
+			],
+
+			semi: ["error", "always"],
+			quotes: ["error", "double"],
+			"comma-dangle": ["error", "always-multiline"],
+			"object-curly-spacing": ["error", "always"],
 		},
 	},
 ]);

@@ -24,7 +24,7 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 
 	async findByMentorId(
 		mentorId: string,
-		options?: { page?: number; limit?: number; rating?: number }
+		options?: { page?: number; limit?: number; rating?: number },
 	): Promise<{ reviews: ReviewDTO[]; total: number }> {
 		try {
 			const page = options?.page ?? 1;
@@ -67,7 +67,7 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 			sessionId?: string;
 			rating: number;
 			comment: string;
-		}
+		},
 	): Promise<ReviewEntity> {
 		try {
 			const updated = await ReviewModel.findByIdAndUpdate(reviewId, data, { new: true });

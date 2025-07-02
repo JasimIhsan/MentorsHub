@@ -11,7 +11,7 @@ export class GetUpcomingSessionMentorUsecase implements IGetUpcomingSessionMento
 			filterOption?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
-		}
+		},
 	) {
 		const sessions = await this.sessionRepo.getSessionByMentor(mentorId, queryParams);
 

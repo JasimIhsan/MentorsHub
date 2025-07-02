@@ -25,6 +25,6 @@ export class EditGamificationTaskUseCase implements IEditGamificationTaskUseCase
 		// 4. Save
 		await this.taskRepo.update(existingTask);
 
-		return mapToGamificationTaskDTO(existingTask)
+		return mapToGamificationTaskDTO(existingTask);
 	}
 }

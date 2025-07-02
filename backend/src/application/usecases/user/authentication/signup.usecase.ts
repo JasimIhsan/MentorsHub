@@ -11,7 +11,7 @@ export class SignupUseCase implements ISignupUseCase {
 		private readonly tokenService: ITokenService,
 		private readonly verifyOtp: IVerifyOtpUsecase,
 		private readonly createUserProgress: ICreateUserProgressUseCase,
-		private readonly hashService: IHashService
+		private readonly hashService: IHashService,
 	) {}
 
 	async execute(otp: string, firstName: string, lastName: string, email: string, password: string) {

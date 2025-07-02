@@ -23,7 +23,7 @@ import { hashService, tokenService, userRepository } from "./infrastructure/comp
 
 		// Start listening
 		const PORT = process.env.PORT || 5858;
-		server.listen(PORT, () => logger.info(`Server running : ✅✅✅`));
+		server.listen(PORT, () => logger.info("Server running : ✅✅✅"));
 	} catch (err) {
 		logger.error("❌ Failed to start server", err);
 		process.exit(1);

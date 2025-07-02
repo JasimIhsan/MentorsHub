@@ -56,7 +56,7 @@ export class NotificationRepositoryImpl implements INotificationRepository {
 					link: n.link,
 					isRead: n.isRead,
 					createdAt: n.createdAt,
-				}).toObject()
+				}).toObject(),
 			);
 		} catch (error) {
 			return handleExceptionError(error, "Error fetching notifications");

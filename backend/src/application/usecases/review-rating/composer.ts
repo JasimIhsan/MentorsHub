@@ -8,5 +8,5 @@ import { UpdateReviewUseCase } from "./update.review.usecasee";
 export const createReviewUsecase = new CreateReviewUseCase(reviewRepository, userRepository, updateUserTaskProgressUseCase);
 export const getMentorReviewsUsecase = new GetMentorReviewsUseCase(reviewRepository);
 export const updateReviewUsecase = new UpdateReviewUseCase(reviewRepository, userRepository);
-export const deleteReviewUsecase = new DeleteReviewUseCase(reviewRepository, userRepository)
+export const deleteReviewUsecase = new DeleteReviewUseCase(reviewRepository, userRepository);
 

@@ -7,11 +7,11 @@ export const deleteMessageHandler = (io: Server, socket: Socket) => {
 
 		try {
 			const deletedId = await deleteMessageUseCase.execute({ messageId, chatId, senderId });
-			console.log(`message deleted ✅ `, );
+			console.log("message deleted ✅ " );
 			// notify other clients that the message deleted
 			io.to(`chat_${chatId}`).emit("message-deleted", { messageId: deletedId });
-		} catch (err: any) {
-			console.error("Delete error:", err.message);
+		} catch (err) {
+			console.error("Delete error:", err);
 		}
 	});
 };

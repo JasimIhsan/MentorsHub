@@ -33,8 +33,8 @@ export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 						fileName: document.originalname,
 						mimeType: document.mimetype,
 						mentorId: userId,
-					})
-				)
+					}),
+				),
 			);
 		}
 
@@ -56,7 +56,7 @@ export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 		userEntity?.updateUserDetails(updatedUserData);
 		await this.userRepo.updateUser(userId, userEntity);
 
-		const user = mapToUserDTO(userEntity)
+		const user = mapToUserDTO(userEntity);
 		return { savedUser: user, mentorProfile };
 	}
 }

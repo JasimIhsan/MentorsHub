@@ -9,4 +9,4 @@ export const documentsRouter = Router();
 
 documentsRouter.get("/:id/documents", verifyAccessToken, (req, res, next) => getDocumentsController.handle(req, res, next));
 
-documentsRouter.get('/download-document', verifyAccessToken, (req, res, next) => downloadDocumentController.handle(req, res, next));
+documentsRouter.get("/download-document", verifyAccessToken, (req, res, next) => downloadDocumentController.handle(req, res, next));

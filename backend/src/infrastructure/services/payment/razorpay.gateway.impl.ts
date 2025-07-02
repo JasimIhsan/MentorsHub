@@ -26,7 +26,7 @@ export class RazorpayGatewayImpl implements IPaymentGateway {
 				notes,
 			});
 		} catch (error) {
-			console.error(`Error in RazorpayGatewayImpl:`, error);
+			console.error("Error in RazorpayGatewayImpl:", error);
 			throw error;
 		}
 	}

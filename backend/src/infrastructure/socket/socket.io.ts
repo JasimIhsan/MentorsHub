@@ -187,7 +187,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 				socket.emit("reconnect-success", { sessionId });
 				console.log(`🔄 User reconnected: ${userId}`);
 			} catch (error) {
-				console.log(`Error from reconnect-session : `, error);
+				console.log("Error from reconnect-session : ", error);
 				socket.emit("error", { message: "Reconnect failed" });
 			}
 		});

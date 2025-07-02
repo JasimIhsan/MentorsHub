@@ -12,8 +12,6 @@ export class WalletTopUpController {
 		try {
 			const { userId } = req.params;
 			const { amount, purpose, description } = req.body;
-			console.log(`req.body : `, req.body);
-			console.log(`userId : `, userId);
 
 			if (!amount || !purpose || !description || !userId) throw new Error("Missing required fields.");
 
