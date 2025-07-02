@@ -19,7 +19,7 @@ import {
 	sessionRepository,
 	s3BucketService,
 	walletRepository,
-	paymentGatewayService,
+	getPaymentGatewayService,
 	hashService,
 } from "../../../infrastructure/composer";
 import { UpdateUserProfileUseCase } from "./user-profile/update.user.profile.usecase";
@@ -64,4 +64,6 @@ export const paySessionWithWalletUseCase = new PaySessionWithWalletUseCase(sessi
 export const paySessionWithGatewayUsecase = new PaySessionWithGatewayUseCase(sessionRepository, walletRepository);
 export const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository);
 export const verifySessionPaymentUseCase = new VerifySessionPaymentUseCase(sessionRepository);
-export const createSessionPaymentOrderUsecase = new CreateSessionPaymentOrderUseCase(sessionRepository, paymentGatewayService);
+
+// lazy loading usecases
+export const getCreateSessionPaymentOrderUsecase = () => new CreateSessionPaymentOrderUseCase(sessionRepository, getPaymentGatewayService());

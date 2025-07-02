@@ -1,22 +1,33 @@
+// src/infrastructure/services/payment/razorpay.gateway.impl.ts
 import Razorpay from "razorpay";
+import { RazorpayConfig } from "./config/razorpay.config";
 import { IPaymentGateway } from "../../../application/interfaces/services/payment.service";
-import { razorpayClient } from "./razorpay.service.config";
 
 export class RazorpayGatewayImpl implements IPaymentGateway {
+	private client: Razorpay;
+
+	constructor() {
+		if (!RazorpayConfig.RAZORPAY_KEY || !RazorpayConfig.RAZORPAY_SECRET) {
+			throw new Error("RazorpayConfig is not initialized");
+		}
+
+		this.client = new Razorpay({
+			key_id: RazorpayConfig.RAZORPAY_KEY,
+			key_secret: RazorpayConfig.RAZORPAY_SECRET,
+		});
+	}
+
 	async createOrder(amount: number, receipt: string, notes: Record<string, any>): Promise<any> {
 		try {
-			const order = await razorpayClient.orders.create({
+			return await this.client.orders.create({
 				amount,
 				currency: "INR",
 				receipt,
 				notes,
 			});
-			console.log(`order : `, order);
-
-			return order;
 		} catch (error) {
-			console.log(`Error from razorpay impl : `, error);
-			throw new Error(error as string);
+			console.error(`Error in RazorpayGatewayImpl:`, error);
+			throw error;
 		}
 	}
 }

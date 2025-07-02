@@ -1,6 +1,6 @@
 import AWS from "aws-sdk";
 import dotenv from "dotenv";
-import { S3Config } from "./s3.config";
+import { S3Config } from "./config/s3.config";
 
 dotenv.config();
 

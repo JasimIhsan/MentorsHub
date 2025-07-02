@@ -2,7 +2,7 @@ import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
 import { Readable } from "stream";
 import { ICloudinaryService } from "../../../application/interfaces/user/user.profile.usecase.interfaces";
-import { CloudinaryConfig } from "./cloudinary.config";
+import { CloudinaryConfig } from "./config/cloudinary.config";
 
 dotenv.config();
 

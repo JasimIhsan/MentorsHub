@@ -27,8 +27,8 @@ import {
 	reApplyMentorApplicationUseCase,
 	cancelSessionUseCase,
 	verifySessionPaymentUseCase,
-	createSessionPaymentOrderUsecase,
 	paySessionWithGatewayUsecase,
+	getCreateSessionPaymentOrderUsecase,
 } from "../../../application/usecases/user/composer";
 import { UpdateUserProfileController } from "./user-profile/update.user.profile.controller";
 import { cloudinaryService } from "../../../infrastructure/composer";
@@ -66,10 +66,12 @@ export const getUserProfileController = new GetUserProfileController(getUserProf
 export const createSessionController = new RequestSessionController(requestSessionUsecase);
 export const getSessionsByUserController = new GetSessionByUserController(getSessionsByUserUsecase);
 export const paySessionWithWalletController = new PaySessionWithWalletController(paySessionWithWalletUseCase);
-export const paySessionWithGatewayController = new PaySessionWithGatewayController(paySessionWithGatewayUsecase)
+export const paySessionWithGatewayController = new PaySessionWithGatewayController(paySessionWithGatewayUsecase);
 export const getAvailabilityController = new GetMentorAvailabilityController(getAvailabilityUsecase);
 export const cancelSessionController = new CancelSessionController(cancelSessionUseCase);
 export const verifySessionPaymentController = new VerifySessionPaymentController(verifySessionPaymentUseCase);
-export const createSessionPaymentOrderController = new CreateSessionPaymentOrderController(createSessionPaymentOrderUsecase);
-export const getAllListedGamificationTasksController = new GetAllListedGamificationTasksController(getAllListedGamificationTasksUseCase)
-export const getUserProgressController = new GetUserProgressController(getUserProgressUseCase)
+export const getAllListedGamificationTasksController = new GetAllListedGamificationTasksController(getAllListedGamificationTasksUseCase);
+export const getUserProgressController = new GetUserProgressController(getUserProgressUseCase);
+
+// lazy loading
+export const getCreateSessionPaymentOrderController = () => new CreateSessionPaymentOrderController(getCreateSessionPaymentOrderUsecase());

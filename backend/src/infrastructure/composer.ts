@@ -61,5 +61,7 @@ export const redisService: ICacheRepository = new RedisCacheRepository();
 export const cloudinaryService: ICloudinaryService = new CloudinaryService();
 export const tokenService: ITokenService = new TokenServicesImpl(redisService);
 export const s3BucketService: IS3Service = new S3Service();
-export const paymentGatewayService = new RazorpayGatewayImpl();
 export const kmsService: IKmsService = new KmsServiceImpl();
+
+// lazy loading services
+export const getPaymentGatewayService = () => new RazorpayGatewayImpl(); // delay loading to load secrets from KMS (lazy loading using getter function)

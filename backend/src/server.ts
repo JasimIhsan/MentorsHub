@@ -4,10 +4,11 @@ import { logger } from "./infrastructure/utils/logger";
 import { createSocketServer } from "./infrastructure/socket/socket.server";
 import initializeSocket from "./infrastructure/socket/socket.io";
 import { SessionModel } from "./infrastructure/database/models/session/session.model";
-import { TokenConfig } from "./infrastructure/auth/jwt/jwt.config";
+import { TokenConfig } from "./infrastructure/auth/jwt/config/jwt.config";
 import { kmsService } from "./infrastructure/composer";
-import { CloudinaryConfig } from "./infrastructure/cloud/cloudinary/cloudinary.config";
-import { S3Config } from "./infrastructure/cloud/S3 bucket/s3.config";
+import { CloudinaryConfig } from "./infrastructure/cloud/cloudinary/config/cloudinary.config";
+import { S3Config } from "./infrastructure/cloud/S3 bucket/config/s3.config";
+import { RazorpayConfig } from "./infrastructure/services/payment/config/razorpay.config";
 
 (async () => {
 	// Load jwt secrets
@@ -25,6 +26,11 @@ import { S3Config } from "./infrastructure/cloud/S3 bucket/s3.config";
 	const awsAccessKey = await kmsService.getSecret("mentorshub/prod/aws", "AWS_ACCESS_KEY_ID");
 	const awsSecretAccessKey = await kmsService.getSecret("mentorshub/prod/aws", "AWS_SECRET_ACCESS_KEY");
 	S3Config.init({ AWS_ACCESS_KEY_ID: awsAccessKey, AWS_SECRET_ACCESS_KEY: awsSecretAccessKey });
+
+	// load razorpay secrets
+	const razorpayKey = await kmsService.getSecret("mentorshub/prod/razorpay", "RAZORPAY_KEY");
+	const razorpaySecret = await kmsService.getSecret("mentorshub/prod/razorpay", "RAZORPAY_SECRET");
+	RazorpayConfig.init({ RAZORPAY_KEY: razorpayKey, RAZORPAY_SECRET: razorpaySecret });
 
 	// Create server
 	const server = createServer(app);
