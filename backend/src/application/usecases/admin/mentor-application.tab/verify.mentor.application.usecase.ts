@@ -6,7 +6,6 @@ import { IVerifyMentorApplicationUsecase } from "../../../interfaces/admin/admin
 import { ICreateNotificationUseCase } from "../../../interfaces/notification";
 import { Server } from "socket.io";
 import { findUserSocket } from "../../../../infrastructure/socket/socket.io";
-import { sessions } from "../../../../infrastructure/socket/socket.io";
 
 export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationUsecase {
 	constructor(

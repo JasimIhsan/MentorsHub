@@ -1,7 +1,7 @@
 import { IMentorProfileRepository } from "../../../../domain/repositories/mentor.details.repository";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { IMentorInterface, MentorProfileEntity } from "../../../../domain/entities/mentor.detailes.entity";
-import { UserEntity, UserEntityProps } from "../../../../domain/entities/user.entity";
+import { UserEntityProps } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IUploadMentorDocuments } from "../../../interfaces/documents";
 import { IBecomeMentorUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
@@ -54,7 +54,7 @@ export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 		};
 
 		userEntity?.updateUserDetails(updatedUserData);
-		const savedUser = await this.userRepo.updateUser(userId, userEntity);
+		await this.userRepo.updateUser(userId, userEntity);
 
 		const user = mapToUserDTO(userEntity)
 		return { savedUser: user, mentorProfile };

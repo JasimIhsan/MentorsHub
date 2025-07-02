@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { IPaySessionWithWalletUseCase } from "../../../../application/interfaces/session";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
-import crypto from "crypto";
 
 export class PaySessionWithWalletController {
 	constructor(private paySessionWithWalletUseCase: IPaySessionWithWalletUseCase) {}

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { ReviewDTO } from "../../../application/dtos/review.dtos";
 import { ReviewEntity } from "../../../domain/entities/review.entity";
 import { IReviewRepository } from "../../../domain/repositories/review.repository";
-import { IReviewDocument, ReviewModel } from "../models/review-rating/review.model";
+import { ReviewModel } from "../models/review-rating/review.model";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 
 export class ReviewRepositoryImpl implements IReviewRepository {

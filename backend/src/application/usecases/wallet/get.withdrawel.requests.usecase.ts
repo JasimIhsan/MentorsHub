@@ -1,4 +1,3 @@
-import { ObjectId } from "mongoose";
 import { WithdrawalRequestEntity } from "../../../domain/entities/wallet/wallet.withdrawel.request.entity";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IGetWithdrawalRequestsUsecase } from "../../interfaces/wallet";

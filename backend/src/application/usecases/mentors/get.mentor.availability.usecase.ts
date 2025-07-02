@@ -1,7 +1,6 @@
 import dayjs from "dayjs";
 import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
-import { IAvailabilityDTO } from "../../dtos/availability.dto";
 import { IGetAvailabilityUseCase } from "../../interfaces/mentors/mentors.interface";
 import { WeekDay } from "../../../domain/entities/mentor.detailes.entity";
 

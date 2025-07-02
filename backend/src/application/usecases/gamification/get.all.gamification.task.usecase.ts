@@ -1,4 +1,3 @@
-import { GamificationTaskEntity } from "../../../domain/entities/gamification/gamification.task.entity";
 import { IGamificationTaskRepository } from "../../../domain/repositories/gamification/gamification.task.repository";
 import { IGamificationTaskDTO, mapToGamificationTaskDTO } from "../../dtos/gamification.dto";
 import { IGetAllGamificationTasksUseCase } from "../../interfaces/gamification";

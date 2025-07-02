@@ -1,5 +1,5 @@
 import { IForgotPasswordTokensRepository } from "../../../domain/repositories/forgot.password.token.respository";
-import { ForgotPasswordTokenEntity, ForgotPasswordTokenProps } from "../../../domain/entities/forgot.password.token.entity";
+import { ForgotPasswordTokenEntity } from "../../../domain/entities/forgot.password.token.entity";
 import { ForgotTokenModel } from "../models/user/forgot.password.reset.token.model";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 

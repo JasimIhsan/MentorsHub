@@ -1,5 +1,4 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import { UserEntity } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IGetUserProfileUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";

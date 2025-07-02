@@ -1,4 +1,3 @@
-import { ReviewEntity } from "../../../domain/entities/review.entity";
 import { IReviewRepository } from "../../../domain/repositories/review.repository";
 import { ReviewDTO } from "../../dtos/review.dtos";
 

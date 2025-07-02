@@ -1,4 +1,3 @@
-import { MessageEntity } from "../../../domain/entities/message.entity";
 import { IMessageRepository } from "../../../domain/repositories/message.repository";
 import { ISendMessageDTO } from "../../dtos/message.dto";
 import { IGetMessagesByChatUseCase } from "../../interfaces/messages";

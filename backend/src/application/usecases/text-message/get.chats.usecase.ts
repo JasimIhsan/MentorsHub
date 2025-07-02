@@ -1,4 +1,3 @@
-import { ChatEntity } from "../../../domain/entities/chat.entity";
 import { IChatRepository } from "../../../domain/repositories/chat.repository";
 import { IChatDTO } from "../../dtos/chats.dto";
 import { IGetUserChatsUseCase } from "../../interfaces/messages";

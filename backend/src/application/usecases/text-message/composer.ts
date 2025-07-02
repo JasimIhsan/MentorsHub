@@ -1,4 +1,4 @@
-import { chatRepository, hashService, messageRepository, userRepository } from "../../../infrastructure/composer";
+import { chatRepository, messageRepository, userRepository } from "../../../infrastructure/composer";
 import { DeleteMessageUseCase } from "./delete.message.usecase";
 import { GetUserChatsUseCase } from "./get.chats.usecase";
 import { GetMessagesByChatUseCase } from "./get.message.by.chat.usecase";

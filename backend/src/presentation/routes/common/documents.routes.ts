@@ -2,7 +2,6 @@ import { Router } from "express";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import dotenv from "dotenv";
 import { downloadDocumentController, getDocumentsController } from "../../controllers/documents/composer";
-import { DownloadDocumentsController } from "../../controllers/documents/download.documents.controller";
 
 dotenv.config();
 

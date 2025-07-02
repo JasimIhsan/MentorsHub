@@ -1,7 +1,7 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import { UserEntity, UserEntityProps } from "../../../../domain/entities/user.entity";
+import { UserEntityProps } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
-import { ICloudinaryService, IUpdateUserProfileUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
+import { IUpdateUserProfileUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
 
 export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {
 	constructor(private userRepo: IUserRepository) {}

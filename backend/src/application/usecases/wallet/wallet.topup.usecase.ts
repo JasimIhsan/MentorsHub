@@ -1,5 +1,4 @@
 import { ICreateTransactionUsecase, IWalletTopUpUsecase } from "../../interfaces/wallet";
-import { WalletTransactionEntity } from "../../../domain/entities/wallet/wallet.transaction.entity";
 import { WalletEntity } from "../../../domain/entities/wallet/wallet.entity";
 import { IWalletTransactionDTO } from "../../dtos/wallet.transation.dto";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";

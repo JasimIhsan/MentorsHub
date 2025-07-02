@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { IAdminAuthUsecase } from "../../../../application/interfaces/admin/admin.auth.interface";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
-import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { logger } from "../../../../infrastructure/utils/logger";
 
 export class AdminLoginController {

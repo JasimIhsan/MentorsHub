@@ -1,13 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { TokenServicesImpl } from "../../infrastructure/auth/jwt/jwt.services";
 import { UserRepositoryImpl } from "../../infrastructure/database/implementation/user.repository.impl";
-import { UserEntity } from "../../domain/entities/user.entity";
-import { AdminEntity } from "../../domain/entities/admin.entity";
 import { AdminRepositoryImpl } from "../../infrastructure/database/implementation/admin.repository.impl";
 import { HttpStatusCode } from "../../shared/constants/http.status.codes";
 import { CommonStringMessage } from "../../shared/constants/string.messages";
 import { RoleEnum } from "../../application/interfaces/role";
 import { redisService } from "../../infrastructure/composer";
+import { logger } from "../../infrastructure/utils/logger";
 
 export const tokenService = new TokenServicesImpl(redisService);
 const userRepo = new UserRepositoryImpl();
@@ -56,6 +55,7 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 			return next();
 		}
 	} catch (error) {
-		res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: CommonStringMessage.SERVER_ERROR_MESSAGE });
+		logger.error(`❌ Error in verifyAccessToken: ${error}`);
+		next(error);
 	}
 };

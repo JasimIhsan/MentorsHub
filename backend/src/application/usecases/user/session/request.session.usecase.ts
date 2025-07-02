@@ -2,7 +2,7 @@ import { ISessionRepository } from "../../../../domain/repositories/session.repo
 import { IMentorProfileRepository } from "../../../../domain/repositories/mentor.details.repository";
 import { ISessionParticipantDTO, SessionEntity } from "../../../../domain/entities/session.entity";
 import { IRequestSessionUseCase } from "../../../interfaces/session";
-import { SessionFormat, SessionPaymentStatus, PricingType, SessionStatus } from "../../../../infrastructure/database/models/session/session.model";
+import { SessionFormat, SessionPaymentStatus, PricingType } from "../../../../infrastructure/database/models/session/session.model";
 import { IGetAvailabilityUseCase } from "../../../interfaces/mentors/mentors.interface";
 
 export interface SessionDTO {

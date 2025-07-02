@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { UserEntity } from "../../domain/entities/user.entity";
-import { userInfo } from "os";
 import { UserRepositoryImpl } from "../../infrastructure/database/implementation/user.repository.impl";
 import { HttpStatusCode } from "../../shared/constants/http.status.codes";
 import { CommonStringMessage } from "../../shared/constants/string.messages";

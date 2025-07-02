@@ -6,10 +6,8 @@ import {
 	getWalletUsecase,
 	getWithdrawalRequestsUsecase,
 	topupWalletUsecase,
-	updateWalletBalanceUseCase,
 	withdrawWalletUsecase,
 } from "../../../application/usecases/wallet/composer";
-import { GetWalletUsecase } from "../../../application/usecases/wallet/get.wallet.usecase";
 import { CreateTransactionController } from "./create.transaction.controller";
 import { CreateWalletController } from "./create.wallet.controller";
 import { CreateWithdrawalRequestController } from "./create.withdrawal.request.controller";

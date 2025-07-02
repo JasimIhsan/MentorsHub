@@ -2,9 +2,7 @@
 import { NextFunction, Request, Response } from "express";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { AdminEntity } from "../../../domain/entities/admin.entity";
-import { IGetMentorUsecase } from "../../../application/interfaces/mentors/mentors.interface";
 import { IGetDocumentsUseCase } from "../../../application/interfaces/documents";
-import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
 
 export interface CustomRequest extends Request {

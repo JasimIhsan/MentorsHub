@@ -1,4 +1,3 @@
-import { UserProgressEntity } from "../../../domain/entities/gamification/user.progress.entity";
 import { IUserProgressRepository } from "../../../domain/repositories/gamification/user.progress.repository";
 import { IUserProgressDTO, mapToUserProgressDTO } from "../../dtos/gamification.dto";
 import { IGetUserProgressUseCase } from "../../interfaces/gamification";

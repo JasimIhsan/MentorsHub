@@ -1,6 +1,5 @@
 import { IWalletTransactionDTO } from "../../application/dtos/wallet.transation.dto";
 import { WalletEntity } from "../entities/wallet/wallet.entity";
-import { WalletTransactionEntity } from "../entities/wallet/wallet.transaction.entity";
 import { WithdrawalRequestEntity } from "../entities/wallet/wallet.withdrawel.request.entity";
 
 export interface IWalletRepository {
