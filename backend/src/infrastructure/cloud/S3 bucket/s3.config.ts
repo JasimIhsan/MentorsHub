@@ -1,12 +1,10 @@
-import AWS from "aws-sdk";
-import dotenv from "dotenv";
+// src/infrastructure/cloud/s3/s3.config.ts
+export class S3Config {
+	static AWS_ACCESS_KEY_ID: string;
+	static AWS_SECRET_ACCESS_KEY: string;
 
-dotenv.config();
-
-const s3 = new AWS.S3({
-	accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
-	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
-	region: process.env.AWS_REGION as string,
-});
-
-export default s3;
+	static init(secrets: { AWS_ACCESS_KEY_ID: string; AWS_SECRET_ACCESS_KEY: string }) {
+		this.AWS_ACCESS_KEY_ID = secrets.AWS_ACCESS_KEY_ID;
+		this.AWS_SECRET_ACCESS_KEY = secrets.AWS_SECRET_ACCESS_KEY;
+	}
+}

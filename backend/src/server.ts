@@ -7,6 +7,7 @@ import { SessionModel } from "./infrastructure/database/models/session/session.m
 import { TokenConfig } from "./infrastructure/auth/jwt/jwt.config";
 import { kmsService } from "./infrastructure/composer";
 import { CloudinaryConfig } from "./infrastructure/cloud/cloudinary/cloudinary.config";
+import { S3Config } from "./infrastructure/cloud/S3 bucket/s3.config";
 
 (async () => {
 	// Load jwt secrets
@@ -19,6 +20,11 @@ import { CloudinaryConfig } from "./infrastructure/cloud/cloudinary/cloudinary.c
 	const cloudinaryAPIKey = await kmsService.getSecret("mentorshub/prod/cloudinary", "CLOUDINARY_API_KEY");
 	const cloudinaryAPISecret = await kmsService.getSecret("mentorshub/prod/cloudinary", "CLOUDINARY_API_SECRET");
 	CloudinaryConfig.init({ CLOUDINARY_CLOUD_NAME: cloudinaryName, CLOUDINARY_API_KEY: cloudinaryAPIKey, CLOUDINARY_API_SECRET: cloudinaryAPISecret });
+
+	// load aws secrets
+	const awsAccessKey = await kmsService.getSecret("mentorshub/prod/aws", "AWS_ACCESS_KEY_ID");
+	const awsSecretAccessKey = await kmsService.getSecret("mentorshub/prod/aws", "AWS_SECRET_ACCESS_KEY");
+	S3Config.init({ AWS_ACCESS_KEY_ID: awsAccessKey, AWS_SECRET_ACCESS_KEY: awsSecretAccessKey });
 
 	// Create server
 	const server = createServer(app);
