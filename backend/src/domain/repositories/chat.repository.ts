@@ -1,6 +1,4 @@
-import { Types } from "mongoose";
 import { IChat } from "../../infrastructure/database/models/text-message/chat.model";
-import { ChatEntity } from "../entities/chat.entity";
 import { IChatDTO } from "../../application/dtos/chats.dto";
 
 export interface IChatRepository {

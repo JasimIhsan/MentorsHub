@@ -1,5 +1,5 @@
 import { IForgotPasswordTokensRepository } from "../../../domain/repositories/forgot.password.token.respository";
-import { ForgotPasswordTokenEntity, ForgotPasswordTokenProps } from "../../../domain/entities/forgot.password.token.entity";
+import { ForgotPasswordTokenEntity } from "../../../domain/entities/forgot.password.token.entity";
 import { ForgotTokenModel } from "../models/user/forgot.password.reset.token.model";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 
@@ -7,8 +7,8 @@ export class ForgotPasswordResetTokenImpl implements IForgotPasswordTokensReposi
 	async createToken(userId: string, token: string, expiresInMinutes: number): Promise<ForgotPasswordTokenEntity> {
 		try {
 			const tokenEntity = ForgotPasswordTokenEntity.create(userId, token, expiresInMinutes);
-			console.log('tokenEntity: ', tokenEntity);
-			const createdToken = new ForgotTokenModel({token: tokenEntity.token, userId: tokenEntity.userId, expiresAt: tokenEntity.expiresAt});
+			console.log("tokenEntity: ", tokenEntity);
+			const createdToken = new ForgotTokenModel({ token: tokenEntity.token, userId: tokenEntity.userId, expiresAt: tokenEntity.expiresAt });
 			await createdToken.save();
 
 			return tokenEntity;

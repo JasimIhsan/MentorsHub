@@ -3,6 +3,7 @@ import { TokenServicesImpl } from "../../infrastructure/auth/jwt/jwt.services";
 import { HttpStatusCode } from "../../shared/constants/http.status.codes";
 import { CommonStringMessage } from "../../shared/constants/string.messages";
 import { RedisCacheRepository } from "../../infrastructure/cache/redis.cache.repository";
+import { logger } from "../../infrastructure/utils/logger";
 
 const redisService = new RedisCacheRepository();
 const tokenService = new TokenServicesImpl(redisService);
@@ -35,6 +36,7 @@ export const verifyRefreshToken = async (req: Request, res: Response, next: Next
 		req.user = decoded;
 		next();
 	} catch (error) {
-		res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: CommonStringMessage.SERVER_ERROR_MESSAGE });
+		logger.error(`❌ Error in verifyRefreshToken: ${error}`);
+		next(error);
 	}
 };

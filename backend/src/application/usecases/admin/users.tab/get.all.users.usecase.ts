@@ -1,4 +1,4 @@
-import { FindUsersParams, IUserRepository, PaginatedUsers } from "../../../../domain/repositories/user.repository";
+import { FindUsersParams, IUserRepository } from "../../../../domain/repositories/user.repository";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
 import { IGetAllUsersUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
 

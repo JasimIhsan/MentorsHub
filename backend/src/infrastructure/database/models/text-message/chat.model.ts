@@ -19,7 +19,7 @@ const ChatSchema: Schema<IChat> = new Schema(
 		groupAdmin: { type: Schema.Types.ObjectId, ref: "Users" },
 		lastMessage: { type: Schema.Types.ObjectId, ref: "Message" },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const ChatModel: Model<IChat> = mongoose.model<IChat>("Chat", ChatSchema);

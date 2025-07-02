@@ -15,7 +15,7 @@ export class KmsServiceImpl implements IKmsService {
 		const groupObj = this.cache.get(group)!;
 		const value = groupObj[field] ?? process.env[field]; // fallback for dev
 		if (!value) throw new Error(`Field ${field} missing in ${group}`);
-		console.log(`Secret cache : `, this.cache);
+		console.log("Secret cache : ", this.cache);
 		return value;
 	}
 }

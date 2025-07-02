@@ -23,7 +23,7 @@ const ReviewSchema = new Schema<IReviewDocument>(
 		},
 		comment: { type: String, required: true },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const ReviewModel = mongoose.model<IReviewDocument>("Review", ReviewSchema);

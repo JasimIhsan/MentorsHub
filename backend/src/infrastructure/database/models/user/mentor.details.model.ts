@@ -95,7 +95,7 @@ const MentorProfileSchema: Schema = new Schema(
 		},
 		documents: [{ type: String }],
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const MentorProfileModel = mongoose.model<IMentorProfileModel>("MentorProfile", MentorProfileSchema);

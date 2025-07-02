@@ -23,7 +23,7 @@ export class TokenServicesImpl implements ITokenService {
 		try {
 			return jwt.verify(token, TokenConfig.ACCESS_TOKEN_SECRET) as Payload;
 		} catch (error) {
-			return null;
+			throw error;
 		}
 	}
 
@@ -31,7 +31,7 @@ export class TokenServicesImpl implements ITokenService {
 		try {
 			return jwt.verify(token, TokenConfig.REFRESH_TOKEN_SECRET) as Payload;
 		} catch (error) {
-			return null;
+			throw error;
 		}
 	}
 

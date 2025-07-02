@@ -13,7 +13,7 @@ const ActionTypeSchema = new Schema<IActionTypeDocument>(
 		_id: { type: String, required: true }, // slug/key
 		label: { type: String, required: true },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const ActionTypeModel = model<IActionTypeDocument>("ActionType", ActionTypeSchema);

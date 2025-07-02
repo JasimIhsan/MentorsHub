@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { ICreateUserUsecase } from "../../../../application/interfaces/admin/admin.usertab.interfaces";
-import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 
 export class CreateUserController {

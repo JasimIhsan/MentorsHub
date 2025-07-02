@@ -1,6 +1,5 @@
 import { IForgotPasswordTokensRepository } from "../../../../domain/repositories/forgot.password.token.respository";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import { UserEntity } from "../../../../domain/entities/user.entity";
 import { IHashService } from "../../../interfaces/services/hash.service";
 
 export class ResetPasswordUseCase {

@@ -12,5 +12,5 @@ export const sessionWorker = new Worker(
 		await useCase.execute();
 		console.log("✅ Expired sessions updated");
 	},
-	{ connection }
+	{ connection },
 );

@@ -6,7 +6,7 @@ export const getMessageUnreadCountHandler = (io: Server, socket: Socket) => {
 		try {
 			console.log(`🔄️📖🔄️📖 get-unread-counts: userId=${userId}, chatIds=${chatIds}`);
 			const counts = await getMessageUnreadCountsByUser.execute(userId, chatIds);
-			console.log('counts of unread message of each chats: ', counts);
+			console.log("counts of unread message of each chats: ", counts);
 			socket.emit("unread-counts-response", counts);
 		} catch (err) {
 			console.error(err);

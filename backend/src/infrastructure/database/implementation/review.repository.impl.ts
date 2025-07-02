@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { ReviewDTO } from "../../../application/dtos/review.dtos";
 import { ReviewEntity } from "../../../domain/entities/review.entity";
 import { IReviewRepository } from "../../../domain/repositories/review.repository";
-import { IReviewDocument, ReviewModel } from "../models/review-rating/review.model";
+import { ReviewModel } from "../models/review-rating/review.model";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 
 export class ReviewRepositoryImpl implements IReviewRepository {
@@ -24,7 +24,7 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 
 	async findByMentorId(
 		mentorId: string,
-		options?: { page?: number; limit?: number; rating?: number }
+		options?: { page?: number; limit?: number; rating?: number },
 	): Promise<{ reviews: ReviewDTO[]; total: number }> {
 		try {
 			const page = options?.page ?? 1;
@@ -67,7 +67,7 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 			sessionId?: string;
 			rating: number;
 			comment: string;
-		}
+		},
 	): Promise<ReviewEntity> {
 		try {
 			const updated = await ReviewModel.findByIdAndUpdate(reviewId, data, { new: true });

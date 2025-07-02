@@ -9,8 +9,6 @@ export class CreateSessionPaymentOrderController {
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { sessionId, userId } = req.body;
-			console.log('userId: ', userId);
-			console.log('sessionId: ', sessionId);
 
 			const order = await this.createSessionPaymentOrderUseCase.execute(sessionId, userId);
 			res.status(HttpStatusCode.OK).json({ success: true, order });

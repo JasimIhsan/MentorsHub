@@ -13,6 +13,6 @@ export class CreateActionTypeUseCase implements ICreateActionTypeUseCase {
 
 		const entity = new ActionTypeEntity(input.id, input.label);
 		await this.repo.save(entity);
-		return entity
+		return entity;
 	}
 }

@@ -22,7 +22,7 @@ const GamificationTaskSchema = new Schema(
 	},
 	{
 		timestamps: true,
-	}
+	},
 );
 
 export const GamificationTaskModel = mongoose.model<IGamificationTaskDocument>("GamificationTask", GamificationTaskSchema);

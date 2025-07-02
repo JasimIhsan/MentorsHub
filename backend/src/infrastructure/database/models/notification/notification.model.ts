@@ -25,7 +25,7 @@ const NotificationSchema: Schema = new Schema(
 		link: { type: String },
 		isRead: { type: Boolean, default: false },
 	},
-	{ timestamps: { createdAt: true, updatedAt: false } }
+	{ timestamps: { createdAt: true, updatedAt: false } },
 );
 
 export const NotificationModel = mongoose.model<INotificationDocument>("Notification", NotificationSchema);

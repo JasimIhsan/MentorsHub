@@ -23,7 +23,7 @@ const WithdrawalRequestSchema = new Schema<IWithdrawalRequestDocument>(
 		requestedAt: { type: Date, default: Date.now },
 		processedAt: { type: Date },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const WithdrawalRequestModel = mongoose.model<IWithdrawalRequestDocument>("WithdrawalRequest", WithdrawalRequestSchema);

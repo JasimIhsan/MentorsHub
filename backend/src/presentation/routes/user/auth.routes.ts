@@ -2,7 +2,7 @@ import { Router } from "express";
 import { signupController, signinController, refreshController, forgotPasswordController, verifyResetTokenController, resetPasswordController, logoutController, sendOtpController } from "../../controllers/user/composer";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { verifyRefreshToken } from "../../middlewares/auth.refresh.token.middleware";
-import { checkUserStatus, checkUserStatusInLogin } from "../../middlewares/auth.user.status.middleware";
+import { checkUserStatusInLogin } from "../../middlewares/auth.user.status.middleware";
 import { requireRole } from "../../middlewares/require.role.middleware";
 
 const authRouter = Router();
@@ -27,7 +27,7 @@ authRouter.post("/send-otp", (req, res, next) => sendOtpController.handle(req, r
 authRouter.post("/resend-otp", (req, res, next) => sendOtpController.handle(req, res, next));
 
 // Test Route
-authRouter.get("/test", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => {
+authRouter.get("/test", verifyAccessToken, requireRole("mentor", "user"), (req, res) => {
 	res.json({ success: true, message: "Hello, authenticated user!" });
 });
 

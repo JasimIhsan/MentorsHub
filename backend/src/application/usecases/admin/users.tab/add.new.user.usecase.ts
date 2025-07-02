@@ -14,10 +14,10 @@ export class CreateUserUsecase implements ICreateUserUsecase {
 				throw new Error("User already exists with this email");
 			}
 
-			const password = this.hashService.generatePassword()
+			const password = this.hashService.generatePassword();
 			const hashedPassword = await this.hashService.hashPassword(password);
 
-			const userEntity = new UserEntity({firstName, lastName, email, password: hashedPassword, role});
+			const userEntity = new UserEntity({ firstName, lastName, email, password: hashedPassword, role });
 			const newUser = await this.userRepository.createUser(userEntity);
 			return mapToUserDTO(newUser);
 		} catch (error) {

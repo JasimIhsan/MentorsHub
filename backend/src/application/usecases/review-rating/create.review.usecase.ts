@@ -2,7 +2,6 @@ import { ICreateReviewUseCase } from "../../interfaces/review";
 import { IReviewRepository } from "../../../domain/repositories/review.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository"; // You need this
 import { ReviewEntity } from "../../../domain/entities/review.entity";
-import { UserEntity } from "../../../domain/entities/user.entity";
 import { IUpdateUserTaskProgressUseCase } from "../../interfaces/gamification";
 import { ActionType } from "../../dtos/gamification.dto";
 

@@ -46,7 +46,7 @@ export const configurePassport = (userRepo: IUserRepository, tokenService: IToke
 								averageRating: 0,
 								totalReviews: 0,
 								createdAt: new Date(),
-							})
+							}),
 						);
 					}
 
@@ -58,8 +58,8 @@ export const configurePassport = (userRepo: IUserRepository, tokenService: IToke
 				} catch (err) {
 					return done(err as Error, false);
 				}
-			}
-		)
+			},
+		),
 	);
 
 	// ── Standard serialize / deserialize ────────────────────

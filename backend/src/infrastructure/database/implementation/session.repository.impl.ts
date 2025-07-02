@@ -51,7 +51,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			filterOption?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
-		}
+		},
 	): Promise<{ sessions: ISessionMentorDTO[]; total: number }> {
 		try {
 			const { filterOption, page, limit, status } = queryParams;
@@ -106,7 +106,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			const updatedSession = await SessionModel.findByIdAndUpdate(
 				sessionId,
 				{ status, rejectReason },
-				{ new: true }
+				{ new: true },
 			);
 			if (!updatedSession) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 			return SessionEntity.fromDBDocument(updatedSession);
@@ -120,7 +120,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		userId: string,
 		paymentId: string,
 		paymentStatus: string,
-		status: string
+		status: string,
 	): Promise<void> {
 		try {
 			const updated = await SessionModel.findOneAndUpdate(
@@ -132,7 +132,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 						status: status,
 					},
 				},
-				{ new: true }
+				{ new: true },
 			);
 			if (!updated) throw new Error("Session or participant not found");
 		} catch (error) {
@@ -187,7 +187,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 
 	private mapSessionToUserDTO(session: any, userId: string): ISessionUserDTO {
 		const participant = session.participants.find((p: any) =>
-			p.userId._id?.toString?.() === userId || p.userId?.toString() === userId
+			p.userId._id?.toString?.() === userId || p.userId?.toString() === userId,
 		);
 
 		return {

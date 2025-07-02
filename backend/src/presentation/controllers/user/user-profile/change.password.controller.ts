@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { IChangePasswordUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
-import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { logger } from "../../../../infrastructure/utils/logger";
 
 export class ChangePasswordController {

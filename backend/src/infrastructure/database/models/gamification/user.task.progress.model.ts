@@ -21,7 +21,7 @@ const UserTaskProgressSchema = new Schema(
 	},
 	{
 		timestamps: true,
-	}
+	},
 );
 
 // Ensure one progress record per (user + task)

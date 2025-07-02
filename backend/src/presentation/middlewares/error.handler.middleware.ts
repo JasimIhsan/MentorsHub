@@ -1,9 +1,8 @@
-// src/presentation/middleware/error.middleware.ts
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { logger } from "../../infrastructure/utils/logger";
 import { HttpStatusCode } from "../../shared/constants/http.status.codes";
 
-export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
+export function errorHandler(err: any, req: Request, res: Response) {
 	logger.error(`${req.method} ${req.url} ❌ ${err.message || "Unknown Error"}`);
 
 	if (err instanceof Error) {

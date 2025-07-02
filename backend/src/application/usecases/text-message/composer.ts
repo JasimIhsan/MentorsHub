@@ -1,4 +1,4 @@
-import { chatRepository, hashService, messageRepository, userRepository } from "../../../infrastructure/composer";
+import { chatRepository, messageRepository, userRepository } from "../../../infrastructure/composer";
 import { DeleteMessageUseCase } from "./delete.message.usecase";
 import { GetUserChatsUseCase } from "./get.chats.usecase";
 import { GetMessagesByChatUseCase } from "./get.message.by.chat.usecase";
@@ -11,4 +11,4 @@ export const markMessageAsReadUsecase = new MarkMessageReadUseCase(messageReposi
 export const getUserChatsUsecase = new GetUserChatsUseCase(chatRepository);
 export const getMessagesByChatUsecase = new GetMessagesByChatUseCase(messageRepository);
 export const deleteMessageUseCase = new DeleteMessageUseCase(messageRepository, chatRepository);
-export const getMessageUnreadCountsByUser = new GetMessageUnreadCountUseCase(messageRepository)
+export const getMessageUnreadCountsByUser = new GetMessageUnreadCountUseCase(messageRepository);

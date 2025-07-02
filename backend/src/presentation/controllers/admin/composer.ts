@@ -1,4 +1,3 @@
-import { adminRepository } from "../../../infrastructure/composer";
 import { AdminLoginController } from "./auth/admin.login.controller";
 import { adminLoginUsecase, createUserUsecase, deleteUserUsecase, getAllUsersUsecase, updateUserStatusUseCase, updateUserUsecase, verifyMentorApplicationUsecase } from "../../../application/usecases/admin/composer";
 import { GetAllUsersController } from "./user-tab/get.all.users.controller";

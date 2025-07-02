@@ -16,13 +16,13 @@ export function applyGlobalMiddlewares(app: Express) {
 			origin: [process.env.FRONTEND_ORIGIN!],
 			methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 			credentials: true,
-		})
+		}),
 	);
 
 	app.use(morgan("dev"));
 	app.use(
 		morgan(":method :url :status :res[content-length] - :response-time ms", {
 			stream: { write: (msg) => logger.http(msg.trim()) },
-		})
+		}),
 	);
 }

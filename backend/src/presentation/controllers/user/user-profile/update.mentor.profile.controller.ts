@@ -10,7 +10,6 @@ export class ReApplyMentorApplicationController {
 		try {
 			const { userId, firstName, lastName, bio, professionalTitle, languages, primaryExpertise, skills, yearsExperience, workExperiences, educations, certifications, sessionFormat, sessionTypes, pricing, hourlyRate, availability } = req.body;
 
-			console.log(`req.body : `, req.body);
 			// Parse stringified fields
 			const parsedData = {
 				languages: JSON.parse(languages || "[]"),
@@ -55,7 +54,7 @@ export class ReApplyMentorApplicationController {
 					bio,
 					skills: parsedData.skills,
 				},
-				documents
+				documents,
 			);
 
 			res.status(HttpStatusCode.OK).json({

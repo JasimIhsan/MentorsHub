@@ -15,7 +15,7 @@ export class UpdateReviewUseCase implements IUpdateReviewUseCase {
 			sessionId?: string;
 			rating: number;
 			comment: string;
-		}
+		},
 	): Promise<ReviewDTO> {
 		if (!reviewId) throw new Error("reviewId is required");
 		if (!data.reviewerId) throw new Error("reviewerId is required");

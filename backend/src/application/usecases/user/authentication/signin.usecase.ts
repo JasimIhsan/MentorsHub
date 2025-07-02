@@ -1,6 +1,5 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { ITokenService } from "../../../interfaces/user/token.service.interface";
-import { UserEntity } from "../../../../domain/entities/user.entity";
 import { ISignInUseCase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IHashService } from "../../../interfaces/services/hash.service";

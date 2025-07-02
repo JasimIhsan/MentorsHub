@@ -6,7 +6,9 @@
 		"dev": "nodemon src/server.ts --legacy-watch",
 		"start": "ts-node src/server.ts",
 		"build": "tsc",
-		"serve": "node dist/server.js"
+		"serve": "node dist/server.js",
+		"lint": "eslint . --config eslint.config.mjs",
+		"lint:fix": "eslint . --config eslint.config.mjs --fix"
 	},
 	"keywords": [],
 	"author": "",
@@ -58,6 +60,7 @@
 		"@types/passport": "^1.0.17",
 		"@types/passport-google-oauth20": "^2.0.16",
 		"eslint": "^9.29.0",
+		"eslint-plugin-unused-imports": "^4.1.4",
 		"globals": "^16.2.0",
 		"nodemon": "^3.1.9",
 		"ts-node": "^10.9.2",

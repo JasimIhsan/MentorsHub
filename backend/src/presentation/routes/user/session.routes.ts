@@ -12,6 +12,7 @@ import { verifyAccessToken } from "../../middlewares/auth.access.token.middlewar
 import { SessionModel } from "../../../infrastructure/database/models/session/session.model";
 import { requireRole } from "../../middlewares/require.role.middleware";
 import { CommonStringMessage } from "../../../shared/constants/string.messages";
+import { logger } from "../../../infrastructure/utils/logger";
 export const sessionRouter = Router();
 
 sessionRouter.post("/create-session", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => createSessionController.handle(req, res, next));
@@ -38,6 +39,7 @@ sessionRouter.get("/:sessionId", verifyAccessToken, requireRole("mentor", "user"
 		}
 		res.json({ session });
 	} catch (error) {
-		res.status(500).json({ message: "Failed to fetch session" });
+		logger.error(`❌ Error in sessionRouter: ${error}`);
+		next(error);
 	}
 });

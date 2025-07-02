@@ -1,6 +1,5 @@
-import { IAvailabilityDTO } from "../../dtos/availability.dto";
 import { IMentorDTO } from "../../dtos/mentor.dtos";
-import { ISessionMentorDTO, ISessionUserDTO } from "../../dtos/session.dto";
+import { ISessionMentorDTO } from "../../dtos/session.dto";
 
 export interface IGetAllMentorsUsecase {
 	execute(query: { page?: number; limit?: number; search?: string; status?: string }): Promise<{

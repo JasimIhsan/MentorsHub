@@ -24,7 +24,7 @@ export class UserProgressRepositoryImpl implements IUserProgressRepository {
 					tasksCompleted: progress.tasksCompleted,
 					xpToNextLevel: progress.xpToNextLevel,
 				},
-				{ upsert: true }
+				{ upsert: true },
 			);
 		} catch (error) {
 			throw new Error(`Error in save(): ${error}`);

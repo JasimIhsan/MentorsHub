@@ -33,7 +33,6 @@ import { PaySessionWithWalletUseCase } from "./session/pay.session.with.wallet.u
 import { UploadMentorDocumentUseCase } from "../documents/upload.mentor.document.usecase";
 import { ReApplyMentorApplicationUseCase } from "./user-profile/re.apply.mentor.application.usecase";
 import { CancelSessionUseCase } from "./session/cancel.session.usecase";
-import { get } from "axios";
 import { getAvailabilityUsecase } from "../mentors/composer";
 import { VerifySessionPaymentUseCase } from "./session/verify.session.payment.usecase";
 import { CreateSessionPaymentOrderUseCase } from "./session/create.session.payment.order.usecase";

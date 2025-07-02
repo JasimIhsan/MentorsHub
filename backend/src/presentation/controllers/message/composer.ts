@@ -2,5 +2,5 @@ import { getMessagesByChatUsecase, getUserChatsUsecase } from "../../../applicat
 import { GetMessagesByChatController } from "./get.message.by.chat.controller";
 import { GetUserChatsController } from "./get.user.chats.controller";
 
-export const getUserChatsController = new GetUserChatsController(getUserChatsUsecase)
-export const getMessagesByChatController = new GetMessagesByChatController(getMessagesByChatUsecase)
+export const getUserChatsController = new GetUserChatsController(getUserChatsUsecase);
+export const getMessagesByChatController = new GetMessagesByChatController(getMessagesByChatUsecase);

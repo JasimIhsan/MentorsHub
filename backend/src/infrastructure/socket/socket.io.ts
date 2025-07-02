@@ -1,7 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { Model } from "mongoose";
 import { ISessionDocument } from "../database/models/session/session.model";
-import { MessageModel } from "../database/models/text-message/message.model";
 import { markMessageAsReadUsecase, sendMessageUsecase } from "../../application/usecases/text-message/composer";
 import { deleteMessageHandler } from "./socket/delete.message.handler";
 import { registerMessageReadHandlers } from "./socket/update.readby.handler";
@@ -187,7 +186,8 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 				}
 				socket.emit("reconnect-success", { sessionId });
 				console.log(`🔄 User reconnected: ${userId}`);
-			} catch (error: any) {
+			} catch (error) {
+				console.log("Error from reconnect-session : ", error);
 				socket.emit("error", { message: "Reconnect failed" });
 			}
 		});

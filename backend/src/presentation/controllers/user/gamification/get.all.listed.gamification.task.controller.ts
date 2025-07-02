@@ -11,7 +11,7 @@ export class GetAllListedGamificationTasksController {
 			const { page, limit, searchTerm } = req.query;
 			const { tasks, totalCount } = await this.useCase.execute(userId, { page: page ? parseInt(page as string, 10) : 1, limit: limit ? parseInt(limit as string, 10) : 10, searchTerm: searchTerm as string });
 
-			res.status(HttpStatusCode.OK).json({ success: true, tasks , totalCount});
+			res.status(HttpStatusCode.OK).json({ success: true, tasks , totalCount });
 		} catch (error) {
 			logger.error(`❌ Error in GetAllListedGamificationTasksController: ${error}`);
 			next(error);

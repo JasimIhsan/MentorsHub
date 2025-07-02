@@ -1,7 +1,5 @@
-import { Types } from "mongoose";
 import { IChatRepository } from "../../../domain/repositories/chat.repository";
 import { IChat, ChatModel } from "../models/text-message/chat.model";
-import { ChatEntity } from "../../../domain/entities/chat.entity";
 import { IUserSummaryDTO, IMessageSummaryDTO, IChatDTO } from "../../../application/dtos/chats.dto";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 

@@ -8,7 +8,6 @@ export class RequestSessionController {
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const requestData = req.body;
-			console.log(`request data date in controller : `, requestData.date);
 
 			const session = await this.requestSessionUsecase.execute(requestData);
 			res.status(HttpStatusCode.OK).json({ success: true, session, message: "Session requested successfully" });
