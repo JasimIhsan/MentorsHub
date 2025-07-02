@@ -5,10 +5,6 @@ export class KmsServiceImpl implements IKmsService {
 	private cache = new Map<string, Record<string, string>>();
 	private client = new SecretsManagerClient({ region: process.env.AWS_REGION! });
 
-	async init(): Promise<void> {
-		/* noop – lazy load */
-	}
-
 	async getSecret(group: string, field: string): Promise<string> {
 		if (!this.cache.has(group)) {
 			const cmd = new GetSecretValueCommand({ SecretId: group });
@@ -19,6 +15,7 @@ export class KmsServiceImpl implements IKmsService {
 		const groupObj = this.cache.get(group)!;
 		const value = groupObj[field] ?? process.env[field]; // fallback for dev
 		if (!value) throw new Error(`Field ${field} missing in ${group}`);
+		console.log(`Secret cache : `, this.cache);
 		return value;
 	}
 }

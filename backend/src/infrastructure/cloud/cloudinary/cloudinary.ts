@@ -2,20 +2,27 @@ import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
 import { Readable } from "stream";
 import { ICloudinaryService } from "../../../application/interfaces/user/user.profile.usecase.interfaces";
+import { CloudinaryConfig } from "./cloudinary.config";
 
 dotenv.config();
 
 export class CloudinaryService implements ICloudinaryService {
-	uploader: any;
-	constructor() {
-		cloudinary.config({
-			cloud_name: process.env.CLOUDINARY_NAME as string,
-			api_key: process.env.CLOUDINARY_API_KEY as string,
-			api_secret: process.env.CLOUDINARY_API_SECRET as string,
-		});
+	private isConfigured = false;
+
+	private configureCloudinary() {
+		if (!this.isConfigured) {
+			cloudinary.config({
+				cloud_name: CloudinaryConfig.CLOUDINARY_CLOUD_NAME,
+				api_key: CloudinaryConfig.CLOUDINARY_API_KEY,
+				api_secret: CloudinaryConfig.CLOUDINARY_API_SECRET,
+			});
+		}
 	}
 
 	async uploadProfilePicture(file: Express.Multer.File): Promise<string> {
+		// configure cloudinary here to avoid construction the scretes are loaded
+		this.configureCloudinary();
+
 		return new Promise<string>((resolve, reject) => {
 			if (!file.buffer) {
 				return reject(new Error("No file buffer found"));

@@ -1,16 +1,20 @@
-import { z } from "zod";
+// src/envLoader.ts
 import dotenv from "dotenv";
+import { z } from "zod";
 
 dotenv.config();
 
 const EnvSchema = z.object({
-	PORT: z.string().default("5858"),
-	FRONTEND_ORIGIN: z.string().url(),
-	AWS_REGION: z.string().default("ap-south-1"),
-	// optional fallbacks for local/dev
-	JWT_ACCESS_TOKEN: z.string().optional(),
-	JWT_REFRESH_TOKEN: z.string().optional(),
+  NODE_ENV: z.string().default("development"),
+  PORT: z.string().default("5858"),
+
+  MONGO_URI: z.string().min(1, "MONGO_URI is required"),
+  FRONTEND_ORIGIN: z.string().url(),
+  BACKEND_ORIGIN: z.string().url(),
+
+  AWS_REGION: z.string().default("ap-south-1"),
+  REDIS_URL: z.string().min(1),
 });
 
-export type Env = z.infer<typeof EnvSchema>;
-export const env: Env = EnvSchema.parse(process.env);
+export const env = EnvSchema.parse(process.env);
+
