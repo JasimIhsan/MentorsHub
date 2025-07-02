@@ -5,6 +5,7 @@ import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { ITokenService } from "../../../application/interfaces/user/token.service.interface";
 import { IHashService } from "../../../application/interfaces/services/hash.service";
 import { UserEntity } from "../../../domain/entities/user.entity";
+import { GoogleConfig } from "./config/google.config";
 
 dotenv.config();
 
@@ -12,8 +13,8 @@ export const configurePassport = (userRepo: IUserRepository, tokenService: IToke
 	passport.use(
 		new GoogleStrategy(
 			{
-				clientID: process.env.GOOGLE_CLIENT_ID as string,
-				clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+				clientID: GoogleConfig.GOOGLE_CLIENT_ID,
+				clientSecret: GoogleConfig.GOOGLE_CLIENT_SECRET,
 				callbackURL: "/api/auth/google/callback",
 			},
 			async (_accessToken, _refreshToken, profile: Profile, done) => {
