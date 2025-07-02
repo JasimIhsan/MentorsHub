@@ -7,7 +7,8 @@ export class ForgotPasswordResetTokenImpl implements IForgotPasswordTokensReposi
 	async createToken(userId: string, token: string, expiresInMinutes: number): Promise<ForgotPasswordTokenEntity> {
 		try {
 			const tokenEntity = ForgotPasswordTokenEntity.create(userId, token, expiresInMinutes);
-			const createdToken = new ForgotTokenModel({ ...tokenEntity });
+			console.log('tokenEntity: ', tokenEntity);
+			const createdToken = new ForgotTokenModel({token: tokenEntity.token, userId: tokenEntity.userId, expiresAt: tokenEntity.expiresAt});
 			await createdToken.save();
 
 			return tokenEntity;
