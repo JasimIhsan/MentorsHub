@@ -19,8 +19,10 @@ jobs:
            with:
               node-version: 18
 
-         - name: Install dependencies
+         - name: Install dependencies in backend
            run: npm install
+           working-directory: ./backend
 
          - name: Run ESLint
            run: npx eslint . --ext .ts,.tsx
+           working-directory: ./backend
