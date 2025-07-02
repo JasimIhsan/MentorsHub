@@ -1,6 +1,4 @@
-import bcrypt from "bcrypt";
-
-interface AdminInterface {
+export interface AdminProps {
 	id?: string;
 	name?: string;
 	username: string;
@@ -10,68 +8,53 @@ interface AdminInterface {
 }
 
 export class AdminEntity {
-	private id?: string;
-	private name?: string;
-	private username: string;
-	private password: string;
-	private role: "admin" | "super-admin";
-	private avatar?: string;
-	constructor(admin: AdminInterface) {
-		this.id = admin.id;
-		this.name = admin.name;
-		this.username = admin.username;
-		this.password = admin.password;
-		this.role = admin.role === "admin" ? "admin" : "super-admin";
-		this.avatar = admin.avatar;
+	private readonly _id?: string;
+	private readonly _name?: string;
+	private readonly _username: string;
+	private _password: string;
+	private readonly _role: "admin" | "super-admin";
+	private readonly _avatar?: string;
+
+	constructor(props: AdminProps) {
+		this._id = props.id;
+		this._name = props.name;
+		this._username = props.username;
+		this._password = props.password;
+		this._role = props.role;
+		this._avatar = props.avatar;
 	}
 
-	static async createAdmin(admin: AdminInterface) {
-		const hashedPassword = await bcrypt.hash(admin.password, 10);
-		return new AdminEntity({
-			...admin,
-			password: hashedPassword,
-		});
+	// 👇 Public Getters
+	get id(): string | undefined {
+		return this._id;
 	}
 
-	static fromDBDocument(doc: AdminInterface): AdminEntity {
-		return new AdminEntity({
-			id: doc.id,
-			name: doc.name,
-			avatar: doc.avatar,
-			username: doc.username,
-			password: doc.password,
-			role: doc.role,
-		});
+	get name(): string | undefined {
+		return this._name;
 	}
 
-	async comparePassword(password: string): Promise<boolean> {
-		return await bcrypt.compare(password, this.password);
+	get username(): string {
+		return this._username;
 	}
 
-	getProfile(): AdminInterface {
-		return {
-			id: this.id,
-			name: this.name,
-			avatar: this.avatar,
-			username: this.username,
-			password: this.password,
-			role: this.role,
-		};
+	get password(): string {
+		return this._password;
 	}
 
-	getId(): string | undefined {
-		return this.id;
+	get role(): "admin" | "super-admin" {
+		return this._role;
 	}
 
-	getUsername(): string {
-		return this.username;
+	get avatar(): string | undefined {
+		return this._avatar;
 	}
 
-	getPassword(): string {
-		return this.password;
+	get isSuperAdmin(): boolean {
+		return this._role === "super-admin";
 	}
 
-	getIsSuperAdmin(): boolean {
-		return this.role === "super-admin";
+	// 🔒 You can allow password update
+	updatePassword(newPassword: string) {
+		this._password = newPassword;
 	}
 }

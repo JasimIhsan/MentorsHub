@@ -27,8 +27,8 @@ export class GetTransactionsController {
 		try {
 			const result = await this.getTransactionsUseCase.execute(userId, role as string, page, limit, filter);
 			res.status(HttpStatusCode.OK).json({ success: true, transactions: result.data, total: result.total });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetTransactionsController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetTransactionsController: ${error}`);
 			next(error);
 		}
 	}

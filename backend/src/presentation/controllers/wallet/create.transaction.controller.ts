@@ -12,8 +12,8 @@ export class CreateTransactionController {
 		try {
 			const tx = await this.createTransactionUseCase.execute(req.body);
 			res.status(HttpStatusCode.CREATED).json({ success: true, data: tx });
-		} catch (error: any) {
-			logger.error(`❌ Error in CreateTransactionController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in CreateTransactionController: ${error}`);
 			next(error);
 		}
 	}

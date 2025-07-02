@@ -21,8 +21,8 @@ export class VerifyResetTokenController {
 				logger.error("Token is invalid");
 				res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: "Token is invalid" });
 			}
-		} catch (error: any) {
-			logger.error(`❌ Error in VerifyResetTokenController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in VerifyResetTokenController: ${error}`);
 			next(error);
 		}
 	}

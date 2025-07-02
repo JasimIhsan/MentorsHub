@@ -1,4 +1,5 @@
 import { UserEntity } from "../../../domain/entities/user.entity";
+import { IUserDTO } from "../../dtos/user.dtos";
 
 export interface IForgotPasswordUseCase {
 	execute(email: string): Promise<void>;
@@ -13,7 +14,7 @@ export interface IResetPasswordUseCase {
 }
 
 export interface ISignInUseCase {
-	execute(email: string, password: string): Promise<{ user: UserEntity; refreshToken: string; accessToken: string }>;
+	execute(email: string, password: string): Promise<{ user: IUserDTO; refreshToken: string; accessToken: string }>;
 }
 
 export interface ISignupUseCase {

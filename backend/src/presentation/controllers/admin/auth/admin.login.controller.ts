@@ -28,8 +28,8 @@ export class AdminLoginController {
 			});
 
 			res.status(HttpStatusCode.OK).json({ success: true, admin });
-		} catch (error: any) {
-			logger.error(`❌ Error in AdminLoginController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in AdminLoginController: ${error}`);
 			next(error);
 		}
 	}

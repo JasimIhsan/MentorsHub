@@ -20,8 +20,8 @@ export class GetUpcomingSessionMentorController {
 			const sessions = await this.getUpcomingSessionMentorUsecase.execute(mentorId, queryParams);
 
 			res.status(HttpStatusCode.OK).json({ success: true, sessions: sessions.sessions, total: sessions.total });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetUpcomingSessionMentorController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetUpcomingSessionMentorController: ${error}`);
 			next(error);
 		}
 	}

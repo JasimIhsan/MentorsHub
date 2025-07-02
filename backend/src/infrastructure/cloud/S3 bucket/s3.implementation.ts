@@ -1,5 +1,5 @@
 import { IS3Service } from "../../../domain/interface/s3.service.interface";
-import s3 from "./s3.config";
+import s3 from "./s3.instance";
 import { v4 as uuid } from "uuid";
 
 export class S3Service implements IS3Service {

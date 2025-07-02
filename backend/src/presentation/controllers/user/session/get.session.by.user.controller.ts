@@ -10,8 +10,8 @@ export class GetSessionByUserController {
 			const userId = req.params.userId;
 			const sessions = await this.getSessionByUserUsecase.execute(userId);
 			res.status(HttpStatusCode.OK).json({ success: true, sessions });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetSessionByUserController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetSessionByUserController: ${error}`);
 			next(error);
 		}
 	}

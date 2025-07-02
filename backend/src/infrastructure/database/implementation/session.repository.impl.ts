@@ -3,6 +3,7 @@ import { ISessionDocument, SessionModel } from "../models/session/session.model"
 import { SessionEntity } from "../../../domain/entities/session.entity";
 import { ISessionUserDTO, ISessionMentorDTO } from "../../../application/dtos/session.dto";
 import { handleExceptionError } from "../../utils/handle.exception.error";
+import { CommonStringMessage } from "../../../shared/constants/string.messages";
 
 export class SessionRepositoryImpl implements ISessionRepository {
 	async createSession(session: SessionEntity): Promise<SessionEntity> {
@@ -107,7 +108,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 				{ status, rejectReason },
 				{ new: true }
 			);
-			if (!updatedSession) throw new Error("Session not found");
+			if (!updatedSession) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 			return SessionEntity.fromDBDocument(updatedSession);
 		} catch (error) {
 			return handleExceptionError(error, "Error updating session status");

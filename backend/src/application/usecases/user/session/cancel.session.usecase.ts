@@ -1,6 +1,7 @@
 import { SessionEntity } from "../../../../domain/entities/session.entity";
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { isSessionExpired } from "../../../../infrastructure/utils/isSessionExpired";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { ICancelSessionUseCase } from "../../../interfaces/session";
 
 export class CancelSessionUseCase implements ICancelSessionUseCase {
@@ -10,7 +11,7 @@ export class CancelSessionUseCase implements ICancelSessionUseCase {
 		// Fetch the session by ID
 		const session = await this.sessionRepository.getSessionById(sessionId);
 		if (!session) {
-			throw new Error("Session not found");
+			throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 		}
 
 		// Validate user is a participant

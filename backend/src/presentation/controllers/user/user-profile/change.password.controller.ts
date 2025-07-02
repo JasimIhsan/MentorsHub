@@ -13,8 +13,8 @@ export class ChangePasswordController {
 			const user = await this.changePasswordUsecase.execute(userId, oldPassword, newPassword);
 
 			res.status(HttpStatusCode.OK).json({ success: true, user });
-		} catch (error: any) {
-			logger.error(`❌ Error in ChangePasswordController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in ChangePasswordController: ${error}`);
 			next(error);
 		}
 	}

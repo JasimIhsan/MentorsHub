@@ -12,8 +12,8 @@ export class DeleteUserController {
 			const userId = req.params.id;
 			await this.deleteUserUsecase.execute(userId);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "User deleted successfully" });
-		} catch (error: any) {
-			logger.error(`❌ Error in DeleteUserController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in DeleteUserController: ${error}`);
 			next(error);
 		}
 	}

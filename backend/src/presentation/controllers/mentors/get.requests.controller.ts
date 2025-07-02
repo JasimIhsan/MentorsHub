@@ -26,8 +26,8 @@ export class GetSessionRequestsController {
 				requests: result.requests,
 				total: result.total,
 			});
-		} catch (error: any) {
-			logger.error(`❌ Error in GetSessionRequestsController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetSessionRequestsController: ${error}`);
 			next(error);
 		}
 	}

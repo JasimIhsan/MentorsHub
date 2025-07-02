@@ -11,8 +11,8 @@ export class DeleteReviewController {
 			const { mentorId, userId } = req.query;
 			await this.deleteReviewUseCase.execute(reviewId, mentorId as string, userId as string);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Review deleted successfully" });
-		} catch (error: any) {
-			logger.error(`❌ Error in DeleteReviewController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in DeleteReviewController: ${error}`);
 			next(error);
 		}
 	}

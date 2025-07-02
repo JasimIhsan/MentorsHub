@@ -10,8 +10,8 @@ export class GetMentorController {
 			const userId = req.params.mentorId;
 			const mentor = await this.getMentorUsecase.execute(userId);
 			res.status(HttpStatusCode.OK).json({ success: true, mentor });
-	} catch (error: any) {
-			logger.error(`❌ Error in GetMentorController: ${error.message}`);
+	} catch (error) {
+			logger.error(`❌ Error in GetMentorController: ${error}`);
 			next(error);
 		}
 	}

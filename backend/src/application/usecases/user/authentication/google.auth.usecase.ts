@@ -3,6 +3,7 @@ import { UserEntity } from "../../../../domain/entities/user.entity";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { ITokenService } from "../../../interfaces/user/token.service.interface";
 import { IGoogleAuthUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
+import { IHashService } from "../../../interfaces/services/hash.service";
 
 interface GoogleUserData {
 	email: string;
@@ -13,39 +14,51 @@ interface GoogleUserData {
 }
 
 export class GoogleAuthUsecase implements IGoogleAuthUsecase {
-	constructor(private userRepo: IUserRepository, private tokenService: ITokenService) {}
+	constructor(private readonly userRepo: IUserRepository, private readonly tokenService: ITokenService, private readonly hashService: IHashService) {}
 
-	private async getGoogleUserData(token: string) {
-		if (!token) {
-			throw new Error("Google token is required");
-		}
-		const response = await axios.get<GoogleUserData>(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${token}`);
-		return response.data;
+	private async getGoogleUserData(idToken: string): Promise<GoogleUserData> {
+		if (!idToken) throw new Error("Google token is required");
+		const url = `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`;
+		const { data } = await axios.get<GoogleUserData>(url);
+		return data;
 	}
 
 	async execute(googleToken: string) {
 		try {
-			const data = await this.getGoogleUserData(googleToken);
-			const userEntity = await UserEntity.createWithGoogle(data.email, "", data.given_name, data.family_name, data.sub, data.picture);
+			const gUser = await this.getGoogleUserData(googleToken);
 
-			const user = await this.userRepo.findUserByEmail(data.email);
+			let user = await this.userRepo.findUserByEmail(gUser.email);
 
 			if (!user) {
-				const newUser = await this.userRepo.createUser(userEntity);
-				if (!newUser) {
-					throw new Error("User creation failed");
-				}
-				const accessToken = this.tokenService.generateAccessToken(newUser.getId() as string);
-				const refreshToken = this.tokenService.generateRefreshToken(newUser.getId() as string);
-				return { user: newUser, accessToken, refreshToken };
-			} else {
-				const accessToken = this.tokenService.generateAccessToken(user.getId() as string);
-				const refreshToken = this.tokenService.generateRefreshToken(user.getId() as string);
-				return { user, accessToken, refreshToken };
+				const randomPassword = this.hashService.generatePassword(); // plain random
+				const hashedPassword = await this.hashService.hashPassword(randomPassword);
+
+				const newUser = new UserEntity({
+					email: gUser.email,
+					password: hashedPassword,
+					firstName: gUser.given_name,
+					lastName: gUser.family_name,
+					avatar: gUser.picture,
+					role: "user",
+					status: "unblocked",
+					mentorRequestStatus: "not-requested",
+					googleId: gUser.sub,
+					sessionCompleted: 0,
+					averageRating: 0,
+					totalReviews: 0,
+					createdAt: new Date(),
+				});
+
+				user = await this.userRepo.createUser(newUser);
 			}
-		} catch (error: any) {
-			console.error("Google authentication error: ", error.message);
-			throw new Error(error.message || "An error occurred during Google authentication");
+
+			const accessToken = this.tokenService.generateAccessToken(user.id!);
+			const refreshToken = this.tokenService.generateRefreshToken(user.id!);
+
+			return { user, accessToken, refreshToken };
+		} catch (err: any) {
+			console.error("Google authentication error:", err?.message);
+			throw new Error(err?.message || "An error occurred during Google authentication");
 		}
 	}
 }

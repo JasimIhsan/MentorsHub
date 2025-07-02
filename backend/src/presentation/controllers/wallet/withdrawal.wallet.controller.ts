@@ -11,8 +11,8 @@ export class WithdrawWalletController {
 			const { amount } = req.body;
 			const wallet = await this.withdrawWalletUseCase.execute(userId, amount);
 			res.status(HttpStatusCode.OK).json({ success: true, wallet: wallet.wallet, transaction: wallet.transaction });
-		} catch (error: any) {
-			logger.error(`❌ Error in WithdrawWalletController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in WithdrawWalletController: ${error}`);
 			next(error);
 		}
 	}

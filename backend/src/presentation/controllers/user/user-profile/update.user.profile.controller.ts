@@ -31,8 +31,8 @@ export class UpdateUserProfileController {
 			}
 
 			res.status(HttpStatusCode.OK).json({ success: true, user });
-		} catch (error: any) {
-			logger.error(`❌ Error in UpdateUserProfileController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in UpdateUserProfileController: ${error}`);
 			next(error);
 		}
 	}

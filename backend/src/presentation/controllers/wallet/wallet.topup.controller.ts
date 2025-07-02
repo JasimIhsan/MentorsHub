@@ -24,8 +24,8 @@ export class WalletTopUpController {
 				message: "Wallet topped up successfully.",
 				data: result,
 			});
-		} catch (error: any) {
-			logger.error(`❌ Error in WalletTopUpController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in WalletTopUpController: ${error}`);
 			next(error);
 		}
 	}

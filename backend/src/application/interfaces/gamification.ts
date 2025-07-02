@@ -6,7 +6,7 @@ export interface ICreateGamificationTaskUseCase {
 }
 
 export interface IGetAllGamificationTasksUseCase {
-	execute(params: { page?: number; limit?: number; actionType?: string }): Promise<IGamificationTaskDTO[]>;
+	execute(params: { page?: number; limit?: number; actionType?: string; searchTerm?: string }): Promise<IGamificationTaskDTO[]>;
 }
 
 export interface IUpdateGamificationTaskStatusUseCase {

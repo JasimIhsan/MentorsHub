@@ -13,8 +13,8 @@ export class GetUserProfileController {
 			const { userId } = req.params;
 			const user = await this.getUserProfileUsecase.execute(userId as string);
 			res.status(HttpStatusCode.OK).json({ success: true, user });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetUserProfileController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetUserProfileController: ${error}`);
 			next(error);
 		}
 	}

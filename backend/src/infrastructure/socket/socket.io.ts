@@ -6,6 +6,7 @@ import { markMessageAsReadUsecase, sendMessageUsecase } from "../../application/
 import { deleteMessageHandler } from "./socket/delete.message.handler";
 import { registerMessageReadHandlers } from "./socket/update.readby.handler";
 import { getMessageUnreadCountHandler } from "./socket/get.message.unread.count.handler";
+import { CommonStringMessage } from "../../shared/constants/string.messages";
 
 interface SessionParticipant {
 	userId: string;
@@ -62,7 +63,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 
 				// Broadcast online status to all connected users
 				if (wasOffline) {
-					io.emit("user-status-update", { userId, status: "online" }); // Broadcast to all clients
+					io.emit("user.status-update", { userId, status: "online" }); // Broadcast to all clients
 				}
 			}
 		});
@@ -79,7 +80,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 			console.log(`join-session: sessionId=${sessionId}, userId=${userId}, role=${role}`);
 			try {
 				const session = await SessionModel.findById(sessionId);
-				if (!session) return socket.emit("error", { message: "Session not found" });
+				if (!session) return socket.emit("error", { message: CommonStringMessage.SESSION_NOT_FOUND });
 
 				if (!["upcoming", "ongoing"].includes(session.status)) {
 					return socket.emit("error", { message: "Session is not available or not paid" });
@@ -156,7 +157,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 		socket.on("reconnect-session", async ({ sessionId, userId, peerId, role, name, avatar }) => {
 			try {
 				const session = await SessionModel.findById(sessionId);
-				if (!session) return socket.emit("error", { message: "Session not found" });
+				if (!session) return socket.emit("error", { message: CommonStringMessage.SESSION_NOT_FOUND });
 				if (!sessions[sessionId]) return socket.emit("error", { message: "Session not active" });
 				const existingIndex = sessions[sessionId].findIndex((p) => p.userId === userId);
 				const participantData: SessionParticipant = {
@@ -198,7 +199,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 			if (userId && connectedUsers[userId]) {
 				delete connectedUsers[userId];
 				console.log(`User ${userId} disconnected from connectedUsers`);
-				io.emit("user-status-update", { userId, status: "offline" });
+				io.emit("user.status-update", { userId, status: "offline" });
 				// ... session disconnection logic
 			}
 			// Handle session disconnection

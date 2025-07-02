@@ -12,8 +12,8 @@ export class GetMessagesByChatController {
 			const limit = parseInt(req.query.limit as string) || 10;
 			const messages = await this.getMessageByChatUseCase.execute(chatId, page, limit);
 			res.status(HttpStatusCode.OK).json({ success: true, messages });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetMessagesByChatController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetMessagesByChatController: ${error}`);
 			next(error);
 		}
 	}

@@ -1,8 +1,17 @@
-import { Request, Response, Router } from "express";
-import { cancelSessionController, createSessionController, createSessionPaymentOrderController, getAvailabilityController, getSessionsByUserController, paySessionWithGatewayController, paySessionWithWalletController, verifySessionPaymentController } from "../../controllers/user/composer";
+import { Router } from "express";
+import {
+	cancelSessionController,
+	createSessionController,
+	getCreateSessionPaymentOrderController,
+	getSessionsByUserController,
+	paySessionWithGatewayController,
+	paySessionWithWalletController,
+	verifySessionPaymentController,
+} from "../../controllers/user/composer";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { SessionModel } from "../../../infrastructure/database/models/session/session.model";
 import { requireRole } from "../../middlewares/require.role.middleware";
+import { CommonStringMessage } from "../../../shared/constants/string.messages";
 export const sessionRouter = Router();
 
 sessionRouter.post("/create-session", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => createSessionController.handle(req, res, next));
@@ -11,7 +20,7 @@ sessionRouter.get("/all/:userId", verifyAccessToken, requireRole("mentor", "user
 
 sessionRouter.get("/verify-payment", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => verifySessionPaymentController.handle(req, res, next));
 
-sessionRouter.post("/create-payment-order", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => createSessionPaymentOrderController.handle(req, res, next));
+sessionRouter.post("/create-payment-order", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => getCreateSessionPaymentOrderController().handle(req, res, next));
 
 sessionRouter.post("/pay/wallet", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => paySessionWithWalletController.handle(req, res, next));
 
@@ -24,7 +33,7 @@ sessionRouter.get("/:sessionId", verifyAccessToken, requireRole("mentor", "user"
 	try {
 		const session = await SessionModel.findById(req.params.sessionId).populate("mentorId");
 		if (!session) {
-			res.status(404).json({ message: "Session not found" });
+			res.status(404).json({ message: CommonStringMessage.SESSION_NOT_FOUND });
 			return;
 		}
 		res.json({ session });

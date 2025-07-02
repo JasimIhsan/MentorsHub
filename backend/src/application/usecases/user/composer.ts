@@ -8,7 +8,20 @@ import { SignupUseCase } from "./authentication/signup.usecase";
 import { SendOtpUsecase } from "./authentication/send.otp.usecase";
 import { GoogleAuthUsecase } from "./authentication/google.auth.usecase";
 
-import { userRepository, forgotResetRepository, tokenInterface, emailService, redisService, cloudinaryService, mentorRepository, sessionRepository, s3BucketService, walletRepository, paymentGatewayService } from "../../../infrastructure/composer";
+import {
+	userRepository,
+	forgotResetRepository,
+	tokenService,
+	emailService,
+	redisService,
+	cloudinaryService,
+	mentorRepository,
+	sessionRepository,
+	s3BucketService,
+	walletRepository,
+	getPaymentGatewayService,
+	hashService,
+} from "../../../infrastructure/composer";
 import { UpdateUserProfileUseCase } from "./user-profile/update.user.profile.usecase";
 import { UploadAvatarUseCase } from "./user-profile/upload.avatar.usecase";
 import { ChangePasswordUsecase } from "./user-profile/change.password.usecase";
@@ -28,18 +41,18 @@ import { PaySessionWithGatewayUseCase } from "./session/pay.session.with.gateway
 import { createUserProgressUseCase } from "../gamification/composer";
 
 // Initialize UseCases
-export const signinUseCase = new SigninUseCase(userRepository, tokenInterface);
-export const refreshUseCase = new RefreshTokenUseCase(tokenInterface);
+export const signinUseCase = new SigninUseCase(userRepository, tokenService, hashService);
+export const refreshUseCase = new RefreshTokenUseCase(tokenService);
 export const forgotPasswordUseCase = new ForgotPasswordUseCase(userRepository, emailService, forgotResetRepository);
 export const verifyResetTokenUseCase = new VerifyResetTokenUseCase(forgotResetRepository);
-export const resetPasswordUseCase = new ResetPasswordUseCase(forgotResetRepository, userRepository);
+export const resetPasswordUseCase = new ResetPasswordUseCase(forgotResetRepository, userRepository, hashService);
 export const verifyOTPUsecase = new VerifyOtpUsecase(redisService);
-export const signupUseCase = new SignupUseCase(userRepository, tokenInterface, verifyOTPUsecase, createUserProgressUseCase);
+export const signupUseCase = new SignupUseCase(userRepository, tokenService, verifyOTPUsecase, createUserProgressUseCase, hashService);
 export const sendOtpUseCase = new SendOtpUsecase(emailService, userRepository, redisService);
-export const googleAuthUsecase = new GoogleAuthUsecase(userRepository, tokenInterface);
+export const googleAuthUsecase = new GoogleAuthUsecase(userRepository, tokenService, hashService);
 export const updateUserProfileUsecase = new UpdateUserProfileUseCase(userRepository);
 export const uploadImageCloudinaryUsecase = new UploadAvatarUseCase(cloudinaryService);
-export const changePasswordUsecase = new ChangePasswordUsecase(userRepository);
+export const changePasswordUsecase = new ChangePasswordUsecase(userRepository, hashService);
 export const uploadMentorDocumentUseCase = new UploadMentorDocumentUseCase(s3BucketService);
 export const becomeMentorUseCase = new BecomeMentorUseCase(mentorRepository, userRepository, uploadMentorDocumentUseCase);
 export const reApplyMentorApplicationUseCase = new ReApplyMentorApplicationUseCase(mentorRepository, userRepository, uploadMentorDocumentUseCase);
@@ -51,4 +64,6 @@ export const paySessionWithWalletUseCase = new PaySessionWithWalletUseCase(sessi
 export const paySessionWithGatewayUsecase = new PaySessionWithGatewayUseCase(sessionRepository, walletRepository);
 export const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository);
 export const verifySessionPaymentUseCase = new VerifySessionPaymentUseCase(sessionRepository);
-export const createSessionPaymentOrderUsecase = new CreateSessionPaymentOrderUseCase(sessionRepository, paymentGatewayService);
+
+// lazy loading usecases
+export const getCreateSessionPaymentOrderUsecase = () => new CreateSessionPaymentOrderUseCase(sessionRepository, getPaymentGatewayService());

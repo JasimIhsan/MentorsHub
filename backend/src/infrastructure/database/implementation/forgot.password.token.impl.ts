@@ -1,31 +1,32 @@
-import { ForgotPasswordTokenDTO } from "../../../application/dtos/forgot.token.dto";
 import { IForgotPasswordTokensRepository } from "../../../domain/repositories/forgot.password.token.respository";
-import { ForgotPasswordTokenEntity, IForgotPasswordTokens } from "../../../domain/entities/forgot.password.token.entity";
-import { UserEntity } from "../../../domain/entities/user.entity";
+import { ForgotPasswordTokenEntity, ForgotPasswordTokenProps } from "../../../domain/entities/forgot.password.token.entity";
 import { ForgotTokenModel } from "../models/user/forgot.password.reset.token.model";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 
 export class ForgotPasswordResetTokenImpl implements IForgotPasswordTokensRepository {
-	async createToken(userId: string, token: string, expiresInMinutes: number): Promise<IForgotPasswordTokens> {
+	async createToken(userId: string, token: string, expiresInMinutes: number): Promise<ForgotPasswordTokenEntity> {
 		try {
 			const tokenEntity = ForgotPasswordTokenEntity.create(userId, token, expiresInMinutes);
-			const createdToken = new ForgotTokenModel({
-				token: tokenEntity.getToken(),
-				expiresAt: tokenEntity.getExpires(),
-				userId: tokenEntity.getUserId(),
-			});
+			console.log('tokenEntity: ', tokenEntity);
+			const createdToken = new ForgotTokenModel({token: tokenEntity.token, userId: tokenEntity.userId, expiresAt: tokenEntity.expiresAt});
 			await createdToken.save();
-			return tokenEntity.toDBDocument();
+
+			return tokenEntity;
 		} catch (error) {
 			return handleExceptionError(error, "Error creating forgot password token");
 		}
 	}
 
-	async findAllTokenDetails(token: string): Promise<ForgotPasswordTokenDTO | null> {
+	async findAllTokenDetails(token: string): Promise<ForgotPasswordTokenEntity | null> {
 		try {
-			const tokenDoc = await ForgotTokenModel.findOne({ token }).populate("userId");
-			if (!tokenDoc || !tokenDoc.userId) return null;
-			return ForgotPasswordTokenDTO.fromEntity(tokenDoc);
+			const tokenDoc = await ForgotTokenModel.findOne({ token });
+			if (!tokenDoc) return null;
+
+			return ForgotPasswordTokenEntity.restore({
+				token: tokenDoc.token,
+				userId: tokenDoc.userId.toString(),
+				expiresAt: tokenDoc.expiresAt,
+			});
 		} catch (error) {
 			return handleExceptionError(error, "Error finding forgot password token");
 		}
@@ -33,22 +34,25 @@ export class ForgotPasswordResetTokenImpl implements IForgotPasswordTokensReposi
 
 	async findToken(token: string): Promise<ForgotPasswordTokenEntity | null> {
 		try {
-			const tokenDoc = await ForgotTokenModel.findOne({ token }).populate("userId");
+			const tokenDoc = await ForgotTokenModel.findOne({ token });
 			if (!tokenDoc) return null;
-			return ForgotPasswordTokenEntity.fromDBDocument({ token: tokenDoc.token, userId: tokenDoc.userId.toString(), expiresAt: tokenDoc.expires });
+
+			return ForgotPasswordTokenEntity.restore({
+				token: tokenDoc.token,
+				userId: tokenDoc.userId.toString(),
+				expiresAt: tokenDoc.expiresAt,
+			});
 		} catch (error) {
 			return handleExceptionError(error, "Error finding forgot password token");
 		}
 	}
 
-	async findUserByResetToken(token: string): Promise<UserEntity | null> {
+	async isTokenValid(token: string): Promise<boolean> {
 		try {
-			const tokenDoc = await ForgotTokenModel.findOne({ token }).populate("userId");
-			if (!tokenDoc || !tokenDoc.userId) return null;
-
-			return UserEntity.fromDBDocument(tokenDoc.userId);
+			const tokenDoc = await ForgotTokenModel.findOne({ token });
+			return !!tokenDoc;
 		} catch (error) {
-			return handleExceptionError(error, "Error finding user by forgot password token");
+			return handleExceptionError(error, "Error checking token validity");
 		}
 	}
 }

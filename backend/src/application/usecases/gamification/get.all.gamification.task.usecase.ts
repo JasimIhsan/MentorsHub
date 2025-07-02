@@ -6,7 +6,7 @@ import { IGetAllGamificationTasksUseCase } from "../../interfaces/gamification";
 export class GetAllGamificationTasksUseCase implements IGetAllGamificationTasksUseCase {
 	constructor(private taskRepo: IGamificationTaskRepository) {}
 
-	async execute(params: { page?: number; limit?: number; actionType?: string }): Promise<IGamificationTaskDTO[]> {
+	async execute(params: { page?: number; limit?: number; actionType?: string, searchTerm?: string }): Promise<IGamificationTaskDTO[]> {
 		const tasks = await this.taskRepo.findAll(params);
 
 		return tasks.map((t) => mapToGamificationTaskDTO(t));

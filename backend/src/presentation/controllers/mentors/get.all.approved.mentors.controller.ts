@@ -9,8 +9,8 @@ export class GetAllApprovedMentorsController {
 		try {
 			const mentors = await this.getAllApprovedMentorsUsecase.execute();
 			res.status(HttpStatusCode.OK).json({ success: true, mentors });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetAllApprovedMentorsController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetAllApprovedMentorsController: ${error}`);
 			next(error);
 		}
 	}

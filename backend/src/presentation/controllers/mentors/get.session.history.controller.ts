@@ -16,8 +16,8 @@ export class GetSessionHistoryController {
 			};
 			const sessions = await this.getSessionHistoryUsecase.execute(mentorId, queryParams);
 			res.status(HttpStatusCode.OK).json({ success: true, sessions: sessions.sessions, total: sessions.total });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetSessionHistoryController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetSessionHistoryController: ${error}`);
 			next(error);
 		}
 	}

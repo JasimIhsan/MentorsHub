@@ -14,8 +14,8 @@ export class UpdateUserController {
 
 			const updatedUser = await this.updateUserUsecase.execute(userId, userData);
 			res.status(HttpStatusCode.OK).json({ success: true, user: updatedUser });
-		} catch (error: any) {
-			logger.error(`❌ Error in UpdateUserController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in UpdateUserController: ${error}`);
 			next(error);
 		}
 	}

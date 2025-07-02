@@ -26,8 +26,8 @@ export class GetUserNotificationsController {
 				success: true,
 				data: result,
 			});
-	} catch (error: any) {
-			logger.error(`❌ Error in GetUserNotificationsController: ${error.message}`);
+	} catch (error) {
+			logger.error(`❌ Error in GetUserNotificationsController: ${error}`);
 			next(error);
 		}
 	}

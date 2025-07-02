@@ -11,8 +11,8 @@ export class ResetPasswordController {
 			const { token, newPassword } = req.body;
 			await this.restPasswordUseCase.execute(token, newPassword);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Password reset successfully" });
-		} catch (error: any) {
-			logger.error(`❌ Error in ResetPasswordController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in ResetPasswordController: ${error}`);
 			next(error);
 		}
 	}

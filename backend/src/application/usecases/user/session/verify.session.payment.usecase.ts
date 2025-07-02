@@ -1,4 +1,5 @@
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
+import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IVerifySessionPaymentUseCase } from "../../../interfaces/session";
 
 export class VerifySessionPaymentUseCase implements IVerifySessionPaymentUseCase {
@@ -6,7 +7,7 @@ export class VerifySessionPaymentUseCase implements IVerifySessionPaymentUseCase
 
 	async execute(sessionId: string, userId: string): Promise<boolean> {
 		const session = await this.sessionRepo.getSessionById(sessionId);
-		if (!session) throw new Error("Session not found");
+		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 
 		const user = session.getParticipants().find((p) => p.userId === userId);
 		if (!user) throw new Error("Unauthorized: User is not a participant in this session");

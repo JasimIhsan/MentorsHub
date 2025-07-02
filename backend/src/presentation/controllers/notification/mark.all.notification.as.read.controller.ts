@@ -9,8 +9,8 @@ export class MarkAllNotificationsAsReadController {
 			const userId = req.params.userId;
 			await this.markAllNotificationsAsReadUseCase.execute(userId);
 			res.status(200).json({ success: true, message: "All notifications marked as read" });
-		} catch (error: any) {
-			logger.error(`❌ Error in MarkAllNotificationsAsReadController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in MarkAllNotificationsAsReadController: ${error}`);
 			next(error);
 		}
 	}

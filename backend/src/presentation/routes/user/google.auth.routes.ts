@@ -1,6 +1,4 @@
-import { Request, Response, Router } from "express";
-import { configurePassport } from "../../../infrastructure/auth/passport/passport.config";
-import { JwtPayload } from "jsonwebtoken";
+import { Router } from "express";
 import passport from "passport";
 import { googleAuthController } from "../../controllers/user/composer";
 import { checkUserStatus } from "../../middlewares/auth.user.status.middleware";

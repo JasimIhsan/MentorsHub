@@ -1,75 +1,46 @@
-import { ObjectId } from "mongoose";
-
-export interface IForgotPasswordTokens {
+export interface ForgotPasswordTokenProps {
 	userId: string;
 	token: string;
 	expiresAt: Date;
-
-	createdAt?: Date;
-	updatedAt?: Date | null;
 }
 
 export class ForgotPasswordTokenEntity {
-	private userId: string;
-	private token: string;
-	private expiresAt: Date;
-	private createdAt: Date;
-	private updatedAt: Date | null;
+	private readonly _userId: string;
+	private readonly _token: string;
+	private readonly _expiresAt: Date;
 
-	constructor(data: IForgotPasswordTokens) {
-		this.userId = data.userId;
-		this.token = data.token;
-		this.expiresAt = new Date(data.expiresAt);
-		this.createdAt = data.createdAt ?? new Date();
-		this.updatedAt = data.updatedAt ?? null;
+	private constructor(props: ForgotPasswordTokenProps) {
+		this._userId = props.userId;
+		this._token = props.token;
+		this._expiresAt = props.expiresAt;
 	}
 
-	static create(userId: string, token: string, expiresInMinutes: number): ForgotPasswordTokenEntity {
-		const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
+
+	static create(userId: string, token: string, ttlMinutes: number): ForgotPasswordTokenEntity {
+		const expiresAt = new Date(Date.now() + ttlMinutes * 60_000);
 		return new ForgotPasswordTokenEntity({ userId, token, expiresAt });
 	}
 
-	isExpired(): boolean {
-		return Date.now() > this.expiresAt.getTime();
+
+	static restore(props: ForgotPasswordTokenProps): ForgotPasswordTokenEntity {
+		return new ForgotPasswordTokenEntity(props);
 	}
 
-	toDBDocument(): IForgotPasswordTokens {
-		return {
-			userId: this.userId,
-			token: this.token,
-			expiresAt: this.expiresAt,
-			createdAt: this.createdAt,
-			updatedAt: this.updatedAt,
-		};
+	// ✅ Domain logic
+	isExpired(now: Date = new Date()): boolean {
+		return now > this._expiresAt;
 	}
 
-	static fromDBDocument(doc: IForgotPasswordTokens): ForgotPasswordTokenEntity {
-		return new ForgotPasswordTokenEntity({
-			userId: doc.userId.toString(),
-			token: doc.token,
-			expiresAt: new Date(doc.expiresAt),
-			createdAt: doc.createdAt,
-			updatedAt: doc.updatedAt,
-		});
+	// ✅ Use these like: tokenEntity.userId, tokenEntity.token
+	get userId(): string {
+		return this._userId;
 	}
 
-	getUserId(): string {
-		return this.userId;
+	get token(): string {
+		return this._token;
 	}
 
-	getToken(): string {
-		return this.token;
-	}
-
-	getExpires(): Date {
-		return this.expiresAt;
-	}
-
-	getCreatedAt(): Date {
-		return this.createdAt;
-	}
-
-	getUpdatedAt(): Date | null {
-		return this.updatedAt;
+	get expiresAt(): Date {
+		return this._expiresAt;
 	}
 }

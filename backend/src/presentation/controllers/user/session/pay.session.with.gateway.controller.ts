@@ -30,8 +30,8 @@ export class PaySessionWithGatewayController {
 				success: true,
 				message: "Session paid successfully via Razorpay",
 			});
-		} catch (error: any) {
-			logger.error(`❌ Error in PayWithRazorpayController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in PayWithRazorpayController: ${error}`);
 			next(error);
 		}
 	}

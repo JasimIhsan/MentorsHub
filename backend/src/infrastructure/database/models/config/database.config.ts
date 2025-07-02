@@ -9,9 +9,10 @@ async function connectDB() {
 	try {
 		await mongoose.connect(MONGO_URI);
 		logger.info(` MongoDB connected  : ✅✅✅`);
-	} catch (error: any) {
+	} catch (error) {
 		logger.error(` MongoDB connected  : ❌❌❌`);
-		console.error("Error connecting to MongoDB:", error.message);
+		if (error instanceof Error) console.error("Error connecting to MongoDB:", error.message);
+		else console.error("Error connecting to MongoDB:", error);
 		process.exit(1);
 	}
 }

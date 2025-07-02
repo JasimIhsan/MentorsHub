@@ -11,8 +11,8 @@ export class StartSessionController {
 			console.log("sessionId: ", sessionId);
 			// await this.startSessionUsecase.execute(sessionId);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Session started successfully" });
-		} catch (error: any) {
-			logger.error(`❌ Error in StartSessionController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in StartSessionController: ${error}`);
 			next(error);
 		}
 	}

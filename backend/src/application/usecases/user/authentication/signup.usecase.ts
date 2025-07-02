@@ -1,35 +1,59 @@
-import { UserInterface, UserEntity } from "../../../../domain/entities/user.entity";
+import { UserEntity } from "../../../../domain/entities/user.entity";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import bcrypt from "bcrypt";
 import { ITokenService } from "../../../interfaces/user/token.service.interface";
-import { ICacheRepository } from "../../../../domain/repositories/cache.respository";
-import { ISignupUseCase, IVerifyOtpUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
-import { emit } from "process";
+import { IVerifyOtpUsecase, ISignupUseCase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { ICreateUserProgressUseCase } from "../../../interfaces/gamification";
+import { IHashService } from "../../../interfaces/services/hash.service";
 
 export class SignupUseCase implements ISignupUseCase {
-	constructor(private userRepository: IUserRepository, private tokenSerivice: ITokenService, private verifyOtp: IVerifyOtpUsecase, private createUserProgress: ICreateUserProgressUseCase) {}
+	constructor(
+		private readonly userRepository: IUserRepository,
+		private readonly tokenService: ITokenService,
+		private readonly verifyOtp: IVerifyOtpUsecase,
+		private readonly createUserProgress: ICreateUserProgressUseCase,
+		private readonly hashService: IHashService
+	) {}
 
 	async execute(otp: string, firstName: string, lastName: string, email: string, password: string) {
+		// 1️⃣ Verify OTP
 		const isOTPValid = await this.verifyOtp.execute(email, otp);
 		if (!isOTPValid) throw new Error("Invalid or expired OTP");
 
-		const existingUser = await this.userRepository.findUserByEmail(email);
-		if (existingUser) throw new Error("User already exists");
+		// 2️⃣ Check for existing user
+		if (await this.userRepository.findUserByEmail(email)) {
+			throw new Error("User already exists");
+		}
 
-		//create new user entity without id
-		const newUser = await UserEntity.create(email, password, firstName, lastName);
+		// 3️⃣ Hash the password inside the use case
+		const hashedPassword = await this.hashService.hashPassword(password);
 
-		// save new user (database will genreate id)
+		// 4️⃣ Create UserEntity with hashed password
+		const newUser = new UserEntity({
+			email,
+			password: hashedPassword,
+			firstName,
+			lastName,
+			status: "unblocked",
+			role: "user",
+			mentorRequestStatus: "not-requested",
+			sessionCompleted: 0,
+			averageRating: 0,
+			totalReviews: 0,
+			createdAt: new Date(),
+		});
+
+		// 5️⃣ Persist user
 		const savedUser = await this.userRepository.createUser(newUser);
-		const userId = savedUser.getId();
-		if (!userId) throw new Error("User ID is undefined after saving");
 
-		// Create gamification progress record
+		// 6️⃣ Gamification: create progress record
+		const userId = savedUser.id;
+		if (!userId) throw new Error("User ID is undefined after saving");
 		await this.createUserProgress.execute(userId);
 
-		const accessToken = this.tokenSerivice.generateAccessToken(userId);
-		const refreshToken = this.tokenSerivice.generateRefreshToken(userId);
-		return { user: savedUser, refreshToken, accessToken };
+		// 7️⃣ Issue tokens
+		const accessToken = this.tokenService.generateAccessToken(userId);
+		const refreshToken = this.tokenService.generateRefreshToken(userId);
+
+		return { user: savedUser, accessToken, refreshToken };
 	}
 }

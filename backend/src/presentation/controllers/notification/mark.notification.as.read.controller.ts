@@ -11,8 +11,8 @@ export class MarkNotificationAsReadController {
 			const notificationId = req.params.notificationId;
 			await this.markNotificationAsReadUseCase.execute(notificationId);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Notification marked as read" });
-		} catch (error: any) {
-			logger.error(`❌ Error in MarkNotificationAsReadController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in MarkNotificationAsReadController: ${error}`);
 			next(error);
 		}
 	}

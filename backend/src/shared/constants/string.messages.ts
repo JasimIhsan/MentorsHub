@@ -19,6 +19,7 @@ export enum CommonStringMessage {
 	USER_CREATED_SUCCESSFULLY = "User created successfully",
 	USER_UPDATED_SUCCESSFULLY = "User updated successfully",
 	USER_DELETED_SUCCESSFULLY = "User deleted successfully",
+	USER_INVALID_CREDENTIALS = "Invalid credentials",
 
 	// Mentor
 	MENTOR_REQUEST_PENDING = "Mentor request is already pending",

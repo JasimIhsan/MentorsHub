@@ -16,8 +16,8 @@ export class CancelSessionController {
 
 			const session = await this.cancelSessionUseCase.execute(sessionId, userId);
 			res.status(200).json({ success: true, session: session.toObject() });
-		} catch (error: any) {
-			logger.error(`❌ Error in CancelSessionController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in CancelSessionController: ${error}`);
 			next(error);
 		}
 	}

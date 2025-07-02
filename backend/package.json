@@ -13,6 +13,7 @@
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
+		"@aws-sdk/client-secrets-manager": "^3.840.0",
 		"@types/cors": "^2.8.17",
 		"aws-sdk": "^2.1692.0",
 		"axios": "^1.8.4",
@@ -40,7 +41,8 @@
 		"redis": "^4.7.0",
 		"socket.io": "^4.8.1",
 		"uuid": "^11.1.0",
-		"winston": "^3.17.0"
+		"winston": "^3.17.0",
+		"zod": "^3.25.67"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.29.0",

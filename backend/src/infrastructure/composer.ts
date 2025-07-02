@@ -30,10 +30,13 @@ import { IChatRepository } from "../domain/repositories/chat.repository";
 import { ChatRepositoryImpl } from "./database/implementation/chat.repository.impl";
 import { RazorpayGatewayImpl } from "./services/payment/razorpay.gateway.impl";
 import { GamificationTaskRepositoryImpl } from "./database/implementation/gamification/gamification.task.repository.impl";
-import { UserTaskProgressEntity } from "../domain/entities/gamification/user.task.progress.entity";
 import { UserTaskProgressRepositoryImpl } from "./database/implementation/gamification/user.task.progress.repository.impl";
 import { ActionTypeRepositoryImpl } from "./database/implementation/gamification/action.type.repository.imp";
 import { UserProgressRepositoryImpl } from "./database/implementation/gamification/user.progress.repository.imp";
+import { IHashService } from "../application/interfaces/services/hash.service";
+import { HashServiceImpl } from "./services/hash-serveice/hash.service";
+import { KmsServiceImpl } from "./services/kms-service/kms.service";
+import { IKmsService } from "../application/interfaces/services/kms.service";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -52,9 +55,13 @@ export const actionTypeRepository = new ActionTypeRepositoryImpl();
 export const userProgressRepository = new UserProgressRepositoryImpl();
 
 // Initialize services implementation
+export const hashService: IHashService = new HashServiceImpl();
 export const emailService: IEmailService = new EmailServiceImpl();
 export const redisService: ICacheRepository = new RedisCacheRepository();
-export const tokenInterface: ITokenService = new TokenServicesImpl(redisService);
 export const cloudinaryService: ICloudinaryService = new CloudinaryService();
+export const tokenService: ITokenService = new TokenServicesImpl(redisService);
 export const s3BucketService: IS3Service = new S3Service();
-export const paymentGatewayService = new RazorpayGatewayImpl();
+export const kmsService: IKmsService = new KmsServiceImpl();
+
+// lazy loading services
+export const getPaymentGatewayService = () => new RazorpayGatewayImpl(); // delay loading to load secrets from KMS (lazy loading using getter function)

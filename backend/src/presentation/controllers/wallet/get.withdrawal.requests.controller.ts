@@ -13,8 +13,8 @@ export class GetWithdrawalRequestsController {
 		try {
 			const result = await this.getWithdrawalRequestsUseCase.execute(req.params.mentorId, page, limit, {});
 			res.status(HttpStatusCode.OK).json({ success: true, withdrawalRequests: result.data, total: result.total });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetWithdrawalRequestsController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetWithdrawalRequestsController: ${error}`);
 			next(error);
 		}
 	}

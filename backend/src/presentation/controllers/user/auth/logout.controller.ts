@@ -19,8 +19,8 @@ export class LogoutController {
 			res.clearCookie("refresh_token");
 
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Logged out successfully" });
-		} catch (error: any) {
-			logger.error(`❌ Error in LogoutController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in LogoutController: ${error}`);
 			next(error);
 		}
 	}

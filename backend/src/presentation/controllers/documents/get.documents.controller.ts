@@ -22,8 +22,8 @@ export class GetDocumentsController {
 			const documents = await this.getDocumentsUseCase.execute({ mentorId, user });
 
 			res.json({ success: true, documents });
-		} catch (error: any) {
-			logger.error(`❌ Error in GetDocumentsController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in GetDocumentsController: ${error}`);
 			next(error);
 		}
 	}

@@ -15,8 +15,8 @@ export class ForgotPasswrodController {
 			}
 			await this.forgotUseCase.execute(email);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Password reset link sent to your email" });
-		} catch (error: any) {
-			logger.error(`❌ Error in ForgotPasswrodController: ${error.message}`);
+		} catch (error) {
+			logger.error(`❌ Error in ForgotPasswrodController: ${error}`);
 			next(error);
 		}
 	}

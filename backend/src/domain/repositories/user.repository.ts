@@ -1,5 +1,4 @@
-import { IUserDTO } from "../../application/dtos/user.dtos";
-import { UserEntity, UserInterface } from "../entities/user.entity";
+import { UserEntity } from "../entities/user.entity";
 
 export interface FindUsersParams {
 	page: number;
