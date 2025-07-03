@@ -5,17 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-// import { useDispatch } from "react-redux";
 import { resendOTP, verifyOtpAndCompleteRegistration } from "@/api/user/authentication.api.service";
 import { ISignupData } from "@/interfaces/interfaces";
 import { useDispatch } from "react-redux";
 import { login } from "@/store/slices/userSlice";
-// import { adminLogout } from "@/store/slices/adminAuthSlice";
+import { Dispatch, SetStateAction } from "react";
 
-type FormState = "login" | "signup" | "forgot-password" | "reset-password" | "otp-varification";
+type FormState = "login" | "signup" | "forgot-password" | "otp-verification";
 
 interface OtpVerificationFormProps {
-	setFormState: (value: FormState) => void;
+	setFormState: Dispatch<SetStateAction<FormState>>;
 	signupData: ISignupData;
 }
 
@@ -25,12 +24,9 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 	const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 	const [loading, setLoading] = useState(false);
 	const [resendLoading, setResendLoading] = useState(false);
-	const [timer, setTimer] = useState(150); //150 2:30 minutes in seconds
+	const [timer, setTimer] = useState(150); // 2:30 minutes in seconds
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 	const dispatch = useDispatch();
-
-	// const [error, setError] = useState(false);
-	// const dispatch = useDispatch();
 
 	useEffect(() => {
 		if (!email) {
@@ -38,7 +34,6 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 		}
 	}, [email, navigate]);
 
-	// Timer effect
 	useEffect(() => {
 		if (timer > 0) {
 			const interval = setInterval(() => {
@@ -61,7 +56,7 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 		newOtp[index] = value;
 		setOtp(newOtp);
 
-		if (value && index < 150) {
+		if (value && index < 5) {
 			const nextInput = document.getElementById(`otp-${index + 1}`);
 			if (nextInput) nextInput.focus();
 		}
@@ -73,11 +68,11 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 		if (/^\d{6}$/.test(pastedData)) {
 			const digits = pastedData.split("");
 			setOtp(digits);
-			inputRefs.current[150]?.focus();
+			inputRefs.current[5]?.focus();
 		}
 	};
 
-	const handleKeyDown = (index: number, e: any) => {
+	const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
 		if (e.key === "Backspace" && !otp[index] && index > 0) {
 			const prevInput = document.getElementById(`otp-${index - 1}`);
 			if (prevInput) prevInput.focus();
@@ -115,7 +110,6 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 	const handleResend = async () => {
 		setResendLoading(true);
 		try {
-			// Simulate API call
 			const response = await resendOTP(signupData.email);
 			if (response.success) {
 				setTimer(150); // Reset timer
@@ -138,12 +132,12 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 	};
 
 	return (
-		<Card className="border-0 shadow-none px-6">
-			<CardHeader>
-				<CardTitle className="text-2xl">Verify OTP</CardTitle>
+		<Card className="border-0 shadow-none px-4 sm:px-6 md:px-8">
+			<CardHeader className="mb-4">
+				<CardTitle className="text-xl sm:text-2xl">Verify OTP</CardTitle>
 				<CardDescription>Please enter the 6-digit code sent to {email}</CardDescription>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="px-0">
 				<div className="flex justify-between mb-6" onPaste={handlePaste}>
 					{otp.map((digit, index) => (
 						<Input
@@ -176,9 +170,8 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 						"Resend OTP"
 					)}
 				</Button>
-				{/* {error && <p className="text-sm text-destructive mb-4">{error}</p>} */}
 			</CardContent>
-			<CardFooter className="flex flex-col gap-4">
+			<CardFooter className="flex flex-col gap-4 px-0">
 				<Button className="w-full" onClick={handleSubmit} disabled={loading}>
 					{loading ? (
 						<>
@@ -189,7 +182,6 @@ const OtpVerificationForm = ({ setFormState, signupData }: OtpVerificationFormPr
 						"Verify OTP"
 					)}
 				</Button>
-
 				<Button variant="link" className="w-full" onClick={handleBack} disabled={loading}>
 					Back
 				</Button>

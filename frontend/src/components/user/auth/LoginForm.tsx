@@ -1,4 +1,3 @@
-// src/components/auth/LoginForm.tsx
 import { LucideLogIn } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,8 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import GoogleLoginButton from "./GoogleLoginButton";
 import { loginApi } from "@/api/user/authentication.api.service";
-// import { adminLogout } from "@/store/slices/adminAuthSlice";
-// import { RootState } from "@/store/store";
 
 type FormState = "login" | "signup" | "forgot-password";
 
@@ -24,7 +21,6 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ setFormState }: LoginFormProps) {
-	// const isAdminAuthenticated = useSelector((state: RootState) => state.adminAuth.isAuthenticated);
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
@@ -33,23 +29,17 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 		defaultValues: { email: "", password: "" },
 	});
 
-
 	const onSubmit = async (data: LoginFormData) => {
 		try {
 			const response = await loginApi(data.email, data.password);
 			if (response.success) {
-				// if (isAdminAuthenticated) {
-				// 	dispatch(adminLogout());
-				// }
 				dispatch(login(response.user));
-
 				form.reset();
 				navigate("/dashboard", { replace: true });
 				toast.success("Login successful");
 			}
 		} catch (error: any) {
-			console.log("Login error:", error);
-
+			console.error("Login error:", error);
 			toast.error(error.message || "Login failed. Please try again.");
 		}
 	};
@@ -57,12 +47,12 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 	return (
 		<>
 			<CardHeader className="mb-4">
-				<CardTitle className="text-xl">Login to your account</CardTitle>
+				<CardTitle className="text-xl sm:text-2xl">Login to your account</CardTitle>
 				<CardDescription>Enter your email and password to access your account</CardDescription>
 			</CardHeader>
 
 			<form onSubmit={form.handleSubmit(onSubmit)}>
-				<div className="space-y-4 px-6">
+				<div className="space-y-5 px-4 sm:px-6 md:px-8">
 					<GoogleLoginButton />
 					<div className="relative w-full my-4">
 						<div className="absolute inset-0 flex items-center">
@@ -73,12 +63,12 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 						</div>
 					</div>
 
-					<div className="space-y-2">
+					<div className="space-y-3">
 						<Label htmlFor="email">Email</Label>
 						<Input id="email" type="email" placeholder="m@example.com" {...form.register("email")} />
 						{form.formState.errors.email && <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>}
 					</div>
-					<div className="space-y-2">
+					<div className="space-y-3">
 						<Label htmlFor="password">Password</Label>
 						<Input id="password" type="password" {...form.register("password")} />
 						{form.formState.errors.password && <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>}
@@ -89,12 +79,11 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 						</button>
 					</div>
 				</div>
-				<CardFooter className="flex flex-col space-y-4 my-4 px-6">
+				<CardFooter className="flex flex-col space-y-4 my-4 px-4 sm:px-6 md:px-8">
 					<Button className="w-full" size="lg" type="submit" disabled={form.formState.isSubmitting}>
 						<LucideLogIn className="mr-2 h-4 w-4" />
 						Login
 					</Button>
-
 					<p className="text-center text-sm text-muted-foreground">
 						Don’t have an account?{" "}
 						<button type="button" onClick={() => setFormState("signup")} className="text-primary hover:underline hover:cursor-pointer">
