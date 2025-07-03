@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { forgotPassword } from "@/api/user/authentication.api.service";
 
-// Define the schema for the forgot password form
 const forgotPasswordSchema = z.object({
 	email: z.string().email("Please enter a valid email address"),
 });
@@ -35,7 +34,7 @@ export default function ForgotPasswordForm({ setFormState }: ForgotPasswordFormP
 			if (response.success) {
 				toast.success("Password reset link has been sent to your email");
 				form.reset();
-				setFormState("login"); 
+				setFormState("login");
 			}
 		} catch (error: any) {
 			console.error("Forgot password error:", error);
@@ -46,20 +45,20 @@ export default function ForgotPasswordForm({ setFormState }: ForgotPasswordFormP
 	return (
 		<>
 			<CardHeader className="mb-4">
-				<CardTitle className="text-xl">Forgot Password</CardTitle>
+				<CardTitle className="text-xl sm:text-2xl">Forgot Password</CardTitle>
 				<CardDescription>Enter your email to receive a link to reset your password</CardDescription>
 			</CardHeader>
 			<form onSubmit={form.handleSubmit(onSubmit)}>
-				<div className="space-y-4 px-6">
-					<div className="space-y-2">
+				<div className="space-y-5 px-4 sm:px-6 md:px-8">
+					<div className="space-y-3">
 						<Label htmlFor="email">Email</Label>
 						<Input id="email" type="email" placeholder="m@example.com" {...form.register("email")} />
 						{form.formState.errors.email && <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>}
 					</div>
 				</div>
-				<CardFooter className="flex flex-col space-y-4 my-4 px-6">
+				<CardFooter className="flex flex-col space-y-4 my-4 px-4 sm:px-6 md:px-8">
 					<Button className="w-full" size="lg" type="submit" disabled={form.formState.isSubmitting}>
-						<Send />
+						<Send className="mr-2 h-4 w-4" />
 						Send Link
 					</Button>
 					<Button variant="link" className="w-full" onClick={() => setFormState("login")} disabled={form.formState.isSubmitting}>
