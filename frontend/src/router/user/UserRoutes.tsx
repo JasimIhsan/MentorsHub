@@ -33,8 +33,8 @@ const UserRoutes = () => {
 				}
 			/>
 			<Route path="reset-password/:token" element={<ResetPasswordPage />} />
+			<Route path="/" element={<Home />} />
 			<Route element={<MainLayout />}>
-				<Route path="/" element={<Home />} />
 				<Route
 					path="dashboard"
 					element={

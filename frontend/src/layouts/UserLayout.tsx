@@ -13,7 +13,7 @@ import { UserInterface } from "@/interfaces/interfaces";
 export default function MainLayout() {
 	const { isAuthenticated, user } = useSelector((state: RootState) => state.userAuth);
 	const navigate = useNavigate();
-	
+
 	return (
 		<div className="flex min-h-screen flex-col items-stretch ">
 			{/* <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange> */}
@@ -31,11 +31,23 @@ export default function MainLayout() {
 							</div>
 						</div>
 					) : (
-						<div className="hidden md:flex items-center gap-4 px-10 md:px-20 xl:px-25 justify-center">
-							<Button variant="outline" onClick={() => navigate("/authenticate")}>
-								Login
-							</Button>
-							<Button onClick={() => navigate("/authenticate")}>Register</Button>
+						<div className="flex items-center gap-4 px-10 md:px-20 xl:px-25 justify-center">
+							{/* Desktop buttons */}
+							<div className="hidden md:flex items-center gap-4">
+								<Button variant="outline" onClick={() => navigate("/authenticate")}>
+									Login
+								</Button>
+								<Button onClick={() => navigate("/authenticate")}>Register</Button>
+							</div>
+							{/* Mobile buttons */}
+							<div className="md:hidden flex items-center gap-2">
+								<Button variant="outline" size="sm" onClick={() => navigate("/authenticate")}>
+									Login
+								</Button>
+								<Button size="sm" onClick={() => navigate("/authenticate")}>
+									Register
+								</Button>
+							</div>
 						</div>
 					)}
 				</div>

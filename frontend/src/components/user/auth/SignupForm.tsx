@@ -1,9 +1,9 @@
-import { Loader2, LucideUserPlus } from "lucide-react";
+import { Loader2, LucideUserPlus, LucideEye, LucideEyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignupFormData, signupSchema } from "@/schema/auth.form";
 import { toast } from "sonner";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,9 @@ interface SignupFormProps {
 }
 
 export default function SignupForm({ setFormState, setSignupData }: SignupFormProps) {
+	const [showPassword, setShowPassword] = useState(false); // State for password visibility
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State for confirm password visibility
+
 	const form = useForm<SignupFormData>({
 		resolver: zodResolver(signupSchema),
 		defaultValues: { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" },
@@ -73,12 +76,38 @@ export default function SignupForm({ setFormState, setSignupData }: SignupFormPr
 					</div>
 					<div className="space-y-3">
 						<Label htmlFor="signup-password">Password</Label>
-						<Input id="signup-password" type="password" {...form.register("password")} />
+						<div className="relative">
+							<Input
+								id="signup-password"
+								type={showPassword ? "text" : "password"} // Toggle password input type
+								{...form.register("password")}
+							/>
+							<button
+								type="button"
+								className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+								onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+							>
+								{showPassword ? <LucideEyeOff className="h-4 w-4" /> : <LucideEye className="h-4 w-4" />}
+							</button>
+						</div>
 						{form.formState.errors.password && <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>}
 					</div>
 					<div className="space-y-3">
 						<Label htmlFor="confirm-password">Confirm Password</Label>
-						<Input id="confirm-password" type="password" {...form.register("confirmPassword")} />
+						<div className="relative">
+							<Input
+								id="confirm-password"
+								type={showConfirmPassword ? "text" : "password"} // Toggle confirm password input type
+								{...form.register("confirmPassword")}
+							/>
+							<button
+								type="button"
+								className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+								onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Toggle confirm password visibility
+							>
+								{showConfirmPassword ? <LucideEyeOff className="h-4 w-4" /> : <LucideEye className="h-4 w-4" />}
+							</button>
+						</div>
 						{form.formState.errors.confirmPassword && <p className="text-sm text-red-500">{form.formState.errors.confirmPassword.message}</p>}
 					</div>
 				</div>

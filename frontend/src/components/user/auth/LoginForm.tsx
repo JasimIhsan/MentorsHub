@@ -1,4 +1,4 @@
-import { LucideLogIn } from "lucide-react";
+import { LucideLogIn, LucideEye, LucideEyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormData, loginSchema } from "@/schema/auth.form";
@@ -6,9 +6,10 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login } from "@/store/slices/userSlice";
 import { toast } from "sonner";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import GoogleLoginButton from "./GoogleLoginButton";
@@ -23,6 +24,7 @@ interface LoginFormProps {
 export default function LoginForm({ setFormState }: LoginFormProps) {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
+	const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
 
 	const form = useForm<LoginFormData>({
 		resolver: zodResolver(loginSchema),
@@ -38,9 +40,11 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 				navigate("/dashboard", { replace: true });
 				toast.success("Login successful");
 			}
-		} catch (error: any) {
+		} catch (error) {
 			console.error("Login error:", error);
-			toast.error(error.message || "Login failed. Please try again.");
+			if (error instanceof Error) {
+				toast.error(error.message);
+			}
 		}
 	};
 
@@ -70,7 +74,20 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 					</div>
 					<div className="space-y-3">
 						<Label htmlFor="password">Password</Label>
-						<Input id="password" type="password" {...form.register("password")} />
+						<div className="relative">
+							<Input
+								id="password"
+								type={showPassword ? "text" : "password"} // Toggle input type
+								{...form.register("password")}
+							/>
+							<button
+								type="button"
+								className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+								onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+							>
+								{showPassword ? <LucideEyeOff className="h-4 w-4" /> : <LucideEye className="h-4 w-4" />}
+							</button>
+						</div>
 						{form.formState.errors.password && <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>}
 					</div>
 					<div className="text-right">

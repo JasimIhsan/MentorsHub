@@ -3,93 +3,109 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Search, Calendar, GraduationCap, ArrowRight, Clock, Check } from "lucide-react";
-// import Image from "next/image";
 import { Link, useNavigate } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import LandingPhoto from "@/assets/main-image.png";
+import { UserProfileNavLinks } from "@/components/user/navbar/UserProfileNavLinks";
+import { UserMainNavbar } from "@/components/user/navbar/UserMainNavbar";
+import { MobileNav } from "@/components/user/navbar/MobileNavbar";
+import { UserInterface } from "@/interfaces/interfaces";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 const mentors = [
 	{
 		name: "John Doe",
 		title: "Software Engineer",
-		avatar: "/placeholder.svg",
+		avatar: "https://randomuser.me/api/portraits/men/75.jpg",
 		skills: ["JavaScript", "React", "Node.js"],
 		bio: "Experienced software engineer with a passion for building scalable web applications.",
-		rate: "$50/hour",
+		rate: "₹150/hour",
 	},
 	{
 		name: "Jane Smith",
 		title: "Data Scientist",
-		avatar: "/placeholder.svg",
+		avatar: "https://randomuser.me/api/portraits/men/15.jpg",
 		skills: ["Python", "Machine Learning", "Data Analysis"],
 		bio: "Data scientist with expertise in developing machine learning models and data-driven insights.",
-		rate: "$60/hour",
+		rate: "₹160/hour",
 	},
 	{
 		name: "Peter Jones",
 		title: "Product Manager",
-		avatar: "/placeholder.svg",
+		avatar: "https://randomuser.me/api/portraits/men/20.jpg",
 		skills: ["Product Strategy", "Agile", "User Research"],
 		bio: "Product manager with a proven track record of launching successful products and features.",
-		rate: "$70/hour",
+		rate: "₹170/hour",
 	},
 ];
 
 const testimonials = [
 	{
 		name: "Alice Brown",
+		avatar: "https://randomuser.me/api/portraits/women/75.jpg",
 		text: "I had a great experience learning from John. He helped me understand React concepts and build my first web app.",
 	},
 	{
 		name: "Bob Green",
+		avatar: "https://randomuser.me/api/portraits/men/65.jpg",
 		text: "Jane is an excellent data scientist. She taught me how to use Python for data analysis and machine learning.",
 	},
 	{
 		name: "Charlie White",
+		avatar: "https://randomuser.me/api/portraits/men/10.jpg",
 		text: "Peter is a fantastic product manager. He guided me through the product development process and helped me launch my startup.",
 	},
 ];
 
 export default function Home() {
+	const { isAuthenticated, user } = useSelector((state: RootState) => state.userAuth);
 	const navigate = useNavigate();
 	return (
-		<div className="flex min-h-screen flex-col ">
-			{/* <header className="sticky top-0 z-40 border-b bg-background">
-				<div className="container flex h-16 items-center justify-between py-4">
-					<div className="flex items-center gap-2">
-						<GraduationCap className="h-6 w-6 text-primary" />
-						<span className="text-xl font-bold">MentorsHub</span>
-					</div>
-					<nav className="hidden md:flex items-center gap-6">
-						<Link to="#how-it-works" className="text-sm font-medium hover:text-primary">
-							How It Works
-						</Link>
-						<Link to="#mentors" className="text-sm font-medium hover:text-primary">
-							Mentors
-						</Link>
-						<Link to="#testimonials" className="text-sm font-medium hover:text-primary">
-							Testimonials
-						</Link>
-						<Link to="#pricing" className="text-sm font-medium hover:text-primary">
-							Pricing
-						</Link>
-					</nav>
-					<div className="flex items-center gap-4">
-						<Button variant="outline" className="hidden md:inline-flex">
-							Log In
-						</Button>
-						<Button>Sign Up</Button>
-					</div>
+		// Remove overflow-y-hidden to allow scrolling
+		<div className="flex min-h-screen flex-col">
+			<header className="sticky top-0 z-50 w-full h-16 border-b backdrop-blur-3xl bg-transparent">
+				<div className=" flex h-16 justify-between items-center w-full">
+					<UserMainNavbar />
+					{isAuthenticated ? (
+						<div>
+							<div className="hidden md:flex items-center gap-4">
+								<UserProfileNavLinks user={user as UserInterface} />
+							</div>
+							<div className="md:hidden px-10 md:px-20 xl:px-25 flex justify-center">
+								<MobileNav />
+							</div>
+						</div>
+					) : (
+						<div className="flex items-center gap-4 px-10 md:px-20 xl:px-25 justify-center">
+							{/* Desktop buttons */}
+							<div className="hidden md:flex items-center gap-4">
+								<Button variant="outline" onClick={() => navigate("/authenticate")}>
+									Login
+								</Button>
+								<Button onClick={() => navigate("/authenticate")}>Register</Button>
+							</div>
+							{/* Mobile buttons */}
+							<div className="md:hidden flex items-center gap-2">
+								<Button variant="outline" size="sm" onClick={() => navigate("/authenticate")}>
+									Login
+								</Button>
+								<Button size="sm" onClick={() => navigate("/authenticate")}>
+									Register
+								</Button>
+							</div>
+						</div>
+					)}
 				</div>
-			</header> */}
+			</header>
 			<main className="flex-1">
 				{/* Hero Section */}
 				<section className="relative overflow-hidden mt-10 px-10 md:px-20 xl:px-25 flex justify-center">
-					<div className="container relative z-10 grid gap-8 md:grid-cols-2 md:items-center items-center ">
-						{/* Image Section - Moves to top on small screens */}
-						<div className="relative h-[400px] w-full flex justify-center items-center order-first md:order-last">
+					<div className="container relative z-10 grid gap-8 md:grid-cols-2 md:items-center items-center">
+						{/* Image Section - Use responsive height instead of fixed */}
+						<div className="relative min-h-[300px] w-full flex justify-center items-center order-first md:order-last">
 							<div className="md:w-3/4 relative">
 								<div className="absolute -z-1 hidden md:block md:-top-6 md:-left-8 md:w-20 md:h-20 bg-primary rounded-lg -rotate-20"></div>
 								<div className="absolute -z-1 hidden md:block rotate-20 md:-bottom-6 md:-right-8 md:w-20 md:h-20 bg-blue-200 rounded-lg"></div>
@@ -99,7 +115,7 @@ export default function Home() {
 							</div>
 						</div>
 
-						{/* Text Section - Moves to bottom on small screens */}
+						{/* Text Section */}
 						<div className="flex flex-col gap-6 order-last md:order-first">
 							<h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
 								Unlock Knowledge, <span className="text-primary">One Hour at a Time</span>
@@ -221,7 +237,7 @@ export default function Home() {
 										<p className="text-muted-foreground">{testimonial.text}</p>
 										<div className="mt-6 flex items-center">
 											<Avatar className="h-10 w-10 border">
-												<AvatarImage src="/placeholder.svg" alt={testimonial.name} />
+												<AvatarImage src={testimonial.avatar} alt={testimonial.name} />
 												<AvatarFallback>
 													{testimonial.name
 														.split(" ")
@@ -243,7 +259,7 @@ export default function Home() {
 
 				{/* Pricing Section */}
 				<section id="pricing" className="py-20 px-10 md:px-20 xl:px-25 mt-10 flex justify-center">
-					<div className="container ">
+					<div className="container">
 						<div className="flex flex-col items-center gap-4 text-center mb-16">
 							<h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Simple, Transparent Pricing</h2>
 							<p className="text-xl text-muted-foreground max-w-2xl">Choose the plan that works best for your learning journey</p>
@@ -257,7 +273,7 @@ export default function Home() {
 								</CardHeader>
 								<CardContent className="flex flex-1 flex-col p-6">
 									<div className="flex items-baseline gap-2">
-										<span className="text-4xl font-bold">$29</span>
+										<span className="text-4xl font-bold">₹129</span>
 										<span className="text-muted-foreground">/month</span>
 									</div>
 									<ul className="mt-6 space-y-4 flex-1">
@@ -291,7 +307,7 @@ export default function Home() {
 								</CardHeader>
 								<CardContent className="flex flex-1 flex-col p-6">
 									<div className="flex items-baseline gap-2">
-										<span className="text-4xl font-bold">$79</span>
+										<span className="text-4xl font-bold">₹179</span>
 										<span className="text-muted-foreground">/month</span>
 									</div>
 									<ul className="mt-6 space-y-4 flex-1">
@@ -328,7 +344,7 @@ export default function Home() {
 								</CardHeader>
 								<CardContent className="flex flex-1 flex-col p-6">
 									<div className="flex items-baseline gap-2">
-										<span className="text-4xl font-bold">$149</span>
+										<span className="text-4xl font-bold">₹1149</span>
 										<span className="text-muted-foreground">/month</span>
 									</div>
 									<ul className="mt-6 space-y-4 flex-1">
@@ -391,7 +407,7 @@ export default function Home() {
 								<AccordionItem value="item-2">
 									<AccordionTrigger>How much does mentorship cost?</AccordionTrigger>
 									<AccordionContent>
-										Mentorship costs vary depending on the mentor's experience and expertise. We offer plans starting at $29/month for basic mentorship, with premium options available for more intensive guidance. Many mentors also offer a
+										Mentorship costs vary depending on the mentor's experience and expertise. We offer plans starting at ₹129/month for basic mentorship, with premium options available for more intensive guidance. Many mentors also offer a
 										free introductory session to ensure it's a good fit.
 									</AccordionContent>
 								</AccordionItem>
@@ -462,6 +478,22 @@ export default function Home() {
 					</div>
 				</section>
 			</main>
+			<footer className="border-t px-10 md:px-20 xl:px-25 flex justify-center">
+				<div className="container flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row">
+					<p className="text-sm text-muted-foreground">© {new Date().getFullYear()} MentorMatch. All rights reserved.</p>
+					<div className="flex items-center gap-4 text-sm text-muted-foreground">
+						<a href="#" className="hover:underline">
+							Terms
+						</a>
+						<a href="#" className="hover:underline">
+							Privacy
+						</a>
+						<a href="#" className="hover:underline">
+							Contact
+						</a>
+					</div>
+				</div>
+			</footer>
 		</div>
 	);
 }
