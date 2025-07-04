@@ -1,7 +1,8 @@
+/* ---------- Shared value objects & aliases ---------- */
 export interface WorkExperience {
 	jobTitle: string;
 	company: string;
-	startDate: string;
+	startDate: string; // yyyy‑mm‑dd ISO string
 	endDate: string | null;
 	currentJob: boolean;
 	description: string;
@@ -38,9 +39,10 @@ export type Availability = {
 export type SessionFormat = "one-on-one" | "group" | "both";
 export type PricingType = "free" | "paid" | "both-pricing";
 
-export interface IMentorInterface {
-	id?: string; // MongoDB _id
-	userId: string; // reference to user
+/* ---------- Aggregate root props ---------- */
+export interface MentorProfileProps {
+	id?: string; // Mongo _id
+	userId: string; // FK to User
 	professionalTitle: string;
 	languages: string[];
 	primaryExpertise: string;
@@ -51,53 +53,50 @@ export interface IMentorInterface {
 	sessionFormat: SessionFormat;
 	sessionTypes: string[];
 	pricing: PricingType;
-	hourlyRate: number | null;
+	hourlyRate: number | null; // must be null if pricing === "free"
 	availability: Availability;
 	documents: string[];
 	createdAt?: Date;
 	updatedAt?: Date;
 }
 
+/* ---------- Domain Entity ---------- */
 export class MentorProfileEntity {
-	private id?: string;
-	private userId: string;
-	private professionalTitle: string;
-	private languages: string[];
-	private primaryExpertise: string;
-	private yearsExperience: string;
-	private workExperiences: WorkExperience[];
-	private educations: Education[];
-	private certifications: Certification[];
-	private sessionFormat: SessionFormat;
-	private sessionTypes: string[];
-	private pricing: PricingType;
-	private hourlyRate: number | null;
-	private availability: Availability;
-	private documents: string[];
-	private createdAt: Date;
-	private updatedAt?: Date;
+	/* All state is private so it can be validated */
+	private readonly _id?: string;
+	private _userId: string;
+	private _professionalTitle: string;
+	private _languages: string[];
+	private _primaryExpertise: string;
+	private _yearsExperience: string;
+	private _workExperiences: WorkExperience[];
+	private _educations: Education[];
+	private _certifications: Certification[];
+	private _sessionFormat: SessionFormat;
+	private _sessionTypes: string[];
+	private _pricing: PricingType;
+	private _hourlyRate: number | null;
+	private _availability: Availability;
+	private _documents: string[];
+	private readonly _createdAt: Date;
+	private _updatedAt: Date;
 
-	constructor(mentor: IMentorInterface) {
-		this.id = mentor.id;
-		this.userId = mentor.userId;
-		this.professionalTitle = mentor.professionalTitle;
-		this.languages = mentor.languages;
-		this.primaryExpertise = mentor.primaryExpertise;
-		this.yearsExperience = mentor.yearsExperience;
-		this.workExperiences = mentor.workExperiences;
-		this.educations = mentor.educations;
-		this.certifications = mentor.certifications;
-		this.sessionFormat = mentor.sessionFormat;
-		this.sessionTypes = mentor.sessionTypes;
-		this.pricing = mentor.pricing;
-		this.hourlyRate = mentor.hourlyRate;
-		this.availability = mentor.availability ?? {};
-		this.documents = mentor.documents;
-		this.createdAt = mentor.createdAt ?? new Date();
-		this.updatedAt = mentor.updatedAt ?? new Date();
+	/* ===== Factory methods ===== */
+
+	/** Use when *creating a brand‑new* mentor profile */
+	public static create(props: MentorProfileProps): MentorProfileEntity {
+		//  Basic domain‑level validation
+		if (props.pricing === "free" && props.hourlyRate !== null) {
+			throw new Error("hourlyRate must be null when pricing is 'free'");
+		}
+		if (props.pricing === "paid" && (props.hourlyRate === null || props.hourlyRate < 0)) {
+			throw new Error("hourlyRate must be a positive number when pricing is 'paid'");
+		}
+		return new MentorProfileEntity(props);
 	}
 
-	static fromDBDocument(doc: any): MentorProfileEntity {
+	/** Use when *re‑hydrating* from persistence (e.g. MongoDB) */
+	public static fromDBDocument(doc: any): MentorProfileEntity {
 		return new MentorProfileEntity({
 			id: doc._id?.toString(),
 			userId: doc.userId,
@@ -112,78 +111,139 @@ export class MentorProfileEntity {
 			sessionTypes: doc.sessionTypes ?? [],
 			pricing: doc.pricing,
 			hourlyRate: doc.hourlyRate ?? null,
-			availability: doc.availability ?? [],
+			availability: doc.availability ?? {},
 			documents: doc.documents ?? [],
 			createdAt: doc.createdAt ?? new Date(),
 			updatedAt: doc.updatedAt ?? new Date(),
 		});
 	}
 
-	updateMentorProfile(updatedData: Partial<IMentorInterface>) {
-		if (updatedData.professionalTitle !== undefined) this.professionalTitle = updatedData.professionalTitle;
-		if (updatedData.languages !== undefined) this.languages = updatedData.languages;
-		if (updatedData.primaryExpertise !== undefined) this.primaryExpertise = updatedData.primaryExpertise;
-		if (updatedData.yearsExperience !== undefined) this.yearsExperience = updatedData.yearsExperience;
-		if (updatedData.workExperiences !== undefined) this.workExperiences = updatedData.workExperiences;
-		if (updatedData.educations !== undefined) this.educations = updatedData.educations;
-		if (updatedData.certifications !== undefined) this.certifications = updatedData.certifications;
-		if (updatedData.sessionFormat !== undefined) this.sessionFormat = updatedData.sessionFormat;
-		if (updatedData.sessionTypes !== undefined) this.sessionTypes = updatedData.sessionTypes;
-		if (updatedData.pricing !== undefined) this.pricing = updatedData.pricing;
-		if (updatedData.hourlyRate !== undefined) this.hourlyRate = updatedData.hourlyRate;
-		if (updatedData.availability !== undefined) this.availability = updatedData.availability;
-		if (updatedData.documents !== undefined) this.documents = updatedData.documents;
-		this.updatedAt = new Date();
+	/* ===== Private ctor – never call directly ===== */
+	private constructor(props: MentorProfileProps) {
+		this._id = props.id;
+		this._userId = props.userId;
+		this._professionalTitle = props.professionalTitle;
+		this._languages = [...props.languages];
+		this._primaryExpertise = props.primaryExpertise;
+		this._yearsExperience = props.yearsExperience;
+		this._workExperiences = [...props.workExperiences];
+		this._educations = [...props.educations];
+		this._certifications = [...props.certifications];
+		this._sessionFormat = props.sessionFormat;
+		this._sessionTypes = [...props.sessionTypes];
+		this._pricing = props.pricing;
+		this._hourlyRate = props.hourlyRate;
+		this._availability = { ...props.availability };
+		this._documents = [...props.documents];
+		this._createdAt = props.createdAt ?? new Date();
+		this._updatedAt = props.updatedAt ?? new Date();
 	}
 
-	// ✅ Getters
-	getId(): string | undefined {
-		return this.id;
+	/* ===== Getters ===== */
+
+	get id(): string | undefined {
+		return this._id;
+	}
+	get userId(): string {
+		return this._userId;
+	}
+	get professionalTitle(): string {
+		return this._professionalTitle;
+	}
+	get languages(): string[] {
+		return [...this._languages];
+	}
+	get primaryExpertise(): string {
+		return this._primaryExpertise;
+	}
+	get yearsExperience(): string {
+		return this._yearsExperience;
+	}
+	get workExperiences(): WorkExperience[] {
+		return [...this._workExperiences];
+	}
+	get educations(): Education[] {
+		return [...this._educations];
+	}
+	get certifications(): Certification[] {
+		return [...this._certifications];
+	}
+	get sessionFormat(): SessionFormat {
+		return this._sessionFormat;
+	}
+	get sessionTypes(): string[] {
+		return [...this._sessionTypes];
+	}
+	get pricing(): PricingType {
+		return this._pricing;
+	}
+	get hourlyRate(): number | null {
+		return this._hourlyRate;
+	}
+	get availability(): Availability {
+		return { ...this._availability };
+	}
+	get documents(): string[] {
+		return [...this._documents];
+	}
+	get createdAt(): Date {
+		return this._createdAt;
+	}
+	get updatedAt(): Date {
+		return this._updatedAt;
 	}
 
-	getUserId(): string {
-		return this.userId;
+	/* ===== Domain‑specific mutators ===== */
+
+	/** Update “profile basics” in one shot (commonly used in a settings screen) */
+	public updateMentorProfile(updatedData: Partial<MentorProfileProps>): void {
+		// Basic fields
+		if (updatedData.professionalTitle !== undefined) this._professionalTitle = updatedData.professionalTitle;
+		if (updatedData.primaryExpertise !== undefined) this._primaryExpertise = updatedData.primaryExpertise;
+		if (updatedData.yearsExperience !== undefined) this._yearsExperience = updatedData.yearsExperience;
+		if (updatedData.languages !== undefined) this._languages = [...updatedData.languages];
+		// Array value objects
+		if (updatedData.workExperiences !== undefined) this._workExperiences = [...updatedData.workExperiences];
+		if (updatedData.educations !== undefined) this._educations = [...updatedData.educations];
+		if (updatedData.certifications !== undefined) this._certifications = [...updatedData.certifications];
+		if (updatedData.sessionTypes !== undefined) this._sessionTypes = [...updatedData.sessionTypes];
+		if (updatedData.documents !== undefined) this._documents = [...updatedData.documents];
+		// Enums & logic-handled
+		if (updatedData.pricing !== undefined || updatedData.hourlyRate !== undefined) this.setPricing(updatedData.pricing ?? this._pricing, updatedData.hourlyRate !== undefined ? updatedData.hourlyRate : this._hourlyRate);
+		if (updatedData.sessionFormat !== undefined) this._sessionFormat = updatedData.sessionFormat;
+		if (updatedData.availability !== undefined) this.setAvailability(updatedData.availability);
+		this.touch();
 	}
 
-	getTitle(): string {
-		return this.professionalTitle;
+	public setPricing(pricing: PricingType, hourlyRate: number | null): void {
+		if (pricing === "free" && hourlyRate !== null) {
+			throw new Error("hourlyRate must be null when pricing is 'free'");
+		}
+		if (pricing === "paid" && (hourlyRate === null || hourlyRate < 0)) {
+			throw new Error("hourlyRate must be a positive number when pricing is 'paid'");
+		}
+		this._pricing = pricing;
+		this._hourlyRate = hourlyRate;
+		this.touch();
 	}
 
-	getLanguages(): string[] {
-		return this.languages;
+	public setAvailability(avail: Availability): void {
+		this._availability = { ...avail };
+		this.touch();
 	}
 
-	getPricing(): PricingType {
-		return this.pricing;
+	public addWorkExperience(exp: WorkExperience): void {
+		this._workExperiences.push(exp);
+		this.touch();
 	}
 
-	getHourlyRate(): number | null {
-		return this.hourlyRate;
+	public removeWorkExperience(index: number): void {
+		this._workExperiences.splice(index, 1);
+		this.touch();
 	}
 
-	getDocuments(): string[] {
-		return this.documents;
-	}
-
-	getFullProfile(): Partial<IMentorInterface> {
-		return {
-			id: this.id,
-			userId: this.userId,
-			professionalTitle: this.professionalTitle,
-			languages: this.languages,
-			primaryExpertise: this.primaryExpertise,
-			yearsExperience: this.yearsExperience,
-			workExperiences: this.workExperiences,
-			educations: this.educations,
-			certifications: this.certifications,
-			sessionFormat: this.sessionFormat,
-			sessionTypes: this.sessionTypes,
-			pricing: this.pricing,
-			hourlyRate: this.hourlyRate,
-			availability: this.availability,
-			documents: this.documents,
-			createdAt: this.createdAt,
-			updatedAt: this.updatedAt,
-		};
+	/* ===== Helper ===== */
+	private touch(): void {
+		this._updatedAt = new Date();
 	}
 }

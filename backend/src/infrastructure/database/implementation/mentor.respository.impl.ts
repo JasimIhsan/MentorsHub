@@ -4,6 +4,7 @@ import { MentorProfileEntity } from "../../../domain/entities/mentor.detailes.en
 import { MentorProfileModel } from "../models/user/mentor.details.model";
 import { UserModel } from "../models/user/user.model";
 import { IAvailabilityDTO } from "../../../application/dtos/availability.dto";
+import { MentorEntity } from "../../../domain/entities/mentor.entity";
 
 // Error handler
 const handleExceptionError = (error: unknown, message: string): never => {
@@ -41,22 +42,11 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 		}
 	}
 
-	async findAllMentors(query: { page?: number; limit?: number; search?: string; status?: string }): Promise<{
-		mentors: IMentorDTO[];
-		total: number;
-	}> {
+	async findAllMentors({ page = 1, limit = 10, search = "", status = "" }) {
 		try {
-			const page = query.page || 1;
-			const limit = query.limit || 10;
 			const skip = (page - 1) * limit;
-			const search = query.search || "";
-			const status = query.status || "";
-
-			// Build MongoDB query
 			const match: any = {};
-			if (status) {
-				match["userId.mentorRequestStatus"] = status;
-			}
+			if (status) match["userId.mentorRequestStatus"] = status;
 			if (search) {
 				match.$or = [
 					{ "userId.firstName": { $regex: search, $options: "i" } },
@@ -66,8 +56,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 				];
 			}
 
-			// Aggregation pipeline
-			const mentors = await MentorProfileModel.aggregate([
+			const [result] = await MentorProfileModel.aggregate([
 				{ $lookup: { from: "users", localField: "userId", foreignField: "_id", as: "userId" } },
 				{ $unwind: "$userId" },
 				{ $match: match },
@@ -79,156 +68,109 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 				},
 			]);
 
-			const mentorDTOs: IMentorDTO[] = mentors[0].data.map((mentor: any) => ({
-				email: mentor.userId.email,
-				password: mentor.userId.password,
-				firstName: mentor.userId.firstName,
-				role: mentor.userId.role,
-				lastName: mentor.userId.lastName,
-				avatar: mentor.userId.avatar,
-				bio: mentor.userId.bio,
-				interests: mentor.userId.interests,
-				updatedAt: mentor.userId.updatedAt,
-				skills: mentor.userId.skills,
-				status: mentor.userId.status,
-				mentorRequestStatus: mentor.userId.mentorRequestStatus,
-				isVerified: mentor.userId.isVerified,
-				averageRating: mentor.userId.averageRating,
-				totalReviews: mentor.userId.totalReviews,
-				sessionCompleted: mentor.userId.sessionCompleted,
-				featuredMentor: mentor.userId.featuredMentor,
-				badges: mentor.userId.badges,
-				userId: mentor.userId._id,
-				professionalTitle: mentor.professionalTitle,
-				languages: mentor.languages,
-				primaryExpertise: mentor.primaryExpertise,
-				yearsExperience: mentor.yearsExperience,
-				workExperiences: mentor.workExperiences,
-				educations: mentor.educations,
-				certifications: mentor.certifications,
-				sessionFormat: mentor.sessionFormat,
-				sessionTypes: mentor.sessionTypes,
-				pricing: mentor.pricing,
-				hourlyRate: mentor.hourlyRate,
-				availability: mentor.availability,
-				documents: mentor.documents,
-				createdAt: mentor.createdAt,
-				lastActive: mentor.userId.lastActive,
-			}));
+			const mentors = result.data.map(MentorEntity.fromMongo);
+			const total = result.total[0]?.count || 0;
 
-			const total = mentors[0].total[0]?.count || 0;
-
-			return { mentors: mentorDTOs, total };
-		} catch (error) {
-			throw handleExceptionError(error, "Error finding all mentors");
+			return { mentors, total };
+		} catch (err) {
+			return handleExceptionError(err, "Error finding mentors");
 		}
 	}
 
-	async findAllApprovedMentors(): Promise<IMentorDTO[]> {
+	/* ---------------------------------------------------------------- */
+	async findAllApprovedMentors(params: { page: number; limit: number; search?: string; sortBy?: string; priceMin?: number; priceMax?: number; interests?: string[] }): Promise<{ mentors: MentorEntity[]; total: number }> {
+		console.log('params: ', params);
 		try {
-			const approvedMentors = await MentorProfileModel.find().populate({
-				path: "userId",
-				model: UserModel,
-				match: {
-					role: "mentor",
-					mentorRequestStatus: "approved",
-				},
-			});
+			/* ---------- 1. Pagination helpers ---------- */
+			const page = params.page ?? 1; // default page 1
+			const limit = params.limit ?? 12; // default 12 per page
+			const skip = (page - 1) * limit; // correct skip
 
-			const mentorDTOs: IMentorDTO[] = approvedMentors
-				.filter((mentor: any) => mentor.userId)
-				.map((mentor: any) => ({
-					id: mentor._id,
-					email: mentor.userId.email,
-					password: mentor.userId.password,
-					firstName: mentor.userId.firstName,
-					role: mentor.userId.role,
-					lastName: mentor.userId.lastName,
-					avatar: mentor.userId.avatar,
-					bio: mentor.userId.bio,
-					interests: mentor.userId.interests,
-					updatedAt: mentor.userId.updatedAt,
-					skills: mentor.userId.skills,
-					status: mentor.userId.status,
-					mentorRequestStatus: mentor.userId.mentorRequestStatus,
-					isVerified: mentor.userId.isVerified,
-					averageRating: mentor.userId.averageRating,
-					totalReviews: mentor.userId.totalReviews,
-					sessionCompleted: mentor.userId.sessionCompleted,
-					featuredMentor: mentor.userId.featuredMentor,
-					badges: mentor.userId.badges,
-					userId: mentor.userId._id,
-					professionalTitle: mentor.professionalTitle,
-					languages: mentor.languages,
-					primaryExpertise: mentor.primaryExpertise,
-					yearsExperience: mentor.yearsExperience,
-					workExperiences: mentor.workExperiences,
-					educations: mentor.educations,
-					certifications: mentor.certifications,
-					sessionFormat: mentor.sessionFormat,
-					sessionTypes: mentor.sessionTypes,
-					pricing: mentor.pricing,
-					hourlyRate: mentor.hourlyRate,
-					availability: mentor.availability,
-					documents: mentor.documents,
-					createdAt: mentor.createdAt,
-					lastActive: mentor.userId.lastActive,
-				}));
+			/* ---------- 2. Build dynamic Mongo query ---------- */
+			const query: any = {};
 
-			return mentorDTOs;
-		} catch (error) {
-			throw handleExceptionError(error, "Error finding all approved mentors");
+			// Full‑text‑ish search on three fields
+			if (params.search?.trim()) {
+				const regex = new RegExp(params.search.trim(), "i");
+				query.$or = [{ firstName: regex }, { professionalTitle: regex }, { interests: regex }];
+			}
+
+			// Price range
+			if (params.priceMin !== undefined || params.priceMax !== undefined) {
+				query.hourlyRate = {};
+				if (params.priceMin !== undefined) query.hourlyRate.$gte = params.priceMin;
+				if (params.priceMax !== undefined) query.hourlyRate.$lte = params.priceMax;
+			}
+
+			// Interests array
+			if (params.interests?.length) {
+				query.interests = { $in: params.interests };
+			}
+
+			/* ---------- 3. Build sort map ---------- */
+			const sort: Record<string, 1 | -1> = {};
+			switch (params.sortBy) {
+				case "price-low":
+					sort.hourlyRate = 1;
+					break;
+				case "price-high":
+					sort.hourlyRate = -1;
+					break;
+				case "rating":
+					sort.averageRating = -1;
+					break;
+				case "reviews":
+					sort.totalReviews = -1;
+					break;
+				case "newest":
+					sort.createdAt = -1;
+					break;
+				default:
+					sort.averageRating = -1;
+			}
+
+			console.log(`query : `, query);
+			console.log(`sort : `, sort);
+
+			/* ---------- 4. Main paginated query ---------- */
+			// searching issue beacause of populate it search the name in details collection not in users
+			const docs = await MentorProfileModel.find(query)
+				.populate({
+					path: "userId",
+					model: UserModel,
+					match: { role: "mentor", mentorRequestStatus: "approved" },
+				})
+				.sort(sort)
+				.skip(skip)
+				.limit(limit);
+			console.log(`docs : `, docs);
+			// Remove any profiles whose user failed the populate match
+			const mentors = docs.filter((d) => d.userId).map(MentorEntity.fromMongo);
+			console.log("mentors: ", mentors);
+
+			/* ---------- 5. “Total rows” query (same filters, no pagination) ---------- */
+			const totalDocs = await MentorProfileModel.find(query)
+				.populate({
+					path: "userId",
+					model: UserModel,
+					match: { role: "mentor", mentorRequestStatus: "approved" },
+				})
+				.countDocuments();
+			console.log("totalDocs: ", totalDocs);
+
+			return { mentors, total: totalDocs };
+		} catch (err) {
+			throw handleExceptionError(err, "Error finding approved mentors");
 		}
 	}
 
-	async findMentorByUserId(userId: string): Promise<IMentorDTO | null> {
+	/* ---------------------------------------------------------------- */
+	async findMentorByUserId(userId: string) {
 		try {
-			const mentor = await MentorProfileModel.findOne({ userId }).populate("userId");
-			if (!mentor || !mentor.userId) return null;
-
-			const user = mentor.userId as any;
-
-			const mentorDTOs: IMentorDTO = {
-				id: user._id,
-				email: user.email,
-				password: user.password,
-				firstName: user.firstName,
-				role: user.role,
-				lastName: user.lastName,
-				avatar: user.avatar,
-				bio: user.bio,
-				interests: user.interests,
-				updatedAt: user.updatedAt,
-				skills: user.skills,
-				status: user.status,
-				mentorRequestStatus: user.mentorRequestStatus,
-				isVerified: user.isVerified,
-				averageRating: user.averageRating,
-				totalReviews: user.totalReviews,
-				sessionCompleted: user.sessionCompleted,
-				featuredMentor: user.featuredMentor,
-				badges: user.badges,
-				userId: user._id,
-				professionalTitle: mentor.professionalTitle,
-				languages: mentor.languages,
-				primaryExpertise: mentor.primaryExpertise,
-				yearsExperience: mentor.yearsExperience,
-				workExperiences: mentor.workExperiences,
-				educations: mentor.educations,
-				certifications: mentor.certifications,
-				sessionFormat: mentor.sessionFormat,
-				sessionTypes: mentor.sessionTypes,
-				pricing: mentor.pricing,
-				hourlyRate: mentor.hourlyRate,
-				availability: mentor.availability,
-				documents: mentor.documents,
-				createdAt: mentor.createdAt,
-				lastActive: user.lastActive,
-			};
-
-			return mentorDTOs;
-		} catch (error) {
-			throw handleExceptionError(error, "Error finding mentor by user ID");
+			const doc = await MentorProfileModel.findOne({ userId }).populate("userId");
+			return doc && doc.userId ? MentorEntity.fromMongo(doc) : null;
+		} catch (err) {
+			return handleExceptionError(err, "Error finding mentor by userId");
 		}
 	}
 

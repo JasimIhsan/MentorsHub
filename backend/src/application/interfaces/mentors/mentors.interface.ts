@@ -1,3 +1,4 @@
+import { MentorEntity } from "../../../domain/entities/mentor.entity";
 import { IMentorDTO } from "../../dtos/mentor.dtos";
 import { ISessionMentorDTO } from "../../dtos/session.dto";
 
@@ -11,7 +12,7 @@ export interface IGetAllMentorsUsecase {
 }
 
 export interface IGetAllApprovedMentorsUsecase {
-	execute(): Promise<IMentorDTO[]>;
+	execute(params: { page?: number; limit?: number; search?: string; sortBy?: string; priceMin?: number; priceMax?: number; interests?: string[] }): Promise<{ mentors: IMentorDTO[]; total: number; page: number; limit: number }>;
 }
 
 export interface IGetMentorUsecase {

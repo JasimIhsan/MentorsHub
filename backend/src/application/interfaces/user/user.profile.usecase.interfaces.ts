@@ -1,5 +1,5 @@
 import { UserEntity, UserEntityProps } from "../../../domain/entities/user.entity";
-import { IMentorInterface, MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
+import { MentorProfileProps, MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
 import { IUserDTO } from "../../dtos/user.dtos";
 
 export interface IUpdateUserProfileUseCase {
@@ -16,7 +16,7 @@ export interface IChangePasswordUseCase {
 export interface IBecomeMentorUseCase {
 	execute(
 		userId: string,
-		data: Omit<IMentorInterface, "documents">,
+		data: Omit<MentorProfileProps, "documents">,
 		userData: Partial<UserEntityProps>,
 		documents: Express.Multer.File[]
 	): Promise<{
@@ -28,7 +28,7 @@ export interface IBecomeMentorUseCase {
 export interface IReApplyMentorApplicationUseCase {
 	execute(
 		userId: string,
-		data: Omit<IMentorInterface, "documents">,
+		data: Omit<MentorProfileProps, "documents">,
 		userData: Partial<UserEntityProps>,
 		documents: Express.Multer.File[]
 	): Promise<{

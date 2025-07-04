@@ -9,9 +9,9 @@ export interface IUsersDocument extends Document {
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;
-	interests: object[] | null;
+	interests: string[] | null;
 	updatedAt: Date;
-	skills: object[] | null;
+	skills: string[] | null;
 	status: "blocked" | "unblocked";
 	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
 	createdAt: Date;

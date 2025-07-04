@@ -1,6 +1,6 @@
 import { IMentorProfileRepository } from "../../../../domain/repositories/mentor.details.repository";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import { IMentorInterface, MentorProfileEntity } from "../../../../domain/entities/mentor.detailes.entity";
+import { MentorProfileProps, MentorProfileEntity } from "../../../../domain/entities/mentor.detailes.entity";
 import { UserEntity, UserEntityProps } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IUploadMentorDocuments } from "../../../interfaces/documents";
@@ -9,7 +9,7 @@ import { IReApplyMentorApplicationUseCase } from "../../../interfaces/user/user.
 export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicationUseCase {
 	constructor(private mentorProfileRepo: IMentorProfileRepository, private userRepo: IUserRepository, private uploadDocumentUseCase: IUploadMentorDocuments) {}
 
-	async execute(userId: string, data: IMentorInterface, userData: Partial<UserEntityProps>, documents: Express.Multer.File[]): Promise<{ savedUser: UserEntity; mentorProfile: MentorProfileEntity }> {
+	async execute(userId: string, data: MentorProfileProps, userData: Partial<UserEntityProps>, documents: Express.Multer.File[]): Promise<{ savedUser: UserEntity; mentorProfile: MentorProfileEntity }> {
 		const userEntity = await this.userRepo.findUserById(userId);
 		if (!userEntity) throw new Error(CommonStringMessage.USER_NOT_FOUND);
 		if (userEntity.role === "mentor") {
@@ -31,14 +31,14 @@ export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicatio
 						fileName: document.originalname,
 						mimeType: document.mimetype,
 						mentorId: userId,
-					}),
-				),
+					})
+				)
 			);
 		} else if (existingProfile && userEntity.mentorRequestStatus === "rejected") {
-			documentUrls = existingProfile.getDocuments() || [];
+			documentUrls = existingProfile.documents || [];
 		}
 
-		const updateData: IMentorInterface = {
+		const updateData: MentorProfileProps = {
 			...data,
 			hourlyRate: Number(data.hourlyRate),
 			documents: documentUrls,
@@ -52,7 +52,7 @@ export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicatio
 			mentorProfile = await this.mentorProfileRepo.updateMentorProfile(userId, existingProfile);
 		} else {
 			// Create new mentor profile
-			const newMentorProfile = new MentorProfileEntity(updateData);
+			const newMentorProfile = MentorProfileEntity.create(updateData);
 			mentorProfile = await this.mentorProfileRepo.createMentorProfile(userId, newMentorProfile);
 		}
 
