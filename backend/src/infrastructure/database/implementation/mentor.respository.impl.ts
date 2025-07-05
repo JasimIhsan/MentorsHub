@@ -251,20 +251,3 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 		}
 	}
 }
-
-function buildSortMap(sortBy?: string): Record<string, 1 | -1> {
-	switch (sortBy) {
-		case "price-low":
-			return { hourlyRate: 1 };
-		case "price-high":
-			return { hourlyRate: -1 };
-		case "rating":
-			return { averageRating: -1 };
-		case "reviews":
-			return { totalReviews: -1 };
-		case "newest":
-			return { createdAt: -1 };
-		default:
-			return { averageRating: -1 };
-	}
-}
