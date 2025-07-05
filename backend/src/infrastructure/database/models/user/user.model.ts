@@ -15,13 +15,10 @@ export interface IUsersDocument extends Document {
 	status: "blocked" | "unblocked";
 	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
 	createdAt: Date;
-	lastActive: Date | null;
-	isVerified: boolean | null;
 	averageRating: number | null;
 	totalReviews: number | null;
 	sessionCompleted: number | null;
-	featuredMentor: boolean | null;
-	badges: ObjectId[] | null;
+	badges: string[] | null;
 	googleId: string | null;
 }
 
@@ -37,8 +34,6 @@ const UsersSchema: Schema = new Schema(
 		interests: [{ type: String }],
 		skills: [{ type: String }],
 		status: { type: String, enum: ["blocked", "unblocked"], default: "unblocked" },
-		lastActive: { type: Date },
-		isVerified: { type: Boolean },
 		mentorRequestStatus: {
 			type: String,
 			enum: ["pending", "approved", "rejected", "not-requested"],
@@ -47,7 +42,6 @@ const UsersSchema: Schema = new Schema(
 		averageRating: { type: Number, default: 0 },
 		totalReviews: { type: Number, default: 0 },
 		sessionCompleted: { type: Number },
-		featuredMentor: { type: Boolean },
 		badges: [{ type: Schema.Types.ObjectId }],
 		googleId: { type: String },
 	},

@@ -12,7 +12,7 @@ export interface IGetAllMentorsUsecase {
 }
 
 export interface IGetAllApprovedMentorsUsecase {
-	execute(params: { page?: number; limit?: number; search?: string; sortBy?: string; priceMin?: number; priceMax?: number; interests?: string[] }): Promise<{ mentors: IMentorDTO[]; total: number; page: number; limit: number }>;
+	execute(params: { page?: number; limit?: number; search?: string; sortBy?: string; priceMin?: number; priceMax?: number; interests?: string[] }, browserId: string): Promise<{ mentors: IMentorDTO[]; total: number; page: number; limit: number }>;
 }
 
 export interface IGetMentorUsecase {

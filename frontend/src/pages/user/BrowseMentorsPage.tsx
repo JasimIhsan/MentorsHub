@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Star, Search, Filter, Check, ChevronDown, X } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -16,11 +17,40 @@ import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/custom/Loading";
 import { INTEREST_OPTIONS } from "@/constants/interest.option";
 import MentorBio from "@/components/user/browse-mentors/MentorsBio";
 import { useDebounce } from "@/hooks/useDebounce";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PaginationControls } from "@/components/custom/PaginationControls";
+
+// Skeleton component for mentor card
+const MentorCardSkeleton = () => (
+	<Card className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+		<CardContent className="flex flex-1 flex-col px-6 py-4">
+			<div className="flex items-center gap-5">
+				<Skeleton className="bg-gray-200 h-16 w-16 rounded-full" />
+				<div className="space-y-2">
+					<Skeleton className="bg-gray-200 h-5 w-32" />
+					<Skeleton className="bg-gray-200 h-4 w-48" />
+				</div>
+			</div>
+			<div className="mt-5 flex flex-wrap gap-2">
+				<Skeleton className="bg-gray-200 h-6 w-20 rounded-full" />
+				<Skeleton className="bg-gray-200 h-6 w-24 rounded-full" />
+				<Skeleton className="bg-gray-200 h-6 w-16 rounded-full" />
+			</div>
+			<Skeleton className="bg-gray-200 mt-5 h-10 w-full" />
+			<div className="mt-5 flex items-center justify-between">
+				<div className="flex items-center gap-2">
+					<Skeleton className="bg-gray-200 h-5 w-5 rounded-full" />
+					<Skeleton className="bg-gray-200 h-4 w-12" />
+					<Skeleton className="bg-gray-200 h-4 w-8" />
+				</div>
+				<Skeleton className="bg-gray-200 h-4 w-16" />
+			</div>
+			<Skeleton className="bg-gray-200 mt-6 h-10 w-full rounded-lg" />
+		</CardContent>
+	</Card>
+);
 
 export default function BrowseMentorsPage() {
 	// Manage URL query parameters
@@ -32,13 +62,14 @@ export default function BrowseMentorsPage() {
 	const [tempPriceRange, setTempPriceRange] = useState([parseFloat(searchParams.get("priceMin") || "0"), parseFloat(searchParams.get("priceMax") || "200")]);
 	const [priceRange, setPriceRange] = useState(tempPriceRange);
 	const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "recommended");
-	const [selectedInterests, setSelectedInterests] = useState<string[]>(searchParams.get("interests")?.split(",").filter(Boolean) || []);
+	const [tempSelectedInterests, setTempSelectedInterests] = useState<string[]>(searchParams.get("interests")?.split(",").filter(Boolean) || []); // Temporary interests state
+	const [selectedInterests, setSelectedInterests] = useState<string[]>(tempSelectedInterests); // Applied interests state
 	const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page") || "1"));
 	const [mentors, setMentors] = useState<IMentorDTO[]>([]);
 	const [total, setTotal] = useState(0);
-	const [isFetching, setIsFetching] = useState<boolean>(false); // Localized loading state
+	const [isFetching, setIsFetching] = useState<boolean>(false);
 	const user = useSelector((state: RootState) => state.userAuth.user);
-	const mentorsPerPage = 6;
+	const mentorsPerPage = 9;
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -59,7 +90,16 @@ export default function BrowseMentorsPage() {
 		const fetchMentors = async () => {
 			setIsFetching(true);
 			try {
-				const response = await fetchAllApprovedMentors(currentPage, mentorsPerPage, debouncedSearchTerm, sortBy, priceRange[0], priceRange[1], selectedInterests);
+				const response = await fetchAllApprovedMentors(
+					user?.id || "", // Handle case where user.id is undefined
+					currentPage,
+					mentorsPerPage,
+					debouncedSearchTerm,
+					sortBy,
+					priceRange[0],
+					priceRange[1],
+					selectedInterests
+				);
 				if (response.success) {
 					const fetchedMentors: IMentorDTO[] = response.mentors.filter((mentor: IMentorDTO) => mentor.userId !== user?.id);
 					const adjustedTotal = response.total - (response.mentors.length - fetchedMentors.length);
@@ -78,14 +118,12 @@ export default function BrowseMentorsPage() {
 
 	// Handle interest toggle
 	const handleInterestToggle = (value: string) => {
-		setSelectedInterests((prev) => (prev.includes(value) ? prev.filter((i) => i !== value) : [...prev, value]));
-		setCurrentPage(1);
+		setTempSelectedInterests((prev) => (prev.includes(value) ? prev.filter((i) => i !== value) : [...prev, value]));
 	};
 
 	// Remove interest
 	const removeInterest = (value: string) => {
-		setSelectedInterests((prev) => prev.filter((i) => i !== value));
-		setCurrentPage(1);
+		setTempSelectedInterests((prev) => prev.filter((i) => i !== value));
 	};
 
 	// Handle page change
@@ -97,6 +135,7 @@ export default function BrowseMentorsPage() {
 	// Apply filters
 	const applyFilters = () => {
 		setPriceRange(tempPriceRange);
+		setSelectedInterests(tempSelectedInterests); // Apply temporary interests
 		setCurrentPage(1);
 		setDrawerOpen(false);
 	};
@@ -121,7 +160,7 @@ export default function BrowseMentorsPage() {
 					<Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
 						<PopoverTrigger asChild>
 							<Button variant="outline" className="w-full justify-between rounded-lg border-indigo-200 bg-white text-sm">
-								{selectedInterests.length > 0 ? `${selectedInterests.length} interest${selectedInterests.length > 1 ? "s" : ""} selected` : "Select interests"}
+								{tempSelectedInterests.length > 0 ? `${tempSelectedInterests.length} interest${tempSelectedInterests.length > 1 ? "s" : ""} selected` : "Select interests"}
 								<ChevronDown className="ml-2 h-4 w-4" />
 							</Button>
 						</PopoverTrigger>
@@ -133,7 +172,7 @@ export default function BrowseMentorsPage() {
 									<CommandGroup>
 										{INTEREST_OPTIONS.map((interest) => (
 											<CommandItem key={interest.value} value={interest.value} onSelect={() => handleInterestToggle(interest.value)} className="flex items-center gap-2 rounded-md hover:bg-indigo-50 cursor-pointer">
-												<Check className={`h-4 w-4 text-primary ${selectedInterests.includes(interest.value) ? "opacity-100" : "opacity-0"}`} />
+												<Check className={`h-4 w-4 text-primary ${tempSelectedInterests.includes(interest.value) ? "opacity-100" : "opacity-0"}`} />
 												{interest.label}
 											</CommandItem>
 										))}
@@ -142,9 +181,9 @@ export default function BrowseMentorsPage() {
 							</Command>
 						</PopoverContent>
 					</Popover>
-					{selectedInterests.length > 0 && (
+					{tempSelectedInterests.length > 0 && (
 						<div className="mt-4 flex flex-wrap gap-2">
-							{selectedInterests.map((interest) => (
+							{tempSelectedInterests.map((interest) => (
 								<Badge key={interest} variant="default" className="flex items-center gap-1 rounded-full px-3 py-1 text-xs">
 									{INTEREST_OPTIONS.find((opt) => opt.value === interest)?.label || interest}
 									<button onClick={() => removeInterest(interest)} className="ml-1 text-white hover:cursor-pointer">
@@ -156,7 +195,7 @@ export default function BrowseMentorsPage() {
 					)}
 				</div>
 			</div>
-			<Button onClick={applyFilters} className="w-full">
+			<Button onClick={applyFilters} className="w-full bg-indigo-600 hover:bg-indigo-700">
 				Apply Filters
 			</Button>
 		</div>
@@ -280,26 +319,7 @@ export default function BrowseMentorsPage() {
 								))}
 							</div>
 							{/* Pagination Controls */}
-							{totalPages > 1 && (
-								<div className="mt-8 flex items-center justify-center gap-2 flex-wrap">
-									<Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="border-indigo-200 text-indigo-600 hover:bg-indigo-50">
-										Previous
-									</Button>
-									{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-										<Button
-											key={page}
-											variant={currentPage === page ? "default" : "outline"}
-											size="sm"
-											onClick={() => handlePageChange(page)}
-											className={currentPage === page ? "bg-indigo-600 text-white hover:bg-indigo-700" : "border-indigo-200 text-indigo-600 hover:bg-indigo-50"}>
-											{page}
-										</Button>
-									))}
-									<Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="border-indigo-200 text-indigo-600 hover:bg-indigo-50">
-										Next
-									</Button>
-								</div>
-							)}
+							<PaginationControls totalPages={totalPages} currentPage={currentPage} onPageChange={handlePageChange} maxPagesToShow={mentorsPerPage} />
 						</>
 					)}
 				</div>
@@ -307,32 +327,3 @@ export default function BrowseMentorsPage() {
 		</div>
 	);
 }
-
-const MentorCardSkeleton = () => (
-	<Card className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-		<CardContent className="flex flex-1 flex-col px-6 py-4">
-			<div className="flex items-center gap-5">
-				<Skeleton className="bg-gray-200 h-16 w-16 rounded-full" />
-				<div className="space-y-2">
-					<Skeleton className="bg-gray-200 h-5 w-32" />
-					<Skeleton className="bg-gray-200 h-4 w-48" />
-				</div>
-			</div>
-			<div className="mt-5 flex flex-wrap gap-2">
-				<Skeleton className="bg-gray-200 h-6 w-20 rounded-full" />
-				<Skeleton className="bg-gray-200 h-6 w-24 rounded-full" />
-				<Skeleton className="bg-gray-200 h-6 w-16 rounded-full" />
-			</div>
-			<Skeleton className="bg-gray-200 mt-5 h-10 w-full" />
-			<div className="mt-5 flex items-center justify-between">
-				<div className="flex items-center gap-2">
-					<Skeleton className="bg-gray-200 h-5 w-5 rounded-full" />
-					<Skeleton className="bg-gray-200 h-4 w-12" />
-					<Skeleton className="bg-gray-200 h-4 w-8" />
-				</div>
-				<Skeleton className="bg-gray-200 h-4 w-16" />
-			</div>
-			<Skeleton className="bg-gray-200 mt-6 h-10 w-full rounded-lg" />
-		</CardContent>
-	</Card>
-);

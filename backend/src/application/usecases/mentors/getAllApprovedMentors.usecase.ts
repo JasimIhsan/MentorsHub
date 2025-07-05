@@ -5,8 +5,8 @@ import { IGetAllApprovedMentorsUsecase } from "../../interfaces/mentors/mentors.
 export class GetAllApprovedMentorsUsecase implements IGetAllApprovedMentorsUsecase {
 	constructor(private mentorRepository: IMentorProfileRepository) {}
 
-	async execute(params: { page: number; limit: number; search?: string; sortBy?: string; priceMin?: number; priceMax?: number; interests?: string[] }): Promise<{ mentors: any[]; total: number; page: number; limit: number }> {
-		const { mentors, total } = await this.mentorRepository.findAllApprovedMentors(params);
+	async execute(params: { page: number; limit: number; search?: string; sortBy?: string; priceMin?: number; priceMax?: number; interests?: string[] }, browserId: string): Promise<{ mentors: any[]; total: number; page: number; limit: number }> {
+		const { mentors, total } = await this.mentorRepository.findAllApprovedMentors(params, browserId);
 
 		return {
 			mentors: mentors.map(mapToMentorDTOWithoutUser),

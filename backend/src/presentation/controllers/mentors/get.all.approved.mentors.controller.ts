@@ -8,6 +8,7 @@ export class GetAllApprovedMentorsController {
 
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
+			const browserId = req.params.userId;
 			const { page, limit, search, sortBy, priceMin, priceMax, interests } = req.query;
 
 			// Parse filters
@@ -29,15 +30,18 @@ export class GetAllApprovedMentorsController {
 			if (!user) throw new Error("User not found");
 			console.log("user: ", user);
 
-			const result = await this.getAllApprovedMentorsUsecase.execute({
-				page: parsedPage,
-				limit: parsedLimit,
-				search: search as string,
-				sortBy: sortBy as string,
-				priceMin: parsedPriceMin,
-				priceMax: parsedPriceMax,
-				interests: parsedInterests,
-			});
+			const result = await this.getAllApprovedMentorsUsecase.execute(
+				{
+					page: parsedPage,
+					limit: parsedLimit,
+					search: search as string,
+					sortBy: sortBy as string,
+					priceMin: parsedPriceMin,
+					priceMax: parsedPriceMax,
+					interests: parsedInterests,
+				},
+				browserId
+			);
 
 			res.status(HttpStatusCode.OK).json({
 				success: true,

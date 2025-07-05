@@ -1,10 +1,15 @@
 import { IMentorDTO } from "../../../application/dtos/mentor.dtos";
 import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
 import { MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
-import { MentorProfileModel } from "../models/user/mentor.details.model";
-import { UserModel } from "../models/user/user.model";
+import { IMentorProfileModel, MentorProfileModel } from "../models/user/mentor.details.model";
+import { IUsersDocument, UserModel } from "../models/user/user.model";
 import { IAvailabilityDTO } from "../../../application/dtos/availability.dto";
 import { MentorEntity } from "../../../domain/entities/mentor.entity";
+import mongoose from "mongoose";
+
+type AggregatedMentorDoc = IMentorProfileModel & {
+	user: IUsersDocument; // because $lookup + $unwind gives you a single user object
+};
 
 // Error handler
 const handleExceptionError = (error: unknown, message: string): never => {
@@ -78,87 +83,149 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 	}
 
 	/* ---------------------------------------------------------------- */
-	async findAllApprovedMentors(params: { page: number; limit: number; search?: string; sortBy?: string; priceMin?: number; priceMax?: number; interests?: string[] }): Promise<{ mentors: MentorEntity[]; total: number }> {
-		console.log('params: ', params);
+	async findAllApprovedMentors(
+		params: {
+			page: number;
+			limit: number;
+			search?: string;
+			sortBy?: string;
+			priceMin?: number;
+			priceMax?: number;
+			interests?: string[];
+		},
+		browserId: string
+	): Promise<{ mentors: MentorEntity[]; total: number }> {
 		try {
-			/* ---------- 1. Pagination helpers ---------- */
-			const page = params.page ?? 1; // default page 1
-			const limit = params.limit ?? 12; // default 12 per page
-			const skip = (page - 1) * limit; // correct skip
+			const page = params.page ?? 1;
+			const limit = params.limit ?? 12;
+			const skip = (page - 1) * limit;
 
-			/* ---------- 2. Build dynamic Mongo query ---------- */
-			const query: any = {};
+			// Build the aggregation pipeline
+			const pipeline: any[] = [];
 
-			// Full‑text‑ish search on three fields
+			// Stage 1: Price filter on MentorProfile
+			const priceFilter: any = {};
+			if (params.priceMin !== undefined) priceFilter.$gte = params.priceMin;
+			if (params.priceMax !== undefined) priceFilter.$lte = params.priceMax;
+			if (Object.keys(priceFilter).length) {
+				pipeline.push({
+					$match: {
+						hourlyRate: priceFilter,
+					},
+				});
+			}
+
+			// Stage 2: Lookup user (join with UserModel)
+			pipeline.push({
+				$lookup: {
+					from: "users", // collection name (check your MongoDB if plural)
+					localField: "userId",
+					foreignField: "_id",
+					as: "user",
+				},
+			});
+
+			// Stage 3: Unwind user array
+			pipeline.push({
+				$unwind: "$user",
+			});
+
+			// Stage 4: Filter for approved mentors only and exclude self
+			pipeline.push({
+				$match: {
+					"user.role": "mentor",
+					"user.mentorRequestStatus": "approved",
+					"user._id": { $ne: new mongoose.Types.ObjectId(browserId) },
+				},
+			});
+
+			// Stage 5: Apply search filter if present
 			if (params.search?.trim()) {
-				const regex = new RegExp(params.search.trim(), "i");
-				query.$or = [{ firstName: regex }, { professionalTitle: regex }, { interests: regex }];
+				const searchRegex = new RegExp(params.search.trim(), "i");
+				pipeline.push({
+					$match: {
+						$or: [{ "user.firstName": searchRegex }, { "user.lastName": searchRegex }, { professionalTitle: searchRegex }],
+					},
+				});
 			}
 
-			// Price range
-			if (params.priceMin !== undefined || params.priceMax !== undefined) {
-				query.hourlyRate = {};
-				if (params.priceMin !== undefined) query.hourlyRate.$gte = params.priceMin;
-				if (params.priceMax !== undefined) query.hourlyRate.$lte = params.priceMax;
-			}
-
-			// Interests array
+			// Stage 6: Filter by interests (if given)
 			if (params.interests?.length) {
-				query.interests = { $in: params.interests };
+				pipeline.push({
+					$match: {
+						"user.interests": { $in: params.interests },
+					},
+				});
 			}
 
-			/* ---------- 3. Build sort map ---------- */
-			const sort: Record<string, 1 | -1> = {};
-			switch (params.sortBy) {
-				case "price-low":
-					sort.hourlyRate = 1;
-					break;
-				case "price-high":
-					sort.hourlyRate = -1;
-					break;
-				case "rating":
-					sort.averageRating = -1;
-					break;
-				case "reviews":
-					sort.totalReviews = -1;
-					break;
-				case "newest":
-					sort.createdAt = -1;
-					break;
-				default:
-					sort.averageRating = -1;
-			}
+			// Stage 7: Sorting
+			const sortMap: Record<string, any> = {
+				recommended: { "user.averageRating": -1 },
+				priceLowToHigh: { hourlyRate: 1 },
+				priceHighToLow: { hourlyRate: -1 },
+				experience: { yearsExperience: -1 },
+			};
+			const sortStage = sortMap[params.sortBy ?? "recommended"] || sortMap["recommended"];
+			pipeline.push({ $sort: sortStage });
 
-			console.log(`query : `, query);
-			console.log(`sort : `, sort);
+			// Stage 8: Facet to get paginated data and total count together
+			pipeline.push({
+				$facet: {
+					data: [{ $skip: skip }, { $limit: limit }],
+					total: [{ $count: "count" }],
+				},
+			});
 
-			/* ---------- 4. Main paginated query ---------- */
-			// searching issue beacause of populate it search the name in details collection not in users
-			const docs = await MentorProfileModel.find(query)
-				.populate({
-					path: "userId",
-					model: UserModel,
-					match: { role: "mentor", mentorRequestStatus: "approved" },
-				})
-				.sort(sort)
-				.skip(skip)
-				.limit(limit);
-			console.log(`docs : `, docs);
-			// Remove any profiles whose user failed the populate match
-			const mentors = docs.filter((d) => d.userId).map(MentorEntity.fromMongo);
+			// Execute pipeline
+			const result = await MentorProfileModel.aggregate(pipeline);
+
+			const mentorsRaw = result[0].data;
+			const total = result[0].total[0]?.count ?? 0;
+
+			// Convert documents into MentorEntity (optional step)
+			const mentors = mentorsRaw.map(
+				(doc: AggregatedMentorDoc) =>
+					new MentorEntity({
+						id: doc._id?.toString()!,
+						email: doc.user.email,
+						firstName: doc.user.firstName,
+						role: doc.user.role,
+						lastName: doc.user.lastName,
+						avatar: doc.user.avatar,
+						bio: doc.user.bio,
+						interests: doc.user.interests,
+						updatedAt: doc.user.updatedAt,
+						skills: doc.user.skills,
+						status: doc.user.status,
+						mentorRequestStatus: doc.user.mentorRequestStatus,
+						createdAt: doc.createdAt,
+						averageRating: doc.user.averageRating,
+						totalReviews: doc.user.totalReviews,
+						sessionCompleted: doc.user.sessionCompleted,
+						badges: doc.user.badges,
+						userId: doc.user._id.toString(),
+
+						// 💡 the three you missed:
+						pricing: doc.pricing,
+						availability: doc.availability, // that Map from your schema
+						documents: doc.documents,
+
+						professionalTitle: doc.professionalTitle,
+						languages: doc.languages,
+						primaryExpertise: doc.primaryExpertise,
+						yearsExperience: doc.yearsExperience,
+						workExperiences: doc.workExperiences,
+						educations: doc.educations,
+						certifications: doc.certifications,
+						sessionFormat: doc.sessionFormat,
+						sessionTypes: doc.sessionTypes,
+						hourlyRate: doc.hourlyRate,
+					})
+			);
+
 			console.log("mentors: ", mentors);
 
-			/* ---------- 5. “Total rows” query (same filters, no pagination) ---------- */
-			const totalDocs = await MentorProfileModel.find(query)
-				.populate({
-					path: "userId",
-					model: UserModel,
-					match: { role: "mentor", mentorRequestStatus: "approved" },
-				})
-				.countDocuments();
-			console.log("totalDocs: ", totalDocs);
-
-			return { mentors, total: totalDocs };
+			return { mentors, total };
 		} catch (err) {
 			throw handleExceptionError(err, "Error finding approved mentors");
 		}
@@ -182,5 +249,22 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 		} catch (error) {
 			throw handleExceptionError(error, "Error finding mentor availability");
 		}
+	}
+}
+
+function buildSortMap(sortBy?: string): Record<string, 1 | -1> {
+	switch (sortBy) {
+		case "price-low":
+			return { hourlyRate: 1 };
+		case "price-high":
+			return { hourlyRate: -1 };
+		case "rating":
+			return { averageRating: -1 };
+		case "reviews":
+			return { totalReviews: -1 };
+		case "newest":
+			return { createdAt: -1 };
+		default:
+			return { averageRating: -1 };
 	}
 }
