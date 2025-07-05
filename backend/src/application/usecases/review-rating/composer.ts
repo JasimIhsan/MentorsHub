@@ -6,7 +6,7 @@ import { GetMentorReviewsUseCase } from "./get.mentor.review.usecase";
 import { UpdateReviewUseCase } from "./update.review.usecasee";
 
 export const createReviewUsecase = new CreateReviewUseCase(reviewRepository, userRepository, updateUserTaskProgressUseCase);
-export const getMentorReviewsUsecase = new GetMentorReviewsUseCase(reviewRepository);
+export const getMentorReviewsUsecase = new GetMentorReviewsUseCase(reviewRepository, userRepository);
 export const updateReviewUsecase = new UpdateReviewUseCase(reviewRepository, userRepository);
 export const deleteReviewUsecase = new DeleteReviewUseCase(reviewRepository, userRepository);
 

@@ -1,5 +1,4 @@
 import { IAvailabilityDTO } from "../../application/dtos/availability.dto";
-import { IMentorDTO } from "../../application/dtos/mentor.dtos";
 import { MentorProfileEntity } from "../entities/mentor.detailes.entity";
 import { MentorEntity } from "../entities/mentor.entity";
 

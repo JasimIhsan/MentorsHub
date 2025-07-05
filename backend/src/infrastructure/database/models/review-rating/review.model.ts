@@ -8,6 +8,7 @@ export interface IReviewDocument extends Document {
 	rating: number; // 1 to 5
 	comment: string;
 	createdAt: Date;
+	updatedAt: Date;
 }
 
 const ReviewSchema = new Schema<IReviewDocument>(

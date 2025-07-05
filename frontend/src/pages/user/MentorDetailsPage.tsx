@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useMentor } from "@/hooks/useMentor";
-import { motion } from "framer-motion";
 import { WeekDay } from "@/interfaces/IMentorDTO";
 import { formatTime } from "@/utility/time-data-formatter";
 import axiosInstance from "@/api/config/api.config";
@@ -17,6 +16,7 @@ import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Define interface for reviewer
 export interface ReviewerDTO {
@@ -158,6 +158,97 @@ export function MentorReviewModal({ isOpen, onClose, mentor, setReviews, reviewT
 	);
 }
 
+// Skeleton Component for Mentor Details
+const MentorDetailsSkeleton = () => {
+	return (
+		<div className="container py-8 px-10 md:px-20 xl:px-25">
+			<div className="flex flex-col gap-8">
+				{/* Mentor Header Skeleton */}
+				<div className="flex flex-col items-center gap-6 md:flex-row md:items-start md:gap-8">
+					<Skeleton className="bg-gray-200 h-32 w-32 rounded-full" />
+					<div className="flex flex-1 flex-col gap-4 text-center md:text-left">
+						<Skeleton className="bg-gray-200 h-8 w-64" />
+						<Skeleton className="bg-gray-200 h-6 w-48" />
+						<div className="flex flex-wrap justify-center gap-2 md:justify-start">
+							<Skeleton className="bg-gray-200 h-6 w-20" />
+							<Skeleton className="bg-gray-200 h-6 w-20" />
+							<Skeleton className="bg-gray-200 h-6 w-20" />
+						</div>
+					</div>
+					<div className="flex flex-col gap-3 w-full md:w-40">
+						<Skeleton className="bg-gray-200 h-10 w-full" />
+						<Skeleton className="bg-gray-200 h-10 w-full" />
+					</div>
+				</div>
+
+				{/* Tabs Skeleton */}
+				<div className="w-full">
+					<div className="flex gap-2 mb-6">
+						<Skeleton className="bg-gray-200 h-10 w-20" />
+						<Skeleton className="bg-gray-200 h-10 w-20" />
+						<Skeleton className="bg-gray-200 h-10 w-20" />
+						<Skeleton className="bg-gray-200 h-10 w-20" />
+					</div>
+					<div className="grid gap-6 md:grid-cols-3">
+						<div className="md:col-span-2">
+							<Skeleton className="bg-gray-200 h-96 w-full" />
+						</div>
+						<div>
+							<Skeleton className="bg-gray-200 h-64 w-full" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+// Skeleton Component for Reviews
+const ReviewsSkeleton = () => {
+	return (
+		<div className="space-y-6">
+			{/* Review Summary Skeleton */}
+			<div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
+				<Skeleton className="bg-gray-200 h-10 w-24" />
+				<Skeleton className="bg-gray-200 h-6 w-48" />
+			</div>
+			<div className="space-y-2">
+				{[1, 2, 3, 4, 5].map((star) => (
+					<div key={star} className="flex items-center gap-2">
+						<Skeleton className="bg-gray-200 h-6 w-16" />
+						<Skeleton className="bg-gray-200 h-2 w-full rounded-full" />
+						<Skeleton className="bg-gray-200 h-6 w-12" />
+					</div>
+				))}
+			</div>
+			<Skeleton className="bg-gray-200 h-10 w-32" />
+
+			{/* Individual Reviews Skeleton */}
+			<div className="space-y-6">
+				{[1, 2, 3].map((index) => (
+					<div key={index} className="border-b border-gray-200 pb-4">
+						<div className="flex items-start gap-4">
+							<Skeleton className="bg-gray-200 h-10 w-10 rounded-full" />
+							<div className="flex-1">
+								<div className="flex items-center justify-between">
+									<div>
+										<Skeleton className="bg-gray-200 h-6 w-32" />
+										<Skeleton className="bg-gray-200 h-4 w-24 mt-1" />
+									</div>
+									<div className="flex items-center gap-1">
+										<Skeleton className="bg-gray-200 h-4 w-20" />
+									</div>
+								</div>
+								<Skeleton className="bg-gray-200 h-16 w-full mt-2" />
+							</div>
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+};
+
 // Mentor Details Page Component
 export function MentorDetailsPage() {
 	const [isAvatarOpen, setIsAvatarOpen] = useState(false);
@@ -172,6 +263,7 @@ export function MentorDetailsPage() {
 	const { mentor, loading } = useMentor(mentorId as string);
 	const user = useSelector((state: RootState) => state.userAuth.user);
 	const [_selectedDay, setSelectedDay] = useState<WeekDay>(WeekDay.Monday);
+	const [activeTab, setActiveTab] = useState("about"); // Track active tab for dropdown
 	const reviewsPerPage = 5;
 
 	// Fetch reviews with pagination and optional rating filter
@@ -240,19 +332,7 @@ export function MentorDetailsPage() {
 	};
 
 	if (loading) {
-		return (
-			<div className="flex items-center justify-center min-h-screen min-w-full bg-gray-50">
-				<div className="text-center flex flex-col gap-2">
-					<motion.div className="mx-auto text-muted-foreground" animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}>
-						<User className="h-16 w-16" />
-					</motion.div>
-					<div>
-						<h2 className="text-2xl font-semibold text-gray-800">Loading Profile...</h2>
-						<p className="text-gray-500">Please wait while we fetch the mentor's profile.</p>
-					</div>
-				</div>
-			</div>
-		);
+		return <MentorDetailsSkeleton />;
 	}
 
 	if (!mentor) {
@@ -270,7 +350,7 @@ export function MentorDetailsPage() {
 	}
 
 	return (
-		<div className="container py-8 px-10 md:px-20 xl:px-25">
+		<div className="w-full flex flex-col py-8 px-10 md:px-20 xl:px-25">
 			<div className="flex flex-col gap-8">
 				{/* Mentor Header */}
 				<div className="flex flex-col items-center gap-6 md:flex-row md:items-start md:gap-8">
@@ -295,7 +375,7 @@ export function MentorDetailsPage() {
 								</h1>
 								<div className="flex items-center">
 									<Star className="ml-2 mr-1 h-5 w-5 fill-yellow-400 text-yellow-400" />
-									<span className="font-medium">{mentor.averageRating ?? "N/A"}</span>
+									<span className="text-xl">{mentor.averageRating?.toFixed(1) ?? "N/A"}</span>
 								</div>
 							</div>
 							<p className="text-xl text-muted-foreground">{mentor.professionalTitle || "No title provided"}</p>
@@ -325,13 +405,34 @@ export function MentorDetailsPage() {
 				</div>
 
 				{/* Main Content */}
-				<Tabs defaultValue="about" className="w-full">
-					<TabsList className="w-full justify-start">
-						<TabsTrigger value="about">About</TabsTrigger>
-						<TabsTrigger value="experience">Experience</TabsTrigger>
-						<TabsTrigger value="reviews">Reviews</TabsTrigger>
-						<TabsTrigger value="availability">Availability</TabsTrigger>
-					</TabsList>
+				<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+					{/* Responsive Tabs: Dropdown for small screens, Tabs for larger screens */}
+					<div className="flex items-center justify-between md:justify-start">
+						{/* Dropdown for small screens */}
+						<div className="block md:hidden">
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button variant="outline" className="flex items-center gap-2">
+										{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+										<MoreVertical className="h-4 w-4" />
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="start">
+									<DropdownMenuItem onClick={() => setActiveTab("about")}>About</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setActiveTab("experience")}>Experience</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setActiveTab("reviews")}>Reviews</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setActiveTab("availability")}>Availability</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
+						</div>
+						{/* Tabs for larger screens */}
+						<TabsList className="hidden md:flex w-full justify-start">
+							<TabsTrigger value="about">About</TabsTrigger>
+							<TabsTrigger value="experience">Experience</TabsTrigger>
+							<TabsTrigger value="reviews">Reviews</TabsTrigger>
+							<TabsTrigger value="availability">Availability</TabsTrigger>
+						</TabsList>
+					</div>
 
 					<TabsContent value="about" className="mt-6">
 						<div className="grid gap-6 md:grid-cols-3">
@@ -479,16 +580,12 @@ export function MentorDetailsPage() {
 					<TabsContent value="reviews" className="mt-6">
 						<Card>
 							<CardHeader>
-								<CardTitle>Reviews</CardTitle>
+								<CardTitle className="text-2xl">Reviews</CardTitle>
 								<CardDescription>Feedback from mentees about their sessions with {mentor.firstName || "this mentor"}</CardDescription>
 							</CardHeader>
 							<CardContent>
 								{reviewsLoading ? (
-									<div className="flex items-center justify-center py-8">
-										<motion.div className="text-muted-foreground" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}>
-											<Star className="h-8 w-8" />
-										</motion.div>
-									</div>
+									<ReviewsSkeleton />
 								) : (
 									<>
 										{/* Total Review Progress Section */}
@@ -523,7 +620,7 @@ export function MentorDetailsPage() {
 												})}
 											</div>
 											<Button
-												variant="outline"
+												variant="default"
 												className="mt-4"
 												onClick={() => {
 													setReviewToEdit(null);
@@ -613,11 +710,15 @@ export function MentorDetailsPage() {
 								<CardContent>
 									<Tabs defaultValue={WeekDay.Monday} onValueChange={(value) => setSelectedDay(value as WeekDay)}>
 										<TabsList className="grid w-full grid-cols-7 gap-2 mb-6">
-											{Object.values(WeekDay).map((day) => (
-												<TabsTrigger key={day} value={day} className="text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-indigo-100 relative">
-													{day.slice(0, 3)}
-													{mentor.availability[day]?.length > 0 && <span className="absolute top-1 right-1 h-2 w-2 bg-green-500 rounded-full" />}
-												</TabsTrigger>
+											{Object.values(WeekDay).map((day, index) => (
+												<div key={day} className="relative flex items-center">
+													<TabsTrigger value={day} className="text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-white hover:bg-indigo-100 relative w-full">
+														{day.slice(0, 3)}
+														{mentor.availability[day]?.length > 0 && <span className="absolute top-1 right-1 h-2 w-2 bg-green-500 rounded-full" />}
+													</TabsTrigger>
+													{/* Add divider except for the last tab */}
+													{index < Object.values(WeekDay).length - 1 && <span className="absolute right-[-8px] text-gray-300">|</span>}
+												</div>
 											))}
 										</TabsList>
 										{Object.entries(mentor.availability).map(([day, times]) => (

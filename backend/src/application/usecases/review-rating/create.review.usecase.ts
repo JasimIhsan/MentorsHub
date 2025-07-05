@@ -1,14 +1,14 @@
 import { ICreateReviewUseCase } from "../../interfaces/review";
 import { IReviewRepository } from "../../../domain/repositories/review.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository"; // You need this
-import { ReviewEntity } from "../../../domain/entities/review.entity";
 import { IUpdateUserTaskProgressUseCase } from "../../interfaces/gamification";
 import { ActionType } from "../../dtos/gamification.dto";
+import { mapToReviewDTO, ReviewDTO } from "../../dtos/review.dtos";
 
 export class CreateReviewUseCase implements ICreateReviewUseCase {
 	constructor(private reviewRepo: IReviewRepository, private userRepo: IUserRepository, private updateUserProgress: IUpdateUserTaskProgressUseCase) {}
 
-	async execute(data: { reviewerId: string; mentorId: string; sessionId?: string; rating: number; comment: string }): Promise<ReviewEntity> {
+	async execute(data: { reviewerId: string; mentorId: string; sessionId?: string; rating: number; comment: string }): Promise<ReviewDTO> {
 		if (!data.reviewerId) throw new Error("reviewerId is required");
 		if (!data.mentorId) throw new Error("mentorId is required");
 		if (!data.rating) throw new Error("rating is required");
@@ -30,19 +30,9 @@ export class CreateReviewUseCase implements ICreateReviewUseCase {
 		const reviewer = await this.userRepo.findUserById(data.reviewerId);
 		if (!reviewer) throw new Error("Reviewer not found");
 
-		// 5. Update review entity with reviewer info
-		review.updateReviewData({
-			reviewerId: {
-				firstName: reviewer.firstName,
-				lastName: reviewer.lastName,
-				avatar: reviewer.avatar ?? "",
-				id: data.reviewerId,
-			},
-		});
-
 		// update gamification task completion progress
 		await this.updateUserProgress.execute(data.reviewerId, ActionType.GIVE_FEEDBACK);
 
-		return review;
+		return mapToReviewDTO(review, reviewer);
 	}
 }

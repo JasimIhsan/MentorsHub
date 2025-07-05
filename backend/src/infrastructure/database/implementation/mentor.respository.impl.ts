@@ -1,8 +1,7 @@
-import { IMentorDTO } from "../../../application/dtos/mentor.dtos";
 import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
 import { MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
 import { IMentorProfileModel, MentorProfileModel } from "../models/user/mentor.details.model";
-import { IUsersDocument, UserModel } from "../models/user/user.model";
+import { IUsersDocument } from "../models/user/user.model";
 import { IAvailabilityDTO } from "../../../application/dtos/availability.dto";
 import { MentorEntity } from "../../../domain/entities/mentor.entity";
 import mongoose from "mongoose";
@@ -93,7 +92,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			priceMax?: number;
 			interests?: string[];
 		},
-		browserId: string
+		browserId: string,
 	): Promise<{ mentors: MentorEntity[]; total: number }> {
 		try {
 			const page = params.page ?? 1;
@@ -220,10 +219,8 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 						sessionFormat: doc.sessionFormat,
 						sessionTypes: doc.sessionTypes,
 						hourlyRate: doc.hourlyRate,
-					})
+					}),
 			);
-
-			console.log("mentors: ", mentors);
 
 			return { mentors, total };
 		} catch (err) {

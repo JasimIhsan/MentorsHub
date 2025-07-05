@@ -28,7 +28,6 @@ export class GetAllApprovedMentorsController {
 
 			const user = req.user;
 			if (!user) throw new Error("User not found");
-			console.log("user: ", user);
 
 			const result = await this.getAllApprovedMentorsUsecase.execute(
 				{
@@ -40,7 +39,7 @@ export class GetAllApprovedMentorsController {
 					priceMax: parsedPriceMax,
 					interests: parsedInterests,
 				},
-				browserId
+				browserId,
 			);
 
 			res.status(HttpStatusCode.OK).json({

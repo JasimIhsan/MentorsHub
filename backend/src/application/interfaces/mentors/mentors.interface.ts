@@ -1,4 +1,3 @@
-import { MentorEntity } from "../../../domain/entities/mentor.entity";
 import { IMentorDTO } from "../../dtos/mentor.dtos";
 import { ISessionMentorDTO } from "../../dtos/session.dto";
 

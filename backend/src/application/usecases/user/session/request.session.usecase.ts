@@ -29,7 +29,6 @@ export class RequestSessionUseCase implements IRequestSessionUseCase {
 
 		// Get available slots for the selected date
 		const availableSlots: string[] = await this.getMentorAvailabilityUseCase.execute(data.mentorId, data.date);
-		console.log("availableSlots: ", availableSlots);
 
 		// Check if the requested slot is available
 		if (!availableSlots.includes(data.time)) {

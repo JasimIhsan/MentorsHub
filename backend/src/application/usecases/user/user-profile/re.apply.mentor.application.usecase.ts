@@ -31,8 +31,8 @@ export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicatio
 						fileName: document.originalname,
 						mimeType: document.mimetype,
 						mentorId: userId,
-					})
-				)
+					}),
+				),
 			);
 		} else if (existingProfile && userEntity.mentorRequestStatus === "rejected") {
 			documentUrls = existingProfile.documents || [];

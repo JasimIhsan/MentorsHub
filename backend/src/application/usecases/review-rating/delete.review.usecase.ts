@@ -12,7 +12,7 @@ export class DeleteReviewUseCase implements IDeleteReviewUseCase {
 
 		const review = await this.reviewRepo.findById(reviewId);
 		if (!review) throw new Error("Review not found");
-		if (review.getReviewer().id !== userId) throw new Error("You can only delete your own review");
+		if (review.reviewerId !== userId) throw new Error("You can only delete your own review");
 
 		// 1. Delete the review from the DB
 		await this.reviewRepo.deleteById(reviewId);
