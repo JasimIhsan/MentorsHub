@@ -39,7 +39,7 @@ export const BrowseMentorsCard = ({ mentor }: { mentor: IMentorDTO }) => (
 				<div className="mt-5 flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-						<span className="text-base font-medium text-gray-900">{mentor.averageRating ?? "N/A"}</span>
+						<span className="text-base font-medium text-gray-900">{mentor.averageRating?.toFixed(1) ?? "N/A"}</span>
 						<span className="text-sm text-gray-500">({mentor.totalReviews ?? 0})</span>
 					</div>
 					<span className="text-base font-semibold text-primary">{mentor.hourlyRate === 0 ? "FREE" : `₹${mentor.hourlyRate}/-`}</span>
