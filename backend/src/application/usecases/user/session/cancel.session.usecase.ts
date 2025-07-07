@@ -1,4 +1,3 @@
-import { SessionEntity } from "../../../../domain/entities/session.entity";
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { isSessionExpired } from "../../../../infrastructure/utils/isSessionExpired";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";

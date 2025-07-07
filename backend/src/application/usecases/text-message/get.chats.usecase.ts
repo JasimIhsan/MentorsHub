@@ -9,7 +9,7 @@ export class GetUserChatsUseCase implements IGetUserChatsUseCase {
 	constructor(
 		private readonly chatRepository: IChatRepository,
 		private readonly userRepository: IUserRepository,
-		private readonly messageRepository: IMessageRepository
+		private readonly messageRepository: IMessageRepository,
 	) {}
 
 	async execute(userId: string): Promise<IChatDTO[]> {

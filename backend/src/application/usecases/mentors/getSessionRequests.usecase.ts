@@ -1,4 +1,4 @@
-import { PricingType, SessionEntity, SessionStatus } from "../../../domain/entities/session.entity";
+import { PricingType, SessionStatus } from "../../../domain/entities/session.entity";
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { ISessionMentorDTO, mapToMentorSessionDTO } from "../../dtos/session.dto";
 import { IGetSessionRequestsUseCase } from "../../interfaces/mentors/mentors.interface";

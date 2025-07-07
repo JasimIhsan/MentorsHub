@@ -1,6 +1,5 @@
 // domain/entities/session.entity.ts
 
-import { ISessionDocument } from "../../infrastructure/database/models/session/session.model";
 
 export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected" | "expired" | "ongoing";
 

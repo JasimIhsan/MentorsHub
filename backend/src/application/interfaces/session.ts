@@ -1,4 +1,3 @@
-import { SessionEntity } from "../../domain/entities/session.entity";
 import { ISessionUserDTO } from "../dtos/session.dto";
 import { SessionRequestInput } from "../usecases/user/session/request.session.usecase";
 

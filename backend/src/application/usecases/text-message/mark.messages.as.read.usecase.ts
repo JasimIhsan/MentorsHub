@@ -1,4 +1,3 @@
-import { MessageEntity } from "../../../domain/entities/message.entity";
 import { IMessageRepository } from "../../../domain/repositories/message.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { ISendMessageDTO, mapToSendMessageDTO } from "../../dtos/message.dto";

@@ -1,4 +1,3 @@
-import { Session } from "inspector/promises";
 import { PersonEntity, PricingType, SessionEntity, SessionPaymentStatus, SessionStatus } from "../../domain/entities/session.entity";
 
 interface BaseSession {

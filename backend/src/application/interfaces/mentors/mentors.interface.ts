@@ -1,4 +1,4 @@
-import { PricingType, SessionEntity, SessionStatus } from "../../../domain/entities/session.entity";
+import { PricingType, SessionStatus } from "../../../domain/entities/session.entity";
 import { IMentorDTO } from "../../dtos/mentor.dtos";
 import { ISessionMentorDTO } from "../../dtos/session.dto";
 

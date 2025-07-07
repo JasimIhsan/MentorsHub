@@ -1,6 +1,4 @@
-import { User } from "aws-sdk/clients/budgets";
 import { MessageEntity } from "../../domain/entities/message.entity";
-import { PersonEntity } from "../../domain/entities/session.entity";
 import { UserEntity } from "../../domain/entities/user.entity";
 import { ChatEntity } from "../../domain/entities/chat.entity";
 
