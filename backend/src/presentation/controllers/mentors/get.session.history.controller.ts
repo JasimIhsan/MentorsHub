@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { IGetSessionHistoryUsecase } from "../../../application/interfaces/mentors/mentors.interface";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
+import { SessionStatus } from "../../../domain/entities/session.entity";
 
 export class GetSessionHistoryController {
 	constructor(private getSessionHistoryUsecase: IGetSessionHistoryUsecase) {}
@@ -10,7 +11,7 @@ export class GetSessionHistoryController {
 			const { mentorId } = req.params;
 			const { status, page = "1", limit = "6" } = req.query;
 			const queryParams = {
-				status: status as string,
+				status: status as SessionStatus,
 				page: parseInt(page as string, 10),
 				limit: parseInt(limit as string, 10),
 			};

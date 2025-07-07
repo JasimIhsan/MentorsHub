@@ -10,7 +10,7 @@ dayjs.extend(customParseFormat);
 export class GetAvailabilityUseCase implements IGetAvailabilityUseCase {
 	constructor(private mentorRepo: IMentorProfileRepository, private sessionRepo: ISessionRepository) {}
 
-	async execute(userId: string, date: Date): Promise<any> {
+	async execute(userId: string, date: Date): Promise<string[]> {
 		const dayName = dayjs(date).format("dddd") as WeekDay;
 
 		const allSlots = await this.mentorRepo.getAvailability(userId);
@@ -18,16 +18,16 @@ export class GetAvailabilityUseCase implements IGetAvailabilityUseCase {
 
 		const slotsInDate = allSlots.availability[dayName];
 
-		const sessions = await this.sessionRepo.getSessionByDate(userId, date);
+		const sessions = await this.sessionRepo.findByDate(userId, date);
 
-		const bookedSessions = sessions?.filter((s) => s.getStatus() !== "approved" || s.getStatus() !== "upcoming");
+		const bookedSessions = sessions?.filter((s) => s.status !== "approved" && s.status !== "upcoming");
 
 		const bookedTimeSet = new Set<string>();
 
 		if (bookedSessions) {
 			bookedSessions?.forEach((s) => {
-				const sessionStartTime = s.getTime();
-				const sessionHours = s.getHours();
+				const sessionStartTime = s.time;
+				const sessionHours = s.hours;
 
 				for (let i = 0; i < sessionHours; i++) {
 					const slotTime = dayjs(sessionStartTime, "HH:mm").add(i, "hour").format("HH:mm");

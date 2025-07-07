@@ -1,15 +1,30 @@
-import { ISessionDocument, ISessionParticipant, SessionFormat, SessionPaymentStatus, SessionStatus } from "../../infrastructure/database/models/session/session.model";
+// domain/entities/session.entity.ts
 
-export interface ISessionParticipantDTO {
-	userId: string;
+import { ISessionDocument } from "../../infrastructure/database/models/session/session.model";
+
+export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected" | "expired" | "ongoing";
+
+export type SessionPaymentStatus = "pending" | "completed" | "failed";
+export type SessionFormat = "one-on-one" | "group";
+export type PricingType = "free" | "paid";
+
+export interface PersonEntity {
+	id: string;
+	firstName?: string;
+	lastName?: string;
+	avatar?: string;
+}
+
+export interface SessionParticipantEntity {
+	user: PersonEntity;
 	paymentStatus: SessionPaymentStatus;
 	paymentId?: string;
 }
 
-export interface ISessionInterface {
-	id?: string;
-	participants: ISessionParticipantDTO[];
-	mentorId: string;
+export interface SessionProps {
+	id: string;
+	mentor: PersonEntity;
+	participants: SessionParticipantEntity[];
 	topic: string;
 	sessionType: string;
 	sessionFormat: SessionFormat;
@@ -18,58 +33,98 @@ export interface ISessionInterface {
 	hours: number;
 	message: string;
 	status: SessionStatus;
-	pricing: "free" | "paid";
+	pricing: PricingType;
 	totalAmount?: number;
 	rejectReason?: string;
-	createdAt?: Date;
+	createdAt: Date;
 }
 
 export class SessionEntity {
-	private id?: string;
-	private participants: ISessionParticipantDTO[];
-	private mentorId: string;
-	private topic: string;
-	private sessionType: string;
-	private sessionFormat: string;
-	private date: Date;
-	private time: string;
-	private hours: number;
-	private message: string;
-	private status: SessionStatus;
-	private pricing: string;
-	private totalAmount?: number;
-	private rejectReason?: string;
-	private createdAt: Date;
+	constructor(private props: SessionProps) {}
 
-	constructor(session: ISessionInterface) {
-		this.id = session.id;
-		this.participants = session.participants;
-		this.mentorId = session.mentorId;
-		this.topic = session.topic;
-		this.sessionType = session.sessionType;
-		this.sessionFormat = session.sessionFormat;
-		this.date = session.date;
-		this.time = session.time;
-		this.hours = session.hours;
-		this.message = session.message;
-		this.status = session.status;
-		this.pricing = session.pricing;
-		this.totalAmount = session.totalAmount;
-		this.rejectReason = session.rejectReason;
-		this.createdAt = session.createdAt || new Date();
+	get id() {
+		return this.props.id;
+	}
+	get mentor() {
+		return this.props.mentor;
+	}
+	get participants() {
+		return this.props.participants;
+	}
+	get topic() {
+		return this.props.topic;
+	}
+	get sessionType() {
+		return this.props.sessionType;
+	}
+	get sessionFormat() {
+		return this.props.sessionFormat;
+	}
+	get date() {
+		return this.props.date;
+	}
+	get time() {
+		return this.props.time;
+	}
+	get hours() {
+		return this.props.hours;
+	}
+	get message() {
+		return this.props.message;
+	}
+	get status() {
+		return this.props.status;
+	}
+	get pricing() {
+		return this.props.pricing;
+	}
+	get totalAmount() {
+		return this.props.totalAmount ?? 0;
+	}
+	get rejectReason() {
+		return this.props.rejectReason;
+	}
+	get createdAt() {
+		return this.props.createdAt;
 	}
 
-	static fromDBDocument(doc: ISessionDocument): SessionEntity {
-		const participants = doc.participants.map((p: ISessionParticipant) => ({
-			userId: p.userId.toString(),
-			paymentStatus: p.paymentStatus,
-			paymentId: p.paymentId,
-		}));
+	get paidParticipants() {
+		return this.props.participants.filter((p) => p.paymentStatus === "completed");
+	}
+
+	get fee() {
+		return this.props.pricing === "free" ? 0 : this.totalAmount;
+	}
+
+	toObject(): SessionProps {
+		return { ...this.props };
+	}
+
+	static fromDB(doc: any): SessionEntity {
+		const mentorUser = doc.mentorId || {}; // populated
+		const participants = (doc.participants || []).map((p: any) => {
+			const user = p.userId || {};
+			return {
+				user: {
+					id: user._id?.toString?.() || user.toString(),
+					firstName: user.firstName,
+					lastName: user.lastName,
+					avatar: user.avatar,
+				},
+				paymentStatus: p.paymentStatus,
+				paymentId: p.paymentId,
+			};
+		});
 
 		return new SessionEntity({
 			id: doc._id.toString(),
+			mentor: {
+				id: mentorUser._id?.toString?.() || mentorUser.toString(),
+				firstName: mentorUser.firstName,
+				lastName: mentorUser.lastName,
+				avatar: mentorUser.avatar,
+			},
 			participants,
-			mentorId: doc.mentorId.toString(),
 			topic: doc.topic,
 			sessionType: doc.sessionType,
 			sessionFormat: doc.sessionFormat,
@@ -83,71 +138,5 @@ export class SessionEntity {
 			rejectReason: doc.rejectReason,
 			createdAt: doc.createdAt,
 		});
-	}
-
-	// You can add more getter methods if needed
-	getId(): string | undefined {
-		return this.id;
-	}
-
-	getMentorId(): string {
-		return this.mentorId;
-	}
-
-	getParticipants(): ISessionParticipantDTO[] {
-		return this.participants;
-	}
-
-	getPaidParticipants(): ISessionParticipantDTO[] {
-		return this.participants.filter((p) => p.paymentStatus === "completed");
-	}
-
-	getTopic(): string {
-		return this.topic;
-	}
-
-	getStatus(): SessionStatus {
-		return this.status;
-	}
-
-	getCreatedAt(): Date {
-		return this.createdAt;
-	}
-
-	getTime(): string {
-		return this.time;
-	}
-
-	getDate(): Date {
-		return this.date;
-	}
-
-	getHours(): number {
-		return this.hours;
-	}
-
-	getfee(): number {
-		if (this.pricing === "free") return 0;
-		return this.totalAmount ? this.totalAmount : 0;
-	}
-
-	toObject() {
-		return {
-			id: this.id,
-			participants: this.participants,
-			mentorId: this.mentorId,
-			topic: this.topic,
-			sessionType: this.sessionType,
-			sessionFormat: this.sessionFormat,
-			date: this.date,
-			time: this.time,
-			hours: this.hours,
-			message: this.message,
-			status: this.status,
-			pricing: this.pricing,
-			totalAmount: this.totalAmount,
-			rejectReason: this.rejectReason,
-			createdAt: this.createdAt,
-		};
 	}
 }

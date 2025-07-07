@@ -1,25 +1,45 @@
-import { ISessionMentorDTO, ISessionUserDTO } from "../../application/dtos/session.dto";
-import { ISessionDocument } from "../../infrastructure/database/models/session/session.model";
-import { SessionEntity } from "../entities/session.entity";
+// domain/repositories/session.repository.ts
+
+import { SessionEntity, SessionStatus, SessionPaymentStatus } from "../entities/session.entity";
 
 export interface ISessionRepository {
-	getSessionById(sessionId: string): Promise<SessionEntity | null>;
-	findSessionsByIds(sessionIds: string[]): Promise<SessionEntity[]>;
-	createSession(session: SessionEntity): Promise<SessionEntity>;
-	getSessionsByUser(userId: string): Promise<ISessionUserDTO[]>;
-	getSessionByMentor(
+	// Create a new session
+	create(session: SessionEntity): Promise<SessionEntity>;
+
+	// Get a session by its ID
+	findById(id: string): Promise<SessionEntity | null>;
+
+	findByIds(ids: string[]): Promise<SessionEntity[]>;
+
+	// Get all sessions that a specific user is part of
+	findByUser(userId: string): Promise<SessionEntity[]>;
+
+	// Get all sessions for a specific mentor with filters and pagination
+	findByMentor(
 		mentorId: string,
-		queryParams: {
-			status?: string;
-			filterOption?: "all" | "free" | "paid" | "today" | "week" | "month";
+		options: {
+			status?: SessionStatus;
+			filter?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
 		}
-	): Promise<{ sessions: ISessionMentorDTO[]; total: number }>;
-	updateSessionStatus(sessionId: string, status: string, rejectReason?: string): Promise<SessionEntity>;
-	paySession(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void>;
-	getSessions(mentorId: string): Promise<ISessionMentorDTO[]>;
-	expireSession(sessionId: string): Promise<void>;
-	getSessionToExpire(): Promise<ISessionDocument[]>;
-	getSessionByDate(mentorId: string, date: Date): Promise<SessionEntity[] | null>;
+	): Promise<{ sessions: SessionEntity[]; total: number }>;
+
+	// Update the status (and optionally reject reason) of a session
+	updateStatus(sessionId: string, status: SessionStatus, reason?: string): Promise<SessionEntity>;
+
+	// Mark a user's payment status for a session
+	markPayment(sessionId: string, userId: string, paymentStatus: SessionPaymentStatus, paymentId: string, newStatus: SessionStatus): Promise<void>;
+
+	// Get all sessions for a specific mentor (no pagination)
+	getAllByMentor(mentorId: string): Promise<SessionEntity[]>;
+
+	// Get sessions that are "about to expire" (pending/approved/upcoming)
+	getExpirableSessions(): Promise<SessionEntity[]>;
+
+	// Delete a session by ID (used when expiring it)
+	deleteById(sessionId: string): Promise<void>;
+
+	// Get all sessions for a mentor on a specific date
+	findByDate(mentorId: string, date: Date): Promise<SessionEntity[]>;
 }

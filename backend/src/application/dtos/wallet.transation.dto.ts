@@ -39,7 +39,7 @@ export function mapToTransactionDTO(transaction: WalletTransactionEntity, fromUs
 		type: transaction.transactionType,
 		purpose: transaction.transactionPurpose,
 		description: transaction.transactionDescription,
-		sessionId: session ? { id: session.getId()!, topic: session.getTopic()! } : null,
+		sessionId: session ? { id: session.id, topic: session.topic } : null,
 		createdAt: transaction.created!,
 	};
 }

@@ -22,11 +22,11 @@ export class GetTransactionsUseCase implements IGetTransactionsUsecase {
 		});
 
 		// 3️⃣ batch‑load users & sessions
-		const [users, sessions] = await Promise.all([this.userRepo.findUsersByIds([...userIdSet]), this.sessionRepo.findSessionsByIds([...sessionIdSet])]);
+		const [users, sessions] = await Promise.all([this.userRepo.findUsersByIds([...userIdSet]), this.sessionRepo.findByIds([...sessionIdSet])]);
 
 		// 4️⃣ index them for O(1) lookup
 		const userMap = new Map(users.map((u) => [u.id!, u]));
-		const sessionMap = new Map(sessions.map((s) => [s.getId()!, s]));
+		const sessionMap = new Map(sessions.map((s) => [s.id, s]));
 
 		// 5️⃣ build DTOs in a single synchronous pass
 		const dtos = transactions.flatMap((tx) => {

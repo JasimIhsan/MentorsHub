@@ -20,7 +20,7 @@ export class CreateTransactionUseCase implements ICreateTransactionUsecase {
 	}): Promise<IWalletTransactionDTO> {
 		const transaction = await this.walletRepo.createTransaction(data);
 
-		const [fromUser, toUser, session] = await Promise.all([transaction.fromUserId ? this.userRepo.findUserById(transaction.fromUserId) : null, this.userRepo.findUserById(transaction.toUserId), transaction.sessionId ? this.sessionRepo.getSessionById(transaction.sessionId) : null]);
+		const [fromUser, toUser, session] = await Promise.all([transaction.fromUserId ? this.userRepo.findUserById(transaction.fromUserId) : null, this.userRepo.findUserById(transaction.toUserId), transaction.sessionId ? this.sessionRepo.findById(transaction.sessionId) : null]);
 
 		const dto = mapToTransactionDTO(transaction, fromUser, toUser, session);
 		return dto;

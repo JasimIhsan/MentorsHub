@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { IGetUpcomingSessionMentorUsecase } from "../../../application/interfaces/mentors/mentors.interface";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
+import { SessionStatus } from "../../../domain/entities/session.entity";
 
 export class GetUpcomingSessionMentorController {
 	constructor(private getUpcomingSessionMentorUsecase: IGetUpcomingSessionMentorUsecase) {}
@@ -11,7 +12,7 @@ export class GetUpcomingSessionMentorController {
 			const { status, filterOption, page = "1", limit = "6" } = req.query;
 
 			const queryParams = {
-				status: status as string | undefined,
+				status: status as SessionStatus | undefined,
 				filterOption: filterOption as "today" | "week" | "all" | "month",
 				page: parseInt(page as string, 10),
 				limit: parseInt(limit as string, 10),
