@@ -1,29 +1,39 @@
-// domain/entities/message.entity.ts
-
 import { IMessage } from "../../infrastructure/database/models/text-message/message.model";
 
 export type MessageType = "text" | "image" | "file";
 
+interface MessageEntityProps {
+	id: string;
+	chat: string;
+	sender: string;
+	content: string;
+	type: MessageType;
+	fileUrl?: string;
+	readBy: string[];
+	createdAt?: Date;
+	updatedAt?: Date;
+}
+
 export class MessageEntity {
 	private readonly _id: string;
-	private readonly _chatId: string;
+	private readonly _chat: string;
 	private readonly _sender: string;
-	private _content: string;
+	private readonly _content: string;
 	private readonly _type: MessageType;
-	private _fileUrl?: string;
+	private readonly _fileUrl?: string;
 	private _readBy: string[];
 	private readonly _createdAt: Date;
 	private _updatedAt: Date;
 
-	constructor(props: { id: string; chatId: string; sender: string; content: string; type: MessageType; fileUrl?: string; readBy: string[]; createdAt?: Date; updatedAt?: Date }) {
+	constructor(props: MessageEntityProps) {
 		this._id = props.id;
-		this._chatId = props.chatId;
+		this._chat = props.chat;
 		this._sender = props.sender;
 		this._content = props.content;
 		this._type = props.type;
 		this._fileUrl = props.fileUrl;
 		this._readBy = props.readBy;
-		this._createdAt = props?.createdAt ?? new Date();
+		this._createdAt = props.createdAt ?? new Date();
 		this._updatedAt = props.updatedAt ?? new Date();
 	}
 
@@ -33,10 +43,10 @@ export class MessageEntity {
 	}
 
 	get chatId(): string {
-		return this._chatId;
+		return this._chat;
 	}
 
-	get sender(): string {
+	get senderId(): string {
 		return this._sender;
 	}
 
@@ -65,7 +75,6 @@ export class MessageEntity {
 	}
 
 	// 🔧 Methods
-
 	isReadBy(userId: string): boolean {
 		return this._readBy.includes(userId);
 	}
@@ -93,10 +102,11 @@ export class MessageEntity {
 		this._updatedAt = new Date();
 	}
 
-	static mapToMessageEntity = (doc: IMessage): MessageEntity => {
+	// 📦 Factory mapper from DB (basic for now — replace sender/chat with actual entity loaders)
+	static fromDBDocument(doc: IMessage): MessageEntity {
 		return new MessageEntity({
-			id: doc._id?.toString() as string,
-			chatId: doc.chatId.toString(),
+			id: doc._id?.toString()!,
+			chat: doc.chatId.toString(),
 			sender: doc.sender.toString(),
 			content: doc.content,
 			type: doc.type,
@@ -105,5 +115,5 @@ export class MessageEntity {
 			createdAt: doc.createdAt,
 			updatedAt: doc.updatedAt,
 		});
-	};
+	}
 }

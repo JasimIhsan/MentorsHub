@@ -98,7 +98,7 @@ export class ChatEntity {
 		this._updatedAt = new Date();
 	}
 
-	static mapToChatEntity = (doc: IChat): ChatEntity => {
+	static fromDbDocument = (doc: IChat): ChatEntity => {
 		return new ChatEntity({
 			id: doc._id?.toString() as string,
 			isGroupChat: doc.isGroupChat,

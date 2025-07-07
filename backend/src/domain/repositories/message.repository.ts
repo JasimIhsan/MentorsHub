@@ -1,14 +1,14 @@
 // domain/repositories/message.repository.ts
-import { ISendMessageDTO } from "../../application/dtos/message.dto";
 import { MessageEntity } from "../entities/message.entity";
 
 export interface IMessageRepository {
+	create(msg: MessageEntity): Promise<MessageEntity>;
+	findByChat(chatId: string, page: number, limit: number): Promise<MessageEntity[]>;
+	markAsRead(messageId: string, userId: string): Promise<void>;
+	unreadCountsByUser(userId: string, chatIds: string[]): Promise<Record<string, number>>;
+	deleteById(messageId: string): Promise<void>;
 	findById(id: string): Promise<MessageEntity | null>;
-	sendMessage(message: Omit<MessageEntity, "id" | "createdAt" | "updatedAt">): Promise<ISendMessageDTO>;
-	findLastMessageByChatId(chatId: string): Promise<MessageEntity | null>;
-	getMessagesByChat(chatId: string, page: number, limit: number): Promise<ISendMessageDTO[]>;
-	markMessageAsRead(messageId: string, userId: string): Promise<void>;
-	findUnreadMessages(chatId: string, userId: string): Promise<MessageEntity[]>;
-	getUnreadCountsByUser(userId: string, chatIds: string[]): Promise<{ [chatId: string]: number }>;
-	deleteMessage(messageId: string): Promise<void>;
+	findByIds(ids: string[]): Promise<MessageEntity[]>;
+	findLastByChat(chatId: string): Promise<MessageEntity | null>;
+	findUnread(chatId: string, userId: string): Promise<MessageEntity[]>;
 }

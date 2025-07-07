@@ -101,7 +101,7 @@ export function MentorReviewsPage() {
 	}
 
 	return (
-		<div className="5">
+		<div>
 			<Card>
 				<CardHeader>
 					<CardTitle className="text-2xl">My Reviews</CardTitle>
