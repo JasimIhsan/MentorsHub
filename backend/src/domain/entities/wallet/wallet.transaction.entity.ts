@@ -144,8 +144,8 @@ export class WalletTransactionEntity {
 	static fromDBDocument(doc: IWalletTransactionDocument): WalletTransactionEntity {
 		return new WalletTransactionEntity({
 			_id: doc._id?.toString(),
-			fromUserId: doc.fromUserId.toString(),
-			toUserId: doc.toUserId.toString(),
+			fromUserId: doc.fromUserId?.toString() || null,
+			toUserId: doc.toUserId?.toString(),
 			fromRole: doc.fromRole,
 			toRole: doc.toRole,
 			amount: doc.amount,
