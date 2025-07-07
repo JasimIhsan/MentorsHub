@@ -2,10 +2,12 @@
 import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
 import { IS3Service } from "../../../domain/interface/s3.service.interface";
 import { IGetDocumentsUseCase } from "../../interfaces/documents";
+import { UserEntity } from "../../../domain/entities/user.entity";
+import { AdminEntity } from "../../../domain/entities/admin.entity";
 
 interface Input {
 	mentorId: string;
-	user: any;
+	user: UserEntity | AdminEntity;
 }
 
 export class GetDocumentsUseCase implements IGetDocumentsUseCase {
