@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { HttpStatusCode } from "../../shared/constants/http.status.codes";
 import { CommonStringMessage } from "../../shared/constants/string.messages";
-import { RoleEnum } from "../../application/interfaces/role";
+import { RoleEnum } from "../../application/interfaces/enums/role";
 
 // roles can be: 'admin', 'mentor', 'user'
 export const requireRole = (...allowedRoles: RoleEnum[]) => {

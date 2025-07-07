@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { RoleEnum } from "../../../../application/interfaces/role";
+import { RoleEnum } from "../../../../application/interfaces/enums/role";
 
 export interface IAdmin extends Document {
 	name: string

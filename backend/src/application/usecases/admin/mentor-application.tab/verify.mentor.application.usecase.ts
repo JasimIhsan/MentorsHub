@@ -6,7 +6,7 @@ import { IVerifyMentorApplicationUsecase } from "../../../interfaces/admin/admin
 import { ICreateNotificationUseCase } from "../../../interfaces/notification";
 import { Server } from "socket.io";
 import { findUserSocket } from "../../../../infrastructure/socket/socket.io";
-import { RoleEnum } from "../../../interfaces/role";
+import { RoleEnum } from "../../../interfaces/enums/role";
 
 export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationUsecase {
 	constructor(

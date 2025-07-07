@@ -6,7 +6,7 @@ import { deleteMessageHandler } from "./socket/delete.message.handler";
 import { registerMessageReadHandlers } from "./socket/update.readby.handler";
 import { getMessageUnreadCountHandler } from "./socket/get.message.unread.count.handler";
 import { CommonStringMessage } from "../../shared/constants/string.messages";
-import { RoleEnum } from "../../application/interfaces/role";
+import { RoleEnum } from "../../application/interfaces/enums/role";
 
 interface SessionParticipant {
 	userId: string;

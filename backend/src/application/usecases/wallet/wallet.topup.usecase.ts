@@ -2,7 +2,7 @@ import { ICreateTransactionUsecase, IWalletTopUpUsecase } from "../../interfaces
 import { IWalletTransactionDTO } from "../../dtos/wallet.transation.dto";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletDTO, mapToWalletDTO } from "../../dtos/wallet.dtos";
-import { RoleEnum } from "../../interfaces/role";
+import { RoleEnum } from "../../interfaces/enums/role";
 
 interface TopUpWalletInput {
 	userId: string;

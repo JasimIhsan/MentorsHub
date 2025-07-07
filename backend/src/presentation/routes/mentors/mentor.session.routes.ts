@@ -2,7 +2,7 @@ import { Router } from "express";
 import { getSessionHistoryController, getSessionsRequestsController, getUpcomingSessionMentorController, updateSessionStatusController } from "../../controllers/mentors/composer";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { requireRole } from "../../middlewares/require.role.middleware";
-import { RoleEnum } from "../../../application/interfaces/role";
+import { RoleEnum } from "../../../application/interfaces/enums/role";
 
 export const mentorSessionRouter = Router();
 

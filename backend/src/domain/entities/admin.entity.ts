@@ -1,4 +1,4 @@
-import { RoleEnum } from "../../application/interfaces/role";
+import { RoleEnum } from "../../application/interfaces/enums/role";
 
 export interface AdminProps {
 	id?: string;

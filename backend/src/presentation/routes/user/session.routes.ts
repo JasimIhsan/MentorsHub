@@ -13,7 +13,7 @@ import { SessionModel } from "../../../infrastructure/database/models/session/se
 import { requireRole } from "../../middlewares/require.role.middleware";
 import { CommonStringMessage } from "../../../shared/constants/string.messages";
 import { logger } from "../../../infrastructure/utils/logger";
-import { RoleEnum } from "../../../application/interfaces/role";
+import { RoleEnum } from "../../../application/interfaces/enums/role";
 export const sessionRouter = Router();
 
 sessionRouter.post("/create-session", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => createSessionController.handle(req, res, next));

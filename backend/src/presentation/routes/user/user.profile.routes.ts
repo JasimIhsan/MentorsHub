@@ -3,7 +3,7 @@ import { becomeMentorApplicationController, changePasswordController, getUserPro
 import { upload } from "../../../infrastructure/file-upload/multer/multer.config";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { requireRole } from "../../middlewares/require.role.middleware";
-import { RoleEnum } from "../../../application/interfaces/role";
+import { RoleEnum } from "../../../application/interfaces/enums/role";
 export const userProfileRoutes = Router();
 
 userProfileRoutes.get("/:userId", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => getUserProfileController.handle(req, res, next));

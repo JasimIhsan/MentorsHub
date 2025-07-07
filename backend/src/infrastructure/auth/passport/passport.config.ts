@@ -6,7 +6,7 @@ import { ITokenService } from "../../../application/interfaces/user/token.servic
 import { IHashService } from "../../../application/interfaces/services/hash.service";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { GoogleConfig } from "./config/google.config";
-import { RoleEnum } from "../../../application/interfaces/role";
+import { RoleEnum } from "../../../application/interfaces/enums/role";
 
 dotenv.config();
 

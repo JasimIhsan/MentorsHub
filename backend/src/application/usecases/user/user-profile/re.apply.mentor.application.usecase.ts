@@ -5,7 +5,7 @@ import { UserEntity, UserEntityProps } from "../../../../domain/entities/user.en
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IUploadMentorDocuments } from "../../../interfaces/documents";
 import { IReApplyMentorApplicationUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
-import { RoleEnum } from "../../../interfaces/role";
+import { RoleEnum } from "../../../interfaces/enums/role";
 
 export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicationUseCase {
 	constructor(private mentorProfileRepo: IMentorProfileRepository, private userRepo: IUserRepository, private uploadDocumentUseCase: IUploadMentorDocuments) {}

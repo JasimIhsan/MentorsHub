@@ -1,4 +1,4 @@
-import { RoleEnum } from "../interfaces/role";
+import { RoleEnum } from "../interfaces/enums/role";
 
 export interface IForgotUserDTO {
 	_id: string;

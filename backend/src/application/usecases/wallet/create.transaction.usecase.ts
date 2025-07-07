@@ -2,7 +2,7 @@ import { ISessionRepository } from "../../../domain/repositories/session.reposit
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletTransactionDTO, mapToTransactionDTO } from "../../dtos/wallet.transation.dto";
-import { RoleEnum } from "../../interfaces/role";
+import { RoleEnum } from "../../interfaces/enums/role";
 import { ICreateTransactionUsecase } from "../../interfaces/wallet";
 
 export class CreateTransactionUseCase implements ICreateTransactionUsecase {

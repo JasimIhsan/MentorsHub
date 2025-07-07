@@ -6,7 +6,7 @@ import { CommonStringMessage } from "../../../../shared/constants/string.message
 import { IUploadMentorDocuments } from "../../../interfaces/documents";
 import { IBecomeMentorUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
-import { RoleEnum } from "../../../interfaces/role";
+import { RoleEnum } from "../../../interfaces/enums/role";
 
 export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 	constructor(private mentorProfileRepo: IMentorProfileRepository, private userRepo: IUserRepository, private uploadDocumentUseCase: IUploadMentorDocuments) {}

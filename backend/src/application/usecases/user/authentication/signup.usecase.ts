@@ -4,7 +4,7 @@ import { ITokenService } from "../../../interfaces/user/token.service.interface"
 import { IVerifyOtpUsecase, ISignupUseCase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { ICreateUserProgressUseCase } from "../../../interfaces/gamification";
 import { IHashService } from "../../../interfaces/services/hash.service";
-import { RoleEnum } from "../../../interfaces/role";
+import { RoleEnum } from "../../../interfaces/enums/role";
 
 export class SignupUseCase implements ISignupUseCase {
 	constructor(

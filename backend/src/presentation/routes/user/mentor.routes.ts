@@ -3,7 +3,7 @@ import { getMentorController } from "../../controllers/mentors/composer";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { getAvailabilityController } from "../../controllers/user/composer";
 import { requireRole } from "../../middlewares/require.role.middleware";
-import { RoleEnum } from "../../../application/interfaces/role";
+import { RoleEnum } from "../../../application/interfaces/enums/role";
 
 export const mentorRouter = Router();
 
