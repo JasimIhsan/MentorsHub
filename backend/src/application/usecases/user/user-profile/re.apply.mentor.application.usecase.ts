@@ -5,6 +5,7 @@ import { UserEntity, UserEntityProps } from "../../../../domain/entities/user.en
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IUploadMentorDocuments } from "../../../interfaces/documents";
 import { IReApplyMentorApplicationUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
+import { RoleEnum } from "../../../interfaces/role";
 
 export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicationUseCase {
 	constructor(private mentorProfileRepo: IMentorProfileRepository, private userRepo: IUserRepository, private uploadDocumentUseCase: IUploadMentorDocuments) {}
@@ -12,7 +13,7 @@ export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicatio
 	async execute(userId: string, data: MentorProfileProps, userData: Partial<UserEntityProps>, documents: Express.Multer.File[]): Promise<{ savedUser: UserEntity; mentorProfile: MentorProfileEntity }> {
 		const userEntity = await this.userRepo.findUserById(userId);
 		if (!userEntity) throw new Error(CommonStringMessage.USER_NOT_FOUND);
-		if (userEntity.role === "mentor") {
+		if (userEntity.role === RoleEnum.MENTOR) {
 			throw new Error("You are already a mentor");
 		}
 		if (userEntity.mentorRequestStatus === "pending" || userEntity.mentorRequestStatus === "approved") {

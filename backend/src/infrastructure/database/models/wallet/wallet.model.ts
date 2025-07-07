@@ -1,9 +1,10 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
+import { RoleEnum } from "../../../../application/interfaces/role";
 
 export interface IWalletDocument extends Document {
 	_id: ObjectId;
 	userId: ObjectId;
-	role: "user" | "mentor" | "admin";
+	role: RoleEnum;
 	balance: number;
 	createdAt: Date;
 	updatedAt: Date;

@@ -6,6 +6,7 @@ import { ITokenService } from "../../../application/interfaces/user/token.servic
 import { IHashService } from "../../../application/interfaces/services/hash.service";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { GoogleConfig } from "./config/google.config";
+import { RoleEnum } from "../../../application/interfaces/role";
 
 dotenv.config();
 
@@ -38,7 +39,7 @@ export const configurePassport = (userRepo: IUserRepository, tokenService: IToke
 								firstName: profile.name?.givenName ?? "",
 								lastName: profile.name?.familyName ?? "",
 								avatar: profile.photos?.[0]?.value ?? null,
-								role: "user",
+								role: RoleEnum.USER,
 								status: "unblocked",
 								mentorRequestStatus: "not-requested",
 								googleId: profile.id,

@@ -49,7 +49,7 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 
 			req.user = {
 				id: user.id as string,
-				role: user.role === "mentor" ? RoleEnum.MENTOR : RoleEnum.USER,
+				role: user.role === RoleEnum.MENTOR ? RoleEnum.MENTOR : RoleEnum.USER,
 			};
 
 			return next();

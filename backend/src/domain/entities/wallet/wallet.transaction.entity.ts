@@ -1,18 +1,18 @@
 // domain/entities/wallet.transaction.entity.ts
 
+import { RoleEnum } from "../../../application/interfaces/role";
 import { IWalletTransactionDocument } from "../../../infrastructure/database/models/wallet/wallet.transaction.model";
 
 export type WalletTransactionPurpose = "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";
 
 export type WalletTransactionType = "credit" | "debit" | "withdrawal";
-export type WalletUserRole = "user" | "mentor" | "admin";
 
 export class WalletTransactionEntity {
 	private _id?: string;
 	private _fromUserId: string | null;
 	private _toUserId: string;
-	private _fromRole: WalletUserRole;
-	private _toRole: WalletUserRole;
+	private _fromRole: RoleEnum;
+	private _toRole: RoleEnum;
 	private _amount: number;
 	private _type: WalletTransactionType;
 	private _purpose: WalletTransactionPurpose;
@@ -25,8 +25,8 @@ export class WalletTransactionEntity {
 		_id?: string;
 		fromUserId: string | null;
 		toUserId: string;
-		fromRole: WalletUserRole;
-		toRole: WalletUserRole;
+		fromRole: RoleEnum;
+		toRole: RoleEnum;
 		amount: number;
 		type: WalletTransactionType;
 		purpose: WalletTransactionPurpose;
@@ -53,8 +53,8 @@ export class WalletTransactionEntity {
 	static create(data: {
 		fromUserId?: string | null;
 		toUserId: string;
-		fromRole: WalletUserRole;
-		toRole: WalletUserRole;
+		fromRole: RoleEnum;
+		toRole: RoleEnum;
 		amount: number;
 		type: WalletTransactionType;
 		purpose: WalletTransactionPurpose;
@@ -87,11 +87,11 @@ export class WalletTransactionEntity {
 		return this._toUserId;
 	}
 
-	get fromUserRole(): WalletUserRole {
+	get fromRoleEnum(): RoleEnum {
 		return this._fromRole;
 	}
 
-	get toUserRole(): WalletUserRole {
+	get toRoleEnum(): RoleEnum {
 		return this._toRole;
 	}
 

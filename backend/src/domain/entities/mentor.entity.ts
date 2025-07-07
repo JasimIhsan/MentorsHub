@@ -1,10 +1,11 @@
+import { RoleEnum } from "../../application/interfaces/role";
 import { Availability } from "./mentor.detailes.entity";
 
 export interface MentorEntityProps {
 	id: string;
 	email: string;
 	firstName: string;
-	role: "user" | "mentor";
+	role: RoleEnum.USER | RoleEnum.MENTOR;
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;

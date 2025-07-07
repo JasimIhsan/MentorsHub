@@ -21,8 +21,8 @@ export class WithdrawWalletUseCase implements IWithdrawWalletUsecase {
 			transaction = await this.createTransactionUseCase.execute({
 				fromUserId: userId,
 				toUserId: userId,
-				fromRole: "admin",
-				toRole: "user",
+				fromRole: RoleEnum.ADMIN,
+				toRole: RoleEnum.USER,
 				amount,
 				type: "withdrawal",
 				purpose: "withdrawal",
@@ -34,8 +34,8 @@ export class WithdrawWalletUseCase implements IWithdrawWalletUsecase {
 			transaction = await this.createTransactionUseCase.execute({
 				fromUserId: adminId,
 				toUserId: adminId,
-				fromRole: "admin",
-				toRole: "admin",
+				fromRole: RoleEnum.ADMIN,
+				toRole: RoleEnum.ADMIN,
 				amount,
 				type: "withdrawal",
 				purpose: "withdrawal",

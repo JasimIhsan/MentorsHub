@@ -6,6 +6,7 @@ import { IVerifyMentorApplicationUsecase } from "../../../interfaces/admin/admin
 import { ICreateNotificationUseCase } from "../../../interfaces/notification";
 import { Server } from "socket.io";
 import { findUserSocket } from "../../../../infrastructure/socket/socket.io";
+import { RoleEnum } from "../../../interfaces/role";
 
 export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationUsecase {
 	constructor(
@@ -23,7 +24,7 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 		if (!profile) throw new Error("Mentor profile not found");
 
 		if (status === "approved") {
-			user.updateUserDetails({ role: "mentor", mentorRequestStatus: status });
+			user.updateUserDetails({ role: RoleEnum.MENTOR, mentorRequestStatus: status });
 		} else if (status === "rejected") {
 			user.updateUserDetails({ mentorRequestStatus: status });
 		}

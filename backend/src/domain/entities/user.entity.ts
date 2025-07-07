@@ -1,4 +1,5 @@
-export type UserRole = "user" | "mentor";
+import { RoleEnum } from "../../application/interfaces/role";
+
 export type UserStatus = "blocked" | "unblocked";
 export type MentorRequestStatus = "pending" | "approved" | "rejected" | "not-requested";
 
@@ -8,7 +9,7 @@ export interface UserEntityProps {
 	firstName: string;
 	lastName: string;
 	password: string;
-	role?: UserRole;
+	role?: RoleEnum;
 	avatar?: string | null;
 	status?: UserStatus;
 	bio?: string | null;
@@ -30,7 +31,7 @@ export class UserEntity {
 	private _firstName: string;
 	private _lastName: string;
 	private _password: string;
-	private _role: UserRole;
+	private _role: RoleEnum;
 	private _avatar?: string | null;
 	private _bio?: string | null;
 	private _interests?: string[] | null;
@@ -51,7 +52,7 @@ export class UserEntity {
 		this._firstName = user.firstName;
 		this._lastName = user.lastName;
 		this._password = user.password;
-		this._role = user.role ?? "user";
+		this._role = user.role ?? RoleEnum.USER;
 		this._status = user.status ?? "unblocked";
 		this._avatar = user.avatar ?? null;
 		this._bio = user.bio ?? null;
@@ -92,7 +93,7 @@ export class UserEntity {
 		return this._password;
 	}
 
-	get role(): UserRole {
+	get role(): RoleEnum {
 		return this._role;
 	}
 

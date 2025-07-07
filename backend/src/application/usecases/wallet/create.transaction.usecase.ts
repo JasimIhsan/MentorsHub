@@ -2,6 +2,7 @@ import { ISessionRepository } from "../../../domain/repositories/session.reposit
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletTransactionDTO, mapToTransactionDTO } from "../../dtos/wallet.transation.dto";
+import { RoleEnum } from "../../interfaces/role";
 import { ICreateTransactionUsecase } from "../../interfaces/wallet";
 
 export class CreateTransactionUseCase implements ICreateTransactionUsecase {
@@ -10,8 +11,8 @@ export class CreateTransactionUseCase implements ICreateTransactionUsecase {
 	async execute(data: {
 		fromUserId: string | null;
 		toUserId: string;
-		fromRole: "user" | "mentor" | "admin";
-		toRole: "user" | "mentor" | "admin";
+		fromRole: RoleEnum;
+		toRole: RoleEnum;
 		amount: number;
 		type: "credit" | "debit" | "withdrawal";
 		purpose: string;

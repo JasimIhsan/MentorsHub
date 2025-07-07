@@ -6,12 +6,12 @@ export interface IWalletRepository {
 	findWalletByUserId(userId: string): Promise<WalletEntity | null>;
 	createWallet(userId: string): Promise<WalletEntity>;
 	platformWallet(): Promise<WalletEntity>;
-	updateBalance(userId: string, amount: number, type?: "credit" | "debit", role?: "user" | "mentor" | "admin"): Promise<WalletEntity | null>;
+	updateBalance(userId: string, amount: number, type?: "credit" | "debit", role?: RoleEnum): Promise<WalletEntity | null>;
 	createTransaction(data: {
 		fromUserId: string | null;
 		toUserId: string;
-		fromRole: "user" | "mentor" | "admin";
-		toRole: "user" | "mentor" | "admin";
+		fromRole: RoleEnum;
+		toRole: RoleEnum;
 		amount: number;
 		type: "credit" | "debit" | "withdrawal";
 		purpose: string;

@@ -3,6 +3,7 @@ import { IWalletRepository } from "../../../../domain/repositories/wallet.reposi
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IPaySessionWithGatewayUseCase } from "../../../interfaces/session";
 import { SessionPaymentStatus, SessionStatus } from "../../../../domain/entities/session.entity";
+import { RoleEnum } from "../../../interfaces/role";
 
 export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository) {}
@@ -41,7 +42,7 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 
 		// Credit platform
 		const platformWallet = await this.walletRepo.platformWallet();
-		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, "credit", "admin");
+		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, "credit", RoleEnum.ADMIN);
 
 		// Create transactions
 
@@ -49,8 +50,8 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: mentorId,
-			fromRole: "user",
-			toRole: "mentor",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.MENTOR,
 			amount: mentorEarning,
 			type: "credit",
 			purpose: "session_fee",
@@ -62,8 +63,8 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: platformWallet.userId,
-			fromRole: "user",
-			toRole: "admin",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.ADMIN,
 			amount: platformFeeFixed,
 			type: "credit",
 			purpose: "platform_fee",
@@ -75,8 +76,8 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: platformWallet.userId,
-			fromRole: "user",
-			toRole: "admin",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.ADMIN,
 			amount: platformCommission,
 			type: "credit",
 			purpose: "platform_fee",

@@ -7,6 +7,7 @@ import { WithdrawalRequestEntity } from "../../../domain/entities/wallet/wallet.
 import { AdminModel } from "../models/admin/admin.model";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 import { WalletTransactionEntity } from "../../../domain/entities/wallet/wallet.transaction.entity";
+import { RoleEnum } from "../../../application/interfaces/role";
 
 export class WalletRepositoryImpl implements IWalletRepository {
 	async findWalletByUserId(userId: string): Promise<WalletEntity | null> {
@@ -30,7 +31,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 	async platformWallet(): Promise<WalletEntity> {
 		try {
 			const admin = await AdminModel.findOne({ role: "super-admin" });
-			const adminWallet = await WalletModel.findOne({ userId: admin?._id, role: "admin" });
+			const adminWallet = await WalletModel.findOne({ userId: admin?._id, role: RoleEnum.ADMIN });
 			if (!adminWallet) throw new Error("Admin wallet not found");
 			return WalletEntity.fromDBDocument(adminWallet);
 		} catch (error) {
@@ -38,9 +39,9 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		}
 	}
 
-	async updateBalance(userId: string, amount: number, type: "credit" | "debit" = "credit", role: "user" | "mentor" | "admin" = "user"): Promise<WalletEntity | null> {
+	async updateBalance(userId: string, amount: number, type: "credit" | "debit" = "credit", role: RoleEnum = RoleEnum.USER): Promise<WalletEntity | null> {
 		try {
-			let roleQuery: any = role === "admin" ? "admin" : { $in: ["user", "mentor"] };
+			let roleQuery: any = role === RoleEnum.ADMIN ? RoleEnum.ADMIN : { $in: [RoleEnum.USER, RoleEnum.MENTOR] };
 			const updateAmount = type === "credit" ? amount : -amount;
 
 			const wallet = await WalletModel.findOneAndUpdate({ userId, role: roleQuery }, { $inc: { balance: updateAmount } }, { new: true });
@@ -53,8 +54,8 @@ export class WalletRepositoryImpl implements IWalletRepository {
 	async createTransaction(data: {
 		fromUserId: string | null;
 		toUserId: string;
-		fromRole: "user" | "mentor" | "admin";
-		toRole: "user" | "mentor" | "admin";
+		fromRole: RoleEnum;
+		toRole: RoleEnum;
 		amount: number;
 		type: "credit" | "debit" | "withdrawal";
 		purpose: string;
@@ -67,8 +68,8 @@ export class WalletRepositoryImpl implements IWalletRepository {
 				toUserId: data.toUserId,
 				fromRole: data.fromRole,
 				toRole: data.toRole,
-				fromModel: data.fromRole === "admin" ? "admins" : "Users",
-				toModel: data.toRole === "admin" ? "admins" : "Users",
+				fromModel: data.fromRole === RoleEnum.ADMIN ? "admins" : "Users",
+				toModel: data.toRole === RoleEnum.ADMIN ? "admins" : "Users",
 				amount: data.amount,
 				type: data.type,
 				purpose: data.purpose,

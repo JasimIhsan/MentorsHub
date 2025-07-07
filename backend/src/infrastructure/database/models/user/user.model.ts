@@ -1,11 +1,12 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
+import { RoleEnum } from "../../../../application/interfaces/role";
 
 export interface IUsersDocument extends Document {
 	_id: ObjectId;
 	email: string;
 	password: string;
 	firstName: string;
-	role: "user" | "mentor";
+	role: RoleEnum.USER | RoleEnum.MENTOR;
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;
@@ -45,7 +46,7 @@ const UsersSchema: Schema = new Schema(
 		badges: [{ type: Schema.Types.ObjectId }],
 		googleId: { type: String },
 	},
-	{ timestamps: true },
+	{ timestamps: true }
 );
 
 export const UserModel = mongoose.model<IUsersDocument>("Users", UsersSchema);

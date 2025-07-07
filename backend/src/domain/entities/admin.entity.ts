@@ -1,9 +1,11 @@
+import { RoleEnum } from "../../application/interfaces/role";
+
 export interface AdminProps {
 	id?: string;
 	name?: string;
 	username: string;
 	password: string;
-	role: "admin" | "super-admin";
+	role: RoleEnum.ADMIN | "super-admin";
 	avatar?: string;
 }
 
@@ -12,7 +14,7 @@ export class AdminEntity {
 	private readonly _name?: string;
 	private readonly _username: string;
 	private _password: string;
-	private readonly _role: "admin" | "super-admin";
+	private readonly _role: RoleEnum.ADMIN | "super-admin";
 	private readonly _avatar?: string;
 
 	constructor(props: AdminProps) {
@@ -41,7 +43,7 @@ export class AdminEntity {
 		return this._password;
 	}
 
-	get role(): "admin" | "super-admin" {
+	get role(): RoleEnum.ADMIN | "super-admin" {
 		return this._role;
 	}
 

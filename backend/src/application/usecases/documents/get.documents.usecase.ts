@@ -4,6 +4,7 @@ import { IS3Service } from "../../../domain/interface/s3.service.interface";
 import { IGetDocumentsUseCase } from "../../interfaces/documents";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { AdminEntity } from "../../../domain/entities/admin.entity";
+import { RoleEnum } from "../../interfaces/role";
 
 interface Input {
 	mentorId: string;
@@ -17,7 +18,7 @@ export class GetDocumentsUseCase implements IGetDocumentsUseCase {
 		const mentor = await this.mentorRepo.findMentorByUserId(mentorId);
 		if (!mentor) throw new Error("Mentor not found");
 
-		const isAdmin = user.role === "admin" ? true : user.role === "super-admin" ? true : false;
+		const isAdmin = user.role === RoleEnum.ADMIN ? true : user.role === "super-admin" ? true : false;
 		const isOwner = mentor.userId.toString() === user.id;
 
 		if (!isOwner && !isAdmin) throw new Error("Access denied");

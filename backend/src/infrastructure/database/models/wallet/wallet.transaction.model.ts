@@ -1,12 +1,13 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
+import { RoleEnum } from "../../../../application/interfaces/role";
 
 // 1. Interface
 export interface IWalletTransactionDocument extends Document {
 	_id: ObjectId;
 	fromUserId: ObjectId;
 	toUserId: ObjectId;
-	fromRole: "user" | "mentor" | "admin";
-	toRole: "user" | "mentor" | "admin";
+	fromRole: RoleEnum;
+	toRole: RoleEnum;
 	fromModel?: "Users" | "admins";
 	toModel?: "Users" | "admins";
 	sessionId?: ObjectId;

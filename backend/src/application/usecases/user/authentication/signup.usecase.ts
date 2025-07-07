@@ -4,6 +4,7 @@ import { ITokenService } from "../../../interfaces/user/token.service.interface"
 import { IVerifyOtpUsecase, ISignupUseCase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { ICreateUserProgressUseCase } from "../../../interfaces/gamification";
 import { IHashService } from "../../../interfaces/services/hash.service";
+import { RoleEnum } from "../../../interfaces/role";
 
 export class SignupUseCase implements ISignupUseCase {
 	constructor(
@@ -34,7 +35,7 @@ export class SignupUseCase implements ISignupUseCase {
 			firstName,
 			lastName,
 			status: "unblocked",
-			role: "user",
+			role: RoleEnum.USER,
 			mentorRequestStatus: "not-requested",
 			sessionCompleted: 0,
 			averageRating: 0,

@@ -1,12 +1,13 @@
 import { Availability, MentorProfileEntity } from "../../domain/entities/mentor.detailes.entity";
 import { MentorEntity } from "../../domain/entities/mentor.entity";
 import { UserEntity } from "../../domain/entities/user.entity";
+import { RoleEnum } from "../interfaces/role";
 
 export interface IMentorDTO {
 	id: string;
 	email: string;
 	firstName: string;
-	role: "user" | "mentor";
+	role: RoleEnum;
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;

@@ -5,6 +5,7 @@ import { CommonStringMessage } from "../../../../shared/constants/string.message
 import { IPaySessionWithWalletUseCase } from "../../../interfaces/session";
 
 import { SessionPaymentStatus, SessionStatus } from "../../../../domain/entities/session.entity";
+import { RoleEnum } from "../../../interfaces/role";
 
 export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository) {}
@@ -47,14 +48,14 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		await this.walletRepo.updateBalance(mentorId, mentorEarning, "credit"); // credit mentor
 
 		const platformWallet = await this.walletRepo.platformWallet();
-		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, "credit", "admin"); // credit platform
+		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, "credit", RoleEnum.ADMIN); // credit platform
 
 		/* Transactions */
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: mentorId,
-			fromRole: "user",
-			toRole: "mentor",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.MENTOR,
 			amount: sessionFee,
 			type: "debit",
 			purpose: "session_fee",
@@ -65,8 +66,8 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: mentorId,
-			fromRole: "user",
-			toRole: "mentor",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.MENTOR,
 			amount: mentorEarning,
 			type: "credit",
 			purpose: "session_fee",
@@ -77,8 +78,8 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: platformWallet.userId,
-			fromRole: "user",
-			toRole: "admin",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.ADMIN,
 			amount: platformFeeFixed,
 			type: "credit",
 			purpose: "platform_fee",
@@ -89,8 +90,8 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: platformWallet.userId,
-			fromRole: "user",
-			toRole: "admin",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.ADMIN,
 			amount: platformCommission,
 			type: "credit",
 			purpose: "platform_fee",

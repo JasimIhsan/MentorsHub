@@ -1,4 +1,5 @@
 import { UserEntity } from "../../domain/entities/user.entity";
+import { RoleEnum } from "../interfaces/role";
 
 export interface IUserDTO {
 	id?: string;
@@ -6,7 +7,7 @@ export interface IUserDTO {
 	fullName: string;
 	firstName: string;
 	lastName: string;
-	role: "user" | "mentor";
+	role: RoleEnum;
 	avatar?: string | null;
 	status: "blocked" | "unblocked";
 	bio?: string | null;

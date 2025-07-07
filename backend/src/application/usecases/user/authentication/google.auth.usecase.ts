@@ -4,6 +4,7 @@ import { IUserRepository } from "../../../../domain/repositories/user.repository
 import { ITokenService } from "../../../interfaces/user/token.service.interface";
 import { IGoogleAuthUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { IHashService } from "../../../interfaces/services/hash.service";
+import { RoleEnum } from "../../../interfaces/role";
 
 interface GoogleUserData {
 	email: string;
@@ -39,7 +40,7 @@ export class GoogleAuthUsecase implements IGoogleAuthUsecase {
 					firstName: gUser.given_name,
 					lastName: gUser.family_name,
 					avatar: gUser.picture,
-					role: "user",
+					role: RoleEnum.USER,
 					status: "unblocked",
 					mentorRequestStatus: "not-requested",
 					googleId: gUser.sub,
