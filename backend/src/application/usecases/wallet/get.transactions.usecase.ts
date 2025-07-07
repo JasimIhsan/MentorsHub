@@ -27,8 +27,6 @@ export class GetTransactionsUseCase implements IGetTransactionsUsecase {
 		// 4️⃣ index them for O(1) lookup
 		const userMap = new Map(users.map((u) => [u.id!, u]));
 		const sessionMap = new Map(sessions.map((s) => [s.getId()!, s]));
-		console.log("sessionMap: ", sessionMap);
-		console.log("userMap: ", userMap);
 
 		// 5️⃣ build DTOs in a single synchronous pass
 		const dtos = transactions.flatMap((tx) => {
