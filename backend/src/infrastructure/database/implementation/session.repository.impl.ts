@@ -32,11 +32,18 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
+	async findSessionsByIds(sessionIds: string[]): Promise<SessionEntity[]> {
+		try {
+			const sessions = await SessionModel.find({ _id: { $in: sessionIds } }).lean();
+			return sessions.map(SessionEntity.fromDBDocument);
+		} catch (error) {
+			return handleExceptionError(error, "Error finding sessions by IDs");
+		}
+	}
+
 	async getSessionsByUser(userId: string): Promise<ISessionUserDTO[]> {
 		try {
-			const sessions = await SessionModel.find({ "participants.userId": userId })
-				.populate("participants.userId", "firstName lastName avatar")
-				.populate("mentorId", "firstName lastName avatar");
+			const sessions = await SessionModel.find({ "participants.userId": userId }).populate("participants.userId", "firstName lastName avatar").populate("mentorId", "firstName lastName avatar");
 
 			return sessions.map((session) => this.mapSessionToUserDTO(session, userId));
 		} catch (error) {
@@ -103,11 +110,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 
 	async updateSessionStatus(sessionId: string, status: string, rejectReason?: string): Promise<SessionEntity> {
 		try {
-			const updatedSession = await SessionModel.findByIdAndUpdate(
-				sessionId,
-				{ status, rejectReason },
-				{ new: true },
-			);
+			const updatedSession = await SessionModel.findByIdAndUpdate(sessionId, { status, rejectReason }, { new: true });
 			if (!updatedSession) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 			return SessionEntity.fromDBDocument(updatedSession);
 		} catch (error) {
@@ -115,13 +118,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async paySession(
-		sessionId: string,
-		userId: string,
-		paymentId: string,
-		paymentStatus: string,
-		status: string,
-	): Promise<void> {
+	async paySession(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void> {
 		try {
 			const updated = await SessionModel.findOneAndUpdate(
 				{ _id: sessionId, "participants.userId": userId },
@@ -186,9 +183,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 	}
 
 	private mapSessionToUserDTO(session: any, userId: string): ISessionUserDTO {
-		const participant = session.participants.find((p: any) =>
-			p.userId._id?.toString?.() === userId || p.userId?.toString() === userId,
-		);
+		const participant = session.participants.find((p: any) => p.userId._id?.toString?.() === userId || p.userId?.toString() === userId);
 
 		return {
 			id: session._id.toString(),

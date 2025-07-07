@@ -24,6 +24,7 @@ export interface IUserRepository {
 	findUserByEmail(email: string): Promise<UserEntity | null>;
 	save(user: UserEntity): Promise<void>;
 	findUsers(params: FindUsersParams): Promise<PaginatedUsers>;
+	findUsersByIds(ids: string[]): Promise<UserEntity[]>;
 	// findMentors(params: BrowseMentorsParams): Promise<PaginatedUsers>;
 	updateUser(userId: string, user: UserEntity): Promise<UserEntity>;
 	deleteUser(id: string): Promise<void | null>;

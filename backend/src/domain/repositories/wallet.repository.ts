@@ -1,5 +1,5 @@
-import { IWalletTransactionDTO } from "../../application/dtos/wallet.transation.dto";
 import { WalletEntity } from "../entities/wallet/wallet.entity";
+import { WalletTransactionEntity } from "../entities/wallet/wallet.transaction.entity";
 import { WithdrawalRequestEntity } from "../entities/wallet/wallet.withdrawel.request.entity";
 
 export interface IWalletRepository {
@@ -17,8 +17,8 @@ export interface IWalletRepository {
 		purpose: string;
 		description?: string;
 		sessionId?: string | null;
-	}): Promise<IWalletTransactionDTO>;
-	getTransactionsByUser(userId: string, page?: number, limit?: number, filter?: Record<string, any>): Promise<{ data: IWalletTransactionDTO[]; total: number }>;
+	}): Promise<WalletTransactionEntity>;
+	getTransactionsByUser(userId: string, page?: number, limit?: number, filter?: Record<string, any>): Promise<{ data: WalletTransactionEntity[]; total: number }>;
 	createWithdrawalRequest(data: Partial<WithdrawalRequestEntity>): Promise<WithdrawalRequestEntity>;
 	getWithdrawalRequests(mentorId: string, page?: number, limit?: number, filter?: Record<string, any>): Promise<{ data: WithdrawalRequestEntity[]; total: number }>;
 }

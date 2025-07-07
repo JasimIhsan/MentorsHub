@@ -1,65 +1,70 @@
-// domain/entities/wallet.entity.ts
-
-import { ObjectId } from "mongoose";
-import { IWalletDocument } from "../../../infrastructure/database/models/wallet/wallet.model";
-
 export class WalletEntity {
-	private _id?: ObjectId;
-	private userId: ObjectId;
-	private role: string;
-	private balance: number;
-	private createdAt?: Date;
-	private updatedAt?: Date;
+	private _id?: string;
+	private _userId: string;
+	private _role: string;
+	private _balance: number;
+	private _createdAt?: Date;
+	private _updatedAt?: Date;
 
-	constructor(props: { _id?: ObjectId; userId: ObjectId; role: string; balance: number;  createdAt?: Date; updatedAt?: Date }) {
+	constructor(props: { _id?: string; userId: string; role: string; balance: number; createdAt?: Date; updatedAt?: Date }) {
 		this._id = props._id;
-		this.userId = props.userId;
-		this.role = props.role;
-		this.balance = props.balance;
-		this.createdAt = props.createdAt;
-		this.updatedAt = props.updatedAt;
+		this._userId = props.userId;
+		this._role = props.role;
+		this._balance = props.balance;
+		this._createdAt = props.createdAt;
+		this._updatedAt = props.updatedAt;
 	}
 
-	getId() {
-		return this._id?.toString();
+	// ✅ Getters
+	get id(): string | undefined {
+		return this._id;
 	}
 
-	getUserId() {
-		return this.userId?.toString();
+	get userId(): string {
+		return this._userId;
 	}
 
-	getRole() {
-		return this.role;
+	get role(): string {
+		return this._role;
 	}
 
-	getBalance() {
-		return this.balance;
+	get balance(): number {
+		return this._balance;
 	}
 
-
-	credit(amount: number) {
-		this.balance += amount;
+	get createdAt(): Date | undefined {
+		return this._createdAt;
 	}
 
-	debit(amount: number) {
-		if (amount > this.balance) throw new Error("Insufficient balance");
-		this.balance -= amount;
+	get updatedAt(): Date | undefined {
+		return this._updatedAt;
+	}
+
+	credit(amount: number): void {
+		this._balance += amount;
+	}
+
+	debit(amount: number): void {
+		if (amount > this._balance) {
+			throw new Error("Insufficient balance");
+		}
+		this._balance -= amount;
 	}
 
 	toObject() {
 		return {
 			_id: this._id,
-			userId: this.userId,
-			role: this.role,
-			balance: this.balance,
-			createdAt: this.createdAt,
-			updatedAt: this.updatedAt,
+			userId: this._userId,
+			role: this._role,
+			balance: this._balance,
+			createdAt: this._createdAt,
+			updatedAt: this._updatedAt,
 		};
 	}
 
-	static fromDBDocument(doc: IWalletDocument): WalletEntity {
+	static fromDBDocument(doc: any): WalletEntity {
 		return new WalletEntity({
-			_id: doc._id,
+			_id: doc._id?.toString(),
 			userId: doc.userId,
 			role: doc.role,
 			balance: doc.balance,

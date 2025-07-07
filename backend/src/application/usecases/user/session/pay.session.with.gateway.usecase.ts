@@ -37,7 +37,7 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 
 		// ✅ Credit platform wallet
 		const platformWallet = await this.walletRepo.platformWallet();
-		await this.walletRepo.updateBalance(platformWallet.getUserId(), totalPlatformFee, "credit", "admin");
+		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, "credit", "admin");
 
 		// ✅ Create transactions
 		await this.walletRepo.createTransaction({
@@ -54,7 +54,7 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
-			toUserId: platformWallet.getUserId(),
+			toUserId: platformWallet.userId,
 			amount: platformFeeFixed,
 			type: "credit",
 			purpose: "platform_fee",
@@ -66,7 +66,7 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
-			toUserId: platformWallet.getUserId(),
+			toUserId: platformWallet.userId,
 			amount: platformCommission,
 			type: "credit",
 			purpose: "platform_fee",

@@ -2,11 +2,11 @@ import { WalletModel } from "../models/wallet/wallet.model";
 import { WalletTransactionModel } from "../models/wallet/wallet.transaction.model";
 import { IWithdrawalRequestDocument, WithdrawalRequestModel } from "../models/wallet/wallet.withdrawel.request.model";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
-import { IWalletTransactionDTO } from "../../../application/dtos/wallet.transation.dto";
 import { WalletEntity } from "../../../domain/entities/wallet/wallet.entity";
 import { WithdrawalRequestEntity } from "../../../domain/entities/wallet/wallet.withdrawel.request.entity";
 import { AdminModel } from "../models/admin/admin.model";
 import { handleExceptionError } from "../../utils/handle.exception.error";
+import { WalletTransactionEntity } from "../../../domain/entities/wallet/wallet.transaction.entity";
 
 export class WalletRepositoryImpl implements IWalletRepository {
 	async findWalletByUserId(userId: string): Promise<WalletEntity | null> {
@@ -60,7 +60,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		purpose: string;
 		description?: string;
 		sessionId?: string | null;
-	}): Promise<IWalletTransactionDTO> {
+	}): Promise<WalletTransactionEntity> {
 		try {
 			const transaction = await WalletTransactionModel.create({
 				fromUserId: data.fromUserId,
@@ -76,15 +76,13 @@ export class WalletRepositoryImpl implements IWalletRepository {
 				sessionId: data.sessionId || undefined,
 			});
 
-			const doc = await WalletTransactionModel.findById(transaction._id).populate("fromUserId", "firstName lastName name avatar").populate("toUserId", "firstName lastName name avatar");
-
-			return this.mapToWalletTransactionDTO(doc);
+			return WalletTransactionEntity.fromDBDocument(transaction);
 		} catch (error) {
 			return handleExceptionError(error, "Error creating wallet transaction");
 		}
 	}
 
-	async getTransactionsByUser(userId: string, page: number = 1, limit: number = 10, filter: Record<string, any> = {}): Promise<{ data: IWalletTransactionDTO[]; total: number }> {
+	async getTransactionsByUser(userId: string, page: number = 1, limit: number = 10, filter: Record<string, any> = {}): Promise<{ data: WalletTransactionEntity[]; total: number }> {
 		try {
 			const query: any = {
 				$or: [
@@ -93,30 +91,23 @@ export class WalletRepositoryImpl implements IWalletRepository {
 				],
 			};
 
-			if (filter.type) {
-				query.type = filter.type === "all" ? { $in: ["credit", "debit", "withdrawal"] } : filter.type;
+			if (filter.type && filter.type !== "all") {
+				query.type = filter.type;
 			}
+
 			if (filter.createdAt) {
 				query.createdAt = filter.createdAt;
 			}
 
 			const total = await WalletTransactionModel.countDocuments(query);
 
-			let queryBuilder = WalletTransactionModel.find(query)
-				.populate("fromUserId", "firstName lastName name avatar")
-				.populate("toUserId", "firstName lastName name avatar")
+			const docs = await WalletTransactionModel.find(query)
 				.sort({ createdAt: -1 })
 				.skip((page - 1) * limit)
-				.limit(limit);
+				.limit(limit)
+				.lean(); // Optional: better performance if you're not mutating the doc
 
-			queryBuilder = queryBuilder.populate({
-				path: "sessionId",
-				select: "topic",
-				match: { sessionId: { $ne: null } },
-			});
-
-			const docs = await queryBuilder.exec();
-			const data = docs.map((doc) => this.mapToWalletTransactionDTO(doc));
+			const data = docs.map((doc) => WalletTransactionEntity.fromDBDocument(doc));
 
 			return { data, total };
 		} catch (error) {
@@ -147,39 +138,5 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		} catch (error) {
 			return handleExceptionError(error, "Error fetching withdrawal requests");
 		}
-	}
-
-	mapToWalletTransactionDTO(doc: any): IWalletTransactionDTO {
-		return {
-			_id: doc._id.toString(),
-			fromUserId: doc.fromUserId
-				? {
-						id: doc.fromUserId._id.toString(),
-						name: doc.fromUserId.firstName && doc.fromUserId.lastName ? `${doc.fromUserId.firstName} ${doc.fromUserId.lastName}` : doc.fromUserId.name ?? "",
-						avatar: doc.fromUserId.avatar,
-				  }
-				: null,
-			toUserId: doc.toUserId
-				? {
-						id: doc.toUserId._id.toString(),
-						name: doc.toUserId.firstName && doc.toUserId.lastName ? `${doc.toUserId.firstName} ${doc.toUserId.lastName}` : doc.toUserId.name ?? "",
-						avatar: doc.toUserId.avatar,
-				  }
-				: null,
-			fromRole: doc.fromRole,
-			toRole: doc.toRole,
-			amount: doc.amount,
-			type: doc.type,
-			purpose: doc.purpose,
-			description: doc.description,
-			sessionId:
-				doc.sessionId && typeof doc.sessionId === "object"
-					? {
-							id: doc.sessionId._id.toString(),
-							topic: doc.sessionId.topic,
-					  }
-					: null,
-			createdAt: doc.createdAt,
-		};
 	}
 }

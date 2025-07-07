@@ -120,6 +120,15 @@ export class UserRepositoryImpl implements IUserRepository {
 		}
 	}
 
+	async findUsersByIds(ids: string[]): Promise<UserEntity[]> {
+		try {
+			const docs = await UserModel.find({ _id: { $in: ids } }).lean();
+			return docs.map(mapDocToEntity);
+		} catch (error) {
+			return handleExceptionError(error, "Error finding users by IDs");
+		}
+	}
+
 	// async findMentors(params: { page?: number; limit?: number; search?: string }): Promise<PaginatedUsers> {
 	// 	try {
 	// 		const { page = 1, limit = 12, search } = params;

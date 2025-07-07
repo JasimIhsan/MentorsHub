@@ -34,7 +34,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 
 		// 2. Check user wallet balance
 		const userWallet = await this.walletRepo.findWalletByUserId(userId);
-		if (!userWallet || userWallet.getBalance() < sessionFee) {
+		if (!userWallet || userWallet.balance < sessionFee) {
 			throw new Error("Insufficient wallet balance");
 		}
 
@@ -45,7 +45,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		await this.walletRepo.updateBalance(mentorId, mentorEarning, "credit");
 
 		const platformWallet = await this.walletRepo.platformWallet();
-		await this.walletRepo.updateBalance(platformWallet.getUserId(), totalPlatformFee, "credit", "admin");
+		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, "credit", "admin");
 
 		// 6. Create transactions
 
@@ -78,7 +78,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		// c. Admin gets platform fee (₹40)
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
-			toUserId: platformWallet.getUserId(),
+			toUserId: platformWallet.userId,
 			fromRole: "user",
 			toRole: "admin",
 			amount: platformFeeFixed,
@@ -91,7 +91,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		// d. Admin gets 15% commission
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
-			toUserId: platformWallet.getUserId(),
+			toUserId: platformWallet.userId,
 			fromRole: "user",
 			toRole: "admin",
 			amount: platformCommission,

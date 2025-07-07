@@ -4,6 +4,7 @@ import { SessionEntity } from "../entities/session.entity";
 
 export interface ISessionRepository {
 	getSessionById(sessionId: string): Promise<SessionEntity | null>;
+	findSessionsByIds(sessionIds: string[]): Promise<SessionEntity[]>;
 	createSession(session: SessionEntity): Promise<SessionEntity>;
 	getSessionsByUser(userId: string): Promise<ISessionUserDTO[]>;
 	getSessionByMentor(

@@ -1,9 +1,9 @@
-import { WalletEntity } from "../../domain/entities/wallet/wallet.entity";
 import { WithdrawalRequestEntity } from "../../domain/entities/wallet/wallet.withdrawel.request.entity";
+import { IWalletDTO } from "../dtos/wallet.dtos";
 import { IWalletTransactionDTO } from "../dtos/wallet.transation.dto";
 
 export interface ICreateWalletUsecase {
-	execute(userId: string, role: string): Promise<WalletEntity>;
+	execute(userId: string, role: string): Promise<IWalletDTO>;
 }
 
 export interface ICreateTransactionUsecase {
@@ -33,17 +33,17 @@ export interface IGetWithdrawalRequestsUsecase {
 }
 
 export interface IUpdateWalletBalanceUsecase {
-	execute(userId: string, amount: number, type: string): Promise<WalletEntity | null>;
+	execute(userId: string, amount: number, type: string): Promise<IWalletDTO | null>;
 }
 
 export interface IWalletTopUpUsecase {
-	execute(data: { userId: string; amount: number; purpose?: string; description?: string }): Promise<{ wallet: WalletEntity; transaction: IWalletTransactionDTO }>;
+	execute(data: { userId: string; amount: number; purpose?: string; description?: string }): Promise<{ wallet: IWalletDTO; transaction: IWalletTransactionDTO }>;
 }
 
 export interface IGetWalletUsecase {
-	execute(userId: string): Promise<WalletEntity | null>;
+	execute(userId: string): Promise<IWalletDTO | null>;
 }
 
 export interface IWithdrawWalletUsecase {
-	execute(userId: string, amount: number): Promise<{ wallet: WalletEntity; transaction: IWalletTransactionDTO }> 
+	execute(userId: string, amount: number): Promise<{ wallet: IWalletDTO; transaction: IWalletTransactionDTO }> 
 }
