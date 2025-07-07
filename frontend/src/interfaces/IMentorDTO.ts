@@ -15,24 +15,20 @@ export type Availability = {
 export interface IMentorDTO {
 	id: string;
 	email: string;
-	password: string;
 	firstName: string;
 	role: "user" | "mentor";
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;
 	interests: string[] | null;
-	updatedAt: Date;
+	updatedAt: Date | null;
 	skills: string[] | null;
 	status: "blocked" | "unblocked";
 	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
 	createdAt: Date;
-	lastActive: Date | null;
-	isVerified: boolean | null;
 	averageRating: number | null;
 	totalReviews: number | null;
 	sessionCompleted: number | null;
-	featuredMentor: boolean | null;
 	badges: string[] | null;
 	userId: string;
 	professionalTitle: string;
@@ -59,17 +55,10 @@ export interface IMentorDTO {
 		issueDate: string;
 		expiryDate: string | null;
 	}[];
-	sessionFormat: "one-on-one" | "group";
+	sessionFormat: "one-on-one" | "group" | "both";
 	sessionTypes: string[];
-	pricing: "free" | "paid";
+	pricing: "free" | "paid" | "both-pricing";
 	hourlyRate: number | null;
 	availability: Availability;
 	documents: string[];
-	reviews: {
-		name: string;
-		avatar: string;
-		rating: number;
-		date: string;
-		comment: string;
-	}[];
 }

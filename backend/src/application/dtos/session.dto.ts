@@ -1,4 +1,4 @@
-export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected" | "expired";
+import { PersonEntity, PricingType, SessionEntity, SessionPaymentStatus, SessionStatus } from "../../domain/entities/session.entity";
 
 interface BaseSession {
 	topic: string;
@@ -9,10 +9,10 @@ interface BaseSession {
 	hours: number;
 	message: string;
 	status: SessionStatus;
-	paymentStatus?: "pending" | "completed" | "failed"; // (can be removed if moved to participant level)
-	pricing: "free" | "paid";
+	paymentStatus?: SessionPaymentStatus;
+	pricing: PricingType;
 	rejectReason?: string;
-	paymentId?: string; // (can be removed if moved to participant level)
+	paymentId?: string;
 	totalAmount?: number;
 	createdAt: string;
 }
@@ -28,7 +28,7 @@ export interface MentorInfo extends Person {}
 export interface Mentee extends Person {}
 
 export interface SessionParticipant extends Mentee {
-	paymentStatus?: "pending" | "completed" | "failed";
+	paymentStatus?: SessionPaymentStatus;
 	paymentId?: string;
 }
 
@@ -42,4 +42,63 @@ export interface ISessionMentorDTO extends BaseSession {
 	id: string;
 	mentor: string;
 	participants: SessionParticipant[];
+}
+
+function mapToPerson(user: PersonEntity): Mentee {
+	return {
+		_id: user.id,
+		firstName: user.firstName!,
+		lastName: user.lastName!,
+		avatar: user.avatar,
+	};
+}
+
+// ✅ Mapper: Entity → ISessionUserDTO
+export function mapToUserSessionDTO(session: SessionEntity, userId: string): ISessionUserDTO {
+	const mentor = session.mentor;
+
+	return {
+		id: session.id,
+		mentor: mapToPerson(mentor),
+		userId,
+		topic: session.topic,
+		sessionType: session.sessionType,
+		sessionFormat: session.sessionFormat,
+		date: session.date.toISOString(),
+		time: session.time,
+		hours: session.hours,
+		message: session.message,
+		status: session.status,
+		pricing: session.pricing,
+		rejectReason: session.rejectReason,
+		totalAmount: session.fee,
+		createdAt: session.createdAt.toISOString(),
+	};
+}
+
+// ✅ Mapper: Entity → ISessionMentorDTO
+export function mapToMentorSessionDTO(session: SessionEntity): ISessionMentorDTO {
+	const participants: SessionParticipant[] = session.participants.map((p) => ({
+		...mapToPerson(p.user),
+		paymentStatus: p.paymentStatus,
+		paymentId: p.paymentId,
+	}));
+
+	return {
+		id: session.id,
+		mentor: session.mentor.id,
+		participants,
+		topic: session.topic,
+		sessionType: session.sessionType,
+		sessionFormat: session.sessionFormat,
+		date: session.date.toISOString(),
+		time: session.time,
+		hours: session.hours,
+		message: session.message,
+		status: session.status,
+		pricing: session.pricing,
+		rejectReason: session.rejectReason,
+		totalAmount: session.fee,
+		createdAt: session.createdAt.toISOString(),
+	};
 }

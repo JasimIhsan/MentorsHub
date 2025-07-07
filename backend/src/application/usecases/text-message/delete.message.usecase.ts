@@ -18,13 +18,13 @@ export class DeleteMessageUseCase {
 		const message = await this.messageRepo.findById(messageId);
 		if (!message) throw new Error("Message not found");
 
-		if (message.sender.toString() !== senderId) {
+		if (message.senderId.toString() !== senderId) {
 			throw new Error("Unauthorized delete");
 		}
 
-		await this.messageRepo.deleteMessage(messageId);
+		await this.messageRepo.deleteById(messageId);
 
-		const lastMessage = await this.messageRepo.findLastMessageByChatId(chatId);
+		const lastMessage = await this.messageRepo.findLastByChat(chatId);
 
 		await this.chatRepo.updateLastMessage(chatId, lastMessage?.id as string);
 		return messageId;

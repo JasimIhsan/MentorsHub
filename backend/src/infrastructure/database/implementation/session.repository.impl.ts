@@ -1,65 +1,89 @@
+// infrastructure/database/repositories/session.repository.impl.ts
+
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
-import { ISessionDocument, SessionModel } from "../models/session/session.model";
-import { SessionEntity } from "../../../domain/entities/session.entity";
-import { ISessionUserDTO, ISessionMentorDTO } from "../../../application/dtos/session.dto";
+import { SessionModel } from "../models/session/session.model";
+import { SessionEntity, SessionStatus, SessionPaymentStatus } from "../../../domain/entities/session.entity";
 import { handleExceptionError } from "../../utils/handle.exception.error";
-import { CommonStringMessage } from "../../../shared/constants/string.messages";
 
 export class SessionRepositoryImpl implements ISessionRepository {
-	async createSession(session: SessionEntity): Promise<SessionEntity> {
+	async create(session: SessionEntity): Promise<SessionEntity> {
 		try {
+			const obj = session.toObject();
 			const newSession = new SessionModel({
-				...session,
-				participants: session.getParticipants().map((participant) => ({
-					userId: participant.userId,
-					paymentStatus: participant.paymentStatus,
-					paymentId: participant.paymentId,
+				mentorId: obj.mentor.id,
+				participants: obj.participants.map((p) => ({
+					userId: p.user.id,
+					paymentStatus: p.paymentStatus,
+					paymentId: p.paymentId,
 				})),
+				topic: obj.topic,
+				sessionType: obj.sessionType,
+				sessionFormat: obj.sessionFormat,
+				date: obj.date,
+				time: obj.time,
+				hours: obj.hours,
+				message: obj.message,
+				status: obj.status,
+				pricing: obj.pricing,
+				totalAmount: obj.totalAmount,
+				rejectReason: obj.rejectReason,
 			});
-			const savedSession = await newSession.save();
-			return SessionEntity.fromDBDocument(savedSession);
+			const saved = await newSession.save();
+			return SessionEntity.fromDB(saved);
 		} catch (error) {
 			return handleExceptionError(error, "Error creating session");
 		}
 	}
 
-	async getSessionById(sessionId: string): Promise<SessionEntity | null> {
+	async findById(id: string): Promise<SessionEntity | null> {
 		try {
-			const session = await SessionModel.findById(sessionId);
-			return session ? SessionEntity.fromDBDocument(session) : null;
+			const session = await SessionModel.findById(id).populate("mentorId", "firstName lastName avatar").populate("participants.userId", "firstName lastName avatar");
+			return session ? SessionEntity.fromDB(session) : null;
 		} catch (error) {
-			return handleExceptionError(error, "Error getting session by ID");
+			return handleExceptionError(error, "Error finding session by ID");
 		}
 	}
 
-	async getSessionsByUser(userId: string): Promise<ISessionUserDTO[]> {
+	async findByIds(ids: string[]): Promise<SessionEntity[]> {
 		try {
-			const sessions = await SessionModel.find({ "participants.userId": userId })
-				.populate("participants.userId", "firstName lastName avatar")
-				.populate("mentorId", "firstName lastName avatar");
+			const sessions = await SessionModel.find({ _id: { $in: ids } })
+				.populate("mentorId", "firstName lastName avatar")
+				.populate("participants.userId", "firstName lastName avatar");
+			return sessions.map(SessionEntity.fromDB);
+		} catch (error) {
+			return handleExceptionError(error, "Error finding sessions by IDs");
+		}
+	}
 
-			return sessions.map((session) => this.mapSessionToUserDTO(session, userId));
+	async findByUser(userId: string): Promise<SessionEntity[]> {
+		try {
+			const sessions = await SessionModel.find({ "participants.userId": userId }).populate("mentorId", "firstName lastName avatar").populate("participants.userId", "firstName lastName avatar");
+			return sessions.map(SessionEntity.fromDB);
 		} catch (error) {
 			return handleExceptionError(error, "Error getting sessions by user");
 		}
 	}
 
-	async getSessionByMentor(
+	async findByMentor(
 		mentorId: string,
-		queryParams: {
-			status?: string;
-			filterOption?: "all" | "free" | "paid" | "today" | "week" | "month";
+		{
+			status,
+			filter,
+			page,
+			limit,
+		}: {
+			status?: SessionStatus;
+			filter?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
 		},
-	): Promise<{ sessions: ISessionMentorDTO[]; total: number }> {
+	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
-			const { filterOption, page, limit, status } = queryParams;
 			const query: any = { mentorId };
 			const today = new Date();
 			today.setHours(0, 0, 0, 0);
 
-			switch (filterOption) {
+			switch (filter) {
 				case "free":
 					query.pricing = "free";
 					break;
@@ -89,157 +113,97 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			if (status) query.status = status;
 
 			const total = await SessionModel.countDocuments(query);
-			const sessionsData = await SessionModel.find(query)
-				.populate("participants.userId", "firstName lastName avatar")
+			const docs = await SessionModel.find(query)
 				.skip((page - 1) * limit)
-				.limit(limit);
+				.limit(limit)
+				.populate("mentorId", "firstName lastName avatar")
+				.populate("participants.userId", "firstName lastName avatar");
 
-			const sessions = sessionsData.map(this.mapSessionToMentorDTO);
-			return { sessions, total };
+			return {
+				total,
+				sessions: docs.map(SessionEntity.fromDB),
+			};
 		} catch (error) {
-			return handleExceptionError(error, "Error getting sessions by mentor");
+			return handleExceptionError(error, "Error finding sessions by mentor");
 		}
 	}
 
-	async updateSessionStatus(sessionId: string, status: string, rejectReason?: string): Promise<SessionEntity> {
+	async updateStatus(sessionId: string, status: SessionStatus, reason?: string): Promise<SessionEntity> {
 		try {
-			const updatedSession = await SessionModel.findByIdAndUpdate(
-				sessionId,
-				{ status, rejectReason },
-				{ new: true },
-			);
-			if (!updatedSession) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
-			return SessionEntity.fromDBDocument(updatedSession);
+			const updated = await SessionModel.findByIdAndUpdate(sessionId, { status, rejectReason: reason }, { new: true }).populate("mentorId", "firstName lastName avatar").populate("participants.userId", "firstName lastName avatar");
+
+			if (!updated) throw new Error("Session not found");
+			return SessionEntity.fromDB(updated);
 		} catch (error) {
 			return handleExceptionError(error, "Error updating session status");
 		}
 	}
 
-	async paySession(
-		sessionId: string,
-		userId: string,
-		paymentId: string,
-		paymentStatus: string,
-		status: string,
-	): Promise<void> {
+	async markPayment(sessionId: string, userId: string, paymentStatus: SessionPaymentStatus, paymentId: string, newStatus: SessionStatus): Promise<void> {
 		try {
-			const updated = await SessionModel.findOneAndUpdate(
+			await SessionModel.findOneAndUpdate(
 				{ _id: sessionId, "participants.userId": userId },
 				{
 					$set: {
-						"participants.$.paymentId": paymentId,
 						"participants.$.paymentStatus": paymentStatus,
-						status: status,
+						"participants.$.paymentId": paymentId,
+						status: newStatus,
 					},
 				},
-				{ new: true },
 			);
-			if (!updated) throw new Error("Session or participant not found");
 		} catch (error) {
 			return handleExceptionError(error, "Error updating session payment");
 		}
 	}
 
-	async getSessions(mentorId: string): Promise<ISessionMentorDTO[]> {
+	async getAllByMentor(mentorId: string): Promise<SessionEntity[]> {
 		try {
-			const sessions = await SessionModel.find({ mentorId }).populate("participants.userId", "firstName lastName avatar");
-			return sessions.map(this.mapSessionToMentorDTO);
+			const sessions = await SessionModel.find({ mentorId }).populate("mentorId", "firstName lastName avatar").populate("participants.userId", "firstName lastName avatar");
+			return sessions.map(SessionEntity.fromDB);
 		} catch (error) {
-			return handleExceptionError(error, "Error getting all mentor sessions");
+			return handleExceptionError(error, "Error fetching all mentor sessions");
 		}
 	}
 
-	async getSessionToExpire(): Promise<ISessionDocument[]> {
+	async getExpirableSessions(): Promise<SessionEntity[]> {
 		try {
-			return await SessionModel.find({
+			const sessions = await SessionModel.find({
 				status: { $in: ["pending", "approved", "upcoming"] },
-			});
+			})
+				.populate("mentorId", "firstName lastName avatar")
+				.populate("participants.userId", "firstName lastName avatar");
+
+			return sessions.map(SessionEntity.fromDB);
 		} catch (error) {
-			return handleExceptionError(error, "Error finding sessions to expire");
+			return handleExceptionError(error, "Error getting sessions to expire");
 		}
 	}
 
-	async expireSession(sessionId: string): Promise<void> {
+	async deleteById(sessionId: string): Promise<void> {
 		try {
 			await SessionModel.findByIdAndDelete(sessionId);
 		} catch (error) {
-			return handleExceptionError(error, "Error expiring session");
+			return handleExceptionError(error, "Error deleting session");
 		}
 	}
 
-	async getSessionByDate(mentorId: string, date: Date): Promise<SessionEntity[] | null> {
+	async findByDate(mentorId: string, date: Date): Promise<SessionEntity[]> {
 		try {
 			const startOfDay = new Date(date);
-			startOfDay.setUTCHours(0, 0, 0, 0);
+			startOfDay.setHours(0, 0, 0, 0);
 			const endOfDay = new Date(date);
-			endOfDay.setUTCHours(23, 59, 59, 999);
+			endOfDay.setHours(23, 59, 59, 999);
 
 			const sessions = await SessionModel.find({
 				mentorId,
 				date: { $gte: startOfDay, $lte: endOfDay },
-			});
+			})
+				.populate("mentorId", "firstName lastName avatar")
+				.populate("participants.userId", "firstName lastName avatar");
 
-			return sessions.length > 0 ? sessions.map(SessionEntity.fromDBDocument) : null;
+			return sessions.map(SessionEntity.fromDB);
 		} catch (error) {
 			return handleExceptionError(error, "Error getting sessions by date");
 		}
-	}
-
-	private mapSessionToUserDTO(session: any, userId: string): ISessionUserDTO {
-		const participant = session.participants.find((p: any) =>
-			p.userId._id?.toString?.() === userId || p.userId?.toString() === userId,
-		);
-
-		return {
-			id: session._id.toString(),
-			mentor: {
-				_id: session.mentorId._id.toString(),
-				firstName: session.mentorId.firstName,
-				lastName: session.mentorId.lastName,
-				avatar: session.mentorId.avatar,
-			},
-			userId: participant?.userId._id?.toString() || participant?.userId?.toString(),
-			topic: session.topic,
-			sessionType: session.sessionType,
-			sessionFormat: session.sessionFormat,
-			date: session.date.toISOString(),
-			time: session.time,
-			hours: session.hours,
-			message: session.message,
-			status: session.status,
-			paymentStatus: participant?.paymentStatus,
-			paymentId: participant?.paymentId,
-			rejectReason: session.rejectReason,
-			pricing: session.pricing,
-			totalAmount: session.totalAmount,
-			createdAt: session.createdAt.toISOString(),
-		};
-	}
-
-	private mapSessionToMentorDTO(session: any): ISessionMentorDTO {
-		return {
-			id: session._id.toString(),
-			mentor: session.mentorId.toString(),
-			participants: session.participants.map((p: any) => ({
-				_id: p.userId._id.toString(),
-				firstName: p.userId.firstName,
-				lastName: p.userId.lastName,
-				avatar: p.userId.avatar,
-				paymentStatus: p.paymentStatus,
-				paymentId: p.paymentId,
-			})),
-			topic: session.topic,
-			sessionType: session.sessionType,
-			sessionFormat: session.sessionFormat,
-			date: session.date.toISOString(),
-			time: session.time,
-			hours: session.hours,
-			message: session.message,
-			status: session.status,
-			rejectReason: session.rejectReason,
-			pricing: session.pricing,
-			totalAmount: session.totalAmount,
-			createdAt: session.createdAt.toISOString(),
-		};
 	}
 }

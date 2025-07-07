@@ -12,13 +12,24 @@ export const fetchMentors = async (query: { page?: number; limit?: number; searc
 	}
 };
 
-export const fetchAllApprovedMentors = async () => {
+export const fetchAllApprovedMentors = async (userId: string, page: number = 1, limit: number = 6, search: string = "", sortBy: string = "recommended", priceMin?: number, priceMax?: number, interests?: string[]) => {
 	try {
-		const response = await axiosInstance.get("/user/mentor/approved");
+		const response = await axiosInstance.get(`/user/mentor/approved/${userId}`, {
+			params: {
+				page: page,
+				limit: limit,
+				search: search,
+				sortBy: sortBy,
+				priceMin: priceMin,
+				priceMax: priceMax,
+				interests: interests,
+			},
+		});
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error form fetchMentors api : `, error);
-		throw new Error(error.response.data.message);
+		// Log and throw error
+		console.log(`Error from fetchMentors API: `, error);
+		throw new Error(error.response?.data?.message || "Failed to fetch mentors");
 	}
 };
 
@@ -41,8 +52,6 @@ export const fetchMentorAvailabilityAPI = async (mentorId: string, date: Date) =
 		throw new Error(error.response.data.message);
 	}
 };
-
-
 
 export const updateMentorStatusAPI = async (userId: string, status: "approved" | "rejected", rejectionReason?: string) => {
 	try {

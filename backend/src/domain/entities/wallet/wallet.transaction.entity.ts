@@ -1,64 +1,65 @@
-import { ObjectId } from "mongoose";
+// domain/entities/wallet.transaction.entity.ts
+
 import { IWalletTransactionDocument } from "../../../infrastructure/database/models/wallet/wallet.transaction.model";
 
-// Extend your purpose type to include wallet_topup
 export type WalletTransactionPurpose = "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";
 
-export interface IWalletTransaction {
-	_id?: ObjectId;
-	fromUserId: ObjectId | null;
-	toUserId: ObjectId;
-	fromRole: "user" | "mentor" | "admin";
-	toRole: "user" | "mentor" | "admin";
-	amount: number;
-	type: "credit" | "debit";
-	purpose: WalletTransactionPurpose;
-	description?: string;
-	sessionId?: ObjectId | null;
-	createdAt?: Date;
-	updatedAt?: Date;
-}
+export type WalletTransactionType = "credit" | "debit" | "withdrawal";
+export type WalletUserRole = "user" | "mentor" | "admin";
 
 export class WalletTransactionEntity {
-	private _id?: ObjectId;
-	private fromUserId: ObjectId | null;
-	private toUserId: ObjectId;
-	private fromRole: "user" | "mentor" | "admin";
-	private toRole: "user" | "mentor" | "admin";
-	private amount: number;
-	private type: "credit" | "debit";
-	private purpose: WalletTransactionPurpose;
-	private description?: string;
-	private sessionId?: ObjectId | null;
-	private createdAt?: Date;
-	private updatedAt?: Date;
+	private _id?: string;
+	private _fromUserId: string | null;
+	private _toUserId: string;
+	private _fromRole: WalletUserRole;
+	private _toRole: WalletUserRole;
+	private _amount: number;
+	private _type: WalletTransactionType;
+	private _purpose: WalletTransactionPurpose;
+	private _description?: string;
+	private _sessionId?: string | null;
+	private _createdAt?: Date;
+	private _updatedAt?: Date;
 
-	private constructor(props: IWalletTransaction) {
-		this._id = props._id;
-		this.fromUserId = props.fromUserId;
-		this.toUserId = props.toUserId;
-		this.fromRole = props.fromRole;
-		this.toRole = props.toRole;
-		this.amount = props.amount;
-		this.type = props.type;
-		this.purpose = props.purpose;
-		this.description = props.description;
-		this.sessionId = props.sessionId;
-		this.createdAt = props.createdAt;
-		this.updatedAt = props.updatedAt;
-	}
-
-	// ✅ Safe creation
-	static create(data: {
-		fromUserId?: ObjectId | null;
-		toUserId: ObjectId;
-		fromRole: "user" | "mentor" | "admin";
-		toRole: "user" | "mentor" | "admin";
+	private constructor(props: {
+		_id?: string;
+		fromUserId: string | null;
+		toUserId: string;
+		fromRole: WalletUserRole;
+		toRole: WalletUserRole;
 		amount: number;
-		type: "credit" | "debit";
+		type: WalletTransactionType;
 		purpose: WalletTransactionPurpose;
 		description?: string;
-		sessionId?: ObjectId | null;
+		sessionId?: string | null;
+		createdAt?: Date;
+		updatedAt?: Date;
+	}) {
+		this._id = props._id;
+		this._fromUserId = props.fromUserId;
+		this._toUserId = props.toUserId;
+		this._fromRole = props.fromRole;
+		this._toRole = props.toRole;
+		this._amount = props.amount;
+		this._type = props.type;
+		this._purpose = props.purpose;
+		this._description = props.description;
+		this._sessionId = props.sessionId;
+		this._createdAt = props.createdAt;
+		this._updatedAt = props.updatedAt;
+	}
+
+	// ✅ Factory method (clean)
+	static create(data: {
+		fromUserId?: string | null;
+		toUserId: string;
+		fromRole: WalletUserRole;
+		toRole: WalletUserRole;
+		amount: number;
+		type: WalletTransactionType;
+		purpose: WalletTransactionPurpose;
+		description?: string;
+		sessionId?: string | null;
 	}): WalletTransactionEntity {
 		return new WalletTransactionEntity({
 			fromUserId: data.fromUserId ?? null,
@@ -73,52 +74,87 @@ export class WalletTransactionEntity {
 		});
 	}
 
-	// ✅ To plain object (e.g., for repo.save())
-	toObject(): IWalletTransaction {
+	// ✅ Getters
+	get id(): string | undefined {
+		return this._id;
+	}
+
+	get fromUserId(): string | null {
+		return this._fromUserId;
+	}
+
+	get toUserId(): string {
+		return this._toUserId;
+	}
+
+	get fromUserRole(): WalletUserRole {
+		return this._fromRole;
+	}
+
+	get toUserRole(): WalletUserRole {
+		return this._toRole;
+	}
+
+	get transactionAmount(): number {
+		return this._amount;
+	}
+
+	get transactionType(): WalletTransactionType {
+		return this._type;
+	}
+
+	get transactionPurpose(): WalletTransactionPurpose {
+		return this._purpose;
+	}
+
+	get transactionDescription(): string | undefined {
+		return this._description;
+	}
+
+	get sessionId(): string | null | undefined {
+		return this._sessionId;
+	}
+
+	get created(): Date | undefined {
+		return this._createdAt;
+	}
+
+	get updated(): Date | undefined {
+		return this._updatedAt;
+	}
+
+	// ✅ For repository to save or serialize
+	toObject() {
 		return {
 			_id: this._id,
-			fromUserId: this.fromUserId,
-			toUserId: this.toUserId,
-			fromRole: this.fromRole,
-			toRole: this.toRole,
-			amount: this.amount,
-			type: this.type,
-			purpose: this.purpose,
-			description: this.description,
-			sessionId: this.sessionId,
-			createdAt: this.createdAt,
-			updatedAt: this.updatedAt,
+			fromUserId: this._fromUserId,
+			toUserId: this._toUserId,
+			fromRole: this._fromRole,
+			toRole: this._toRole,
+			amount: this._amount,
+			type: this._type,
+			purpose: this._purpose,
+			description: this._description,
+			sessionId: this._sessionId,
+			createdAt: this._createdAt,
+			updatedAt: this._updatedAt,
 		};
 	}
 
-	// ✅ From DB to domain entity
 	static fromDBDocument(doc: IWalletTransactionDocument): WalletTransactionEntity {
 		return new WalletTransactionEntity({
-			_id: doc._id,
-			fromUserId: doc.fromUserId ?? null,
-			toUserId: doc.toUserId,
+			_id: doc._id?.toString(),
+			fromUserId: doc.fromUserId?.toString() || null,
+			toUserId: doc.toUserId?.toString(),
 			fromRole: doc.fromRole,
 			toRole: doc.toRole,
 			amount: doc.amount,
 			type: doc.type,
-			purpose: doc.purpose as WalletTransactionPurpose,
+			purpose: doc.purpose,
 			description: doc.description,
-			sessionId: doc.sessionId ?? null,
+			sessionId: doc.sessionId?.toString() || null,
 			createdAt: doc.createdAt,
 			updatedAt: doc.updatedAt,
 		});
-	}
-
-	// (Optional) You can add safe getters if needed
-	getToUserId(): ObjectId {
-		return this.toUserId;
-	}
-
-	getAmount(): number {
-		return this.amount;
-	}
-
-	getPurpose(): WalletTransactionPurpose {
-		return this.purpose;
 	}
 }

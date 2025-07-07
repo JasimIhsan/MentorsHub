@@ -1,8 +1,7 @@
-import { ReviewEntity } from "../../domain/entities/review.entity";
 import { ReviewDTO } from "../dtos/review.dtos";
 
 export interface ICreateReviewUseCase {
-	execute(data: { reviewerId: string; mentorId: string; sessionId?: string; rating: number; comment: string }): Promise<ReviewEntity>;
+	execute(data: { reviewerId: string; mentorId: string; sessionId?: string; rating: number; comment: string }): Promise<ReviewDTO>;
 }
 
 export interface IGetMentorReviewsUseCase {

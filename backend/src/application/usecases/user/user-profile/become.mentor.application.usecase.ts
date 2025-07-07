@@ -1,6 +1,6 @@
 import { IMentorProfileRepository } from "../../../../domain/repositories/mentor.details.repository";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import { IMentorInterface, MentorProfileEntity } from "../../../../domain/entities/mentor.detailes.entity";
+import { MentorProfileProps, MentorProfileEntity } from "../../../../domain/entities/mentor.detailes.entity";
 import { UserEntityProps } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IUploadMentorDocuments } from "../../../interfaces/documents";
@@ -10,7 +10,7 @@ import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
 export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 	constructor(private mentorProfileRepo: IMentorProfileRepository, private userRepo: IUserRepository, private uploadDocumentUseCase: IUploadMentorDocuments) {}
 
-	async execute(userId: string, data: IMentorInterface, userData: Partial<UserEntityProps>, documents: Express.Multer.File[]): Promise<{ savedUser: IUserDTO; mentorProfile: MentorProfileEntity }> {
+	async execute(userId: string, data: MentorProfileProps, userData: Partial<UserEntityProps>, documents: Express.Multer.File[]): Promise<{ savedUser: IUserDTO; mentorProfile: MentorProfileEntity }> {
 		const userEntity = await this.userRepo.findUserById(userId);
 		if (!userEntity) throw new Error(CommonStringMessage.USER_NOT_FOUND);
 		if (userEntity.role === "mentor") {
@@ -38,13 +38,13 @@ export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 			);
 		}
 
-		const updateData: IMentorInterface = {
+		const updateData: MentorProfileProps = {
 			...data,
 			hourlyRate: Number(data.hourlyRate),
 			documents: documentUrls,
 		};
 
-		const newMentorProfile = new MentorProfileEntity(updateData);
+		const newMentorProfile = MentorProfileEntity.create(updateData);
 
 		const mentorProfile = await this.mentorProfileRepo.createMentorProfile(userId, newMentorProfile);
 

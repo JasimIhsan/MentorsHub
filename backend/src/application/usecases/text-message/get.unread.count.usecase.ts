@@ -4,6 +4,6 @@ export class GetMessageUnreadCountUseCase {
 	constructor(private readonly messageRepo: IMessageRepository) {}
 
 	async execute(userId: string, chatIds: string[]): Promise<{ [chatId: string]: number }> {
-		return await this.messageRepo.getUnreadCountsByUser(userId, chatIds);
+		return await this.messageRepo.unreadCountsByUser(userId, chatIds);
 	}
 }

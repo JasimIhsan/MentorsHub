@@ -1,3 +1,4 @@
+import { PricingType, SessionStatus } from "../../../domain/entities/session.entity";
 import { IMentorDTO } from "../../dtos/mentor.dtos";
 import { ISessionMentorDTO } from "../../dtos/session.dto";
 
@@ -11,7 +12,7 @@ export interface IGetAllMentorsUsecase {
 }
 
 export interface IGetAllApprovedMentorsUsecase {
-	execute(): Promise<IMentorDTO[]>;
+	execute(params: { page?: number; limit?: number; search?: string; sortBy?: string; priceMin?: number; priceMax?: number; interests?: string[] }, browserId: string): Promise<{ mentors: IMentorDTO[]; total: number; page: number; limit: number }>;
 }
 
 export interface IGetMentorUsecase {
@@ -22,8 +23,8 @@ export interface IGetSessionRequestsUseCase {
 	execute(
 		mentorId: string,
 		queryParams: {
-			status?: string;
-			pricing?: string;
+			status?: SessionStatus;
+			pricing?: PricingType;
 			filterOption?: "today" | "week" | "all" | "free" | "paid";
 			searchQuery?: string;
 			page: number;
@@ -40,7 +41,7 @@ export interface IGetUpcomingSessionMentorUsecase {
 	execute(
 		mentorId: string,
 		queryParams: {
-			status?: string;
+			status?: SessionStatus;
 			filterOption?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
@@ -49,7 +50,7 @@ export interface IGetUpcomingSessionMentorUsecase {
 }
 
 export interface IGetSessionHistoryUsecase {
-	execute(mentorId: string, queryParams: { page: number; limit: number; status: string }): Promise<{ sessions: ISessionMentorDTO[]; total: number }>;
+	execute(mentorId: string, queryParams: { page: number; limit: number; status: SessionStatus }): Promise<{ sessions: ISessionMentorDTO[]; total: number }>;
 }
 
 export interface IGetAvailabilityUseCase {

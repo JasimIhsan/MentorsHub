@@ -1,12 +1,18 @@
 import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
-import { IMentorDTO } from "../../dtos/mentor.dtos";
+import { mapToMentorDTOWithoutUser } from "../../dtos/mentor.dtos";
 import { IGetAllApprovedMentorsUsecase } from "../../interfaces/mentors/mentors.interface";
 
 export class GetAllApprovedMentorsUsecase implements IGetAllApprovedMentorsUsecase {
 	constructor(private mentorRepository: IMentorProfileRepository) {}
 
-	async execute(): Promise<IMentorDTO[]> {
-		const mentors = await this.mentorRepository.findAllApprovedMentors();
-		return mentors;
+	async execute(params: { page: number; limit: number; search?: string; sortBy?: string; priceMin?: number; priceMax?: number; interests?: string[] }, browserId: string): Promise<{ mentors: any[]; total: number; page: number; limit: number }> {
+		const { mentors, total } = await this.mentorRepository.findAllApprovedMentors(params, browserId);
+
+		return {
+			mentors: mentors.map(mapToMentorDTOWithoutUser),
+			total,
+			page: params.page,
+			limit: params.limit,
+		};
 	}
 }

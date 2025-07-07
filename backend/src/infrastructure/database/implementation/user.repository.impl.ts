@@ -71,7 +71,7 @@ export class UserRepositoryImpl implements IUserRepository {
 		}
 	}
 
-	async findAllUsers(params: FindUsersParams): Promise<PaginatedUsers> {
+	async findUsers(params: FindUsersParams): Promise<PaginatedUsers> {
 		try {
 			const { page = 1, limit = 10, search, role, status, sortBy = "createdAt", sortOrder = "desc" } = params;
 
@@ -96,7 +96,7 @@ export class UserRepositoryImpl implements IUserRepository {
 			const totalUsers = await UserModel.countDocuments(query);
 			const totalPages = Math.ceil(totalUsers / limit);
 
-			return { users, totalUsers, totalPages, currentPage: page };
+			return { userEntities: users, totalUsers, totalPages, currentPage: page };
 		} catch (error) {
 			return handleExceptionError(error, "Error getting all users");
 		}
@@ -119,4 +119,51 @@ export class UserRepositoryImpl implements IUserRepository {
 			handleExceptionError(error, "Error deleting user");
 		}
 	}
+
+	async findUsersByIds(ids: string[]): Promise<UserEntity[]> {
+		try {
+			const docs = await UserModel.find({ _id: { $in: ids } }).lean();
+			return docs.map(mapDocToEntity);
+		} catch (error) {
+			return handleExceptionError(error, "Error finding users by IDs");
+		}
+	}
+
+	// async findMentors(params: { page?: number; limit?: number; search?: string }): Promise<PaginatedUsers> {
+	// 	try {
+	// 		const { page = 1, limit = 12, search } = params;
+
+	// 		const query: any = {
+	// 			mentorRequestStatus: "approved",
+	// 			role: "mentor",
+	// 		};
+
+	// 		// Handle search: matches `name` or `headline` using regex
+	// 		if (search) {
+	// 			const regex = new RegExp(search, "i");
+	// 			query.$or = [{ firstName: regex }, { lastName: regex }];
+	// 		}
+
+	// 		// STEP 1: Get all matching users
+	// 		const totalUsers = await UserModel.countDocuments(query);
+
+	// 		let mongoQuery = UserModel.find(query);
+
+	// 		// Pagination
+	// 		const skip = (page - 1) * limit;
+	// 		mongoQuery = mongoQuery.skip(skip).limit(limit);
+
+	// 		const users = await mongoQuery.exec();
+
+	// 		return {
+	// 			userEntities: users.map(mapDocToEntity),
+	// 			currentPage: page,
+	// 			totalPages: Math.ceil(totalUsers / limit),
+	// 			totalUsers,
+	// 		};
+	// 	} catch (error) {
+	// 		handleExceptionError(error, "Error finding mentors");
+	// 		throw error;
+	// 	}
+	// }
 }

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { IGetSessionRequestsUseCase } from "../../../application/interfaces/mentors/mentors.interface";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
+import { PricingType, SessionStatus } from "../../../domain/entities/session.entity";
 
 export class GetSessionRequestsController {
 	constructor(private getSessionByMentorUsecase: IGetSessionRequestsUseCase) {}
@@ -12,8 +13,8 @@ export class GetSessionRequestsController {
 			const { status, pricing, filterOption, page = "1", limit = "6" } = req.query;
 
 			const queryParams = {
-				status: status as string | undefined,
-				pricing: pricing as string | undefined,
+				status: status as SessionStatus | undefined,
+				pricing: pricing as PricingType | undefined,
 				filterOption: filterOption as "today" | "week" | "all" | "free" | "paid",
 				page: parseInt(page as string, 10),
 				limit: parseInt(limit as string, 10),

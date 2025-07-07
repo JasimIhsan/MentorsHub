@@ -7,8 +7,8 @@ import { MarkMessageReadUseCase } from "./mark.messages.as.read.usecase";
 import { SendMessageUseCase } from "./send.message.usecase";
 
 export const sendMessageUsecase = new SendMessageUseCase(messageRepository, chatRepository, userRepository);
-export const markMessageAsReadUsecase = new MarkMessageReadUseCase(messageRepository);
-export const getUserChatsUsecase = new GetUserChatsUseCase(chatRepository);
-export const getMessagesByChatUsecase = new GetMessagesByChatUseCase(messageRepository);
+export const markMessageAsReadUsecase = new MarkMessageReadUseCase(messageRepository, userRepository);
+export const getUserChatsUsecase = new GetUserChatsUseCase(chatRepository, userRepository, messageRepository);
+export const getMessagesByChatUsecase = new GetMessagesByChatUseCase(messageRepository, userRepository);
 export const deleteMessageUseCase = new DeleteMessageUseCase(messageRepository, chatRepository);
 export const getMessageUnreadCountsByUser = new GetMessageUnreadCountUseCase(messageRepository);

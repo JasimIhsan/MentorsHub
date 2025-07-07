@@ -1,11 +1,13 @@
-import { WalletEntity } from "../../../domain/entities/wallet/wallet.entity";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
+import { IWalletDTO, mapToWalletDTO } from "../../dtos/wallet.dtos";
 import { IGetWalletUsecase } from "../../interfaces/wallet";
 
 export class GetWalletUsecase implements IGetWalletUsecase {
 	constructor(private walletRepository: IWalletRepository) {}
 
-	async execute(userId: string): Promise<WalletEntity | null> {
-		return await this.walletRepository.findWalletByUserId(userId);
+	async execute(userId: string): Promise<IWalletDTO | null> {
+		const wallet = await this.walletRepository.findWalletByUserId(userId);
+		if(!wallet) throw new Error("Wallet not found for user");
+		return mapToWalletDTO(wallet);
 	}
 }

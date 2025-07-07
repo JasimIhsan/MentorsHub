@@ -8,12 +8,12 @@ export class CreateSessionPaymentOrderUseCase implements ICreateSessionPaymentOr
 	constructor(private sessionRepo: ISessionRepository, private paymentGateway: IPaymentGateway) {}
 
 	async execute(sessionId: string, userId: string): Promise<string> {
-		const session = await this.sessionRepo.getSessionById(sessionId);
+		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 
 		// Check if session is expired
-		const sessionDate = new Date(session.getDate());
-		const [hour, minute] = session.getTime().split(":").map(Number);
+		const sessionDate = new Date(session.date);
+		const [hour, minute] = session.time.split(":").map(Number);
 		sessionDate.setHours(hour);
 		sessionDate.setMinutes(minute);
 
@@ -21,11 +21,11 @@ export class CreateSessionPaymentOrderUseCase implements ICreateSessionPaymentOr
 			throw new Error("Session is already expired. You cannot make payment.");
 		}
 
-		const participant = session.getParticipants().find((p) => p.userId === userId);
+		const participant = session.participants.find((p) => p.user.id === userId);
 		if (!participant) throw new Error("Unauthorized: User is not a participant in this session");
 		if (participant.paymentStatus === "completed") throw new Error("Session already paid");
 
-		const amount = session.getfee() * 100;
+		const amount = session.fee * 100;
 		const receipt = `sess_${uuidv4().slice(0, 8)}`;
 		const notes = { sessionId, userId };
 

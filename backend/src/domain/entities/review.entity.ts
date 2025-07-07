@@ -1,9 +1,8 @@
-import { ReviewDTO, ReviewerDTO } from "../../application/dtos/review.dtos";
 import { IReviewDocument } from "../../infrastructure/database/models/review-rating/review.model";
 
 export interface IReviewEntity {
 	id?: string;
-	reviewerId: ReviewerDTO;
+	reviewerId: string;
 	mentorId: string;
 	sessionId?: string;
 	rating: number;
@@ -14,133 +13,123 @@ export interface IReviewEntity {
 
 export class ReviewEntity {
 	private _id?: string;
-	private reviewerId: ReviewerDTO;
-	private mentorId: string;
-	private sessionId?: string;
-	private rating: number;
-	private comment: string;
-	private createdAt: Date;
-	private updatedAt: Date;
+	private _reviewerId: string;
+	private _mentorId: string;
+	private _sessionId?: string;
+	private _rating: number;
+	private _comment: string;
+	private _createdAt: Date;
+	private _updatedAt: Date;
 
 	constructor(data: IReviewEntity) {
 		this._id = data.id;
-		this.reviewerId = data.reviewerId;
-		this.mentorId = data.mentorId;
-		this.sessionId = data.sessionId;
-		this.rating = data.rating;
-		this.comment = data.comment;
-		this.createdAt = data.createdAt ?? new Date();
-		this.updatedAt = data.updatedAt ?? new Date();
+		this._reviewerId = data.reviewerId;
+		this._mentorId = data.mentorId;
+		this._sessionId = data.sessionId;
+		this._rating = data.rating;
+		this._comment = data.comment;
+		this._createdAt = data.createdAt ?? new Date();
+		this._updatedAt = data.updatedAt ?? new Date();
 	}
 
-	// --- GETTERS ---
-
+	// ----- GETTERS -----
 	get id(): string | undefined {
 		return this._id;
 	}
 
-	getReviewer(): ReviewerDTO {
-		return this.reviewerId;
+	get reviewerId(): string {
+		return this._reviewerId;
 	}
 
-	getMentorId(): string {
-		return this.mentorId;
+	get mentorId(): string {
+		return this._mentorId;
 	}
 
-	getSessionId(): string | undefined {
-		return this.sessionId;
+	get sessionId(): string | undefined {
+		return this._sessionId;
 	}
 
-	getRating(): number {
-		return this.rating;
+	get rating(): number {
+		return this._rating;
 	}
 
-	getComment(): string {
-		return this.comment;
+	get comment(): string {
+		return this._comment;
 	}
 
-	getCreatedAt(): Date {
-		return this.createdAt;
+	get createdAt(): Date {
+		return this._createdAt;
 	}
 
-	getUpdatedAt(): Date {
-		return this.updatedAt;
+	get updatedAt(): Date {
+		return this._updatedAt;
 	}
 
-	// --- METHODS ---
-
-	updateComment(comment: string): void {
-		this.comment = comment;
-		this.updatedAt = new Date();
-	}
-
-	updateRating(rating: number): void {
-		if (rating < 1 || rating > 5) {
+	// ----- SETTERS -----
+	set rating(value: number) {
+		if (value < 1 || value > 5) {
 			throw new Error("Rating must be between 1 and 5");
 		}
-		this.rating = rating;
-		this.updatedAt = new Date();
+		this._rating = value;
+		this._touch();
+	}
+
+	set comment(value: string) {
+		this._comment = value;
+		this._touch();
+	}
+
+	set mentorId(value: string) {
+		this._mentorId = value;
+		this._touch();
+	}
+
+	set sessionId(value: string | undefined) {
+		this._sessionId = value;
+		this._touch();
+	}
+
+	set reviewerId(value: string) {
+		this._reviewerId = value;
+		this._touch();
+	}
+
+	private _touch() {
+		this._updatedAt = new Date();
 	}
 
 	toObject(): IReviewEntity {
 		return {
 			id: this._id,
-			reviewerId: this.reviewerId,
-			mentorId: this.mentorId,
-			sessionId: this.sessionId,
-			rating: this.rating,
-			comment: this.comment,
-			createdAt: this.createdAt,
-			updatedAt: this.updatedAt,
+			reviewerId: this._reviewerId,
+			mentorId: this._mentorId,
+			sessionId: this._sessionId,
+			rating: this._rating,
+			comment: this._comment,
+			createdAt: this._createdAt,
+			updatedAt: this._updatedAt,
 		};
 	}
 
-	updateReviewData(data: Partial<IReviewEntity>): void {
-		if(data.rating) this.updateRating(data.rating);
-		if(data.comment) this.updateComment(data.comment);
-		if(data.id) this._id = data.id;
-		if(data.mentorId) this.mentorId = data.mentorId;
-		if(data.sessionId) this.sessionId = data.sessionId;
-		if(data.reviewerId?.avatar) this.reviewerId.avatar = data.reviewerId.avatar;
-		if(data.reviewerId?.firstName) this.reviewerId.firstName = data.reviewerId.firstName;
-		if(data.reviewerId?.lastName) this.reviewerId.lastName = data.reviewerId.lastName;
-		if(data.reviewerId?.id) this.reviewerId.id = data.reviewerId.id;
-
+	updateFromPartial(data: Partial<IReviewEntity>) {
+		if (data.rating !== undefined) this.rating = data.rating;
+		if (data.comment !== undefined) this.comment = data.comment;
+		if (data.mentorId !== undefined) this.mentorId = data.mentorId;
+		if (data.sessionId !== undefined) this.sessionId = data.sessionId;
+		if (data.reviewerId !== undefined) this.reviewerId = data.reviewerId;
+		if (data.id !== undefined) this._id = data.id;
 	}
-
 
 	static fromDBDocument(doc: IReviewDocument): ReviewEntity {
-		const reviewer = doc.reviewerId as any; // populated reviewer
-
-		const reviewerDto: ReviewerDTO = {
-			id: reviewer._id?.toString(),
-			firstName: reviewer.firstName,
-			lastName: reviewer.lastName,
-			avatar: reviewer.avatar ?? null,
-		};
-
 		return new ReviewEntity({
 			id: doc._id?.toString(),
-			reviewerId: reviewerDto,
+			reviewerId: doc.reviewerId.toString(), // ✅ it's just a string
 			mentorId: doc.mentorId?.toString(),
 			sessionId: doc.sessionId?.toString() ?? "",
 			rating: doc.rating,
 			comment: doc.comment,
 			createdAt: doc.createdAt ?? new Date(),
-			// updatedAt: doc.updatedAt ?? new Date(),
+			updatedAt: doc.updatedAt ?? new Date(),
 		});
-	}
-
-	static toDTO(review: ReviewEntity): ReviewDTO {
-		return {
-			id: review._id || "",
-			reviewerId: review.reviewerId,
-			mentorId: review.mentorId,
-			sessionId: review.sessionId || "",
-			rating: review.rating,
-			comment: review.comment,
-			createdAt: review.createdAt,
-			updatedAt: review.updatedAt,
-		};
 	}
 }

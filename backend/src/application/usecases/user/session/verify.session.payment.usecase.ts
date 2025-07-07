@@ -6,10 +6,10 @@ export class VerifySessionPaymentUseCase implements IVerifySessionPaymentUseCase
 	constructor(private sessionRepo: ISessionRepository) {}
 
 	async execute(sessionId: string, userId: string): Promise<boolean> {
-		const session = await this.sessionRepo.getSessionById(sessionId);
+		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 
-		const user = session.getParticipants().find((p) => p.userId === userId);
+		const user = session.participants.find((p) => p.user.id === userId);
 		if (!user) throw new Error("Unauthorized: User is not a participant in this session");
 
 		return user.paymentStatus === "pending";

@@ -2,17 +2,19 @@ import { ISessionRepository } from "../../../../domain/repositories/session.repo
 import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IPaySessionWithGatewayUseCase } from "../../../interfaces/session";
+import { SessionPaymentStatus, SessionStatus } from "../../../../domain/entities/session.entity";
 
 export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCase {
-	constructor(private sessionRepo: ISessionRepository, private walletRepo: IWalletRepository) {}
+	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository) {}
 
-	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void> {
-		const session = await this.sessionRepo.getSessionById(sessionId);
+	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: SessionPaymentStatus, status: SessionStatus): Promise<void> {
+		// Get session
+		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 
-		// ✅ Check if session is expired
-		const sessionDate = new Date(session.getDate());
-		const [hour, minute] = session.getTime().split(":").map(Number);
+		// Validate date and time (not expired)
+		const sessionDate = new Date(session.date);
+		const [hour, minute] = session.time.split(":").map(Number);
 		sessionDate.setHours(hour);
 		sessionDate.setMinutes(minute);
 
@@ -20,63 +22,69 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 			throw new Error("Session is already expired. You cannot make payment.");
 		}
 
-		const user = session.getParticipants().find((p) => p.userId === userId);
-		if (!user) throw new Error("Unauthorized");
-		if (user.paymentStatus === "completed") throw new Error("Already is already paid");
+		// Find the participant
+		const participant = session.participants.find((p) => p.user.id === userId);
+		if (!participant) throw new Error("Unauthorized");
+		if (participant.paymentStatus === "completed") throw new Error("Already paid for this session");
 
-		const sessionFee = session.getfee();
-		const mentorId = session.getMentorId();
+		// Calculate payment distribution
+		const sessionFee = session.fee;
+		const mentorId = session.mentor.id;
 
 		const platformFeeFixed = 40;
 		const platformCommission = sessionFee * 0.15;
 		const totalPlatformFee = platformFeeFixed + platformCommission;
 		const mentorEarning = sessionFee - totalPlatformFee;
 
-		// ✅ Credit mentor wallet
+		// Credit mentor
 		await this.walletRepo.updateBalance(mentorId, mentorEarning, "credit");
 
-		// ✅ Credit platform wallet
+		// Credit platform
 		const platformWallet = await this.walletRepo.platformWallet();
-		await this.walletRepo.updateBalance(platformWallet.getUserId(), totalPlatformFee, "credit", "admin");
+		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, "credit", "admin");
 
-		// ✅ Create transactions
+		// Create transactions
+
+		//  Mentor receives their share
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: mentorId,
+			fromRole: "user",
+			toRole: "mentor",
 			amount: mentorEarning,
 			type: "credit",
 			purpose: "session_fee",
-			description: `Mentor earning for session ${session.getTopic()}`,
+			description: `Mentor earning for session ${session.topic}`,
 			sessionId,
-			fromRole: "user",
-			toRole: "mentor",
 		});
 
+		//  Admin receives fixed ₹40
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
-			toUserId: platformWallet.getUserId(),
+			toUserId: platformWallet.userId,
+			fromRole: "user",
+			toRole: "admin",
 			amount: platformFeeFixed,
 			type: "credit",
 			purpose: "platform_fee",
-			description: `Fixed fee from session ${session.getTopic()}`,
+			description: `Fixed fee from session ${session.topic}`,
 			sessionId,
-			fromRole: "user",
-			toRole: "admin",
 		});
 
+		//  Admin receives 15% commission
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
-			toUserId: platformWallet.getUserId(),
+			toUserId: platformWallet.userId,
+			fromRole: "user",
+			toRole: "admin",
 			amount: platformCommission,
 			type: "credit",
 			purpose: "platform_fee",
-			description: `15% commission from session ${session.getTopic()}`,
+			description: `15% commission from session ${session.topic}`,
 			sessionId,
-			fromRole: "user",
-			toRole: "admin",
 		});
 
-		// ✅ Update payment status
-		await this.sessionRepo.paySession(sessionId, userId, paymentId, paymentStatus, status);
+		// Update session payment details
+		await this.sessionRepo.markPayment(sessionId, userId, paymentStatus, paymentId, status);
 	}
 }

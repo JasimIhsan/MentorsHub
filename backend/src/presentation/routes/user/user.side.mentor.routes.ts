@@ -4,6 +4,6 @@ import { getAllApprovedMentorsController, getMentorController } from "../../cont
 import { requireRole } from "../../middlewares/require.role.middleware";
 export const userSideMentorRouter = Router();
 
-userSideMentorRouter.get("/approved", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => getAllApprovedMentorsController.handle(req, res, next));
+userSideMentorRouter.get("/approved/:userId", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => getAllApprovedMentorsController.handle(req, res, next));
 
 userSideMentorRouter.get("/:mentorId", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => getMentorController.handle(req, res, next));

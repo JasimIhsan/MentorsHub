@@ -1,18 +1,11 @@
 import mongoose from "mongoose";
-import { ReviewDTO } from "../../../application/dtos/review.dtos";
 import { ReviewEntity } from "../../../domain/entities/review.entity";
 import { IReviewRepository } from "../../../domain/repositories/review.repository";
 import { ReviewModel } from "../models/review-rating/review.model";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 
 export class ReviewRepositoryImpl implements IReviewRepository {
-	async create(review: {
-		reviewerId: string;
-		mentorId: string;
-		rating: number;
-		comment: string;
-		sessionId?: string;
-	}): Promise<ReviewEntity> {
+	async create(review: { reviewerId: string; mentorId: string; rating: number; comment: string; sessionId?: string }): Promise<ReviewEntity> {
 		try {
 			const newReview = new ReviewModel(review);
 			await newReview.save();
@@ -22,10 +15,7 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 		}
 	}
 
-	async findByMentorId(
-		mentorId: string,
-		options?: { page?: number; limit?: number; rating?: number },
-	): Promise<{ reviews: ReviewDTO[]; total: number }> {
+	async findByMentorId(mentorId: string, options?: { page?: number; limit?: number; rating?: number }): Promise<{ reviews: ReviewEntity[]; total: number }> {
 		try {
 			const page = options?.page ?? 1;
 			const limit = options?.limit ?? 10;
@@ -34,18 +24,10 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 			const filter: any = { mentorId };
 			if (options?.rating !== undefined) filter.rating = options.rating;
 
-			const [docs, total] = await Promise.all([
-				ReviewModel.find(filter)
-					.populate("reviewerId", "firstName lastName avatar")
-					.skip(skip)
-					.limit(limit)
-					.sort({ createdAt: -1 }),
-				ReviewModel.countDocuments(filter),
-			]);
+			const [docs, total] = await Promise.all([ReviewModel.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }), ReviewModel.countDocuments(filter)]);
 
 			const reviewEntities = docs.map((doc) => ReviewEntity.fromDBDocument(doc));
-			const reviews = reviewEntities.map((review) => this.mapReviewToReviewDTO(review));
-			return { reviews, total };
+			return { reviews: reviewEntities, total };
 		} catch (error) {
 			return handleExceptionError(error, "Error fetching reviews for mentor");
 		}
@@ -53,7 +35,8 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 
 	async deleteById(id: string): Promise<void> {
 		try {
-			await ReviewModel.findByIdAndDelete(id);
+			const deleted = await ReviewModel.findByIdAndDelete(id);
+			if (!deleted) throw new Error("Review not found");
 		} catch (error) {
 			return handleExceptionError(error, "Error deleting review");
 		}
@@ -76,19 +59,6 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 		} catch (error) {
 			return handleExceptionError(error, "Error updating review");
 		}
-	}
-
-	private mapReviewToReviewDTO(review: ReviewEntity): ReviewDTO {
-		return {
-			id: review.id ?? "",
-			reviewerId: review.getReviewer(),
-			mentorId: review.getMentorId(),
-			sessionId: review.getSessionId() ?? "",
-			rating: review.getRating(),
-			comment: review.getComment(),
-			createdAt: review.getCreatedAt(),
-			updatedAt: review.getUpdatedAt(),
-		};
 	}
 
 	async calculateMentorRating(mentorId: string): Promise<{ average: number; total: number }> {

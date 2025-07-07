@@ -1,7 +1,7 @@
 import { ICreateTransactionUsecase, IWalletTopUpUsecase } from "../../interfaces/wallet";
-import { WalletEntity } from "../../../domain/entities/wallet/wallet.entity";
 import { IWalletTransactionDTO } from "../../dtos/wallet.transation.dto";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
+import { IWalletDTO, mapToWalletDTO } from "../../dtos/wallet.dtos";
 
 interface TopUpWalletInput {
 	userId: string;
@@ -13,7 +13,7 @@ interface TopUpWalletInput {
 export class WalletTopUpUseCase implements IWalletTopUpUsecase {
 	constructor(private walletRepo: IWalletRepository, private createTransactionUseCase: ICreateTransactionUsecase) {}
 
-	async execute(data: TopUpWalletInput): Promise<{ wallet: WalletEntity; transaction: IWalletTransactionDTO }> {
+	async execute(data: TopUpWalletInput): Promise<{ wallet: IWalletDTO; transaction: IWalletTransactionDTO }> {
 		const { userId, amount, purpose, description } = data;
 
 		if (amount <= 0) {
@@ -44,7 +44,7 @@ export class WalletTopUpUseCase implements IWalletTopUpUsecase {
 		});
 
 		return {
-			wallet: updatedWallet,
+			wallet: mapToWalletDTO(updatedWallet),
 			transaction,
 		};
 	}

@@ -11,10 +11,10 @@ export class GetAllUsersUsecase implements IGetAllUsersUsecase {
 		currentPage: number;
 	}> {
 		try {
-			const users = await this.userRepository.findAllUsers(params);
+			const { currentPage, totalPages, totalUsers, userEntities } = await this.userRepository.findUsers(params);
 
-			const usersDtos: IUserDTO[] = users.users.map((user) => mapToUserDTO(user));
-			return { ...users, users: usersDtos };
+			const usersDtos: IUserDTO[] = userEntities.map((user) => mapToUserDTO(user));
+			return { currentPage, totalPages, totalUsers, users: usersDtos };
 		} catch (error) {
 			if (error instanceof Error) {
 				throw new Error(error.message);

@@ -1,26 +1,24 @@
-import { Availability } from "../../domain/entities/mentor.detailes.entity";
+import { Availability, MentorProfileEntity } from "../../domain/entities/mentor.detailes.entity";
+import { MentorEntity } from "../../domain/entities/mentor.entity";
+import { UserEntity } from "../../domain/entities/user.entity";
 
 export interface IMentorDTO {
 	id: string;
 	email: string;
-	password: string;
 	firstName: string;
 	role: "user" | "mentor";
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;
-	interests: object[] | null;
-	updatedAt: Date;
-	skills: object[] | null;
+	interests: string[] | null;
+	updatedAt: Date | null;
+	skills: string[] | null;
 	status: "blocked" | "unblocked";
 	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
 	createdAt: Date;
-	lastActive: Date | null;
-	isVerified: boolean | null;
 	averageRating: number | null;
 	totalReviews: number | null;
 	sessionCompleted: number | null;
-	featuredMentor: boolean | null;
 	badges: string[] | null;
 	userId: string;
 	professionalTitle: string;
@@ -53,4 +51,77 @@ export interface IMentorDTO {
 	hourlyRate: number | null;
 	availability: Availability;
 	documents: string[];
+}
+
+export function mapToMentorDTO(userEntity: UserEntity, mentorEntity: MentorProfileEntity): IMentorDTO {
+	return {
+		id: mentorEntity.id!,
+		email: userEntity.email,
+		firstName: userEntity.firstName,
+		role: userEntity.role,
+		lastName: userEntity.lastName,
+		avatar: userEntity.avatar,
+		bio: userEntity.bio,
+		interests: userEntity.interests,
+		updatedAt: userEntity.updatedAt,
+		skills: userEntity.skills,
+		status: userEntity.status,
+		mentorRequestStatus: userEntity.mentorRequestStatus,
+		createdAt: userEntity.createdAt,
+		averageRating: userEntity.averageRating,
+		totalReviews: userEntity.totalReviews,
+		sessionCompleted: userEntity.sessionCompleted,
+		badges: userEntity.badges,
+		userId: userEntity.id!,
+		professionalTitle: mentorEntity.professionalTitle,
+		languages: mentorEntity.languages,
+		primaryExpertise: mentorEntity.primaryExpertise,
+		yearsExperience: mentorEntity.yearsExperience,
+		workExperiences: mentorEntity.workExperiences,
+		educations: mentorEntity.educations,
+		availability: mentorEntity.availability,
+		certifications: mentorEntity.certifications,
+		documents: mentorEntity.documents,
+		sessionFormat: mentorEntity.sessionFormat,
+		sessionTypes: mentorEntity.sessionTypes,
+		pricing: mentorEntity.pricing,
+		hourlyRate: mentorEntity.hourlyRate,
+	};
+}
+
+
+export function mapToMentorDTOWithoutUser(mentorEntity: MentorEntity): IMentorDTO {
+	return {
+		id: mentorEntity.id!,
+		userId: mentorEntity.userId!,
+		email: mentorEntity.email,
+		firstName: mentorEntity.firstName,
+		role: mentorEntity.role,
+		lastName: mentorEntity.lastName,
+		avatar: mentorEntity.avatar,
+		bio: mentorEntity.bio,
+		interests: mentorEntity.interests,
+		updatedAt: mentorEntity.updatedAt,
+		skills: mentorEntity.skills,
+		status: mentorEntity.status,
+		mentorRequestStatus: mentorEntity.mentorRequestStatus,
+		createdAt: mentorEntity.createdAt,
+		averageRating: mentorEntity.averageRating,
+		totalReviews: mentorEntity.totalReviews,
+		sessionCompleted: mentorEntity.sessionCompleted,
+		badges: mentorEntity.badges,
+		professionalTitle: mentorEntity.professionalTitle,
+		languages: mentorEntity.languages,
+		primaryExpertise: mentorEntity.primaryExpertise,
+		yearsExperience: mentorEntity.yearsExperience,
+		workExperiences: mentorEntity.workExperiences,
+		educations: mentorEntity.educations,
+		availability: mentorEntity.availability,
+		certifications: mentorEntity.certifications,
+		documents: mentorEntity.documents,
+		sessionFormat: mentorEntity.sessionFormat,
+		sessionTypes: mentorEntity.sessionTypes,
+		pricing: mentorEntity.pricing,
+		hourlyRate: mentorEntity.hourlyRate,
+	};
 }

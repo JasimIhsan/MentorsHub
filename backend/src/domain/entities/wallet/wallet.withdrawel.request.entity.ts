@@ -1,31 +1,61 @@
-import { ObjectId } from "mongoose";
-import { IWithdrawalRequestDocument } from "../../../infrastructure/database/models/wallet/wallet.withdrawel.request.model";
+export type WithdrawalStatus = "pending" | "approved" | "rejected" | "completed";
 
 export class WithdrawalRequestEntity {
-	private _id?: ObjectId;
-	private mentorId: ObjectId;
+	private _id?: string;
+	private mentorId: string;
 	private amount: number;
-	private status: "pending" | "approved" | "rejected" | "completed";
+	private status: WithdrawalStatus;
 	private createdAt?: Date;
 	private updatedAt?: Date;
 
-	constructor(props: { _id?: ObjectId; mentorId: ObjectId; amount: number; status?: "pending" | "approved" | "rejected" | "completed"; createdAt?: Date; updatedAt?: Date }) {
+	constructor(props: { _id?: string; mentorId: string; amount: number; status?: WithdrawalStatus; createdAt?: Date; updatedAt?: Date }) {
 		this._id = props._id;
 		this.mentorId = props.mentorId;
 		this.amount = props.amount;
-		this.status = props.status || "pending";
+		this.status = props.status ?? "pending";
 		this.createdAt = props.createdAt;
 		this.updatedAt = props.updatedAt;
 	}
 
-	approve() {
+	// ✅ Getters
+	get id(): string | undefined {
+		return this._id;
+	}
+
+	get mentor(): string {
+		return this.mentorId;
+	}
+
+	get withdrawalAmount(): number {
+		return this.amount;
+	}
+
+	get withdrawalStatus(): WithdrawalStatus {
+		return this.status;
+	}
+
+	get created(): Date | undefined {
+		return this.createdAt;
+	}
+
+	get updated(): Date | undefined {
+		return this.updatedAt;
+	}
+
+	// ✅ Domain actions
+	approve(): void {
 		this.status = "approved";
 	}
 
-	reject() {
+	reject(): void {
 		this.status = "rejected";
 	}
 
+	complete(): void {
+		this.status = "completed";
+	}
+
+	// ✅ For saving or serialization
 	toObject() {
 		return {
 			_id: this._id,
@@ -37,9 +67,9 @@ export class WithdrawalRequestEntity {
 		};
 	}
 
-	static fromDBDocument(doc: IWithdrawalRequestDocument): WithdrawalRequestEntity {
+	static fromDBDocument(doc: any): WithdrawalRequestEntity {
 		return new WithdrawalRequestEntity({
-			_id: doc._id,
+			_id: doc._id?.toString(),
 			mentorId: doc.mentorId,
 			amount: doc.amount,
 			status: doc.status,

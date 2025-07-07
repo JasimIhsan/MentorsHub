@@ -1,13 +1,13 @@
 import { MessageEntity, MessageType } from "../../../domain/entities/message.entity";
 import { IMessageRepository } from "../../../domain/repositories/message.repository";
 import { IChatRepository } from "../../../domain/repositories/chat.repository";
-import { ISendMessageDTO, mapToSendMessageDTO } from "../../dtos/message.dto";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
+import { ISendMessageDTO, mapToSendMessageDTO } from "../../dtos/message.dto";
 
 interface SendMessageInput {
-	chatId?: string; // existing chat (optional)
-	sender: string; // current user ID
-	receiver: string; // other user ID
+	chatId?: string; // If known
+	sender: string;
+	receiver: string;
 	content: string;
 	type: MessageType;
 	fileUrl?: string;
@@ -17,48 +17,42 @@ export class SendMessageUseCase {
 	constructor(private readonly messageRepo: IMessageRepository, private readonly chatRepo: IChatRepository, private readonly userRepo: IUserRepository) {}
 
 	async execute(data: SendMessageInput): Promise<ISendMessageDTO> {
-		// 1️⃣ Resolve (or create) the chat
-		let chatId = data.chatId;
-		let chat = chatId ? await this.chatRepo.findChatById(chatId) : null;
+		const { chatId, sender, receiver, content, type, fileUrl } = data;
+
+		// Validate sender and receiver
+		const senderUser = await this.userRepo.findUserById(sender);
+		if (!senderUser) throw new Error("Sender not found");
+
+		const receiverUser = await this.userRepo.findUserById(receiver);
+		if (!receiverUser) throw new Error("Receiver not found");
+
+		// Get or create the chat
+		let chat = chatId ? await this.chatRepo.findById(chatId) : await this.chatRepo.findPrivateBetween(sender, receiver);
 
 		if (!chat) {
-			chat = await this.chatRepo.findPrivateChatBetweenUsers(data.sender, data.receiver);
-
-			if (!chat) {
-				chat = await this.chatRepo.createChat([data.sender, data.receiver], /* isGroupChat */ false);
-			}
-
-			chatId = chat.id;
+			chat = await this.chatRepo.create([sender, receiver], false);
 		}
 
-		if (!chatId) {
-			throw new Error("Chat not found or could not be created.");
-		}
-
-		// 2️⃣ Build the MessageEntity
+		// Create message entity
 		const message = new MessageEntity({
 			id: "",
-			chatId,
-			sender: data.sender,
-			content: data.content,
-			type: data.type,
-			fileUrl: data.fileUrl,
-			readBy: [data.sender],
+			chat: chat.id,
+			sender,
+			content,
+			type,
+			fileUrl,
+			readBy: [sender],
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		});
 
-		// 3️⃣ Persist the message
-		const savedMessage = await this.messageRepo.sendMessage(message);
+		// Save message
+		const savedMessage = await this.messageRepo.create(message);
 
-		// 4️⃣ Update chat’s lastMessage pointer
-		await this.chatRepo.updateLastMessage(chatId, savedMessage.id);
+		// Update last message in chat
+		await this.chatRepo.updateLastMessage(chat.id, savedMessage.id);
 
-		const sender = await this.userRepo.findUserById(data.sender);
-		if (!sender) throw new Error("Sender not found");
-
-		const dto = mapToSendMessageDTO(message, sender);
-
-		return dto;
+		// Map to DTO with proper sender
+		return mapToSendMessageDTO(savedMessage, senderUser);
 	}
 }

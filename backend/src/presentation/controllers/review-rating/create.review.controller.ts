@@ -18,7 +18,7 @@ export class CreateReviewController {
 				comment,
 			});
 
-			res.status(HttpStatusCode.CREATED).json({ success: true, review: review.toObject() });
+			res.status(HttpStatusCode.CREATED).json({ success: true, review });
 		} catch (error) {
 			logger.error(`❌ Error in CreateReviewController: ${error}`);
 			next(error);

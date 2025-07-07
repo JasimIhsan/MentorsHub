@@ -1,8 +1,7 @@
 import { IReviewRepository } from "../../../domain/repositories/review.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { IUpdateReviewUseCase } from "../../interfaces/review";
-import { ReviewEntity } from "../../../domain/entities/review.entity";
-import { ReviewDTO } from "../../dtos/review.dtos";
+import { mapToReviewDTO, ReviewDTO } from "../../dtos/review.dtos";
 
 export class UpdateReviewUseCase implements IUpdateReviewUseCase {
 	constructor(private reviewRepo: IReviewRepository, private userRepo: IUserRepository) {}
@@ -44,15 +43,7 @@ export class UpdateReviewUseCase implements IUpdateReviewUseCase {
 		const reviewer = await this.userRepo.findUserById(data.reviewerId);
 		if (!reviewer) throw new Error("Reviewer not found");
 
-		updatedReview.updateReviewData({
-			reviewerId: {
-				id: data.reviewerId,
-				firstName: reviewer.firstName,
-				lastName: reviewer.lastName,
-				avatar: reviewer.avatar ?? "",
-			},
-		});
 
-		return ReviewEntity.toDTO(updatedReview);
+		return mapToReviewDTO(updatedReview, reviewer);
 	}
 }
