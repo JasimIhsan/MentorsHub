@@ -5,7 +5,7 @@ import { CommonStringMessage } from "../../../../shared/constants/string.message
 import { IPaySessionWithWalletUseCase } from "../../../interfaces/session";
 
 import { SessionPaymentStatus, SessionStatus } from "../../../../domain/entities/session.entity";
-import { RoleEnum } from "../../../interfaces/enums/role";
+import { RoleEnum } from "../../../interfaces/enums/role.enum";
 
 export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository) {}

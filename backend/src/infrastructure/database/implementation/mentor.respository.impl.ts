@@ -5,7 +5,7 @@ import { IUsersDocument } from "../models/user/user.model";
 import { IAvailabilityDTO } from "../../../application/dtos/availability.dto";
 import { MentorEntity } from "../../../domain/entities/mentor.entity";
 import mongoose from "mongoose";
-import { RoleEnum } from "../../../application/interfaces/enums/role";
+import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
 
 type AggregatedMentorDoc = IMentorProfileModel & {
 	user: IUsersDocument; // because $lookup + $unwind gives you a single user object

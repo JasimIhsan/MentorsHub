@@ -1,7 +1,7 @@
 import { WithdrawalRequestEntity } from "../../domain/entities/wallet/wallet.withdrawel.request.entity";
 import { IWalletDTO } from "../dtos/wallet.dtos";
 import { IWalletTransactionDTO } from "../dtos/wallet.transation.dto";
-import { RoleEnum } from "./enums/role";
+import { RoleEnum } from "./enums/role.enum";
 
 export interface ICreateWalletUsecase {
 	execute(userId: string, role: string): Promise<IWalletDTO>;

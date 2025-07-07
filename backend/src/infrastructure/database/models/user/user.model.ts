@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
-import { RoleEnum } from "../../../../application/interfaces/enums/role";
+import { RoleEnum } from "../../../../application/interfaces/enums/role.enum";
 
 export interface IUsersDocument extends Document {
 	_id: ObjectId;

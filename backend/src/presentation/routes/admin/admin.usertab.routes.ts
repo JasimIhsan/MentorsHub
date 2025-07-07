@@ -2,7 +2,7 @@ import { Router } from "express";
 import { createUserController, deleteUserController, getAllUserController, updateUserController, updateUserStatusController } from "../../controllers/admin/composer";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { requireRole } from "../../middlewares/require.role.middleware";
-import { RoleEnum } from "../../../application/interfaces/enums/role";
+import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
 export const usertabRouter = Router();
 
 usertabRouter.get("/", verifyAccessToken, requireRole(RoleEnum.ADMIN), (req, res, next) => getAllUserController.handle(req, res, next));

@@ -4,7 +4,7 @@ import { UserRepositoryImpl } from "../../infrastructure/database/implementation
 import { AdminRepositoryImpl } from "../../infrastructure/database/implementation/admin.repository.impl";
 import { HttpStatusCode } from "../../shared/constants/http.status.codes";
 import { CommonStringMessage } from "../../shared/constants/string.messages";
-import { RoleEnum } from "../../application/interfaces/enums/role";
+import { RoleEnum } from "../../application/interfaces/enums/role.enum";
 import { redisService } from "../../infrastructure/composer";
 import { logger } from "../../infrastructure/utils/logger";
 

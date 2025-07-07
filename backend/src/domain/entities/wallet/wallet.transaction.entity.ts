@@ -1,6 +1,6 @@
 // domain/entities/wallet.transaction.entity.ts
 
-import { RoleEnum } from "../../../application/interfaces/enums/role";
+import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
 import { IWalletTransactionDocument } from "../../../infrastructure/database/models/wallet/wallet.transaction.model";
 
 export type WalletTransactionPurpose = "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";

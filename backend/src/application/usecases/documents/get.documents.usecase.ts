@@ -4,7 +4,7 @@ import { IS3Service } from "../../../domain/interface/s3.service.interface";
 import { IGetDocumentsUseCase } from "../../interfaces/documents";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { AdminEntity } from "../../../domain/entities/admin.entity";
-import { RoleEnum } from "../../interfaces/enums/role";
+import { RoleEnum } from "../../interfaces/enums/role.enum";
 
 interface Input {
 	mentorId: string;

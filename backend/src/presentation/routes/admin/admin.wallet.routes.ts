@@ -2,7 +2,7 @@ import { Router } from "express";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { requireRole } from "../../middlewares/require.role.middleware";
 import { createTransactionController, getTransactionsController, getWalletController, topupWalletController, withdrawWalletController } from "../../controllers/wallet/composer";
-import { RoleEnum } from "../../../application/interfaces/enums/role";
+import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
 
 export const adminWalletRouter = Router();
 

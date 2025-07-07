@@ -1,7 +1,7 @@
 import { SessionEntity } from "../../domain/entities/session.entity";
 import { UserEntity } from "../../domain/entities/user.entity";
 import { WalletTransactionEntity, WalletTransactionPurpose, WalletTransactionType } from "../../domain/entities/wallet/wallet.transaction.entity";
-import { RoleEnum } from "../interfaces/enums/role";
+import { RoleEnum } from "../interfaces/enums/role.enum";
 
 export interface IWalletTransactionDTO {
 	_id: string;

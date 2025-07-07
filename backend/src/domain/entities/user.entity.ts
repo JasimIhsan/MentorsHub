@@ -1,4 +1,4 @@
-import { RoleEnum } from "../../application/interfaces/enums/role";
+import { RoleEnum } from "../../application/interfaces/enums/role.enum";
 
 export type UserStatus = "blocked" | "unblocked";
 export type MentorRequestStatus = "pending" | "approved" | "rejected" | "not-requested";

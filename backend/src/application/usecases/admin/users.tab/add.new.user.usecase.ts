@@ -3,7 +3,7 @@ import { UserEntity } from "../../../../domain/entities/user.entity";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
 import { ICreateUserUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
 import { IHashService } from "../../../interfaces/services/hash.service";
-import { RoleEnum } from "../../../interfaces/enums/role";
+import { RoleEnum } from "../../../interfaces/enums/role.enum";
 
 export class CreateUserUsecase implements ICreateUserUsecase {
 	constructor(private userRepository: IUserRepository, private hashService: IHashService) {} 

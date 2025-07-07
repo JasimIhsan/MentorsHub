@@ -4,7 +4,7 @@ import { IUserRepository } from "../../../../domain/repositories/user.repository
 import { ITokenService } from "../../../interfaces/user/token.service.interface";
 import { IGoogleAuthUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { IHashService } from "../../../interfaces/services/hash.service";
-import { RoleEnum } from "../../../interfaces/enums/role";
+import { RoleEnum } from "../../../interfaces/enums/role.enum";
 
 interface GoogleUserData {
 	email: string;

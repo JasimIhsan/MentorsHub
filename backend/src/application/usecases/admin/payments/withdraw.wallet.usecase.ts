@@ -1,7 +1,7 @@
 import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
 import { IWalletDTO, mapToWalletDTO } from "../../../dtos/wallet.dtos";
 import { IWalletTransactionDTO } from "../../../dtos/wallet.transation.dto";
-import { RoleEnum } from "../../../interfaces/enums/role";
+import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { IWithdrawWalletUsecase, ICreateTransactionUsecase } from "../../../interfaces/wallet";
 
 export class WithdrawWalletUseCase implements IWithdrawWalletUsecase {

@@ -1,5 +1,5 @@
 import { UserEntity } from "../../domain/entities/user.entity";
-import { RoleEnum } from "../interfaces/enums/role";
+import { RoleEnum } from "../interfaces/enums/role.enum";
 
 export interface IUserDTO {
 	id?: string;

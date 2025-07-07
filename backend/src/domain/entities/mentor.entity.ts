@@ -1,4 +1,4 @@
-import { RoleEnum } from "../../application/interfaces/enums/role";
+import { RoleEnum } from "../../application/interfaces/enums/role.enum";
 import { Availability } from "./mentor.detailes.entity";
 
 export interface MentorEntityProps {

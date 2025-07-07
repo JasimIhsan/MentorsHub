@@ -4,7 +4,7 @@ import { verifyAccessToken } from "../../middlewares/auth.access.token.middlewar
 import { verifyRefreshToken } from "../../middlewares/auth.refresh.token.middleware";
 import { checkUserStatusInLogin } from "../../middlewares/auth.user.status.middleware";
 import { requireRole } from "../../middlewares/require.role.middleware";
-import { RoleEnum } from "../../../application/interfaces/enums/role";
+import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
 
 const authRouter = Router();
 

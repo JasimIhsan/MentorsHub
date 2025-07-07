@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
-import { RoleEnum } from "../../../../application/interfaces/enums/role";
+import { RoleEnum } from "../../../../application/interfaces/enums/role.enum";
 
 // 1. Interface
 export interface IWalletTransactionDocument extends Document {
