@@ -56,9 +56,9 @@ export class GoogleAuthUsecase implements IGoogleAuthUsecase {
 			const refreshToken = this.tokenService.generateRefreshToken(user.id!);
 
 			return { user, accessToken, refreshToken };
-		} catch (err: any) {
-			console.error("Google authentication error:", err?.message);
-			throw new Error(err?.message || "An error occurred during Google authentication");
+		} catch (err) {
+			console.error("Google authentication error:", err);
+			throw new Error(err instanceof Error ? err.message : "An error occurred during Google authentication");
 		}
 	}
 }

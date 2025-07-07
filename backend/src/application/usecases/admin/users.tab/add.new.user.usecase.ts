@@ -5,9 +5,8 @@ import { ICreateUserUsecase } from "../../../interfaces/admin/admin.usertab.inte
 import { IHashService } from "../../../interfaces/services/hash.service";
 
 export class CreateUserUsecase implements ICreateUserUsecase {
-	constructor(private userRepository: IUserRepository, private hashService: IHashService) {} // Replace 'any' with the actual type of userRepository
+	constructor(private userRepository: IUserRepository, private hashService: IHashService) {} 
 	async execute(firstName: string, lastName: string, email: string, role: UserRole): Promise<IUserDTO> {
-		// Replace 'any' with the actual type of userData
 		try {
 			const isUserExists = await this.userRepository.findUserByEmail(email);
 			if (isUserExists) {
