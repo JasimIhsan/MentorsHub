@@ -2,9 +2,10 @@
 
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { SessionModel } from "../models/session/session.model";
-import { SessionEntity, SessionPaymentStatus } from "../../../domain/entities/session.entity";
+import { SessionEntity } from "../../../domain/entities/session.entity";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 import { SessionStatusEnum } from "../../../application/interfaces/enums/session.status.enums";
+import { SessionPaymentStatusEnum } from "../../../application/interfaces/enums/session.payment.status.enum";
 
 export class SessionRepositoryImpl implements ISessionRepository {
 	async create(session: SessionEntity): Promise<SessionEntity> {
@@ -140,7 +141,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async markPayment(sessionId: string, userId: string, paymentStatus: SessionPaymentStatus, paymentId: string, newStatus: SessionStatusEnum): Promise<void> {
+	async markPayment(sessionId: string, userId: string, paymentStatus: SessionPaymentStatusEnum, paymentId: string, newStatus: SessionStatusEnum): Promise<void> {
 		try {
 			await SessionModel.findOneAndUpdate(
 				{ _id: sessionId, "participants.userId": userId },

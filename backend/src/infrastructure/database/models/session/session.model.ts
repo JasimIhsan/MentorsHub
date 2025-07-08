@@ -1,13 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { SessionStatusEnum } from "../../../../application/interfaces/enums/session.status.enums";
+import { SessionPaymentStatusEnum } from "../../../../application/interfaces/enums/session.payment.status.enum";
 
 export type SessionFormat = "one-on-one" | "group";
-export type SessionPaymentStatus = "pending" | "completed" | "failed";
 export type PricingType = "free" | "paid";
 
 export interface ISessionParticipant {
 	userId: mongoose.Types.ObjectId;
-	paymentStatus: SessionPaymentStatus;
+	paymentStatus: SessionPaymentStatusEnum;
 	paymentId?: string;
 }
 
@@ -30,7 +30,7 @@ export interface ISessionDocument extends Document {
 	updatedAt: Date;
 }
 
-const ParticipantSchema = new Schema<ISessionParticipant>(
+const ParticipantSchema = new Schema(
 	{
 		userId: { type: Schema.Types.ObjectId, ref: "Users", required: true },
 		paymentStatus: {

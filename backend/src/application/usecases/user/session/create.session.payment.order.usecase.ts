@@ -1,5 +1,6 @@
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
+import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
 import { IPaymentGateway } from "../../../interfaces/services/payment.service";
 import { ICreateSessionPaymentOrderUseCase } from "../../../interfaces/session";
 import { v4 as uuidv4 } from "uuid";
@@ -23,7 +24,7 @@ export class CreateSessionPaymentOrderUseCase implements ICreateSessionPaymentOr
 
 		const participant = session.participants.find((p) => p.user.id === userId);
 		if (!participant) throw new Error("Unauthorized: User is not a participant in this session");
-		if (participant.paymentStatus === "completed") throw new Error("Session already paid");
+		if (participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) throw new Error("Session already paid");
 
 		const amount = session.fee * 100;
 		const receipt = `sess_${uuidv4().slice(0, 8)}`;

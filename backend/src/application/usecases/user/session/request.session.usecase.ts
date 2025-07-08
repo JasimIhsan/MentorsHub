@@ -1,11 +1,12 @@
 // application/use‑cases/session/request-session.usecase.ts
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { IMentorProfileRepository } from "../../../../domain/repositories/mentor.details.repository";
-import { SessionEntity, SessionParticipantEntity, SessionPaymentStatus, PricingType } from "../../../../domain/entities/session.entity"; // <- now imported from Entity
+import { SessionEntity, SessionParticipantEntity, PricingType } from "../../../../domain/entities/session.entity"; // <- now imported from Entity
 import { IGetAvailabilityUseCase } from "../../../interfaces/mentors/mentors.interface";
 import { ISessionUserDTO, mapToUserSessionDTO } from "../../../dtos/session.dto";
 import { IRequestSessionUseCase } from "../../../interfaces/session";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
+import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
 
 export interface SessionRequestInput {
 	mentorId: string; // who you’re booking
@@ -38,7 +39,7 @@ export class RequestSessionUseCase implements IRequestSessionUseCase{
 		}
 
 		/* Build participants array with the *new* shape */
-		const participantPayment: SessionPaymentStatus = dto.pricing === "free" ? "completed" : "pending";
+		const participantPayment: SessionPaymentStatusEnum = dto.pricing === "free" ? SessionPaymentStatusEnum.COMPLETED : SessionPaymentStatusEnum.PENDING;
 
 		const participants: SessionParticipantEntity[] = [
 			{

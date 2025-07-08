@@ -3,17 +3,16 @@ import { ISessionRepository } from "../../../../domain/repositories/session.repo
 import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IPaySessionWithWalletUseCase } from "../../../interfaces/session";
-
-import { SessionPaymentStatus } from "../../../../domain/entities/session.entity";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { TransactionsTypeEnum } from "../../../interfaces/enums/transaction.type.enum";
 import { TransactionPurposeEnum } from "../../../interfaces/enums/transaction.purpose.enum";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
+import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
 
 export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository) {}
 
-	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: SessionPaymentStatus, status: SessionStatusEnum): Promise<void> {
+	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: SessionPaymentStatusEnum, status: SessionStatusEnum): Promise<void> {
 		/* Fetch the session */
 		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
@@ -30,7 +29,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		/* Validate participant */
 		const participant = session.participants.find((p) => p.user.id === userId);
 		if (!participant) throw new Error("Unauthorized: User is not a participant in this session");
-		if (participant.paymentStatus === "completed") throw new Error("Session already booked");
+		if (participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) throw new Error("Session already booked");
 
 		/* Calculate fees */
 		const sessionFee = session.fee;

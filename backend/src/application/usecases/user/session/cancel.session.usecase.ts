@@ -2,6 +2,7 @@ import { ISessionRepository } from "../../../../domain/repositories/session.repo
 import { isSessionExpired } from "../../../../infrastructure/utils/isSessionExpired";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { ISessionUserDTO, mapToUserSessionDTO } from "../../../dtos/session.dto";
+import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
 import { ICancelSessionUseCase } from "../../../interfaces/session";
 
@@ -33,7 +34,7 @@ export class CancelSessionUseCase implements ICancelSessionUseCase {
 		}
 
 		// For paid sessions, check payment status
-		if (session.toObject().pricing === "paid" && participant.paymentStatus === "completed") {
+		if (session.toObject().pricing === "paid" && participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) {
 			throw new Error("Cannot cancel session that has already been paid");
 		}
 
