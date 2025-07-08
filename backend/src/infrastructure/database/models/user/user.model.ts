@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
 import { RoleEnum } from "../../../../application/interfaces/enums/role.enum";
+import { MentorRequestStatusEnum } from "../../../../application/interfaces/enums/mentor.request.status.enum";
 
 export interface IUsersDocument extends Document {
 	_id: ObjectId;
@@ -14,7 +15,7 @@ export interface IUsersDocument extends Document {
 	updatedAt: Date;
 	skills: string[] | null;
 	status: "blocked" | "unblocked";
-	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
+	mentorRequestStatus: MentorRequestStatusEnum;
 	createdAt: Date;
 	averageRating: number | null;
 	totalReviews: number | null;

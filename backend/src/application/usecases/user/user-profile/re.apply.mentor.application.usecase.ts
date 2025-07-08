@@ -6,6 +6,7 @@ import { CommonStringMessage } from "../../../../shared/constants/string.message
 import { IUploadMentorDocuments } from "../../../interfaces/documents";
 import { IReApplyMentorApplicationUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
+import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
 
 export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicationUseCase {
 	constructor(private mentorProfileRepo: IMentorProfileRepository, private userRepo: IUserRepository, private uploadDocumentUseCase: IUploadMentorDocuments) {}
@@ -16,7 +17,7 @@ export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicatio
 		if (userEntity.role === RoleEnum.MENTOR) {
 			throw new Error("You are already a mentor");
 		}
-		if (userEntity.mentorRequestStatus === "pending" || userEntity.mentorRequestStatus === "approved") {
+		if (userEntity.mentorRequestStatus === MentorRequestStatusEnum.PENDING || userEntity.mentorRequestStatus === MentorRequestStatusEnum.APPROVED) {
 			throw new Error("Mentor request is already approved or in process");
 		}
 
@@ -35,7 +36,7 @@ export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicatio
 					}),
 				),
 			);
-		} else if (existingProfile && userEntity.mentorRequestStatus === "rejected") {
+		} else if (existingProfile && userEntity.mentorRequestStatus === MentorRequestStatusEnum.REJECTED) {
 			documentUrls = existingProfile.documents || [];
 		}
 
@@ -47,7 +48,7 @@ export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicatio
 
 		let mentorProfile: MentorProfileEntity;
 
-		if (existingProfile && userEntity.mentorRequestStatus === "rejected") {
+		if (existingProfile && userEntity.mentorRequestStatus === MentorRequestStatusEnum.REJECTED) {
 			// Update existing mentor profile for re-application
 			existingProfile.updateMentorProfile(updateData);
 			mentorProfile = await this.mentorProfileRepo.updateMentorProfile(userId, existingProfile);
@@ -60,7 +61,7 @@ export class ReApplyMentorApplicationUseCase implements IReApplyMentorApplicatio
 		// Update user details with pending status
 		const updatedUserData: Partial<UserEntityProps> = {
 			...userData,
-			mentorRequestStatus: "pending",
+			mentorRequestStatus: MentorRequestStatusEnum.PENDING,
 		};
 
 		const user = await this.userRepo.findUserById(userId);

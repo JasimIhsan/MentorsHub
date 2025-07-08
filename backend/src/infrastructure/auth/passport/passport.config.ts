@@ -7,6 +7,7 @@ import { IHashService } from "../../../application/interfaces/services/hash.serv
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { GoogleConfig } from "./config/google.config";
 import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
+import { MentorRequestStatusEnum } from "../../../application/interfaces/enums/mentor.request.status.enum";
 
 dotenv.config();
 
@@ -41,7 +42,7 @@ export const configurePassport = (userRepo: IUserRepository, tokenService: IToke
 								avatar: profile.photos?.[0]?.value ?? null,
 								role: RoleEnum.USER,
 								status: "unblocked",
-								mentorRequestStatus: "not-requested",
+								mentorRequestStatus: MentorRequestStatusEnum.NOT_REQUESTED,
 								googleId: profile.id,
 								sessionCompleted: 0,
 								averageRating: 0,

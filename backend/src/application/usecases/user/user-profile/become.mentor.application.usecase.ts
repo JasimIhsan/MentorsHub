@@ -7,6 +7,7 @@ import { IUploadMentorDocuments } from "../../../interfaces/documents";
 import { IBecomeMentorUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
+import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
 
 export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 	constructor(private mentorProfileRepo: IMentorProfileRepository, private userRepo: IUserRepository, private uploadDocumentUseCase: IUploadMentorDocuments) {}
@@ -17,7 +18,7 @@ export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 		if (userEntity.role === RoleEnum.MENTOR) {
 			throw new Error("You are already a mentor");
 		}
-		if (userEntity.mentorRequestStatus === "pending" || userEntity.mentorRequestStatus === "approved") {
+		if (userEntity.mentorRequestStatus === MentorRequestStatusEnum.PENDING || userEntity.mentorRequestStatus === MentorRequestStatusEnum.APPROVED) {
 			throw new Error("Mentor request is already approved or in process");
 		}
 		const existingProfile = await this.mentorProfileRepo.findByUserId(userId);
@@ -51,7 +52,7 @@ export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 
 		const updatedUserData: Partial<UserEntityProps> = {
 			...userData,
-			mentorRequestStatus: "pending",
+			mentorRequestStatus: MentorRequestStatusEnum.PENDING,
 		};
 
 		userEntity?.updateUserDetails(updatedUserData);

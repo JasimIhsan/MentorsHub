@@ -5,6 +5,7 @@ import { ITokenService } from "../../../interfaces/user/token.service.interface"
 import { IGoogleAuthUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { IHashService } from "../../../interfaces/services/hash.service";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
+import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
 
 interface GoogleUserData {
 	email: string;
@@ -42,7 +43,7 @@ export class GoogleAuthUsecase implements IGoogleAuthUsecase {
 					avatar: gUser.picture,
 					role: RoleEnum.USER,
 					status: "unblocked",
-					mentorRequestStatus: "not-requested",
+					mentorRequestStatus: MentorRequestStatusEnum.NOT_REQUESTED,
 					googleId: gUser.sub,
 					sessionCompleted: 0,
 					averageRating: 0,

@@ -5,6 +5,7 @@ import { IVerifyOtpUsecase, ISignupUseCase } from "../../../interfaces/user/auth
 import { ICreateUserProgressUseCase } from "../../../interfaces/gamification";
 import { IHashService } from "../../../interfaces/services/hash.service";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
+import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
 
 export class SignupUseCase implements ISignupUseCase {
 	constructor(
@@ -36,7 +37,7 @@ export class SignupUseCase implements ISignupUseCase {
 			lastName,
 			status: "unblocked",
 			role: RoleEnum.USER,
-			mentorRequestStatus: "not-requested",
+			mentorRequestStatus: MentorRequestStatusEnum.NOT_REQUESTED,
 			sessionCompleted: 0,
 			averageRating: 0,
 			totalReviews: 0,

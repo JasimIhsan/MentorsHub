@@ -1,7 +1,7 @@
+import { MentorRequestStatusEnum } from "../../application/interfaces/enums/mentor.request.status.enum";
 import { RoleEnum } from "../../application/interfaces/enums/role.enum";
 
 export type UserStatus = "blocked" | "unblocked";
-export type MentorRequestStatus = "pending" | "approved" | "rejected" | "not-requested";
 
 export interface UserEntityProps {
 	id?: string;
@@ -19,7 +19,7 @@ export interface UserEntityProps {
 	sessionCompleted?: number;
 	averageRating?: number | null;
 	totalReviews?: number | null;
-	mentorRequestStatus?: MentorRequestStatus;
+	mentorRequestStatus?: MentorRequestStatusEnum;
 	googleId?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date | null;
@@ -41,7 +41,7 @@ export class UserEntity {
 	private _averageRating: number | null;
 	private _totalReviews: number | null;
 	private _status: UserStatus;
-	private _mentorRequestStatus: MentorRequestStatus;
+	private _mentorRequestStatus: MentorRequestStatusEnum;
 	private _googleId?: string | null;
 	private _createdAt: Date;
 	private _updatedAt: Date | null;
@@ -62,7 +62,7 @@ export class UserEntity {
 		this._sessionCompleted = user.sessionCompleted ?? 0;
 		this._averageRating = user.averageRating ?? null;
 		this._totalReviews = user.totalReviews ?? null;
-		this._mentorRequestStatus = user.mentorRequestStatus ?? "not-requested";
+		this._mentorRequestStatus = user.mentorRequestStatus ?? MentorRequestStatusEnum.NOT_REQUESTED;
 		this._googleId = user.googleId ?? null;
 		this._createdAt = user.createdAt ?? new Date();
 		this._updatedAt = user.updatedAt ?? null;
@@ -133,7 +133,7 @@ export class UserEntity {
 		return this._status;
 	}
 
-	get mentorRequestStatus(): MentorRequestStatus {
+	get mentorRequestStatus(): MentorRequestStatusEnum {
 		return this._mentorRequestStatus;
 	}
 

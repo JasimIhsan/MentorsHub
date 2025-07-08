@@ -6,6 +6,7 @@ import { IAvailabilityDTO } from "../../../application/dtos/availability.dto";
 import { MentorEntity } from "../../../domain/entities/mentor.entity";
 import mongoose from "mongoose";
 import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
+import { MentorRequestStatusEnum } from "../../../application/interfaces/enums/mentor.request.status.enum";
 
 type AggregatedMentorDoc = IMentorProfileModel & {
 	user: IUsersDocument; // because $lookup + $unwind gives you a single user object
@@ -134,7 +135,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			pipeline.push({
 				$match: {
 					"user.role": RoleEnum.MENTOR,
-					"user.mentorRequestStatus": "approved",
+					"user.mentorRequestStatus": MentorRequestStatusEnum.APPROVED,
 					"user._id": { $ne: new mongoose.Types.ObjectId(browserId) },
 				},
 			});
