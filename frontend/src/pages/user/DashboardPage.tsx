@@ -30,6 +30,7 @@ export const DashboardPage: React.FC = () => {
 
 	useEffect(() => {
 		const fetchData = async () => {
+			setLoading(true);
 			try {
 				const data = await fetchDashboardDatas(user?.id!);
 				console.log("data: ", data);
@@ -63,10 +64,6 @@ export const DashboardPage: React.FC = () => {
 		}
 	};
 
-	if (loading || isLoading) {
-		return <div>Loading...</div>;
-	}
-
 	const markAsRead = async (notificationId: string) => {
 		dispatch(markNotificationAsReadThunk(notificationId));
 	};
@@ -81,12 +78,12 @@ export const DashboardPage: React.FC = () => {
 				<WelcomeHeader user={user} />
 				<section className="flex flex-col gap-4 px-10 md:px-20 xl:px-25">
 					<GamificationCard onTestClick={test} />
-					<UpcomingSessions sessions={upcomingSessions} />
-					<Notifications notifications={notifications} markAsRead={markAsRead} markAllAsRead={markAllAsRead} userId={user.id as string} />
+					<UpcomingSessions isLoading={loading} sessions={upcomingSessions} />
+					<Notifications isLoading={isLoading} notifications={notifications} markAsRead={markAsRead} markAllAsRead={markAllAsRead} userId={user.id as string} />
 				</section>
 				<div className="grid gap-6 w-full px-10 md:px-20 xl:px-25">
 					<div className="grid gap-6 w-full lg:grid-cols-2">
-						<TopRatedMentors mentors={topRatedMentor} />
+						<TopRatedMentors mentors={topRatedMentor} isLoading={loading} />
 						<QuickLinks />
 					</div>
 				</div>
