@@ -22,14 +22,14 @@ export const verifyRefreshToken = async (req: Request, res: Response, next: Next
 		if (isBlacklisted) {
 			res.clearCookie("access_token");
 			res.clearCookie("refresh_token");
-			res.status(403).json({ success: false, message: "Refresh token is blacklisted" });
+			res.status(HttpStatusCode.FORBIDDEN).json({ success: false, message: "Refresh token is blacklisted" });
 			return;
 		}
 
 		// decode and validate token
 		const decoded = tokenService.validateRefreshToken(refreshToken);
 		if (!decoded) {
-			res.status(403).json({ success: false, message: "Invalid token" });
+			res.status(HttpStatusCode.FORBIDDEN).json({ success: false, message: "Invalid token" });
 			return;
 		}
 

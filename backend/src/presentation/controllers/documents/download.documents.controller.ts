@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { IS3Service } from "../../../domain/interface/s3.service.interface";
 import https from "https";
 import { logger } from "../../../infrastructure/utils/logger";
+import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 
 export class DownloadDocumentsController {
 	constructor(private s3Service: IS3Service) {}
@@ -18,7 +19,7 @@ export class DownloadDocumentsController {
 
 			https
 				.get(signedUrl, (s3Res) => {
-					if (s3Res.statusCode !== 200) {
+					if (s3Res.statusCode !== HttpStatusCode.OK) {
 						res.status(s3Res.statusCode || 500).send("Failed to fetch file");
 						return;
 					}

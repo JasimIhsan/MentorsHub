@@ -94,7 +94,7 @@ export function MentorDashboardPage() {
 						<CardDescription>Average rating of your reviews</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<MentorReviewRatingChart />
+						<MentorReviewRatingChart userId={user?.id!} />
 					</CardContent>
 				</Card>
 

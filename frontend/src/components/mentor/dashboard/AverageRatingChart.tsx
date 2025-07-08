@@ -1,55 +1,85 @@
-import { useState } from "react";
+import { fetchMentorWeeklyRatingChartData } from "@/api/mentors.api.service";
+import { useState, useEffect } from "react";
 import { Line, LineChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Sample weekly data for a year
-const generateSampleData = () => {
-	const weeks = Array.from({ length: 52 }, (_, i) => `Week ${i + 1}`);
-	return weeks.map((week) => ({
-		name: week,
-		averageRating: (Math.random() * 2 + 3).toFixed(1), // 3.0-5.0 stars
-	}));
-};
+interface ChartData {
+	name: string;
+	averageRating: number;
+}
 
-export function MentorReviewRatingChart() {
-	// State for filter period
+export function MentorReviewRatingChart({ userId }: { userId: string }) {
 	const [filterPeriod, setFilterPeriod] = useState("month");
+	const [data, setData] = useState<ChartData[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-	// Generate sample data
-	const fullData = generateSampleData();
+	// Fetch data when component mounts or filterPeriod changes
+	useEffect(() => {
+		const fetchData = async () => {
+			setIsLoading(true);
+			setError(null);
+			try {
+				const response = await fetchMentorWeeklyRatingChartData(userId, filterPeriod);
+				console.log("response rating: ", response);
+				if (response.success) {
+					const transformedData = response.weeklyRatings.map((item: { week: string; averageRating: string }) => ({
+						name: item.week,
+						averageRating: parseFloat(item.averageRating),
+					}));
+					setData(transformedData);
+				}
+			} catch (err) {
+				setError("Failed to load rating data.");
+				console.error(err);
+			} finally {
+				setIsLoading(false);
+			}
+		};
 
-	// Filter data based on selected period
-	const getFilteredData = () => {
-		switch (filterPeriod) {
-			case "month":
-				return fullData.slice(-4); // Last 4 weeks
-			case "sixMonths":
-				return fullData.slice(-24); // Last 24 weeks
-			case "year":
-				return fullData; // All 52 weeks
-			default:
-				return fullData.slice(-4);
-		}
-	};
-
-	const data = getFilteredData();
+		fetchData();
+	}, [userId, filterPeriod]);
 
 	// Handle filter change
-	const handleFilterChange = (e: any) => {
-		setFilterPeriod(e.target.value);
+	const handleFilterChange = (value: string) => {
+		setFilterPeriod(value);
 	};
 
+	// Render loading state
+	if (isLoading) {
+		return (
+			<div className="w-full">
+				<div className="mb-4 flex justify-end">
+					<Skeleton className="h-10 w-32 bg-gray-200" />
+				</div>
+				<div className="h-[300px]">
+					<Skeleton className="h-full w-full bg-gray-200 rounded-lg" />
+				</div>
+			</div>
+		);
+	}
+
+	// Render error state
+	if (error) {
+		return <div>Error: {error}</div>;
+	}
+
+	// Render chart
 	return (
 		<div className="w-full">
-			{/* Filter dropdown */}
 			<div className="mb-4 flex justify-end">
-				<select value={filterPeriod} onChange={handleFilterChange} className="p-2 border rounded-md bg-white text-gray-700">
-					<option value="month">Last Month</option>
-					<option value="sixMonths">Last 6 Months</option>
-					<option value="year">Last Year</option>
-				</select>
+				<Select value={filterPeriod} onValueChange={handleFilterChange}>
+					<SelectTrigger className="w-[180px]">
+						<SelectValue placeholder="Select period" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="month">Last Month</SelectItem>
+						<SelectItem value="sixMonths">Last 6 Months</SelectItem>
+						<SelectItem value="year">Last Year</SelectItem>
+					</SelectContent>
+				</Select>
 			</div>
-
-			{/* Chart container */}
 			<div className="h-[300px]">
 				<ResponsiveContainer width="100%" height="100%">
 					<LineChart

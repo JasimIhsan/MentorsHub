@@ -102,3 +102,13 @@ export const fetchMetorPerfomanceChartData = async (userId: string, period: stri
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const fetchMentorWeeklyRatingChartData = async (userId: string, period: string) => {
+	try {
+		const response = await axiosInstance.get(`/mentor/dashboard/ratings/${userId}?period=${period}`);
+		return response.data;
+	} catch (error: any) {
+		console.error("Error fetching mentor dashboard data:", error);
+		throw new Error(error.response.data.message);
+	}
+};
