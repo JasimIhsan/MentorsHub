@@ -4,6 +4,7 @@ import { IWalletRepository } from "../../../domain/repositories/wallet.repositor
 import { IWalletDTO, mapToWalletDTO } from "../../dtos/wallet.dtos";
 import { RoleEnum } from "../../interfaces/enums/role.enum";
 import { TransactionsTypeEnum } from "../../interfaces/enums/transaction.type.enum";
+import { TransactionPurposeEnum } from "../../interfaces/enums/transaction.purpose.enum";
 
 interface TopUpWalletInput {
 	userId: string;
@@ -40,7 +41,7 @@ export class WalletTopUpUseCase implements IWalletTopUpUsecase {
 			toRole: RoleEnum.USER,
 			amount,
 			type: TransactionsTypeEnum.CREDIT,
-			purpose: purpose ?? "wallet_topup",
+			purpose: purpose ?? TransactionPurposeEnum.WALLET_TOPUP,
 			description: description ?? "Wallet top-up",
 			sessionId: null,
 		});

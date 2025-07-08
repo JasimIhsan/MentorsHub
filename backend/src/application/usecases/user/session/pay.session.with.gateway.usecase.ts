@@ -5,6 +5,7 @@ import { IPaySessionWithGatewayUseCase } from "../../../interfaces/session";
 import { SessionPaymentStatus, SessionStatus } from "../../../../domain/entities/session.entity";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { TransactionsTypeEnum } from "../../../interfaces/enums/transaction.type.enum";
+import { TransactionPurposeEnum } from "../../../interfaces/enums/transaction.purpose.enum";
 
 export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository) {}
@@ -55,7 +56,7 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 			toRole: RoleEnum.MENTOR,
 			amount: mentorEarning,
 			type: TransactionsTypeEnum.CREDIT,
-			purpose: "session_fee",
+			purpose: TransactionPurposeEnum.SESSION_FEE,
 			description: `Mentor earning for session ${session.topic}`,
 			sessionId,
 		});
@@ -68,7 +69,7 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 			toRole: RoleEnum.ADMIN,
 			amount: platformFeeFixed,
 			type: TransactionsTypeEnum.CREDIT,
-			purpose: "platform_fee",
+			purpose: TransactionPurposeEnum.PLATFORM_FEE,
 			description: `Fixed fee from session ${session.topic}`,
 			sessionId,
 		});
@@ -81,7 +82,7 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 			toRole: RoleEnum.ADMIN,
 			amount: platformCommission,
 			type: TransactionsTypeEnum.CREDIT,
-			purpose: "platform_fee",
+			purpose: TransactionPurposeEnum.PLATFORM_FEE,
 			description: `15% commission from session ${session.topic}`,
 			sessionId,
 		});

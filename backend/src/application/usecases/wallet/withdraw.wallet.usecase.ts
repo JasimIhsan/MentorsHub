@@ -2,6 +2,7 @@ import { IWalletRepository } from "../../../domain/repositories/wallet.repositor
 import { IWalletDTO, mapToWalletDTO } from "../../dtos/wallet.dtos";
 import { IWalletTransactionDTO } from "../../dtos/wallet.transation.dto";
 import { RoleEnum } from "../../interfaces/enums/role.enum";
+import { TransactionPurposeEnum } from "../../interfaces/enums/transaction.purpose.enum";
 import { TransactionsTypeEnum } from "../../interfaces/enums/transaction.type.enum";
 import { ICreateTransactionUsecase, IWithdrawWalletUsecase } from "../../interfaces/wallet";
 
@@ -26,7 +27,7 @@ export class WithdrawWalletUseCase implements IWithdrawWalletUsecase {
 				toRole: RoleEnum.USER,
 				amount,
 				type: TransactionsTypeEnum.WITHDRAWAL,
-				purpose: "withdrawal",
+				purpose: TransactionPurposeEnum.WITHDRAWAL,
 				description: "Wallet withdrawal",
 				sessionId: null,
 			});
@@ -39,7 +40,7 @@ export class WithdrawWalletUseCase implements IWithdrawWalletUsecase {
 				toRole: RoleEnum.ADMIN,
 				amount,
 				type: TransactionsTypeEnum.WITHDRAWAL,
-				purpose: "withdrawal",
+				purpose: TransactionPurposeEnum.WITHDRAWAL,
 				description: "Admin withdrew platform profit",
 				sessionId: null,
 			});

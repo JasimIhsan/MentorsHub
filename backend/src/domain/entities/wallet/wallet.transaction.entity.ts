@@ -1,10 +1,10 @@
 // domain/entities/wallet.transaction.entity.ts
 
 import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
+import { TransactionPurposeEnum } from "../../../application/interfaces/enums/transaction.purpose.enum";
 import { TransactionsTypeEnum } from "../../../application/interfaces/enums/transaction.type.enum";
 import { IWalletTransactionDocument } from "../../../infrastructure/database/models/wallet/wallet.transaction.model";
 
-export type WalletTransactionPurpose = "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";
 
 
 export class WalletTransactionEntity {
@@ -15,7 +15,7 @@ export class WalletTransactionEntity {
 	private _toRole: RoleEnum;
 	private _amount: number;
 	private _type: TransactionsTypeEnum;
-	private _purpose: WalletTransactionPurpose;
+	private _purpose: TransactionPurposeEnum;
 	private _description?: string;
 	private _sessionId?: string | null;
 	private _createdAt?: Date;
@@ -29,7 +29,7 @@ export class WalletTransactionEntity {
 		toRole: RoleEnum;
 		amount: number;
 		type: TransactionsTypeEnum;
-		purpose: WalletTransactionPurpose;
+		purpose: TransactionPurposeEnum;
 		description?: string;
 		sessionId?: string | null;
 		createdAt?: Date;
@@ -57,7 +57,7 @@ export class WalletTransactionEntity {
 		toRole: RoleEnum;
 		amount: number;
 		type: TransactionsTypeEnum;
-		purpose: WalletTransactionPurpose;
+		purpose: TransactionPurposeEnum;
 		description?: string;
 		sessionId?: string | null;
 	}): WalletTransactionEntity {
@@ -103,7 +103,7 @@ export class WalletTransactionEntity {
 		return this._type;
 	}
 
-	get transactionPurpose(): WalletTransactionPurpose {
+	get transactionPurpose(): TransactionPurposeEnum {
 		return this._purpose;
 	}
 

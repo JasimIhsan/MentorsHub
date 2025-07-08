@@ -7,6 +7,7 @@ import { IPaySessionWithWalletUseCase } from "../../../interfaces/session";
 import { SessionPaymentStatus, SessionStatus } from "../../../../domain/entities/session.entity";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { TransactionsTypeEnum } from "../../../interfaces/enums/transaction.type.enum";
+import { TransactionPurposeEnum } from "../../../interfaces/enums/transaction.purpose.enum";
 
 export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository) {}
@@ -59,7 +60,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 			toRole: RoleEnum.MENTOR,
 			amount: sessionFee,
 			type: TransactionsTypeEnum.DEBIT,
-			purpose: "session_fee",
+			purpose: TransactionPurposeEnum.SESSION_FEE,
 			description: `Payment for session ${session.topic}`,
 			sessionId,
 		});
@@ -71,7 +72,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 			toRole: RoleEnum.MENTOR,
 			amount: mentorEarning,
 			type: TransactionsTypeEnum.CREDIT,
-			purpose: "session_fee",
+			purpose: TransactionPurposeEnum.SESSION_FEE,
 			description: `Mentor earning for session ${session.topic}`,
 			sessionId,
 		});
@@ -83,7 +84,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 			toRole: RoleEnum.ADMIN,
 			amount: platformFeeFixed,
 			type: TransactionsTypeEnum.CREDIT,
-			purpose: "platform_fee",
+			purpose: TransactionPurposeEnum.PLATFORM_FEE,
 			description: `Platform fixed fee from session ${session.topic}`,
 			sessionId,
 		});
@@ -95,7 +96,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 			toRole: RoleEnum.ADMIN,
 			amount: platformCommission,
 			type: TransactionsTypeEnum.CREDIT,
-			purpose: "platform_fee",
+			purpose: TransactionPurposeEnum.PLATFORM_FEE,
 			description: `Platform 15% commission from session ${session.topic}`,
 			sessionId,
 		});
