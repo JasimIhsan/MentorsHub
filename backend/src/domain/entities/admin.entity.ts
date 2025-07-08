@@ -5,7 +5,7 @@ export interface AdminProps {
 	name?: string;
 	username: string;
 	password: string;
-	role: RoleEnum.ADMIN | "super-admin";
+	role: RoleEnum.ADMIN | RoleEnum.SUPER_ADMIN;
 	avatar?: string;
 }
 
@@ -14,7 +14,7 @@ export class AdminEntity {
 	private readonly _name?: string;
 	private readonly _username: string;
 	private _password: string;
-	private readonly _role: RoleEnum.ADMIN | "super-admin";
+	private readonly _role: RoleEnum.ADMIN | RoleEnum.SUPER_ADMIN;
 	private readonly _avatar?: string;
 
 	constructor(props: AdminProps) {
@@ -43,7 +43,7 @@ export class AdminEntity {
 		return this._password;
 	}
 
-	get role(): RoleEnum.ADMIN | "super-admin" {
+	get role(): RoleEnum.ADMIN | RoleEnum.SUPER_ADMIN {
 		return this._role;
 	}
 
@@ -52,7 +52,7 @@ export class AdminEntity {
 	}
 
 	get isSuperAdmin(): boolean {
-		return this._role === "super-admin";
+		return this._role === RoleEnum.SUPER_ADMIN;
 	}
 
 	// 🔒 You can allow password update
