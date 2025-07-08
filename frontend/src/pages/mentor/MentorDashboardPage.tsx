@@ -3,7 +3,7 @@ import { SessionOverviewStats } from "@/components/mentor/dashboard/SessionOverV
 import { SessionRequestsPreview } from "@/components/mentor/dashboard/SessionRequestPreview";
 import { UpcomingSessionsList } from "@/components/mentor/dashboard/UpcomingSessionList";
 import { RecentReviewsPreview } from "@/components/mentor/dashboard/RecentReviewsPreview";
-import { MentorPerformanceChart } from "@/components/mentor/dashboard/PlanPerfomanceChart";
+import { MentorPerformanceChart } from "@/components/mentor/dashboard/MentorPerfomanceChart";
 import { useEffect, useState } from "react";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
 import { useSelector } from "react-redux";
@@ -31,7 +31,6 @@ export function MentorDashboardPage() {
 			setIsLoading(true);
 			try {
 				const response = await fetchMentorDashboardData(user?.id!);
-				console.log("response: ", response);
 				if (!response) toast.error("Failed to fetch dashboard data");
 				setSessions(response.upcoming);
 				setRequests(response.requests);
@@ -116,7 +115,7 @@ export function MentorDashboardPage() {
 					<CardDescription>Popularity and revenue by premium plan</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<MentorPerformanceChart />
+					<MentorPerformanceChart userId={user?.id!} />
 				</CardContent>
 			</Card>
 		</div>

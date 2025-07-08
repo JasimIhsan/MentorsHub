@@ -81,12 +81,22 @@ export const fetchMentorDashboardData = async (userId: string) => {
 			axiosInstance.get(`/mentor/dashboard/stats/${userId}`),
 		]);
 		console.log(`pendingRes : `, pendingRes);
-		return { 
-			upcoming: upcomingRes.sessions, 
-			requests: pendingRes.requests ,
+		return {
+			upcoming: upcomingRes.sessions,
+			requests: pendingRes.requests,
 			reviews: reviewsRes.reviews,
-			stats: statsRes.data.stats
+			stats: statsRes.data.stats,
 		};
+	} catch (error: any) {
+		console.error("Error fetching mentor dashboard data:", error);
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const fetchMetorPerfomanceChartData = async (userId: string, period: string) => {
+	try {
+		const response = await axiosInstance.get(`/mentor/dashboard/performance/${userId}?period=${period}`);
+		return response.data;
 	} catch (error: any) {
 		console.error("Error fetching mentor dashboard data:", error);
 		throw new Error(error.response.data.message);
