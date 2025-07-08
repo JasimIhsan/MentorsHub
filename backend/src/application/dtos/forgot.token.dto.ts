@@ -1,10 +1,11 @@
+import { RoleEnum } from "../interfaces/enums/role.enum";
 
 export interface IForgotUserDTO {
 	_id: string;
 	email: string;
 	firstName: string;
 	lastName: string;
-	role: "user" | "mentor";
+	role: RoleEnum;
 	avatar: string | null;
 	isVerified: boolean | null;
 }

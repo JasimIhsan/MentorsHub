@@ -1,18 +1,21 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
+import { RoleEnum } from "../../../../application/interfaces/enums/role.enum";
+import { TransactionsTypeEnum } from "../../../../application/interfaces/enums/transaction.type.enum";
+import { TransactionPurposeEnum } from "../../../../application/interfaces/enums/transaction.purpose.enum";
 
 // 1. Interface
 export interface IWalletTransactionDocument extends Document {
 	_id: ObjectId;
 	fromUserId: ObjectId;
 	toUserId: ObjectId;
-	fromRole: "user" | "mentor" | "admin";
-	toRole: "user" | "mentor" | "admin";
+	fromRole: RoleEnum;
+	toRole: RoleEnum;
 	fromModel?: "Users" | "admins";
 	toModel?: "Users" | "admins";
 	sessionId?: ObjectId;
 	amount: number;
-	type: "credit" | "debit" | "withdrawal";
-	purpose: "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";
+	type: TransactionsTypeEnum;
+	purpose: TransactionPurposeEnum;
 	description?: string;
 	createdAt: Date;
 	updatedAt: Date;

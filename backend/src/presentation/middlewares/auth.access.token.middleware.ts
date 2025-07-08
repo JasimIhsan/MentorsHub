@@ -4,9 +4,10 @@ import { UserRepositoryImpl } from "../../infrastructure/database/implementation
 import { AdminRepositoryImpl } from "../../infrastructure/database/implementation/admin.repository.impl";
 import { HttpStatusCode } from "../../shared/constants/http.status.codes";
 import { CommonStringMessage } from "../../shared/constants/string.messages";
-import { RoleEnum } from "../../application/interfaces/role";
+import { RoleEnum } from "../../application/interfaces/enums/role.enum";
 import { redisService } from "../../infrastructure/composer";
 import { logger } from "../../infrastructure/utils/logger";
+import { UserStatusEnums } from "../../application/interfaces/enums/user.status.enums";
 
 export const tokenService = new TokenServicesImpl(redisService);
 const userRepo = new UserRepositoryImpl();
@@ -42,14 +43,14 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 				return;
 			}
 
-			if (user.status === "blocked") {
+			if (user.status === UserStatusEnums.BLOCKED) {
 				res.status(HttpStatusCode.FORBIDDEN).json({ success: false, blocked: true, message: CommonStringMessage.BLOCKED });
 				return;
 			}
 
 			req.user = {
 				id: user.id as string,
-				role: user.role === "mentor" ? RoleEnum.MENTOR : RoleEnum.USER,
+				role: user.role === RoleEnum.MENTOR ? RoleEnum.MENTOR : RoleEnum.USER,
 			};
 
 			return next();

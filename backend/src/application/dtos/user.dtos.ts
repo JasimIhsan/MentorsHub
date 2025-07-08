@@ -1,4 +1,6 @@
 import { UserEntity } from "../../domain/entities/user.entity";
+import { RoleEnum } from "../interfaces/enums/role.enum";
+import { UserStatusEnums } from "../interfaces/enums/user.status.enums";
 
 export interface IUserDTO {
 	id?: string;
@@ -6,9 +8,9 @@ export interface IUserDTO {
 	fullName: string;
 	firstName: string;
 	lastName: string;
-	role: "user" | "mentor";
+	role: RoleEnum;
 	avatar?: string | null;
-	status: "blocked" | "unblocked";
+	status: UserStatusEnums;
 	bio?: string | null;
 	interests?: string[] | null;
 	skills?: string[] | null;

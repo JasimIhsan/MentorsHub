@@ -2,12 +2,16 @@ import { ISessionRepository } from "../../../../domain/repositories/session.repo
 import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IPaySessionWithGatewayUseCase } from "../../../interfaces/session";
-import { SessionPaymentStatus, SessionStatus } from "../../../../domain/entities/session.entity";
+import { RoleEnum } from "../../../interfaces/enums/role.enum";
+import { TransactionsTypeEnum } from "../../../interfaces/enums/transaction.type.enum";
+import { TransactionPurposeEnum } from "../../../interfaces/enums/transaction.purpose.enum";
+import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
+import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
 
 export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository) {}
 
-	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: SessionPaymentStatus, status: SessionStatus): Promise<void> {
+	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: SessionPaymentStatusEnum, status: SessionStatusEnum): Promise<void> {
 		// Get session
 		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
@@ -25,7 +29,7 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 		// Find the participant
 		const participant = session.participants.find((p) => p.user.id === userId);
 		if (!participant) throw new Error("Unauthorized");
-		if (participant.paymentStatus === "completed") throw new Error("Already paid for this session");
+		if (participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) throw new Error("Already paid for this session");
 
 		// Calculate payment distribution
 		const sessionFee = session.fee;
@@ -37,11 +41,11 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 		const mentorEarning = sessionFee - totalPlatformFee;
 
 		// Credit mentor
-		await this.walletRepo.updateBalance(mentorId, mentorEarning, "credit");
+		await this.walletRepo.updateBalance(mentorId, mentorEarning, TransactionsTypeEnum.CREDIT);
 
 		// Credit platform
 		const platformWallet = await this.walletRepo.platformWallet();
-		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, "credit", "admin");
+		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, TransactionsTypeEnum.CREDIT, RoleEnum.ADMIN);
 
 		// Create transactions
 
@@ -49,11 +53,11 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: mentorId,
-			fromRole: "user",
-			toRole: "mentor",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.MENTOR,
 			amount: mentorEarning,
-			type: "credit",
-			purpose: "session_fee",
+			type: TransactionsTypeEnum.CREDIT,
+			purpose: TransactionPurposeEnum.SESSION_FEE,
 			description: `Mentor earning for session ${session.topic}`,
 			sessionId,
 		});
@@ -62,11 +66,11 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: platformWallet.userId,
-			fromRole: "user",
-			toRole: "admin",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.ADMIN,
 			amount: platformFeeFixed,
-			type: "credit",
-			purpose: "platform_fee",
+			type: TransactionsTypeEnum.CREDIT,
+			purpose: TransactionPurposeEnum.PLATFORM_FEE,
 			description: `Fixed fee from session ${session.topic}`,
 			sessionId,
 		});
@@ -75,11 +79,11 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: platformWallet.userId,
-			fromRole: "user",
-			toRole: "admin",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.ADMIN,
 			amount: platformCommission,
-			type: "credit",
-			purpose: "platform_fee",
+			type: TransactionsTypeEnum.CREDIT,
+			purpose: TransactionPurposeEnum.PLATFORM_FEE,
 			description: `15% commission from session ${session.topic}`,
 			sessionId,
 		});

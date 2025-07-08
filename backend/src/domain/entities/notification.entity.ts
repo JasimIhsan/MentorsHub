@@ -1,12 +1,12 @@
 // domain/entities/notification.entity.ts
 
-export type NotificationType = "info" | "warning" | "success" | "error";
+import { NotificationTypeEnum } from "../../application/interfaces/enums/notification.type.enum";
 
 export interface INotificationEntity {
 	recipientId: string;
 	title: string;
 	message: string;
-	type?: NotificationType;
+	type?: NotificationTypeEnum;
 	link?: string;
 	isRead: boolean;
 	createdAt?: Date;
@@ -18,7 +18,7 @@ export class NotificationEntity {
 	private recipientId: string;
 	private title: string;
 	private message: string;
-	private type: NotificationType;
+	private type: NotificationTypeEnum;
 	private link?: string;
 	private isRead: boolean;
 	private createdAt: Date;
@@ -28,7 +28,7 @@ export class NotificationEntity {
 		this.recipientId = data.recipientId;
 		this.title = data.title;
 		this.message = data.message;
-		this.type = data.type ?? "info";
+		this.type = data.type ?? NotificationTypeEnum.INFO;
 		this.link = data.link;
 		this.isRead = data.isRead ?? false;
 		this.createdAt = data.createdAt ?? new Date();
@@ -52,7 +52,7 @@ export class NotificationEntity {
 		return this.message;
 	}
 
-	getType(): NotificationType {
+	getType(): NotificationTypeEnum {
 		return this.type;
 	}
 

@@ -1,6 +1,7 @@
-export type UserRole = "user" | "mentor";
-export type UserStatus = "blocked" | "unblocked";
-export type MentorRequestStatus = "pending" | "approved" | "rejected" | "not-requested";
+import { MentorRequestStatusEnum } from "../../application/interfaces/enums/mentor.request.status.enum";
+import { RoleEnum } from "../../application/interfaces/enums/role.enum";
+import { UserStatusEnums } from "../../application/interfaces/enums/user.status.enums";
+
 
 export interface UserEntityProps {
 	id?: string;
@@ -8,9 +9,9 @@ export interface UserEntityProps {
 	firstName: string;
 	lastName: string;
 	password: string;
-	role?: UserRole;
+	role?: RoleEnum;
 	avatar?: string | null;
-	status?: UserStatus;
+	status?: UserStatusEnums;
 	bio?: string | null;
 	interests?: string[] | null;
 	skills?: string[] | null;
@@ -18,7 +19,7 @@ export interface UserEntityProps {
 	sessionCompleted?: number;
 	averageRating?: number | null;
 	totalReviews?: number | null;
-	mentorRequestStatus?: MentorRequestStatus;
+	mentorRequestStatus?: MentorRequestStatusEnum;
 	googleId?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date | null;
@@ -30,7 +31,7 @@ export class UserEntity {
 	private _firstName: string;
 	private _lastName: string;
 	private _password: string;
-	private _role: UserRole;
+	private _role: RoleEnum;
 	private _avatar?: string | null;
 	private _bio?: string | null;
 	private _interests?: string[] | null;
@@ -39,8 +40,8 @@ export class UserEntity {
 	private _sessionCompleted: number;
 	private _averageRating: number | null;
 	private _totalReviews: number | null;
-	private _status: UserStatus;
-	private _mentorRequestStatus: MentorRequestStatus;
+	private _status: UserStatusEnums;
+	private _mentorRequestStatus: MentorRequestStatusEnum;
 	private _googleId?: string | null;
 	private _createdAt: Date;
 	private _updatedAt: Date | null;
@@ -51,8 +52,8 @@ export class UserEntity {
 		this._firstName = user.firstName;
 		this._lastName = user.lastName;
 		this._password = user.password;
-		this._role = user.role ?? "user";
-		this._status = user.status ?? "unblocked";
+		this._role = user.role ?? RoleEnum.USER;
+		this._status = user.status ?? UserStatusEnums.UNBLOCKED;
 		this._avatar = user.avatar ?? null;
 		this._bio = user.bio ?? null;
 		this._interests = user.interests ?? null;
@@ -61,7 +62,7 @@ export class UserEntity {
 		this._sessionCompleted = user.sessionCompleted ?? 0;
 		this._averageRating = user.averageRating ?? null;
 		this._totalReviews = user.totalReviews ?? null;
-		this._mentorRequestStatus = user.mentorRequestStatus ?? "not-requested";
+		this._mentorRequestStatus = user.mentorRequestStatus ?? MentorRequestStatusEnum.NOT_REQUESTED;
 		this._googleId = user.googleId ?? null;
 		this._createdAt = user.createdAt ?? new Date();
 		this._updatedAt = user.updatedAt ?? null;
@@ -92,7 +93,7 @@ export class UserEntity {
 		return this._password;
 	}
 
-	get role(): UserRole {
+	get role(): RoleEnum {
 		return this._role;
 	}
 
@@ -128,11 +129,11 @@ export class UserEntity {
 		return this._totalReviews;
 	}
 
-	get status(): UserStatus {
+	get status(): UserStatusEnums {
 		return this._status;
 	}
 
-	get mentorRequestStatus(): MentorRequestStatus {
+	get mentorRequestStatus(): MentorRequestStatusEnum {
 		return this._mentorRequestStatus;
 	}
 
@@ -170,7 +171,7 @@ export class UserEntity {
 		this._updatedAt = new Date();
 	}
 
-	toggleStatus(status: UserStatus): void {
+	toggleStatus(status: UserStatusEnums): void {
 		this._status = status;
 		this._updatedAt = new Date();
 	}

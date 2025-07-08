@@ -13,24 +13,25 @@ import { SessionModel } from "../../../infrastructure/database/models/session/se
 import { requireRole } from "../../middlewares/require.role.middleware";
 import { CommonStringMessage } from "../../../shared/constants/string.messages";
 import { logger } from "../../../infrastructure/utils/logger";
+import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
 export const sessionRouter = Router();
 
-sessionRouter.post("/create-session", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => createSessionController.handle(req, res, next));
+sessionRouter.post("/create-session", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => createSessionController.handle(req, res, next));
 
-sessionRouter.get("/all/:userId", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => getSessionsByUserController.handle(req, res, next));
+sessionRouter.get("/all/:userId", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => getSessionsByUserController.handle(req, res, next));
 
-sessionRouter.get("/verify-payment", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => verifySessionPaymentController.handle(req, res, next));
+sessionRouter.get("/verify-payment", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => verifySessionPaymentController.handle(req, res, next));
 
-sessionRouter.post("/create-payment-order", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => getCreateSessionPaymentOrderController().handle(req, res, next));
+sessionRouter.post("/create-payment-order", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => getCreateSessionPaymentOrderController().handle(req, res, next));
 
-sessionRouter.post("/pay/wallet", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => paySessionWithWalletController.handle(req, res, next));
+sessionRouter.post("/pay/wallet", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => paySessionWithWalletController.handle(req, res, next));
 
-sessionRouter.post("/pay/gateway", verifyAccessToken, requireRole("mentor", "user"), (req, res, next) => paySessionWithGatewayController.handle(req, res, next));
+sessionRouter.post("/pay/gateway", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => paySessionWithGatewayController.handle(req, res, next));
 
-sessionRouter.put("/cancel-session", verifyAccessToken, requireRole("user", "mentor"), (req, res, next) => cancelSessionController.handle(req, res, next));
+sessionRouter.put("/cancel-session", verifyAccessToken, requireRole(RoleEnum.USER, RoleEnum.MENTOR), (req, res, next) => cancelSessionController.handle(req, res, next));
 
 // In mentorSessionRouter
-sessionRouter.get("/:sessionId", verifyAccessToken, requireRole("mentor", "user"), async (req, res, next) => {
+sessionRouter.get("/:sessionId", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), async (req, res, next) => {
 	try {
 		const session = await SessionModel.findById(req.params.sessionId).populate("mentorId");
 		if (!session) {

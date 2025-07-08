@@ -1,4 +1,6 @@
-import { PersonEntity, PricingType, SessionEntity, SessionPaymentStatus, SessionStatus } from "../../domain/entities/session.entity";
+import { PersonEntity, PricingType, SessionEntity } from "../../domain/entities/session.entity";
+import { SessionPaymentStatusEnum } from "../interfaces/enums/session.payment.status.enum";
+import { SessionStatusEnum } from "../interfaces/enums/session.status.enums";
 
 interface BaseSession {
 	topic: string;
@@ -8,8 +10,8 @@ interface BaseSession {
 	time: string;
 	hours: number;
 	message: string;
-	status: SessionStatus;
-	paymentStatus?: SessionPaymentStatus;
+	status: SessionStatusEnum;
+	paymentStatus?: SessionPaymentStatusEnum;
 	pricing: PricingType;
 	rejectReason?: string;
 	paymentId?: string;
@@ -28,7 +30,7 @@ export interface MentorInfo extends Person {}
 export interface Mentee extends Person {}
 
 export interface SessionParticipant extends Mentee {
-	paymentStatus?: SessionPaymentStatus;
+	paymentStatus?: SessionPaymentStatusEnum;
 	paymentId?: string;
 }
 

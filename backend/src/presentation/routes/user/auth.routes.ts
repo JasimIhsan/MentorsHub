@@ -4,6 +4,7 @@ import { verifyAccessToken } from "../../middlewares/auth.access.token.middlewar
 import { verifyRefreshToken } from "../../middlewares/auth.refresh.token.middleware";
 import { checkUserStatusInLogin } from "../../middlewares/auth.user.status.middleware";
 import { requireRole } from "../../middlewares/require.role.middleware";
+import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
 
 const authRouter = Router();
 
@@ -27,7 +28,7 @@ authRouter.post("/send-otp", (req, res, next) => sendOtpController.handle(req, r
 authRouter.post("/resend-otp", (req, res, next) => sendOtpController.handle(req, res, next));
 
 // Test Route
-authRouter.get("/test", verifyAccessToken, requireRole("mentor", "user"), (req, res) => {
+authRouter.get("/test", verifyAccessToken, requireRole(RoleEnum.ADMIN, RoleEnum.USER), (req, res) => {
 	res.json({ success: true, message: "Hello, authenticated user!" });
 });
 

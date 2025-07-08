@@ -2,6 +2,9 @@ import { ICreateTransactionUsecase, IWalletTopUpUsecase } from "../../interfaces
 import { IWalletTransactionDTO } from "../../dtos/wallet.transation.dto";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletDTO, mapToWalletDTO } from "../../dtos/wallet.dtos";
+import { RoleEnum } from "../../interfaces/enums/role.enum";
+import { TransactionsTypeEnum } from "../../interfaces/enums/transaction.type.enum";
+import { TransactionPurposeEnum } from "../../interfaces/enums/transaction.purpose.enum";
 
 interface TopUpWalletInput {
 	userId: string;
@@ -34,11 +37,11 @@ export class WalletTopUpUseCase implements IWalletTopUpUsecase {
 		const transaction = await this.createTransactionUseCase.execute({
 			fromUserId: null,
 			toUserId: userId,
-			fromRole: "admin",
-			toRole: "user",
+			fromRole: RoleEnum.ADMIN,
+			toRole: RoleEnum.USER,
 			amount,
-			type: "credit",
-			purpose: purpose ?? "wallet_topup",
+			type: TransactionsTypeEnum.CREDIT,
+			purpose: purpose ?? TransactionPurposeEnum.WALLET_TOPUP,
 			description: description ?? "Wallet top-up",
 			sessionId: null,
 		});

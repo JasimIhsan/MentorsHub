@@ -3,12 +3,13 @@ import { UserEntity } from "../../domain/entities/user.entity";
 import { UserRepositoryImpl } from "../../infrastructure/database/implementation/user.repository.impl";
 import { HttpStatusCode } from "../../shared/constants/http.status.codes";
 import { CommonStringMessage } from "../../shared/constants/string.messages";
+import { UserStatusEnums } from "../../application/interfaces/enums/user.status.enums";
 
 const userRepo = new UserRepositoryImpl();
 
 export const checkUserStatus = (req: Request, res: Response, next: NextFunction) => {
 	const user = req.user as UserEntity;
-	if (user.status === "blocked") {
+	if (user.status ===UserStatusEnums.BLOCKED) {
 		res.status(HttpStatusCode.FORBIDDEN).json({ success: false, blocked: true, message: CommonStringMessage.BLOCKED });
 		return;
 	}
@@ -22,7 +23,7 @@ export const checkUserStatusInLogin = async (req: Request, res: Response, next: 
 		return next();
 	}
 
-	if (user.status === "blocked") {
+	if (user.status === UserStatusEnums.BLOCKED) {
 		res.status(HttpStatusCode.FORBIDDEN).json({ success: false, blocked: true, message: CommonStringMessage.BLOCKED });
 		return;
 	}

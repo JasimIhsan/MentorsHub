@@ -1,5 +1,6 @@
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
+import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
 import { IVerifySessionPaymentUseCase } from "../../../interfaces/session";
 
 export class VerifySessionPaymentUseCase implements IVerifySessionPaymentUseCase {
@@ -12,6 +13,6 @@ export class VerifySessionPaymentUseCase implements IVerifySessionPaymentUseCase
 		const user = session.participants.find((p) => p.user.id === userId);
 		if (!user) throw new Error("Unauthorized: User is not a participant in this session");
 
-		return user.paymentStatus === "pending";
+		return user.paymentStatus === SessionPaymentStatusEnum.PENDING;
 	}
 }

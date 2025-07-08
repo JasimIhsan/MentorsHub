@@ -1,10 +1,11 @@
-import { PricingType, SessionStatus } from "../../../domain/entities/session.entity";
+import { PricingType } from "../../../domain/entities/session.entity";
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { ISessionMentorDTO, mapToMentorSessionDTO } from "../../dtos/session.dto";
+import { SessionStatusEnum } from "../../interfaces/enums/session.status.enums";
 import { IGetSessionRequestsUseCase } from "../../interfaces/mentors/mentors.interface";
 
 interface QueryParams {
-	status?: SessionStatus;
+	status?: SessionStatusEnum;
 	pricing?: PricingType;
 	filterOption?: "free" | "paid" | "today" | "week" | "all" | "month";
 	searchQuery?: string;

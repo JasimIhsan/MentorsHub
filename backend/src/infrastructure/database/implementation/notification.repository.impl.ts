@@ -1,11 +1,12 @@
-import { INotificationEntity, NotificationEntity, NotificationType } from "../../../domain/entities/notification.entity";
+import { NotificationTypeEnum } from "../../../application/interfaces/enums/notification.type.enum";
+import { INotificationEntity, NotificationEntity } from "../../../domain/entities/notification.entity";
 import { INotificationRepository } from "../../../domain/repositories/notification.repository";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 import { NotificationModel } from "../models/notification/notification.model";
 import { INotificationDocument } from "../models/notification/notification.model";
 
 export class NotificationRepositoryImpl implements INotificationRepository {
-	async createNotification(userId: string, title: string, message: string, type: NotificationType): Promise<INotificationEntity> {
+	async createNotification(userId: string, title: string, message: string, type: NotificationTypeEnum): Promise<INotificationEntity> {
 		try {
 			const notification: INotificationDocument = await NotificationModel.create({
 				recipientId: userId,

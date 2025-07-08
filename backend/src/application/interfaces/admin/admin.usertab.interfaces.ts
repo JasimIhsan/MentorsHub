@@ -1,6 +1,7 @@
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { FindUsersParams } from "../../../domain/repositories/user.repository";
 import { IUserDTO } from "../../dtos/user.dtos";
+import { RoleEnum } from "../enums/role.enum";
 
 export interface IGetAllUsersUsecase {
 	execute(params: FindUsersParams): Promise<{
@@ -11,7 +12,7 @@ export interface IGetAllUsersUsecase {
 }>;
 }
 export interface ICreateUserUsecase {
-	execute(firstName: string, lastName: string, email: string, role: string): Promise<IUserDTO>;
+	execute(firstName: string, lastName: string, email: string, role: RoleEnum): Promise<IUserDTO>;
 }
 
 export interface IUpdateUserStatusUsecase {

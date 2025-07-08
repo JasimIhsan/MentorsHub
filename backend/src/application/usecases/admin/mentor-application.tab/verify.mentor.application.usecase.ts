@@ -6,6 +6,9 @@ import { IVerifyMentorApplicationUsecase } from "../../../interfaces/admin/admin
 import { ICreateNotificationUseCase } from "../../../interfaces/notification";
 import { Server } from "socket.io";
 import { findUserSocket } from "../../../../infrastructure/socket/socket.io";
+import { RoleEnum } from "../../../interfaces/enums/role.enum";
+import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
+import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 
 export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationUsecase {
 	constructor(
@@ -15,23 +18,23 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 		private io?: Server, // Optional io
 	) {}
 
-	async execute(userId: string, status: "approved" | "rejected", reason?: string): Promise<UserEntity> {
+	async execute(userId: string, status: MentorRequestStatusEnum, reason?: string): Promise<UserEntity> {
 		const user = await this.userRepo.findUserById(userId);
 		if (!user) throw new Error(CommonStringMessage.USER_NOT_FOUND);
 
 		const profile = await this.mentorRepo.findByUserId(userId);
 		if (!profile) throw new Error("Mentor profile not found");
 
-		if (status === "approved") {
-			user.updateUserDetails({ role: "mentor", mentorRequestStatus: status });
-		} else if (status === "rejected") {
+		if (status === MentorRequestStatusEnum.APPROVED) {
+			user.updateUserDetails({ role: RoleEnum.MENTOR, mentorRequestStatus: status });
+		} else if (status === MentorRequestStatusEnum.REJECTED) {
 			user.updateUserDetails({ mentorRequestStatus: status });
 		}
 
 		const notificationTitle = `Mentor Application ${status.charAt(0).toUpperCase() + status.slice(1)}`;
-		const notificationMessage = status === "approved" ? "Congratulations! Your mentor application has been approved." : `Your mentor application has been rejected. ${reason ? `Reason: ${reason}` : ""}`;
+		const notificationMessage = status === MentorRequestStatusEnum.APPROVED ? "Congratulations! Your mentor application has been approved." : `Your mentor application has been rejected. ${reason ? `Reason: ${reason}` : ""}`;
 
-		const notification = await this.createNotificationUseCase.execute(userId, notificationTitle, notificationMessage, status === "approved" ? "success" : "info");
+		const notification = await this.createNotificationUseCase.execute(userId, notificationTitle, notificationMessage, status === MentorRequestStatusEnum.APPROVED ? NotificationTypeEnum.SUCCESS : NotificationTypeEnum.INFO);
 		console.log("notification:", JSON.stringify(notification, null, 2));
 
 		if (this.io) {
@@ -42,7 +45,7 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 					userId,
 					title: notificationTitle,
 					message: notificationMessage,
-					type: status === "approved" ? "success" : "error",
+					type: status === MentorRequestStatusEnum.APPROVED ? NotificationTypeEnum.SUCCESS : NotificationTypeEnum.ERROR,
 					read: false,
 					createdAt: notification.createdAt || new Date(),
 				});

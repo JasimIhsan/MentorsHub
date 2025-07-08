@@ -5,11 +5,12 @@ import { IUserProgressRepository } from "../../../domain/repositories/gamificati
 import { IUpdateUserTaskProgressUseCase } from "../../interfaces/gamification";
 import { UserProgressEntity } from "../../../domain/entities/gamification/user.progress.entity";
 import { UserTaskProgressEntity } from "../../../domain/entities/gamification/user.task.progress.entity";
+import { ActionTypeEnum } from "aws-sdk/clients/elbv2";
 
 export class UpdateUserTaskProgressUseCase implements IUpdateUserTaskProgressUseCase {
 	constructor(private taskRepo: IGamificationTaskRepository, private taskProgressRepo: IUserTaskProgressRepository, private userProgressRepo: IUserProgressRepository) {}
 
-	async execute(userId: string, actionType: string): Promise<void> {
+	async execute(userId: string, actionType: ActionTypeEnum): Promise<void> {
 		const tasks = await this.taskRepo.findByActionType(actionType);
 
 		for (const task of tasks) {

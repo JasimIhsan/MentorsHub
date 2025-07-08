@@ -1,10 +1,10 @@
-import { SessionStatus } from "../../../domain/entities/session.entity";
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { mapToMentorSessionDTO } from "../../dtos/session.dto";
+import { SessionStatusEnum } from "../../interfaces/enums/session.status.enums";
 import { IGetUpcomingSessionMentorUsecase } from "../../interfaces/mentors/mentors.interface";
 
 interface QueryParams {
-	status?: SessionStatus;
+	status?: SessionStatusEnum;
 	filterOption?: "all" | "free" | "paid" | "today" | "week" | "month";
 	page: number;
 	limit: number;
@@ -22,7 +22,7 @@ export class GetUpcomingSessionMentorUsecase implements IGetUpcomingSessionMento
 				const sessionDate = new Date(session.date);
 				const [hours, minutes] = session.time.split(":").map(Number);
 				sessionDate.setHours(hours, minutes, 0, 0);
-				return session.status === "upcoming" && sessionDate > now;
+				return session.status === SessionStatusEnum.UPCOMING && sessionDate > now;
 			})
 			.sort((sessionA, sessionB) => new Date(sessionA.date).getTime() - new Date(sessionB.date).getTime());
 

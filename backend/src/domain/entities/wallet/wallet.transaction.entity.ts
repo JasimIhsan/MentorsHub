@@ -1,21 +1,21 @@
 // domain/entities/wallet.transaction.entity.ts
 
+import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
+import { TransactionPurposeEnum } from "../../../application/interfaces/enums/transaction.purpose.enum";
+import { TransactionsTypeEnum } from "../../../application/interfaces/enums/transaction.type.enum";
 import { IWalletTransactionDocument } from "../../../infrastructure/database/models/wallet/wallet.transaction.model";
 
-export type WalletTransactionPurpose = "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";
 
-export type WalletTransactionType = "credit" | "debit" | "withdrawal";
-export type WalletUserRole = "user" | "mentor" | "admin";
 
 export class WalletTransactionEntity {
 	private _id?: string;
 	private _fromUserId: string | null;
 	private _toUserId: string;
-	private _fromRole: WalletUserRole;
-	private _toRole: WalletUserRole;
+	private _fromRole: RoleEnum;
+	private _toRole: RoleEnum;
 	private _amount: number;
-	private _type: WalletTransactionType;
-	private _purpose: WalletTransactionPurpose;
+	private _type: TransactionsTypeEnum;
+	private _purpose: TransactionPurposeEnum;
 	private _description?: string;
 	private _sessionId?: string | null;
 	private _createdAt?: Date;
@@ -25,11 +25,11 @@ export class WalletTransactionEntity {
 		_id?: string;
 		fromUserId: string | null;
 		toUserId: string;
-		fromRole: WalletUserRole;
-		toRole: WalletUserRole;
+		fromRole: RoleEnum;
+		toRole: RoleEnum;
 		amount: number;
-		type: WalletTransactionType;
-		purpose: WalletTransactionPurpose;
+		type: TransactionsTypeEnum;
+		purpose: TransactionPurposeEnum;
 		description?: string;
 		sessionId?: string | null;
 		createdAt?: Date;
@@ -53,11 +53,11 @@ export class WalletTransactionEntity {
 	static create(data: {
 		fromUserId?: string | null;
 		toUserId: string;
-		fromRole: WalletUserRole;
-		toRole: WalletUserRole;
+		fromRole: RoleEnum;
+		toRole: RoleEnum;
 		amount: number;
-		type: WalletTransactionType;
-		purpose: WalletTransactionPurpose;
+		type: TransactionsTypeEnum;
+		purpose: TransactionPurposeEnum;
 		description?: string;
 		sessionId?: string | null;
 	}): WalletTransactionEntity {
@@ -87,11 +87,11 @@ export class WalletTransactionEntity {
 		return this._toUserId;
 	}
 
-	get fromUserRole(): WalletUserRole {
+	get fromRoleEnum(): RoleEnum {
 		return this._fromRole;
 	}
 
-	get toUserRole(): WalletUserRole {
+	get toRoleEnum(): RoleEnum {
 		return this._toRole;
 	}
 
@@ -99,11 +99,11 @@ export class WalletTransactionEntity {
 		return this._amount;
 	}
 
-	get transactionType(): WalletTransactionType {
+	get transactionType(): TransactionsTypeEnum {
 		return this._type;
 	}
 
-	get transactionPurpose(): WalletTransactionPurpose {
+	get transactionPurpose(): TransactionPurposeEnum {
 		return this._purpose;
 	}
 

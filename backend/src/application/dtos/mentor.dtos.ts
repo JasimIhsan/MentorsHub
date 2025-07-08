@@ -1,20 +1,23 @@
 import { Availability, MentorProfileEntity } from "../../domain/entities/mentor.detailes.entity";
 import { MentorEntity } from "../../domain/entities/mentor.entity";
 import { UserEntity } from "../../domain/entities/user.entity";
+import { MentorRequestStatusEnum } from "../interfaces/enums/mentor.request.status.enum";
+import { RoleEnum } from "../interfaces/enums/role.enum";
+import { UserStatusEnums } from "../interfaces/enums/user.status.enums";
 
 export interface IMentorDTO {
 	id: string;
 	email: string;
 	firstName: string;
-	role: "user" | "mentor";
+	role: RoleEnum;
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;
 	interests: string[] | null;
 	updatedAt: Date | null;
 	skills: string[] | null;
-	status: "blocked" | "unblocked";
-	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
+	status: UserStatusEnums;
+	mentorRequestStatus: MentorRequestStatusEnum;
 	createdAt: Date;
 	averageRating: number | null;
 	totalReviews: number | null;

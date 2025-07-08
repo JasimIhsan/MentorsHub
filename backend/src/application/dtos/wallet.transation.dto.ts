@@ -1,7 +1,9 @@
 import { SessionEntity } from "../../domain/entities/session.entity";
 import { UserEntity } from "../../domain/entities/user.entity";
-import { WalletTransactionEntity, WalletTransactionPurpose, WalletTransactionType } from "../../domain/entities/wallet/wallet.transaction.entity";
-import { RoleEnum } from "../interfaces/role";
+import { WalletTransactionEntity } from "../../domain/entities/wallet/wallet.transaction.entity";
+import { RoleEnum } from "../interfaces/enums/role.enum";
+import { TransactionPurposeEnum } from "../interfaces/enums/transaction.purpose.enum";
+import { TransactionsTypeEnum } from "../interfaces/enums/transaction.type.enum";
 
 export interface IWalletTransactionDTO {
 	_id: string;
@@ -18,8 +20,8 @@ export interface IWalletTransactionDTO {
 	fromRole: RoleEnum;
 	toRole: RoleEnum;
 	amount: number;
-	type: WalletTransactionType;
-	purpose: WalletTransactionPurpose;
+	type: TransactionsTypeEnum;
+	purpose: TransactionPurposeEnum;
 	description?: string;
 	sessionId?: {
 		id: string;
@@ -33,8 +35,8 @@ export function mapToTransactionDTO(transaction: WalletTransactionEntity, fromUs
 		_id: transaction.id!,
 		fromUserId: fromUser ? { id: fromUser.id!, name: fromUser.firstName, avatar: fromUser.avatar || "" } : null,
 		toUserId: toUser ? { id: toUser.id!, name: toUser.firstName, avatar: toUser.avatar || "" } : null,
-		fromRole: transaction.fromUserRole as RoleEnum,
-		toRole: transaction.toUserRole as RoleEnum,
+		fromRole: transaction.fromRoleEnum as RoleEnum,
+		toRole: transaction.toRoleEnum as RoleEnum,
 		amount: transaction.transactionAmount,
 		type: transaction.transactionType,
 		purpose: transaction.transactionPurpose,

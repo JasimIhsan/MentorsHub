@@ -1,18 +1,21 @@
+import { MentorRequestStatusEnum } from "../../application/interfaces/enums/mentor.request.status.enum";
+import { RoleEnum } from "../../application/interfaces/enums/role.enum";
+import { UserStatusEnums } from "../../application/interfaces/enums/user.status.enums";
 import { Availability } from "./mentor.detailes.entity";
 
 export interface MentorEntityProps {
 	id: string;
 	email: string;
 	firstName: string;
-	role: "user" | "mentor";
+	role: RoleEnum.USER | RoleEnum.MENTOR;
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;
 	interests: string[] | null;
 	updatedAt: Date | null;
 	skills: string[] | null;
-	status: "blocked" | "unblocked";
-	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
+	status: UserStatusEnums;
+	mentorRequestStatus: MentorRequestStatusEnum;
 	createdAt: Date;
 	averageRating: number | null;
 	totalReviews: number | null;

@@ -1,9 +1,6 @@
-// domain/entities/session.entity.ts
+import { SessionPaymentStatusEnum } from "../../application/interfaces/enums/session.payment.status.enum";
+import { SessionStatusEnum } from "../../application/interfaces/enums/session.status.enums";
 
-
-export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected" | "expired" | "ongoing";
-
-export type SessionPaymentStatus = "pending" | "completed" | "failed";
 export type SessionFormat = "one-on-one" | "group";
 export type PricingType = "free" | "paid";
 
@@ -16,7 +13,7 @@ export interface PersonEntity {
 
 export interface SessionParticipantEntity {
 	user: PersonEntity;
-	paymentStatus: SessionPaymentStatus;
+	paymentStatus: SessionPaymentStatusEnum;
 	paymentId?: string;
 }
 
@@ -31,7 +28,7 @@ export interface SessionProps {
 	time: string;
 	hours: number;
 	message: string;
-	status: SessionStatus;
+	status: SessionStatusEnum;
 	pricing: PricingType;
 	totalAmount?: number;
 	rejectReason?: string;
@@ -88,7 +85,7 @@ export class SessionEntity {
 	}
 
 	get paidParticipants() {
-		return this.props.participants.filter((p) => p.paymentStatus === "completed");
+		return this.props.participants.filter((p) => p.paymentStatus === SessionPaymentStatusEnum.COMPLETED);
 	}
 
 	get fee() {
@@ -139,3 +136,4 @@ export class SessionEntity {
 		});
 	}
 }
+

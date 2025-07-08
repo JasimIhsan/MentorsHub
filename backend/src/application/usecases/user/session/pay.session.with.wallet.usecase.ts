@@ -3,13 +3,16 @@ import { ISessionRepository } from "../../../../domain/repositories/session.repo
 import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IPaySessionWithWalletUseCase } from "../../../interfaces/session";
-
-import { SessionPaymentStatus, SessionStatus } from "../../../../domain/entities/session.entity";
+import { RoleEnum } from "../../../interfaces/enums/role.enum";
+import { TransactionsTypeEnum } from "../../../interfaces/enums/transaction.type.enum";
+import { TransactionPurposeEnum } from "../../../interfaces/enums/transaction.purpose.enum";
+import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
+import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
 
 export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository) {}
 
-	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: SessionPaymentStatus, status: SessionStatus): Promise<void> {
+	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: SessionPaymentStatusEnum, status: SessionStatusEnum): Promise<void> {
 		/* Fetch the session */
 		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
@@ -26,7 +29,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		/* Validate participant */
 		const participant = session.participants.find((p) => p.user.id === userId);
 		if (!participant) throw new Error("Unauthorized: User is not a participant in this session");
-		if (participant.paymentStatus === "completed") throw new Error("Session already booked");
+		if (participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) throw new Error("Session already booked");
 
 		/* Calculate fees */
 		const sessionFee = session.fee;
@@ -43,21 +46,21 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		}
 
 		/* Wallet operations */
-		await this.walletRepo.updateBalance(userId, sessionFee, "debit"); // debit user
-		await this.walletRepo.updateBalance(mentorId, mentorEarning, "credit"); // credit mentor
+		await this.walletRepo.updateBalance(userId, sessionFee, TransactionsTypeEnum.DEBIT); // debit user
+		await this.walletRepo.updateBalance(mentorId, mentorEarning, TransactionsTypeEnum.CREDIT); // credit mentor
 
 		const platformWallet = await this.walletRepo.platformWallet();
-		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, "credit", "admin"); // credit platform
+		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, TransactionsTypeEnum.CREDIT, RoleEnum.ADMIN); // credit platform
 
 		/* Transactions */
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: mentorId,
-			fromRole: "user",
-			toRole: "mentor",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.MENTOR,
 			amount: sessionFee,
-			type: "debit",
-			purpose: "session_fee",
+			type: TransactionsTypeEnum.DEBIT,
+			purpose: TransactionPurposeEnum.SESSION_FEE,
 			description: `Payment for session ${session.topic}`,
 			sessionId,
 		});
@@ -65,11 +68,11 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: mentorId,
-			fromRole: "user",
-			toRole: "mentor",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.MENTOR,
 			amount: mentorEarning,
-			type: "credit",
-			purpose: "session_fee",
+			type: TransactionsTypeEnum.CREDIT,
+			purpose: TransactionPurposeEnum.SESSION_FEE,
 			description: `Mentor earning for session ${session.topic}`,
 			sessionId,
 		});
@@ -77,11 +80,11 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: platformWallet.userId,
-			fromRole: "user",
-			toRole: "admin",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.ADMIN,
 			amount: platformFeeFixed,
-			type: "credit",
-			purpose: "platform_fee",
+			type: TransactionsTypeEnum.CREDIT,
+			purpose: TransactionPurposeEnum.PLATFORM_FEE,
 			description: `Platform fixed fee from session ${session.topic}`,
 			sessionId,
 		});
@@ -89,11 +92,11 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: platformWallet.userId,
-			fromRole: "user",
-			toRole: "admin",
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.ADMIN,
 			amount: platformCommission,
-			type: "credit",
-			purpose: "platform_fee",
+			type: TransactionsTypeEnum.CREDIT,
+			purpose: TransactionPurposeEnum.PLATFORM_FEE,
 			description: `Platform 15% commission from session ${session.topic}`,
 			sessionId,
 		});

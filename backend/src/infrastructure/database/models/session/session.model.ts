@@ -1,13 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { SessionStatusEnum } from "../../../../application/interfaces/enums/session.status.enums";
+import { SessionPaymentStatusEnum } from "../../../../application/interfaces/enums/session.payment.status.enum";
 
 export type SessionFormat = "one-on-one" | "group";
-export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected" | "expired" | "ongoing";
-export type SessionPaymentStatus = "pending" | "completed" | "failed";
 export type PricingType = "free" | "paid";
 
 export interface ISessionParticipant {
 	userId: mongoose.Types.ObjectId;
-	paymentStatus: SessionPaymentStatus;
+	paymentStatus: SessionPaymentStatusEnum;
 	paymentId?: string;
 }
 
@@ -22,7 +22,7 @@ export interface ISessionDocument extends Document {
 	time: string;
 	hours: number;
 	message: string;
-	status: SessionStatus;
+	status: SessionStatusEnum;
 	pricing: PricingType;
 	totalAmount?: number;
 	rejectReason?: string;
@@ -30,7 +30,7 @@ export interface ISessionDocument extends Document {
 	updatedAt: Date;
 }
 
-const ParticipantSchema = new Schema<ISessionParticipant>(
+const ParticipantSchema = new Schema(
 	{
 		userId: { type: Schema.Types.ObjectId, ref: "Users", required: true },
 		paymentStatus: {
@@ -43,7 +43,7 @@ const ParticipantSchema = new Schema<ISessionParticipant>(
 	{ _id: false },
 );
 
-const SessionSchema = new Schema<ISessionDocument>(
+const SessionSchema = new Schema(
 	{
 		participants: { type: [ParticipantSchema], required: true },
 		mentorId: { type: Schema.Types.ObjectId, ref: "Users", required: true },

@@ -1,19 +1,22 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
+import { RoleEnum } from "../../../../application/interfaces/enums/role.enum";
+import { MentorRequestStatusEnum } from "../../../../application/interfaces/enums/mentor.request.status.enum";
+import { UserStatusEnums } from "../../../../application/interfaces/enums/user.status.enums";
 
 export interface IUsersDocument extends Document {
 	_id: ObjectId;
 	email: string;
 	password: string;
 	firstName: string;
-	role: "user" | "mentor";
+	role: RoleEnum.USER | RoleEnum.MENTOR;
 	lastName: string;
 	avatar: string | null;
 	bio: string | null;
 	interests: string[] | null;
 	updatedAt: Date;
 	skills: string[] | null;
-	status: "blocked" | "unblocked";
-	mentorRequestStatus: "pending" | "approved" | "rejected" | "not-requested";
+	status: UserStatusEnums;
+	mentorRequestStatus: MentorRequestStatusEnum;
 	createdAt: Date;
 	averageRating: number | null;
 	totalReviews: number | null;

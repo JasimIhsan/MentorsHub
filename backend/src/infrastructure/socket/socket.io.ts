@@ -6,12 +6,14 @@ import { deleteMessageHandler } from "./socket/delete.message.handler";
 import { registerMessageReadHandlers } from "./socket/update.readby.handler";
 import { getMessageUnreadCountHandler } from "./socket/get.message.unread.count.handler";
 import { CommonStringMessage } from "../../shared/constants/string.messages";
+import { RoleEnum } from "../../application/interfaces/enums/role.enum";
+import { SessionStatusEnum } from "../../application/interfaces/enums/session.status.enums";
 
 interface SessionParticipant {
 	userId: string;
 	peerId: string;
 	socketId: string;
-	role: "mentor" | "user";
+	role: RoleEnum.MENTOR | RoleEnum.USER;
 	isApproved?: boolean;
 	name: string;
 	avatar?: string;
@@ -81,7 +83,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 				const session = await SessionModel.findById(sessionId);
 				if (!session) return socket.emit("error", { message: CommonStringMessage.SESSION_NOT_FOUND });
 
-				if (!["upcoming", "ongoing"].includes(session.status)) {
+				if (![SessionStatusEnum.UPCOMING, SessionStatusEnum.ONGOING].includes(session.status)) {
 					return socket.emit("error", { message: "Session is not available or not paid" });
 				}
 
@@ -89,7 +91,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 				const existingIndex = sessions[sessionId].findIndex((p) => p.userId === userId);
 				const participantData: SessionParticipant = { userId, peerId, socketId: socket.id, role, name, avatar };
 
-				if (role === "mentor") {
+				if (role === RoleEnum.MENTOR) {
 					if (session.mentorId.toString() !== userId) {
 						return socket.emit("error", { message: "Not authorized as mentor" });
 					}
@@ -105,7 +107,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 					if (existingIndex !== -1) sessions[sessionId][existingIndex] = participantData;
 					else sessions[sessionId].push(participantData);
 					Object.assign(socket.data, { sessionId, userId, role });
-					const mentor = sessions[sessionId].find((p) => p.role === "mentor");
+					const mentor = sessions[sessionId].find((p) => p.role === RoleEnum.MENTOR);
 					if (mentor) {
 						io.to(mentor.socketId).emit("join-request", { userId, sessionId, peerId, name, avatar });
 					} else {
@@ -120,7 +122,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 		});
 
 		socket.on("approve-join", ({ userId, sessionId, approve, mentorPeerId }) => {
-			if (socket.data.role !== "mentor") {
+			if (socket.data.role !== RoleEnum.MENTOR) {
 				return socket.emit("error", { message: "Only mentors can approve joins" });
 			}
 			const participants = sessions[sessionId];
@@ -164,7 +166,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 					peerId,
 					socketId: socket.id,
 					role,
-					isApproved: role === "mentor" ? true : false,
+					isApproved: role === RoleEnum.MENTOR ? true : false,
 					name,
 					avatar,
 				};
@@ -172,14 +174,14 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 				else sessions[sessionId].push(participantData);
 				Object.assign(socket.data, { sessionId, userId, role });
 				socket.join(sessionId);
-				if (role === "mentor") {
+				if (role === RoleEnum.MENTOR) {
 					activeCalls[sessionId] = socket.id;
-					const users = sessions[sessionId].filter((p) => p.role === "user" && p.isApproved);
+					const users = sessions[sessionId].filter((p) => p.role === RoleEnum.USER && p.isApproved);
 					for (const user of users) {
 						io.to(user.socketId).emit("join-approved", { sessionId, mentorPeerId: peerId });
 					}
 				} else {
-					const mentor = sessions[sessionId].find((p) => p.role === "mentor");
+					const mentor = sessions[sessionId].find((p) => p.role === RoleEnum.MENTOR);
 					if (mentor && participantData.isApproved) {
 						socket.emit("join-approved", { sessionId, mentorPeerId: mentor.peerId });
 					}
@@ -208,7 +210,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 			if (!participants) return;
 			const user = participants.find((p) => p.userId === userId);
 			sessions[sessionId] = participants.filter((p) => p.userId !== userId);
-			if (role === "mentor") delete activeCalls[sessionId];
+			if (role === RoleEnum.MENTOR) delete activeCalls[sessionId];
 			if (sessions[sessionId].length === 0) delete sessions[sessionId];
 			socket.to(sessionId).emit("user-disconnected", { name: user?.name, avatar: user?.avatar });
 			console.log(`❌ Disconnected: ${userId}, reason: ${reason}`);

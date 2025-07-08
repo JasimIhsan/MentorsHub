@@ -4,6 +4,9 @@ import { IUserRepository } from "../../../../domain/repositories/user.repository
 import { ITokenService } from "../../../interfaces/user/token.service.interface";
 import { IGoogleAuthUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
 import { IHashService } from "../../../interfaces/services/hash.service";
+import { RoleEnum } from "../../../interfaces/enums/role.enum";
+import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
+import { UserStatusEnums } from "../../../interfaces/enums/user.status.enums";
 
 interface GoogleUserData {
 	email: string;
@@ -39,9 +42,9 @@ export class GoogleAuthUsecase implements IGoogleAuthUsecase {
 					firstName: gUser.given_name,
 					lastName: gUser.family_name,
 					avatar: gUser.picture,
-					role: "user",
-					status: "unblocked",
-					mentorRequestStatus: "not-requested",
+					role: RoleEnum.USER,
+					status: UserStatusEnums.UNBLOCKED,
+					mentorRequestStatus: MentorRequestStatusEnum.NOT_REQUESTED,
 					googleId: gUser.sub,
 					sessionCompleted: 0,
 					averageRating: 0,

@@ -1,12 +1,13 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import { UserEntity, UserRole } from "../../../../domain/entities/user.entity";
+import { UserEntity } from "../../../../domain/entities/user.entity";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
 import { ICreateUserUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
 import { IHashService } from "../../../interfaces/services/hash.service";
+import { RoleEnum } from "../../../interfaces/enums/role.enum";
 
 export class CreateUserUsecase implements ICreateUserUsecase {
 	constructor(private userRepository: IUserRepository, private hashService: IHashService) {} 
-	async execute(firstName: string, lastName: string, email: string, role: UserRole): Promise<IUserDTO> {
+	async execute(firstName: string, lastName: string, email: string, role: RoleEnum): Promise<IUserDTO> {
 		try {
 			const isUserExists = await this.userRepository.findUserByEmail(email);
 			if (isUserExists) {

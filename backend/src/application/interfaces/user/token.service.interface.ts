@@ -1,6 +1,5 @@
 import { JwtPayload } from "jsonwebtoken";
 
-export type UserStatus = "blocked" | "unblocked";
 export interface Payload extends JwtPayload {
 	userId: string;
 	isAdmin?: boolean;
