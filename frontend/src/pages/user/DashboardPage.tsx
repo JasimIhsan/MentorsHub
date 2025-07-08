@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { UserInterface, Session, Mentor } from "@/interfaces/interfaces";
+import { UserInterface } from "@/interfaces/interfaces";
 import { AppDispatch, RootState } from "@/store/store";
 import axiosInstance from "@/api/config/api.config";
 import WelcomeHeader from "@/components/user/Dashboard/WelcomeSection";
@@ -8,20 +8,20 @@ import GamificationCard from "@/components/user/Dashboard/GamificationCard";
 import UpcomingSessions from "@/components/user/Dashboard/UpcomingSessions";
 import Notifications from "@/components/user/Dashboard/Notifications";
 import QuickLinks from "@/components/user/Dashboard/QuickLinks";
-import MentorsReadyNow from "@/components/user/Dashboard/MentorsReadyNow";
 import { fetchDashboardDatas } from "@/api/user/dashboard.api.service";
 import { toast } from "sonner";
 import { fetchUserProfile } from "@/store/slices/userSlice";
 import { markAllNotificationsAsReadThunk, markNotificationAsReadThunk } from "@/store/slices/notificationSlice";
-// import { useNotifications } from "@/hooks/useNotification";
+import { ISessionUserDTO } from "@/interfaces/ISessionDTO";
+import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import TopRatedMentors from "@/components/user/Dashboard/MentorsReadyNow";
 
 export const DashboardPage: React.FC = () => {
 	const user = useSelector((state: RootState) => state.userAuth.user) as UserInterface | null;
-	const [upcomingSessions, setUpcomingSessions] = useState<Session[]>([]);
-	const [readyNowMentors, setReadyNowMentors] = useState<Mentor[]>([]);
+	const [upcomingSessions, setUpcomingSessions] = useState<ISessionUserDTO[]>([]);
+	const [topRatedMentor, setTopRatedMentor] = useState<IMentorDTO[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
 	const dispatch = useDispatch<AppDispatch>();
-	// const {notifications, isLoading, markAllAsRead, markAsRead} = useNotifications(user?.id as string);
 	const { notifications, isLoading } = useSelector((state: RootState) => state.notifications);
 
 	useEffect(() => {
@@ -31,10 +31,11 @@ export const DashboardPage: React.FC = () => {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const data = await fetchDashboardDatas();
+				const data = await fetchDashboardDatas(user?.id!);
+				console.log("data: ", data);
 				if (data) {
 					setUpcomingSessions(data.sessions);
-					setReadyNowMentors(data.mentors);
+					setTopRatedMentor(data.mentor);
 				}
 			} catch (error) {
 				console.error("Error fetching dashboard data:", error);
@@ -78,14 +79,16 @@ export const DashboardPage: React.FC = () => {
 		<div className="w-full pb-6">
 			<div className="flex flex-col gap-8">
 				<WelcomeHeader user={user} />
-				<section className="flex flex-col gap-4 px-10 md:px-20 xl:px-25 justify-center">
+				<section className="flex flex-col gap-4 px-10 md:px-20 xl:px-25">
 					<GamificationCard onTestClick={test} />
 					<UpcomingSessions sessions={upcomingSessions} />
 					<Notifications notifications={notifications} markAsRead={markAsRead} markAllAsRead={markAllAsRead} userId={user.id as string} />
 				</section>
-				<div className="grid gap-6 md:grid-cols-2 px-10 md:px-20 xl:px-25 justify-center">
-					<QuickLinks />
-					<MentorsReadyNow mentors={readyNowMentors} />
+				<div className="grid gap-6 w-full px-10 md:px-20 xl:px-25">
+					<div className="grid gap-6 w-full lg:grid-cols-2">
+						<TopRatedMentors mentors={topRatedMentor} />
+						<QuickLinks />
+					</div>
 				</div>
 			</div>
 		</div>

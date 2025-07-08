@@ -6,7 +6,15 @@ export interface IRequestSessionUseCase {
 }
 
 export interface IGetSessionsByUserUseCase {
-	execute(userId: string): Promise<ISessionUserDTO[]>;
+	execute(
+		userId: string,
+		options?: {
+			page?: number;
+			limit?: number;
+			search?: string;
+			status?: string;
+		}
+	): Promise<{sessions: ISessionUserDTO[]; total: number}>;
 }
 
 export interface IUpdateSessionStatusUseCase {

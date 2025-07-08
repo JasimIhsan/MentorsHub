@@ -3,22 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarDays, Clock, Video, MessageSquare, FileText, MoreHorizontal, Search, CreditCard, ChevronDown, CheckCircle, ArrowRight, Download, Star, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Textarea } from "@/components/ui/textarea";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Loading } from "@/components/custom/Loading";
 import { ISessionUserDTO } from "@/interfaces/ISessionDTO";
 import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
-import { formatDate, formatTime } from "@/utility/time-data-formatter"; // Corrected import path
+import { formatDate, formatTime } from "@/utility/time-data-formatter";
 import { isSessionExpired } from "@/utility/is-session-expired";
-import { createRazorpayOrderAPI } from "@/api/session.api.service";
+import { createRazorpayOrderAPI, fetchSessionsByUser } from "@/api/session.api.service";
+import { PaginationControls } from "@/components/custom/PaginationControls";
 
 declare global {
 	interface Window {
@@ -28,19 +28,19 @@ declare global {
 
 interface User {
 	id: string;
-	// Add other user properties as needed
 }
 
 export function SessionsPage() {
 	const [sessions, setSessions] = useState<ISessionUserDTO[]>([]);
 	const [selectedCategory, setSelectedCategory] = useState<"upcoming" | "approved" | "completed" | "canceled" | "all" | "pending" | "rejected">("all");
-	const [loading, setLoading] = useState(true);
+	const [sessionsLoading, setSessionsLoading] = useState(true); // Loading state for sessions
 	const [error, setError] = useState<string | null>(null);
 	const [showPaymentModal, setShowPaymentModal] = useState(false);
 	const [paidSession, setPaidSession] = useState<ISessionUserDTO | null>(null);
 	const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 	const [selectedSession, setSelectedSession] = useState<ISessionUserDTO | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
 	const [itemsPerPage] = useState(5);
 	const [showCancelDialog, setShowCancelDialog] = useState(false);
 	const [sessionToCancel, setSessionToCancel] = useState<ISessionUserDTO | null>(null);
@@ -54,26 +54,22 @@ export function SessionsPage() {
 	// Load Razorpay script
 	useEffect(() => {
 		let script: HTMLScriptElement | null = null;
-
 		const loadRazorpayScript = () => {
 			if (window.Razorpay) {
 				setIsRazorpayLoaded(true);
 				return;
 			}
-
 			script = document.createElement("script");
 			script.src = "https://checkout.razorpay.com/v1/checkout.js";
 			script.async = true;
 			script.onload = () => setIsRazorpayLoaded(true);
 			script.onerror = () => {
-				toast.error("Failed to load payment gateway. Please try again later.");
+				toast.error("Failed to load payment gateway.");
 				setIsRazorpayLoaded(false);
 			};
 			document.body.appendChild(script);
 		};
-
 		loadRazorpayScript();
-
 		return () => {
 			if (script && document.body.contains(script)) {
 				document.body.removeChild(script);
@@ -85,36 +81,36 @@ export function SessionsPage() {
 	useEffect(() => {
 		const fetchData = async () => {
 			if (!user?.id) {
-				setError("User not authenticated. Please log in to view sessions.");
-				setLoading(false);
+				setError("User not authenticated.");
+				setSessionsLoading(false);
 				return;
 			}
-
 			try {
-				// Fetch sessions
-				const sessionsResponse = await axiosInstance.get(`/user/sessions/all/${user.id}`);
-				if (!sessionsResponse.data?.sessions) {
+				setSessionsLoading(true); // Start loading sessions
+				// Fetch sessions with backend filtering
+				const sessionsResponse = await fetchSessionsByUser(user.id, currentPage, itemsPerPage, selectedCategory);
+				if (!sessionsResponse.success) {
 					throw new Error("No sessions data received");
 				}
-				setSessions(sessionsResponse.data.sessions);
-
+				setSessions(sessionsResponse.sessions);
+				setTotalPages(Math.ceil(sessionsResponse.total / itemsPerPage));
 				// Fetch wallet balance
 				const walletResponse = await axiosInstance.get(`/user/wallet/${user.id}`);
 				setWalletBalance(walletResponse.data.wallet.balance || 0);
 			} catch (err: any) {
-				const message = err.response?.data?.message || "Failed to load data. Please check your network and try again.";
+				const message = err.response?.data?.message || "Failed to load data.";
 				setError(message);
 				toast.error(message);
 			} finally {
-				setLoading(false);
+				setSessionsLoading(false); // Stop loading sessions
 			}
 		};
 		fetchData();
-	}, [user?.id]);
+	}, [user?.id, currentPage, selectedCategory]);
 
+	// Handle session cancellation
 	const handleCancelSession = async () => {
 		if (!sessionToCancel || !user?.id) return;
-
 		try {
 			const response = await axiosInstance.put(`/user/sessions/cancel-session`, {
 				sessionId: sessionToCancel.id,
@@ -134,27 +130,10 @@ export function SessionsPage() {
 		}
 	};
 
-	if (loading) {
-		return <Loading appName="My Sessions" loadingMessage="Loading your sessions" />;
-	}
-
 	if (error) {
 		toast.error(error);
 		return null;
 	}
-
-	const filteredSessions = selectedCategory === "all" ? sessions : sessions.filter((session) => session.status === selectedCategory);
-	const sortedSessions = filteredSessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-	const totalItems = sortedSessions.length;
-	const totalPages = Math.ceil(totalItems / itemsPerPage);
-	const indexOfLastItem = currentPage * itemsPerPage;
-	const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-	const currentSessions = sortedSessions.slice(indexOfFirstItem, indexOfLastItem);
-
-	const handlePageChange = (page: number) => {
-		setCurrentPage(page);
-	};
 
 	const categoryLabels: { [key in typeof selectedCategory]: string } = {
 		upcoming: "Upcoming Sessions",
@@ -173,7 +152,6 @@ export function SessionsPage() {
 					<h1 className="text-3xl font-bold tracking-tight">My Sessions</h1>
 					<p className="text-muted-foreground">Manage your mentoring sessions</p>
 				</div>
-
 				<Card>
 					<CardHeader className="pb-0">
 						<div className="flex items-center justify-between">
@@ -199,24 +177,10 @@ export function SessionsPage() {
 					</CardHeader>
 					<CardContent className="pt-6">
 						<div className="space-y-4">
-							{currentSessions.map((session) => (
-								<SessionCard
-									key={session.id}
-									session={session}
-									setShowPaymentModal={setShowPaymentModal}
-									setPaidSession={setPaidSession}
-									isRazorpayLoaded={isRazorpayLoaded}
-									setSelectedSession={setSelectedSession}
-									setShowCancelDialog={setShowCancelDialog}
-									setSessionToCancel={setSessionToCancel}
-									setShowReviewModal={setShowReviewModal}
-									setSessionToReview={setSessionToReview}
-									setShowPaymentMethodModal={setShowPaymentMethodModal}
-									setSessionToPay={setSessionToPay}
-									walletBalance={walletBalance}
-								/>
-							))}
-							{currentSessions.length === 0 && (
+							{sessionsLoading ? (
+								// Render skeleton for session cards
+								Array.from({ length: itemsPerPage }).map((_, index) => <SessionCardSkeleton key={index} />)
+							) : sessions.length === 0 ? (
 								<EmptyState
 									title={`No ${selectedCategory === "all" ? "sessions" : selectedCategory + " sessions"}`}
 									description={`You don't have any ${selectedCategory === "all" ? "sessions" : selectedCategory + " sessions"}${
@@ -230,31 +194,28 @@ export function SessionsPage() {
 										) : undefined
 									}
 								/>
+							) : (
+								sessions.map((session) => (
+									<SessionCard
+										key={session.id}
+										session={session}
+										setShowPaymentModal={setShowPaymentModal}
+										setPaidSession={setPaidSession}
+										isRazorpayLoaded={isRazorpayLoaded}
+										setSelectedSession={setSelectedSession}
+										setShowCancelDialog={setShowCancelDialog}
+										setSessionToCancel={setSessionToCancel}
+										setShowReviewModal={setShowReviewModal}
+										setSessionToReview={setSessionToReview}
+										setShowPaymentMethodModal={setShowPaymentMethodModal}
+										setSessionToPay={setSessionToPay}
+									/>
+								))
 							)}
 						</div>
-						{totalPages > 1 && (
-							<div className="mt-6">
-								<Pagination>
-									<PaginationContent>
-										<PaginationItem>
-											<PaginationPrevious onClick={currentPage > 1 ? () => handlePageChange(currentPage - 1) : undefined} className={currentPage === 1 ? "pointer-events-none opacity-50" : ""} />
-										</PaginationItem>
-										{Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-											<PaginationItem key={page}>
-												<PaginationLink onClick={() => handlePageChange(page)} isActive={currentPage === page}>
-													{page}
-												</PaginationLink>
-											</PaginationItem>
-										))}
-										<PaginationItem>
-											<PaginationNext onClick={currentPage < totalPages ? () => handlePageChange(currentPage + 1) : undefined} className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""} />
-										</PaginationItem>
-									</PaginationContent>
-								</Pagination>
-							</div>
-						)}
+						<PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} className="mt-5" />
 						<div className="mt-6 rounded-lg border border-dashed p-4 text-center">
-							<p className="text-sm text-muted-foreground">Need to reschedule a session? Contact your mentor directly or reach out to our support team.</p>
+							<p className="text-sm text-muted-foreground">Need to reschedule? Contact your mentor or support team.</p>
 						</div>
 					</CardContent>
 				</Card>
@@ -267,10 +228,14 @@ export function SessionsPage() {
 						setPaidSession(null);
 						const fetchSessions = async () => {
 							try {
-								const response = await axiosInstance.get(`/user/sessions/all/${user?.id}`);
-								setSessions(response.data.sessions);
+								setSessionsLoading(true); // Start loading sessions
+								const response = await fetchSessionsByUser(user?.id || "", currentPage, itemsPerPage, selectedCategory);
+								setSessions(response.sessions);
+								setTotalPages(Math.ceil(response.total / itemsPerPage));
 							} catch (err: any) {
 								toast.error("Failed to refresh sessions.");
+							} finally {
+								setSessionsLoading(false); // Stop loading sessions
 							}
 						};
 						fetchSessions();
@@ -327,6 +292,37 @@ export function SessionsPage() {
 	);
 }
 
+// Skeleton component for session cards
+function SessionCardSkeleton() {
+	return (
+		<Card className="overflow-hidden p-0">
+			<CardContent className="p-0">
+				<div className="flex flex-col md:flex-row">
+					<Skeleton className="bg-gray-200 flex-shrink-0 h-24 w-full md:h-auto md:w-48" />
+					<div className="p-6 flex-1">
+						<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+							<div>
+								<Skeleton className="bg-gray-200 h-6 w-3/4 mb-2" />
+								<Skeleton className="bg-gray-200 h-4 w-1/2 mb-4" />
+								<div className="flex flex-wrap items-center gap-4">
+									<Skeleton className="bg-gray-200 h-4 w-24" />
+									<Skeleton className="bg-gray-200 h-4 w-24" />
+									<Skeleton className="bg-gray-200 h-4 w-24" />
+									<Skeleton className="bg-gray-200 h-4 w-24" />
+								</div>
+							</div>
+							<div className="flex items-center gap-2">
+								<Skeleton className="bg-gray-200 h-10 w-24" />
+								<Skeleton className="bg-gray-200 h-10 w-10" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
 interface SessionCardProps {
 	session: ISessionUserDTO;
 	setShowPaymentModal: Dispatch<SetStateAction<boolean>>;
@@ -339,15 +335,17 @@ interface SessionCardProps {
 	setSessionToReview: Dispatch<SetStateAction<ISessionUserDTO | null>>;
 	setShowPaymentMethodModal: Dispatch<SetStateAction<boolean>>;
 	setSessionToPay: Dispatch<SetStateAction<ISessionUserDTO | null>>;
-	walletBalance: number;
+	// walletBalance: number;
 }
 
 function SessionCard({ session, isRazorpayLoaded, setSelectedSession, setShowCancelDialog, setSessionToCancel, setShowReviewModal, setSessionToReview, setShowPaymentMethodModal, setSessionToPay }: SessionCardProps) {
 	const [isReasonOpen, setIsReasonOpen] = useState(false);
 
+	// Check if session is expired
 	const isExpired = session.status === "upcoming" && isSessionExpired(session.date, session.time);
 	const type = isExpired ? "expired" : session.status;
 
+	// Initiate payment
 	const handleInitiatePayment = () => {
 		setSessionToPay(session);
 		setShowPaymentMethodModal(true);
@@ -360,13 +358,13 @@ function SessionCard({ session, isRazorpayLoaded, setSelectedSession, setShowCan
 					<div className="relative flex-shrink-0 h-24 w-full md:h-auto md:w-48 bg-primary/10">
 						<div className="absolute inset-0 flex items-center justify-center">
 							<Avatar className="h-16 w-16 border-2 border-background">
-								<AvatarImage src={session.mentor.avatar} alt={`${session.mentor.firstName} ${session.mentor.lastName}`} />
-								<AvatarFallback>{session.mentor.firstName.charAt(0)}</AvatarFallback>
+								<AvatarImage src={session.mentor.avatar!} alt={`${session.mentor.firstName} ${session.mentor.lastName}`} />
+								<AvatarFallback className="avatarFallback">{session.mentor.firstName.charAt(0)}</AvatarFallback>
 							</Avatar>
 						</div>
 					</div>
 					<div className="p-6 flex-1">
-						<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+						<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
 							<div>
 								<h3 className="font-bold text-lg cursor-pointer hover:underline" onClick={() => setSelectedSession(session)}>
 									{session.topic}
@@ -401,7 +399,7 @@ function SessionCard({ session, isRazorpayLoaded, setSelectedSession, setShowCan
 											<DropdownMenuTrigger asChild>
 												<Button variant="ghost" size="icon">
 													<MoreHorizontal className="h-4 w-4" />
-													<span className="sr-only">More options</span>
+													<span className="sr-only">View More options</span>
 												</Button>
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="end">
@@ -444,7 +442,7 @@ function SessionCard({ session, isRazorpayLoaded, setSelectedSession, setShowCan
 											<DropdownMenuTrigger asChild>
 												<Button variant="ghost" size="icon">
 													<MoreHorizontal className="h-4 w-4" />
-													<span className="sr-only">More options</span>
+													<span className="sr-only">View More options</span>
 												</Button>
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="end">
@@ -472,7 +470,7 @@ function SessionCard({ session, isRazorpayLoaded, setSelectedSession, setShowCan
 								)}
 								{type === "completed" && (
 									<>
-										<Badge variant="outline" className="bg-primary/5 text-primary">
+										<Badge variant="outline" className="text-primary bg-primary/5">
 											Completed
 										</Badge>
 										<Button
@@ -485,7 +483,7 @@ function SessionCard({ session, isRazorpayLoaded, setSelectedSession, setShowCan
 										</Button>
 										<Button variant="ghost" size="icon" onClick={() => setSelectedSession(session)}>
 											<FileText className="h-4 w-4" />
-											<span className="sr-only">View Details</span>
+											<span className="sr-only">View Session Details</span>
 										</Button>
 									</>
 								)}
@@ -495,16 +493,14 @@ function SessionCard({ session, isRazorpayLoaded, setSelectedSession, setShowCan
 											Canceled
 										</Badge>
 										<Button variant="outline" asChild>
-											<Link to={`/browse`}>Rebook</Link>
+											<Link to="/browse">Rebook Now</Link>
 										</Button>
 									</>
 								)}
 								{type === "pending" && <Badge variant="outline">Pending</Badge>}
 								{type === "rejected" && (
 									<>
-										<Badge variant="outline" className="bg-red-100 text-red-800">
-											Rejected
-										</Badge>
+										<Badge className="bg-red-100 text-red-800">Rejected</Badge>
 										<DropdownMenu open={isReasonOpen} onOpenChange={setIsReasonOpen}>
 											<DropdownMenuTrigger asChild>
 												<Button variant="outline" onMouseEnter={() => setIsReasonOpen(true)} onMouseLeave={() => setIsReasonOpen(false)}>
@@ -516,7 +512,7 @@ function SessionCard({ session, isRazorpayLoaded, setSelectedSession, setShowCan
 											</DropdownMenuContent>
 										</DropdownMenu>
 										<Button variant="outline" asChild>
-											<Link to={`/browse`}>Rebook</Link>
+											<Link to="/browse">Rebook</Link>
 										</Button>
 									</>
 								)}
@@ -526,11 +522,11 @@ function SessionCard({ session, isRazorpayLoaded, setSelectedSession, setShowCan
 											Expired
 										</Badge>
 										<Button variant="outline" asChild>
-											<Link to={`/browse`}>Rebook</Link>
+											<Link to="/browse">Rebook Now</Link>
 										</Button>
 										<Button variant="ghost" size="icon" onClick={() => setSelectedSession(session)}>
 											<FileText className="h-4 w-4" />
-											<span className="sr-only">View Details</span>
+											<span className="sr-only">View Session Details</span>
 										</Button>
 									</>
 								)}
@@ -558,14 +554,14 @@ function PaymentSuccessModal({ isOpen, onClose, session }: { isOpen: boolean; on
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
 			<DialogContent className="sm:max-w-lg p-0 overflow-hidden">
-				<div className="bg-gradient-to-r from-primary to-blue-500 p-4 text-center text-white">
+				<div className="bg-primary to-blue-500 p-4 text-center text-white">
 					<div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
 						<CheckCircle className="h-10 w-10 text-white" />
 					</div>
 					<DialogHeader>
 						<DialogTitle className="text-3xl font-bold text-white text-center">Payment Successful!</DialogTitle>
 					</DialogHeader>
-					<p className="mt-2 text-white/80">Your session has been booked successfully</p>
+					<p className="mt-2 text-white/80">Your session has been booked.</p>
 				</div>
 				<div className="px-6">
 					<div className="space-y-2">
@@ -608,7 +604,7 @@ function PaymentSuccessModal({ isOpen, onClose, session }: { isOpen: boolean; on
 							</Button>
 						</div>
 						<div className="rounded-lg border border-dashed p-4 text-center">
-							<p className="text-sm text-muted-foreground">You'll receive an email with the session details and a calendar invitation. The video call link will be available 15 minutes before the session starts.</p>
+							<p className="text-sm text-muted-foreground">You'll receive an email with session details and a calendar invite.</p>
 						</div>
 					</div>
 				</div>
@@ -635,17 +631,16 @@ function ReviewModal({ isOpen, onClose, session }: { isOpen: boolean; onClose: (
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const user = useSelector((state: RootState) => state.userAuth.user as User | null);
 
+	// Submit review
 	const handleSubmitReview = async () => {
 		if (!user?.id || !session.id) {
 			toast.error("User or session not found.");
 			return;
 		}
-
 		if (rating === 0) {
 			toast.error("Please provide a rating.");
 			return;
 		}
-
 		setIsSubmitting(true);
 		try {
 			const response = await axiosInstance.post("/user/reviews/create", {
@@ -656,7 +651,7 @@ function ReviewModal({ isOpen, onClose, session }: { isOpen: boolean; onClose: (
 				comment: feedback,
 			});
 			if (response.data.success) {
-				toast.success("Review submitted successfully!");
+				toast.success("Review submitted!");
 				onClose();
 			} else {
 				toast.error(response.data.message || "Failed to submit review.");
@@ -674,7 +669,7 @@ function ReviewModal({ isOpen, onClose, session }: { isOpen: boolean; onClose: (
 				<DialogHeader>
 					<DialogTitle>Leave a Review</DialogTitle>
 					<DialogDescription>
-						Share your feedback for your session with {session.mentor.firstName} {session.mentor.lastName} on {formatDate(session.date)} at {formatTime(session.time)}.
+						Share feedback for your session with {session.mentor.firstName} {session.mentor.lastName} on {formatDate(session.date)} at {formatTime(session.time)}.
 					</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4">
@@ -730,13 +725,12 @@ function PaymentMethodModal({
 }) {
 	const [isPaying, setIsPaying] = useState(false);
 
+	// Handle wallet payment
 	const handleWalletPayment = async () => {
-		// Fallback check for safety, though totalAmount is now required
 		if (!session.totalAmount || walletBalance < session.totalAmount) {
-			toast.error("Insufficient wallet balance. Please use gateway payment or top up your wallet.");
+			toast.error("Insufficient wallet balance.");
 			return;
 		}
-
 		setIsPaying(true);
 		try {
 			await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -749,37 +743,36 @@ function PaymentMethodModal({
 			if (response.data.success) {
 				setPaidSession({ ...session, status: "upcoming" });
 				setShowPaymentModal(true);
-				toast.success("Payment successful using wallet! Session moved to upcoming.");
+				toast.success("Payment successful using wallet!");
 				onClose();
 			} else {
 				toast.error(response.data?.message || "Wallet payment failed.");
 			}
 		} catch (error: any) {
-			toast.error(error.response?.data?.message || "Failed to process wallet payment.");
+			toast.error(error.response?.data?.message || "Failed to process payment.");
 		} finally {
 			setIsPaying(false);
 		}
 	};
 
+	// Handle gateway payment
 	const handleGatewayPayment = async () => {
 		if (!isRazorpayLoaded || !window.Razorpay) {
-			toast.error("Payment gateway not loaded. Please try again later.");
+			toast.error("Payment gateway not loaded.");
 			return;
 		}
-
 		setIsPaying(true);
 		let order;
 		try {
 			order = await createRazorpayOrderAPI(session.id, userId);
 			if (!order || !order.id || !order.amount) {
-				throw new Error("Invalid order details received from server.");
+				throw new Error("Invalid order details.");
 			}
 		} catch (error: any) {
 			toast.error(error.message || "Failed to create order.");
 			setIsPaying(false);
 			return;
 		}
-
 		try {
 			const options = {
 				key: import.meta.env.VITE_RAZORPAY_KEY,
@@ -802,10 +795,10 @@ function PaymentMethodModal({
 						if (paymentResponse.data.success) {
 							setPaidSession({ ...session, status: "upcoming" });
 							setShowPaymentModal(true);
-							toast.success("Payment successful! Session moved to upcoming.");
+							toast.success("Payment successful!");
 							onClose();
 						} else {
-							toast.error(paymentResponse.data?.message || "Payment processing failed.");
+							toast.error(paymentResponse.data?.message || "Payment failed.");
 						}
 					} catch (error: any) {
 						toast.error(error.response?.data?.message || "Failed to process payment.");
@@ -828,7 +821,6 @@ function PaymentMethodModal({
 					},
 				},
 			};
-
 			const rzp = new window.Razorpay(options);
 			rzp.on("payment.failed", (response: any) => {
 				toast.error(`Payment failed: ${response.error?.description || "Unknown error"}.`);
@@ -847,7 +839,7 @@ function PaymentMethodModal({
 				<DialogHeader>
 					<DialogTitle>Select Payment Method</DialogTitle>
 					<DialogDescription>
-						Choose how you'd like to pay for your session with {session.mentor.firstName} {session.mentor.lastName} amounting to ₹{session.totalAmount || "N/A"}.
+						Pay for your session with {session.mentor.firstName} {session.mentor.lastName} amounting to ₹{session.totalAmount || "N/A"}.
 					</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4">
@@ -868,7 +860,7 @@ function PaymentMethodModal({
 							<CreditCard className="h-5 w-5 text-primary" />
 							<div>
 								<p className="font-medium">Online Payment</p>
-								<p className="text-sm text-muted-foreground">Pay securely with card, UPI, or net banking</p>
+								<p className="text-sm text-muted-foreground">Pay with card, UPI, or net banking</p>
 							</div>
 						</div>
 						<Button onClick={handleGatewayPayment} disabled={isPaying || !isRazorpayLoaded}>

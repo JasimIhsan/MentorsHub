@@ -1,7 +1,8 @@
 // domain/repositories/session.repository.ts
 
+import { SessionPaymentStatusEnum } from "../../application/interfaces/enums/session.payment.status.enum";
 import { SessionStatusEnum } from "../../application/interfaces/enums/session.status.enums";
-import { SessionEntity, SessionPaymentStatusEnum } from "../entities/session.entity";
+import { SessionEntity } from "../entities/session.entity";
 
 export interface ISessionRepository {
 	// Create a new session
@@ -13,7 +14,15 @@ export interface ISessionRepository {
 	findByIds(ids: string[]): Promise<SessionEntity[]>;
 
 	// Get all sessions that a specific user is part of
-	findByUser(userId: string): Promise<SessionEntity[]>;
+	findByUser(
+		userId: string,
+		options?: {
+			page?: number;
+			limit?: number;
+			search?: string;
+			status?: string;
+		}
+	): Promise<{ sessions: SessionEntity[]; total: number }>;
 
 	// Get all sessions for a specific mentor with filters and pagination
 	findByMentor(

@@ -57,10 +57,40 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async findByUser(userId: string): Promise<SessionEntity[]> {
+	async findByUser(
+		userId: string,
+		options?: {
+			page?: number;
+			limit?: number;
+			search?: string;
+			status?: string;
+		}
+	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
-			const sessions = await SessionModel.find({ "participants.userId": userId }).populate("mentorId", "firstName lastName avatar").populate("participants.userId", "firstName lastName avatar");
-			return sessions.map(SessionEntity.fromDB);
+			const { page = 1, limit = 10, search = "", status = "" } = options || {};
+			const skip = (page - 1) * limit;
+
+			const filter: any = {
+				"participants.userId": userId,
+			};
+
+			// Optional: Filter by session status
+			if (status && status !== "all") {
+				filter.status = status;
+			}
+			
+
+			// Optional: Search by mentor name (populate won't work directly in match, so do text-based if needed)
+			if (search) {
+				filter.$or = [
+					{ title: { $regex: search, $options: "i" } }, // If sessions have a title
+					// You can also implement `$lookup` + `$match` in aggregation if you want to search mentor name
+				];
+			}
+
+			const sessions = await SessionModel.find(filter).populate("mentorId", "firstName lastName avatar").populate("participants.userId", "firstName lastName avatar").sort({ updatedAt: -1 }).skip(skip).limit(limit);
+			const total = await SessionModel.countDocuments(filter);
+			return { sessions: sessions.map(SessionEntity.fromDB), total };
 		} catch (error) {
 			return handleExceptionError(error, "Error getting sessions by user");
 		}
@@ -78,7 +108,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			filter?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
-		},
+		}
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const query: any = { mentorId };
@@ -151,7 +181,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 						"participants.$.paymentId": paymentId,
 						status: newStatus,
 					},
-				},
+				}
 			);
 		} catch (error) {
 			return handleExceptionError(error, "Error updating session payment");

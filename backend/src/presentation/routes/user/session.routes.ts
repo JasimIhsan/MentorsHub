@@ -18,7 +18,7 @@ export const sessionRouter = Router();
 
 sessionRouter.post("/create-session", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => createSessionController.handle(req, res, next));
 
-sessionRouter.get("/all/:userId", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => getSessionsByUserController.handle(req, res, next));
+sessionRouter.get("/:userId", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => getSessionsByUserController.handle(req, res, next));
 
 sessionRouter.get("/verify-payment", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => verifySessionPaymentController.handle(req, res, next));
 

@@ -32,41 +32,41 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications, markAllAsR
 	return (
 		<Card>
 			<CardHeader>
-				<div className="flex items-center justify-between">
+				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 					<div>
 						<CustomHeader head="Notifications" description="Stay updated with your mentorship activities" />
 					</div>
-					<Button variant="ghost" size="sm" onClick={() => markAllAsRead(userId)}>
+					<Button variant="ghost" size="sm" onClick={() => markAllAsRead(userId)} className="w-full sm:w-auto">
 						Mark All as Read
 					</Button>
 				</div>
 			</CardHeader>
 			<CardContent>
-				<div className="space-y-4">
-					{notifications.map((notification) => {
+				<div className="space-y-3">
+					{notifications.slice(0, 4).map((notification) => {
 						const { bg, text, icon } = getNotificationStyles(notification.type);
 						return (
-							<div key={notification.id} className="flex items-start gap-4 rounded-lg border p-4">
-								<div className={`flex h-10 w-10 items-center justify-center rounded-full ${bg} ${text}`}>{icon}</div>
-								<div className="flex-1">
-									<p className="font-medium">{notification.title}</p>
-									<p className="text-sm">{notification.message}</p>
-									<p className="text-sm text-muted-foreground">{formatRelativeTime(notification.createdAt)}</p>
+							<div key={notification.id} className="flex  sm:flex-row sm:items-center gap-3 rounded-lg border p-2 sm:p-4 ">
+								<div className={`flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full ${bg} ${text}`}>{icon}</div>
+								<div className="flex-1 space-y-1">
+									<p className="font-medium text-sm sm:text-base">{notification.title}</p>
+									<p className="text-xs text-muted-foreground hidden sm:block">{notification.message}</p>
+									<p className="text-xs sm:text-sm text-muted-foreground">{formatRelativeTime(notification.createdAt)}</p>
 									{notification.link && (
-										<a href={notification.link} className="text-sm text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
+										<a href={notification.link} className="text-xs sm:text-sm text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
 											View Details
 										</a>
 									)}
 								</div>
-								<Button variant="ghost" size="sm" disabled={notification.isRead} onClick={() => markAsRead(notification.id)}>
+								<Button variant="ghost" size="sm" disabled={notification.isRead} onClick={() => markAsRead(notification.id)} className="mt-2 sm:mt-0">
 									{notification.isRead ? "Read" : "Mark as Read"}
 								</Button>
 							</div>
 						);
 					})}
 					{notifications.length === 0 && (
-						<div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-							<p className="text-center text-muted-foreground">No Notifications</p>
+						<div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-4 sm:p-8 text-center">
+							<p className="text-xs sm:text-sm text-muted-foreground">No Notifications</p>
 						</div>
 					)}
 				</div>
