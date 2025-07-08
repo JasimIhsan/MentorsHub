@@ -1,7 +1,7 @@
 
 import mongoose, { Schema, Document } from "mongoose";
+import { NotificationTypeEnum } from "../../../../application/interfaces/enums/notification.type.enum";
 
-export type NotificationType = "info" | "warning" | "success" | "error";
 
 export interface INotificationDocument extends Document {
 	_id: mongoose.Types.ObjectId;
@@ -9,7 +9,7 @@ export interface INotificationDocument extends Document {
 	// sender?: mongoose.Types.ObjectId; // Optional: who triggered the notification
 	title: string;
 	message: string;
-	type: NotificationType; 
+	type: NotificationTypeEnum; 
 	link?: string; // Optional: link to redirect when clicked
 	isRead: boolean; 
 	createdAt: Date;

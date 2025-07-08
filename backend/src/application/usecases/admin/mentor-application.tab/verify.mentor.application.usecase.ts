@@ -8,6 +8,7 @@ import { Server } from "socket.io";
 import { findUserSocket } from "../../../../infrastructure/socket/socket.io";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
+import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 
 export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationUsecase {
 	constructor(
@@ -33,7 +34,7 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 		const notificationTitle = `Mentor Application ${status.charAt(0).toUpperCase() + status.slice(1)}`;
 		const notificationMessage = status === MentorRequestStatusEnum.APPROVED ? "Congratulations! Your mentor application has been approved." : `Your mentor application has been rejected. ${reason ? `Reason: ${reason}` : ""}`;
 
-		const notification = await this.createNotificationUseCase.execute(userId, notificationTitle, notificationMessage, status === MentorRequestStatusEnum.APPROVED ? "success" : "info");
+		const notification = await this.createNotificationUseCase.execute(userId, notificationTitle, notificationMessage, status === MentorRequestStatusEnum.APPROVED ? NotificationTypeEnum.SUCCESS : NotificationTypeEnum.INFO);
 		console.log("notification:", JSON.stringify(notification, null, 2));
 
 		if (this.io) {
@@ -44,7 +45,7 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 					userId,
 					title: notificationTitle,
 					message: notificationMessage,
-					type: status === MentorRequestStatusEnum.APPROVED ? "success" : "error",
+					type: status === MentorRequestStatusEnum.APPROVED ? NotificationTypeEnum.SUCCESS : NotificationTypeEnum.ERROR,
 					read: false,
 					createdAt: notification.createdAt || new Date(),
 				});
