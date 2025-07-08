@@ -2,6 +2,7 @@ import { WithdrawalRequestEntity } from "../../domain/entities/wallet/wallet.wit
 import { IWalletDTO } from "../dtos/wallet.dtos";
 import { IWalletTransactionDTO } from "../dtos/wallet.transation.dto";
 import { RoleEnum } from "./enums/role.enum";
+import { TransactionsTypeEnum } from "./enums/transaction.type.enum";
 
 export interface ICreateWalletUsecase {
 	execute(userId: string, role: string): Promise<IWalletDTO>;
@@ -14,7 +15,7 @@ export interface ICreateTransactionUsecase {
 		fromRole: RoleEnum;
 		toRole: RoleEnum;
 		amount: number;
-		type: "credit" | "debit" | "withdrawal";
+		type: TransactionsTypeEnum;
 		purpose: string;
 		description?: string;
 		sessionId?: string | null;

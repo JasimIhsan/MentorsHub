@@ -6,6 +6,7 @@ import { IPaySessionWithWalletUseCase } from "../../../interfaces/session";
 
 import { SessionPaymentStatus, SessionStatus } from "../../../../domain/entities/session.entity";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
+import { TransactionsTypeEnum } from "../../../interfaces/enums/transaction.type.enum";
 
 export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository) {}
@@ -44,11 +45,11 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		}
 
 		/* Wallet operations */
-		await this.walletRepo.updateBalance(userId, sessionFee, "debit"); // debit user
-		await this.walletRepo.updateBalance(mentorId, mentorEarning, "credit"); // credit mentor
+		await this.walletRepo.updateBalance(userId, sessionFee, TransactionsTypeEnum.DEBIT); // debit user
+		await this.walletRepo.updateBalance(mentorId, mentorEarning, TransactionsTypeEnum.CREDIT); // credit mentor
 
 		const platformWallet = await this.walletRepo.platformWallet();
-		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, "credit", RoleEnum.ADMIN); // credit platform
+		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, TransactionsTypeEnum.CREDIT, RoleEnum.ADMIN); // credit platform
 
 		/* Transactions */
 		await this.walletRepo.createTransaction({
@@ -57,7 +58,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 			fromRole: RoleEnum.USER,
 			toRole: RoleEnum.MENTOR,
 			amount: sessionFee,
-			type: "debit",
+			type: TransactionsTypeEnum.DEBIT,
 			purpose: "session_fee",
 			description: `Payment for session ${session.topic}`,
 			sessionId,
@@ -69,7 +70,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 			fromRole: RoleEnum.USER,
 			toRole: RoleEnum.MENTOR,
 			amount: mentorEarning,
-			type: "credit",
+			type: TransactionsTypeEnum.CREDIT,
 			purpose: "session_fee",
 			description: `Mentor earning for session ${session.topic}`,
 			sessionId,
@@ -81,7 +82,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 			fromRole: RoleEnum.USER,
 			toRole: RoleEnum.ADMIN,
 			amount: platformFeeFixed,
-			type: "credit",
+			type: TransactionsTypeEnum.CREDIT,
 			purpose: "platform_fee",
 			description: `Platform fixed fee from session ${session.topic}`,
 			sessionId,
@@ -93,7 +94,7 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 			fromRole: RoleEnum.USER,
 			toRole: RoleEnum.ADMIN,
 			amount: platformCommission,
-			type: "credit",
+			type: TransactionsTypeEnum.CREDIT,
 			purpose: "platform_fee",
 			description: `Platform 15% commission from session ${session.topic}`,
 			sessionId,

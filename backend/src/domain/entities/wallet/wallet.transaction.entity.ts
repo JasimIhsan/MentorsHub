@@ -1,11 +1,11 @@
 // domain/entities/wallet.transaction.entity.ts
 
 import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
+import { TransactionsTypeEnum } from "../../../application/interfaces/enums/transaction.type.enum";
 import { IWalletTransactionDocument } from "../../../infrastructure/database/models/wallet/wallet.transaction.model";
 
 export type WalletTransactionPurpose = "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";
 
-export type WalletTransactionType = "credit" | "debit" | "withdrawal";
 
 export class WalletTransactionEntity {
 	private _id?: string;
@@ -14,7 +14,7 @@ export class WalletTransactionEntity {
 	private _fromRole: RoleEnum;
 	private _toRole: RoleEnum;
 	private _amount: number;
-	private _type: WalletTransactionType;
+	private _type: TransactionsTypeEnum;
 	private _purpose: WalletTransactionPurpose;
 	private _description?: string;
 	private _sessionId?: string | null;
@@ -28,7 +28,7 @@ export class WalletTransactionEntity {
 		fromRole: RoleEnum;
 		toRole: RoleEnum;
 		amount: number;
-		type: WalletTransactionType;
+		type: TransactionsTypeEnum;
 		purpose: WalletTransactionPurpose;
 		description?: string;
 		sessionId?: string | null;
@@ -56,7 +56,7 @@ export class WalletTransactionEntity {
 		fromRole: RoleEnum;
 		toRole: RoleEnum;
 		amount: number;
-		type: WalletTransactionType;
+		type: TransactionsTypeEnum;
 		purpose: WalletTransactionPurpose;
 		description?: string;
 		sessionId?: string | null;
@@ -99,7 +99,7 @@ export class WalletTransactionEntity {
 		return this._amount;
 	}
 
-	get transactionType(): WalletTransactionType {
+	get transactionType(): TransactionsTypeEnum {
 		return this._type;
 	}
 

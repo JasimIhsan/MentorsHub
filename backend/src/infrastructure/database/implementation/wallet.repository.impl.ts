@@ -8,6 +8,7 @@ import { AdminModel } from "../models/admin/admin.model";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 import { WalletTransactionEntity } from "../../../domain/entities/wallet/wallet.transaction.entity";
 import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
+import { TransactionsTypeEnum } from "../../../application/interfaces/enums/transaction.type.enum";
 
 export class WalletRepositoryImpl implements IWalletRepository {
 	async findWalletByUserId(userId: string): Promise<WalletEntity | null> {
@@ -39,10 +40,10 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		}
 	}
 
-	async updateBalance(userId: string, amount: number, type: "credit" | "debit" = "credit", role: RoleEnum = RoleEnum.USER): Promise<WalletEntity | null> {
+	async updateBalance(userId: string, amount: number, type: TransactionsTypeEnum = TransactionsTypeEnum.CREDIT, role: RoleEnum = RoleEnum.USER): Promise<WalletEntity | null> {
 		try {
 			let roleQuery: any = role === RoleEnum.ADMIN ? RoleEnum.ADMIN : { $in: [RoleEnum.USER, RoleEnum.MENTOR] };
-			const updateAmount = type === "credit" ? amount : -amount;
+			const updateAmount = type === TransactionsTypeEnum.CREDIT ? amount : -amount;
 
 			const wallet = await WalletModel.findOneAndUpdate({ userId, role: roleQuery }, { $inc: { balance: updateAmount } }, { new: true });
 			return wallet ? WalletEntity.fromDBDocument(wallet) : null;
@@ -57,7 +58,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		fromRole: RoleEnum;
 		toRole: RoleEnum;
 		amount: number;
-		type: "credit" | "debit" | "withdrawal";
+		type: TransactionsTypeEnum;
 		purpose: string;
 		description?: string;
 		sessionId?: string | null;
@@ -87,8 +88,8 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		try {
 			const query: any = {
 				$or: [
-					{ fromUserId: userId, type: { $in: ["debit", "withdrawal"] } },
-					{ toUserId: userId, type: "credit" },
+					{ fromUserId: userId, type: { $in: [TransactionsTypeEnum.DEBIT, TransactionsTypeEnum.WITHDRAWAL] } },
+					{ toUserId: userId, type: TransactionsTypeEnum.CREDIT },
 				],
 			};
 

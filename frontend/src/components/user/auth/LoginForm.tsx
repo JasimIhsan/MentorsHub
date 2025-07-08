@@ -1,4 +1,4 @@
-import { LucideLogIn, LucideEye, LucideEyeOff } from "lucide-react";
+import { LucideLogIn, LucideEye, LucideEyeOff, Mail, Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormData, loginSchema } from "@/schema/auth.form";
@@ -69,17 +69,17 @@ export default function LoginForm({ setFormState }: LoginFormProps) {
 
 					<div className="space-y-3">
 						<Label htmlFor="email">Email</Label>
-						<Input id="email" type="email" placeholder="m@example.com" {...form.register("email")} />
+						<div className="relative">
+							<Input id="email" type="email" className="pl-10" placeholder="m@example.com" {...form.register("email")} />
+							<Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+						</div>
 						{form.formState.errors.email && <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>}
 					</div>
 					<div className="space-y-3">
 						<Label htmlFor="password">Password</Label>
 						<div className="relative">
-							<Input
-								id="password"
-								type={showPassword ? "text" : "password"} // Toggle input type
-								{...form.register("password")}
-							/>
+							<Input id="password" className="pl-10" type={showPassword ? "text" : "password"} {...form.register("password")} />
+							<Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 							<button
 								type="button"
 								className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"

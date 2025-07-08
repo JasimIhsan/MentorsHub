@@ -2,6 +2,7 @@ import { IWalletRepository } from "../../../domain/repositories/wallet.repositor
 import { IWalletDTO, mapToWalletDTO } from "../../dtos/wallet.dtos";
 import { IWalletTransactionDTO } from "../../dtos/wallet.transation.dto";
 import { RoleEnum } from "../../interfaces/enums/role.enum";
+import { TransactionsTypeEnum } from "../../interfaces/enums/transaction.type.enum";
 import { ICreateTransactionUsecase, IWithdrawWalletUsecase } from "../../interfaces/wallet";
 
 export class WithdrawWalletUseCase implements IWithdrawWalletUsecase {
@@ -24,7 +25,7 @@ export class WithdrawWalletUseCase implements IWithdrawWalletUsecase {
 				fromRole: RoleEnum.ADMIN,
 				toRole: RoleEnum.USER,
 				amount,
-				type: "withdrawal",
+				type: TransactionsTypeEnum.WITHDRAWAL,
 				purpose: "withdrawal",
 				description: "Wallet withdrawal",
 				sessionId: null,
@@ -37,14 +38,14 @@ export class WithdrawWalletUseCase implements IWithdrawWalletUsecase {
 				fromRole: RoleEnum.ADMIN,
 				toRole: RoleEnum.ADMIN,
 				amount,
-				type: "withdrawal",
+				type: TransactionsTypeEnum.WITHDRAWAL,
 				purpose: "withdrawal",
 				description: "Admin withdrew platform profit",
 				sessionId: null,
 			});
 		}
 
-		const updatedWallet = await this.walletRepo.updateBalance(userId, amount, "debit", role);
+		const updatedWallet = await this.walletRepo.updateBalance(userId, amount, TransactionsTypeEnum.DEBIT, role);
 		if (!updatedWallet) throw new Error("Failed to update wallet balance");
 
 		return { wallet: mapToWalletDTO(updatedWallet), transaction };
