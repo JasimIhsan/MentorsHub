@@ -3,6 +3,7 @@ import { MentorEntity } from "../../domain/entities/mentor.entity";
 import { UserEntity } from "../../domain/entities/user.entity";
 import { MentorRequestStatusEnum } from "../interfaces/enums/mentor.request.status.enum";
 import { RoleEnum } from "../interfaces/enums/role.enum";
+import { UserStatusEnums } from "../interfaces/enums/user.status.enums";
 
 export interface IMentorDTO {
 	id: string;
@@ -15,7 +16,7 @@ export interface IMentorDTO {
 	interests: string[] | null;
 	updatedAt: Date | null;
 	skills: string[] | null;
-	status: "blocked" | "unblocked";
+	status: UserStatusEnums;
 	mentorRequestStatus: MentorRequestStatusEnum;
 	createdAt: Date;
 	averageRating: number | null;

@@ -1,7 +1,7 @@
 import { MentorRequestStatusEnum } from "../../application/interfaces/enums/mentor.request.status.enum";
 import { RoleEnum } from "../../application/interfaces/enums/role.enum";
+import { UserStatusEnums } from "../../application/interfaces/enums/user.status.enums";
 
-export type UserStatus = "blocked" | "unblocked";
 
 export interface UserEntityProps {
 	id?: string;
@@ -11,7 +11,7 @@ export interface UserEntityProps {
 	password: string;
 	role?: RoleEnum;
 	avatar?: string | null;
-	status?: UserStatus;
+	status?: UserStatusEnums;
 	bio?: string | null;
 	interests?: string[] | null;
 	skills?: string[] | null;
@@ -40,7 +40,7 @@ export class UserEntity {
 	private _sessionCompleted: number;
 	private _averageRating: number | null;
 	private _totalReviews: number | null;
-	private _status: UserStatus;
+	private _status: UserStatusEnums;
 	private _mentorRequestStatus: MentorRequestStatusEnum;
 	private _googleId?: string | null;
 	private _createdAt: Date;
@@ -53,7 +53,7 @@ export class UserEntity {
 		this._lastName = user.lastName;
 		this._password = user.password;
 		this._role = user.role ?? RoleEnum.USER;
-		this._status = user.status ?? "unblocked";
+		this._status = user.status ?? UserStatusEnums.UNBLOCKED;
 		this._avatar = user.avatar ?? null;
 		this._bio = user.bio ?? null;
 		this._interests = user.interests ?? null;
@@ -129,7 +129,7 @@ export class UserEntity {
 		return this._totalReviews;
 	}
 
-	get status(): UserStatus {
+	get status(): UserStatusEnums {
 		return this._status;
 	}
 
@@ -171,7 +171,7 @@ export class UserEntity {
 		this._updatedAt = new Date();
 	}
 
-	toggleStatus(status: UserStatus): void {
+	toggleStatus(status: UserStatusEnums): void {
 		this._status = status;
 		this._updatedAt = new Date();
 	}

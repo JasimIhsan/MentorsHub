@@ -6,6 +6,7 @@ import { ICreateUserProgressUseCase } from "../../../interfaces/gamification";
 import { IHashService } from "../../../interfaces/services/hash.service";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
+import { UserStatusEnums } from "../../../interfaces/enums/user.status.enums";
 
 export class SignupUseCase implements ISignupUseCase {
 	constructor(
@@ -35,7 +36,7 @@ export class SignupUseCase implements ISignupUseCase {
 			password: hashedPassword,
 			firstName,
 			lastName,
-			status: "unblocked",
+			status: UserStatusEnums.UNBLOCKED,
 			role: RoleEnum.USER,
 			mentorRequestStatus: MentorRequestStatusEnum.NOT_REQUESTED,
 			sessionCompleted: 0,

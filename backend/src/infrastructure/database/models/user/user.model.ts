@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
 import { RoleEnum } from "../../../../application/interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../../application/interfaces/enums/mentor.request.status.enum";
+import { UserStatusEnums } from "../../../../application/interfaces/enums/user.status.enums";
 
 export interface IUsersDocument extends Document {
 	_id: ObjectId;
@@ -14,7 +15,7 @@ export interface IUsersDocument extends Document {
 	interests: string[] | null;
 	updatedAt: Date;
 	skills: string[] | null;
-	status: "blocked" | "unblocked";
+	status: UserStatusEnums;
 	mentorRequestStatus: MentorRequestStatusEnum;
 	createdAt: Date;
 	averageRating: number | null;

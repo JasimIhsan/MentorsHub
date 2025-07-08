@@ -7,6 +7,7 @@ import { CommonStringMessage } from "../../shared/constants/string.messages";
 import { RoleEnum } from "../../application/interfaces/enums/role.enum";
 import { redisService } from "../../infrastructure/composer";
 import { logger } from "../../infrastructure/utils/logger";
+import { UserStatusEnums } from "../../application/interfaces/enums/user.status.enums";
 
 export const tokenService = new TokenServicesImpl(redisService);
 const userRepo = new UserRepositoryImpl();
@@ -42,7 +43,7 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
 				return;
 			}
 
-			if (user.status === "blocked") {
+			if (user.status === UserStatusEnums.BLOCKED) {
 				res.status(HttpStatusCode.FORBIDDEN).json({ success: false, blocked: true, message: CommonStringMessage.BLOCKED });
 				return;
 			}

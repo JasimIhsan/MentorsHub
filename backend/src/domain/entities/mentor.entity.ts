@@ -1,5 +1,6 @@
 import { MentorRequestStatusEnum } from "../../application/interfaces/enums/mentor.request.status.enum";
 import { RoleEnum } from "../../application/interfaces/enums/role.enum";
+import { UserStatusEnums } from "../../application/interfaces/enums/user.status.enums";
 import { Availability } from "./mentor.detailes.entity";
 
 export interface MentorEntityProps {
@@ -13,7 +14,7 @@ export interface MentorEntityProps {
 	interests: string[] | null;
 	updatedAt: Date | null;
 	skills: string[] | null;
-	status: "blocked" | "unblocked";
+	status: UserStatusEnums;
 	mentorRequestStatus: MentorRequestStatusEnum;
 	createdAt: Date;
 	averageRating: number | null;
