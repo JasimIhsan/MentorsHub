@@ -1,0 +1,4 @@
+export enum ActionTypeEnum {
+	GIVE_FEEDBACK = "GIVE_FEEDBACK",
+	COMPLETE_SESSION = "COMPLETE_SESSION",
+}

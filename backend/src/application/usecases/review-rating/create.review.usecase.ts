@@ -2,8 +2,8 @@ import { ICreateReviewUseCase } from "../../interfaces/review";
 import { IReviewRepository } from "../../../domain/repositories/review.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository"; // You need this
 import { IUpdateUserTaskProgressUseCase } from "../../interfaces/gamification";
-import { ActionType } from "../../dtos/gamification.dto";
 import { mapToReviewDTO, ReviewDTO } from "../../dtos/review.dtos";
+import { ActionTypeEnum } from "../../interfaces/enums/gamification.action.type.enum";
 
 export class CreateReviewUseCase implements ICreateReviewUseCase {
 	constructor(private reviewRepo: IReviewRepository, private userRepo: IUserRepository, private updateUserProgress: IUpdateUserTaskProgressUseCase) {}
@@ -31,7 +31,7 @@ export class CreateReviewUseCase implements ICreateReviewUseCase {
 		if (!reviewer) throw new Error("Reviewer not found");
 
 		// update gamification task completion progress
-		await this.updateUserProgress.execute(data.reviewerId, ActionType.GIVE_FEEDBACK);
+		await this.updateUserProgress.execute(data.reviewerId, ActionTypeEnum.GIVE_FEEDBACK);
 
 		return mapToReviewDTO(review, reviewer);
 	}

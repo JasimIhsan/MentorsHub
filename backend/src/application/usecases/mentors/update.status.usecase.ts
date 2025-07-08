@@ -1,9 +1,9 @@
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { IUpdateUserTaskProgressUseCase } from "../../interfaces/gamification";
 import { IUpdateSessionStatusUseCase } from "../../interfaces/session";
-import { ActionType } from "../../dtos/gamification.dto";
 import { SessionStatusEnum } from "../../interfaces/enums/session.status.enums";
 import { SessionPaymentStatusEnum } from "../../interfaces/enums/session.payment.status.enum";
+import { ActionTypeEnum } from "../../interfaces/enums/gamification.action.type.enum";
 
 export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly updateUserProgress: IUpdateUserTaskProgressUseCase) {}
@@ -18,7 +18,7 @@ export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 
 			// Gamify each paid participant
 			for (const participant of paidParticipants) {
-				await this.updateUserProgress.execute(participant.user.id, ActionType.COMPLETE_SESSION);
+				await this.updateUserProgress.execute(participant.user.id, ActionTypeEnum.COMPLETE_SESSION);
 			}
 		}
 	}

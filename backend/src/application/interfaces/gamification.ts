@@ -1,5 +1,6 @@
 import { GamificationTaskEntity } from "../../domain/entities/gamification/gamification.task.entity";
 import { IGamificationTaskDTO, IUserProgressDTO, IUserTaskWithProgressDTO } from "../dtos/gamification.dto";
+import { ActionTypeEnum } from "./enums/gamification.action.type.enum";
 
 export interface ICreateGamificationTaskUseCase {
 	execute(input: { title: string; xpReward: number; targetCount: number; actionType: string }): Promise<GamificationTaskEntity>;
@@ -34,5 +35,5 @@ export interface ICreateUserProgressUseCase {
 }
 
 export interface IUpdateUserTaskProgressUseCase {
-	execute(userId: string, actionType: string): Promise<void>;
+	execute(userId: string, actionType: ActionTypeEnum): Promise<void>;
 }
