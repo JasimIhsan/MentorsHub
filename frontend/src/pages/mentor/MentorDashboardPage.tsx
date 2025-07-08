@@ -3,7 +3,6 @@ import { SessionOverviewStats } from "@/components/mentor/dashboard/SessionOverV
 import { SessionRequestsPreview } from "@/components/mentor/dashboard/SessionRequestPreview";
 import { UpcomingSessionsList } from "@/components/mentor/dashboard/UpcomingSessionList";
 import { RecentReviewsPreview } from "@/components/mentor/dashboard/RecentReviewsPreview";
-import { MentorPerformanceChart } from "@/components/mentor/dashboard/MentorPerfomanceChart";
 import { useEffect, useState } from "react";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
 import { useSelector } from "react-redux";
@@ -12,6 +11,9 @@ import { toast } from "sonner";
 import { fetchMentorDashboardData } from "@/api/mentors.api.service";
 import { IReviewDTO } from "@/interfaces/review.dto";
 import { MentorReviewRatingChart } from "@/components/mentor/dashboard/AverageRatingChart";
+import { MentorPerformanceChart } from "@/components/mentor/dashboard/MentorPerformanceChart";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { MentorReportDocument } from "@/components/mentor/dashboard/MentorReportDocument";
 
 export function MentorDashboardPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
@@ -52,6 +54,15 @@ export function MentorDashboardPage() {
 					<h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
 					<p className="text-muted-foreground">Manage your sessions, availability, and premium plans</p>
 				</div>
+				{!isLoading && (
+					<PDFDownloadLink
+						document={<MentorReportDocument stats={stats} sessions={sessions} requests={requests} reviews={reviews} />}
+						fileName="mentor-report.pdf"
+						className="flex justify-center items-center h-10 btn px-4 bg-primary text-white rounded-md hover:bg-primary/90 transition">
+						{({ loading }) => (loading ? "Generating PDF..." : "Download Report")}
+					</PDFDownloadLink>
+				)}
+
 				{/* <div className="flex items-center gap-2">
 					<Tabs defaultValue="today" className="w-[300px]">
 						<TabsList className="grid w-full grid-cols-3">
