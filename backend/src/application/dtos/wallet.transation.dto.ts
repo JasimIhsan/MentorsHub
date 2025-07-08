@@ -1,6 +1,6 @@
 import { SessionEntity } from "../../domain/entities/session.entity";
 import { UserEntity } from "../../domain/entities/user.entity";
-import { WalletTransactionEntity} from "../../domain/entities/wallet/wallet.transaction.entity";
+import { WalletTransactionEntity } from "../../domain/entities/wallet/wallet.transaction.entity";
 import { RoleEnum } from "../interfaces/enums/role.enum";
 import { TransactionPurposeEnum } from "../interfaces/enums/transaction.purpose.enum";
 import { TransactionsTypeEnum } from "../interfaces/enums/transaction.type.enum";

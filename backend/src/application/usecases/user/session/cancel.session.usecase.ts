@@ -2,6 +2,7 @@ import { ISessionRepository } from "../../../../domain/repositories/session.repo
 import { isSessionExpired } from "../../../../infrastructure/utils/isSessionExpired";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { ISessionUserDTO, mapToUserSessionDTO } from "../../../dtos/session.dto";
+import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
 import { ICancelSessionUseCase } from "../../../interfaces/session";
 
 export class CancelSessionUseCase implements ICancelSessionUseCase {
@@ -22,7 +23,7 @@ export class CancelSessionUseCase implements ICancelSessionUseCase {
 
 		// Check if session can be canceled (only upcoming or approved)
 		const sessionStatus = session.status;
-		if (sessionStatus !== "upcoming" && sessionStatus !== "approved") {
+		if (sessionStatus !== SessionStatusEnum.UPCOMING && sessionStatus !== SessionStatusEnum.APPROVED) {
 			throw new Error("Only upcoming or approved sessions can be canceled");
 		}
 
@@ -36,7 +37,7 @@ export class CancelSessionUseCase implements ICancelSessionUseCase {
 			throw new Error("Cannot cancel session that has already been paid");
 		}
 
-		const updatedSession = await this.sessionRepository.updateStatus(sessionId, "canceled");
+		const updatedSession = await this.sessionRepository.updateStatus(sessionId, SessionStatusEnum.CANCELED);
 		if (!updatedSession) {
 			throw new Error("Failed to cancel session");
 		}

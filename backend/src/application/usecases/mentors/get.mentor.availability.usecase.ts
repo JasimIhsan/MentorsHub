@@ -5,6 +5,7 @@ import { IGetAvailabilityUseCase } from "../../interfaces/mentors/mentors.interf
 import { WeekDay } from "../../../domain/entities/mentor.detailes.entity";
 
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { SessionStatusEnum } from "../../interfaces/enums/session.status.enums";
 dayjs.extend(customParseFormat);
 
 export class GetAvailabilityUseCase implements IGetAvailabilityUseCase {
@@ -20,7 +21,7 @@ export class GetAvailabilityUseCase implements IGetAvailabilityUseCase {
 
 		const sessions = await this.sessionRepo.findByDate(userId, date);
 
-		const bookedSessions = sessions?.filter((s) => s.status !== "approved" && s.status !== "upcoming");
+		const bookedSessions = sessions?.filter((s) => s.status !== SessionStatusEnum.APPROVED && s.status !== SessionStatusEnum.UPCOMING);
 
 		const bookedTimeSet = new Set<string>();
 

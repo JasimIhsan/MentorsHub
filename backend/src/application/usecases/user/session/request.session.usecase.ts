@@ -5,6 +5,7 @@ import { SessionEntity, SessionParticipantEntity, SessionPaymentStatus, PricingT
 import { IGetAvailabilityUseCase } from "../../../interfaces/mentors/mentors.interface";
 import { ISessionUserDTO, mapToUserSessionDTO } from "../../../dtos/session.dto";
 import { IRequestSessionUseCase } from "../../../interfaces/session";
+import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
 
 export interface SessionRequestInput {
 	mentorId: string; // who you’re booking
@@ -59,7 +60,7 @@ export class RequestSessionUseCase implements IRequestSessionUseCase{
 			time: dto.time,
 			hours: dto.hours,
 			message: dto.message,
-			status: "pending",
+			status: SessionStatusEnum.PENDING,
 			pricing: dto.pricing,
 			totalAmount: dto.totalAmount,
 			createdAt: new Date(),

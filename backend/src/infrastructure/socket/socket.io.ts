@@ -7,6 +7,7 @@ import { registerMessageReadHandlers } from "./socket/update.readby.handler";
 import { getMessageUnreadCountHandler } from "./socket/get.message.unread.count.handler";
 import { CommonStringMessage } from "../../shared/constants/string.messages";
 import { RoleEnum } from "../../application/interfaces/enums/role.enum";
+import { SessionStatusEnum } from "../../application/interfaces/enums/session.status.enums";
 
 interface SessionParticipant {
 	userId: string;
@@ -82,7 +83,7 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 				const session = await SessionModel.findById(sessionId);
 				if (!session) return socket.emit("error", { message: CommonStringMessage.SESSION_NOT_FOUND });
 
-				if (!["upcoming", "ongoing"].includes(session.status)) {
+				if (![SessionStatusEnum.UPCOMING, SessionStatusEnum.ONGOING].includes(session.status)) {
 					return socket.emit("error", { message: "Session is not available or not paid" });
 				}
 

@@ -46,7 +46,7 @@ const UsersSchema: Schema = new Schema(
 		badges: [{ type: Schema.Types.ObjectId }],
 		googleId: { type: String },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const UserModel = mongoose.model<IUsersDocument>("Users", UsersSchema);

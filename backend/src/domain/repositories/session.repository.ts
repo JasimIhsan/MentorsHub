@@ -1,6 +1,7 @@
 // domain/repositories/session.repository.ts
 
-import { SessionEntity, SessionStatus, SessionPaymentStatus } from "../entities/session.entity";
+import { SessionStatusEnum } from "../../application/interfaces/enums/session.status.enums";
+import { SessionEntity, SessionPaymentStatus } from "../entities/session.entity";
 
 export interface ISessionRepository {
 	// Create a new session
@@ -18,7 +19,7 @@ export interface ISessionRepository {
 	findByMentor(
 		mentorId: string,
 		options: {
-			status?: SessionStatus;
+			status?: SessionStatusEnum;
 			filter?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
@@ -26,10 +27,10 @@ export interface ISessionRepository {
 	): Promise<{ sessions: SessionEntity[]; total: number }>;
 
 	// Update the status (and optionally reject reason) of a session
-	updateStatus(sessionId: string, status: SessionStatus, reason?: string): Promise<SessionEntity>;
+	updateStatus(sessionId: string, status: SessionStatusEnum, reason?: string): Promise<SessionEntity>;
 
 	// Mark a user's payment status for a session
-	markPayment(sessionId: string, userId: string, paymentStatus: SessionPaymentStatus, paymentId: string, newStatus: SessionStatus): Promise<void>;
+	markPayment(sessionId: string, userId: string, paymentStatus: SessionPaymentStatus, paymentId: string, newStatus: SessionStatusEnum): Promise<void>;
 
 	// Get all sessions for a specific mentor (no pagination)
 	getAllByMentor(mentorId: string): Promise<SessionEntity[]>;

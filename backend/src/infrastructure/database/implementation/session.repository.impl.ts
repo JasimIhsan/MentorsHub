@@ -2,8 +2,9 @@
 
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { SessionModel } from "../models/session/session.model";
-import { SessionEntity, SessionStatus, SessionPaymentStatus } from "../../../domain/entities/session.entity";
+import { SessionEntity, SessionPaymentStatus } from "../../../domain/entities/session.entity";
 import { handleExceptionError } from "../../utils/handle.exception.error";
+import { SessionStatusEnum } from "../../../application/interfaces/enums/session.status.enums";
 
 export class SessionRepositoryImpl implements ISessionRepository {
 	async create(session: SessionEntity): Promise<SessionEntity> {
@@ -72,7 +73,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			page,
 			limit,
 		}: {
-			status?: SessionStatus;
+			status?: SessionStatusEnum;
 			filter?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
@@ -128,7 +129,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async updateStatus(sessionId: string, status: SessionStatus, reason?: string): Promise<SessionEntity> {
+	async updateStatus(sessionId: string, status: SessionStatusEnum, reason?: string): Promise<SessionEntity> {
 		try {
 			const updated = await SessionModel.findByIdAndUpdate(sessionId, { status, rejectReason: reason }, { new: true }).populate("mentorId", "firstName lastName avatar").populate("participants.userId", "firstName lastName avatar");
 
@@ -139,7 +140,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async markPayment(sessionId: string, userId: string, paymentStatus: SessionPaymentStatus, paymentId: string, newStatus: SessionStatus): Promise<void> {
+	async markPayment(sessionId: string, userId: string, paymentStatus: SessionPaymentStatus, paymentId: string, newStatus: SessionStatusEnum): Promise<void> {
 		try {
 			await SessionModel.findOneAndUpdate(
 				{ _id: sessionId, "participants.userId": userId },
@@ -168,7 +169,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 	async getExpirableSessions(): Promise<SessionEntity[]> {
 		try {
 			const sessions = await SessionModel.find({
-				status: { $in: ["pending", "approved", "upcoming"] },
+				status: { $in: [SessionStatusEnum.APPROVED, SessionStatusEnum.PENDING, SessionStatusEnum.UPCOMING] },
 			})
 				.populate("mentorId", "firstName lastName avatar")
 				.populate("participants.userId", "firstName lastName avatar");

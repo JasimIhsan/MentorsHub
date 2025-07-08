@@ -1,4 +1,5 @@
-import { PersonEntity, PricingType, SessionEntity, SessionPaymentStatus, SessionStatus } from "../../domain/entities/session.entity";
+import { PersonEntity, PricingType, SessionEntity, SessionPaymentStatus } from "../../domain/entities/session.entity";
+import { SessionStatusEnum } from "../interfaces/enums/session.status.enums";
 
 interface BaseSession {
 	topic: string;
@@ -8,7 +9,7 @@ interface BaseSession {
 	time: string;
 	hours: number;
 	message: string;
-	status: SessionStatus;
+	status: SessionStatusEnum;
 	paymentStatus?: SessionPaymentStatus;
 	pricing: PricingType;
 	rejectReason?: string;

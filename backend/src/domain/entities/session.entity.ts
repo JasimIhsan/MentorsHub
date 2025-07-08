@@ -1,7 +1,4 @@
-// domain/entities/session.entity.ts
-
-
-export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected" | "expired" | "ongoing";
+import { SessionStatusEnum } from "../../application/interfaces/enums/session.status.enums";
 
 export type SessionPaymentStatus = "pending" | "completed" | "failed";
 export type SessionFormat = "one-on-one" | "group";
@@ -31,7 +28,7 @@ export interface SessionProps {
 	time: string;
 	hours: number;
 	message: string;
-	status: SessionStatus;
+	status: SessionStatusEnum;
 	pricing: PricingType;
 	totalAmount?: number;
 	rejectReason?: string;
