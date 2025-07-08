@@ -22,7 +22,7 @@ export interface ReviewDTO {
 export function mapToReviewDTO(review: ReviewEntity, userEntity: UserEntity): ReviewDTO {
 	return {
 		id: review.id!,
-		reviewerId: { id: userEntity.id!, firstName: userEntity.firstName, lastName: userEntity.lastName },
+		reviewerId: { id: userEntity.id!, firstName: userEntity.firstName, lastName: userEntity.lastName, avatar: userEntity.avatar || "" },
 		mentorId: review.mentorId,
 		sessionId: review.sessionId ?? "",
 		rating: review.rating,

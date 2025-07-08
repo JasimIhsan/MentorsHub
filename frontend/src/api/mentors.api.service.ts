@@ -1,4 +1,6 @@
 import axiosInstance from "./config/api.config";
+import { fetchReviewsByMentor } from "./review.api.service";
+import { fetchSessionsByMentor, fetchUpcomingSessionsByMentorAPI } from "./session.api.service";
 
 export const fetchMentors = async (query: { page?: number; limit?: number; search?: string; status?: string }) => {
 	try {
@@ -66,6 +68,27 @@ export const updateMentorStatusAPI = async (userId: string, status: "approved" |
 		return response.data;
 	} catch (error: any) {
 		console.error(`Error updating mentor status to ${status}:`, error);
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const fetchMentorDashboardData = async (userId: string) => {
+	try {
+		const [upcomingRes, pendingRes, reviewsRes, statsRes] = await Promise.all([
+			fetchUpcomingSessionsByMentorAPI(userId || "", "all", 1, 3, "upcoming"), //
+			fetchSessionsByMentor(userId, "all", "pending", 1, 3),
+			fetchReviewsByMentor(userId, 1, 3),
+			axiosInstance.get(`/mentor/dashboard/stats/${userId}`),
+		]);
+		console.log(`pendingRes : `, pendingRes);
+		return { 
+			upcoming: upcomingRes.sessions, 
+			requests: pendingRes.requests ,
+			reviews: reviewsRes.reviews,
+			stats: statsRes.data.stats
+		};
+	} catch (error: any) {
+		console.error("Error fetching mentor dashboard data:", error);
 		throw new Error(error.response.data.message);
 	}
 };

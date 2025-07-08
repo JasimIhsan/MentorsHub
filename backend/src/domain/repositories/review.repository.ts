@@ -16,9 +16,9 @@ export interface IReviewRepository {
 	): Promise<ReviewEntity>;
 	findById(id: string): Promise<ReviewEntity | null>;
 
-
 	// findBySessionAndUser(sessionId: string, reviewerId: string): Promise<ReviewEntity | null>;
 	// findAllByMentor(mentorId: string): Promise<ReviewEntity[]>;
 	// Optional: helper
 	calculateMentorRating(mentorId: string): Promise<{ average: number; total: number }>;
+	getWeeklyRatings(mentorId: string, period: "month" | "sixMonths" | "year"): Promise<{ week: string; averageRating: number }[]>;
 }

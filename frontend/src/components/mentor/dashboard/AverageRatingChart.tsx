@@ -1,17 +1,16 @@
 import { useState } from "react";
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Line, LineChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 // Sample weekly data for a year
 const generateSampleData = () => {
 	const weeks = Array.from({ length: 52 }, (_, i) => `Week ${i + 1}`);
 	return weeks.map((week) => ({
 		name: week,
-		sessions: Math.floor(Math.random() * 20) + 5,
-		revenue: Math.floor(Math.random() * 500) + 100,
+		averageRating: (Math.random() * 2 + 3).toFixed(1), // 3.0-5.0 stars
 	}));
 };
 
-export function MentorPerformanceChart() {
+export function MentorReviewRatingChart() {
 	// State for filter period
 	const [filterPeriod, setFilterPeriod] = useState("month");
 
@@ -42,7 +41,7 @@ export function MentorPerformanceChart() {
 	return (
 		<div className="w-full">
 			{/* Filter dropdown */}
-			<div className="mb-4">
+			<div className="mb-4 flex justify-end">
 				<select value={filterPeriod} onChange={handleFilterChange} className="p-2 border rounded-md bg-white text-gray-700">
 					<option value="month">Last Month</option>
 					<option value="sixMonths">Last 6 Months</option>
@@ -53,7 +52,7 @@ export function MentorPerformanceChart() {
 			{/* Chart container */}
 			<div className="h-[300px]">
 				<ResponsiveContainer width="100%" height="100%">
-					<BarChart
+					<LineChart
 						data={data}
 						margin={{
 							top: 20,
@@ -63,13 +62,11 @@ export function MentorPerformanceChart() {
 						}}>
 						<CartesianGrid strokeDasharray="3 3" />
 						<XAxis dataKey="name" />
-						<YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-						<YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
-						<Tooltip />
+						<YAxis domain={[1, 5]} unit="★" tickFormatter={(value) => `${value}`} />
+						<Tooltip formatter={(value) => `${value}★`} />
 						<Legend />
-						<Bar yAxisId="left" dataKey="sessions" fill="#8884d8" name="Sessions" />
-						<Bar yAxisId="right" dataKey="revenue" fill="#82ca9d" name="Revenue ($)" />
-					</BarChart>
+						<Line type="monotone" dataKey="averageRating" stroke="#8884d8" name="Average Rating" dot={false} />
+					</LineChart>
 				</ResponsiveContainer>
 			</div>
 		</div>

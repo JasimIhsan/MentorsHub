@@ -27,6 +27,8 @@ export const fetchUserProfile = createAsyncThunk<UserWithoutPassword, void, { st
 		// Access the current state to get the user ID
 		const state = thunkAPI.getState();
 		const userId = state.userAuth.user?.id;
+		console.log('userId: ', userId);
+		console.log(`name : `, state.userAuth.user?.firstName);
 
 		if (!userId) {
 			return thunkAPI.rejectWithValue("User ID not found");
