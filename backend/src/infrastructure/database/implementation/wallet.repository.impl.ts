@@ -215,7 +215,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 			]);
 
 			// console.log("revenueData: ", revenueData);
-			console.log(`length : `, revenueData.length);
+			console.log("length : ", revenueData.length);
 
 			return revenueData;
 		} catch (error) {

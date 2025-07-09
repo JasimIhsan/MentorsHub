@@ -223,8 +223,8 @@ export class UserRepositoryImpl implements IUserRepository {
 						name: 1,
 						users: 1,
 						mentors: 1,
-					}
-				}
+					},
+				},
 			]);
 			return userGrowthData;
 		} catch (error) {
