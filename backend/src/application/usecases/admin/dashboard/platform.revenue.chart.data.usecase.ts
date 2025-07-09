@@ -5,7 +5,7 @@ import { IGetPlatformRevenueChartDataUseCase } from "../../../interfaces/admin/a
 export class GetPlatformRevenueChartDataUseCase implements IGetPlatformRevenueChartDataUseCase {
 	constructor(private readonly _walletRepo: IWalletRepository, private readonly _adminRepo: IAdminRepository) {}
 
-	async execute(adminId: string) {
+	async execute(adminId: string): Promise<{ name: string; total: number }[]> {
 		try {
 			const adminEntity = await this._adminRepo.findAdminById(adminId);
 			if (!adminEntity) throw new Error("Admin not found");

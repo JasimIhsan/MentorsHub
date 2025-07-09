@@ -5,12 +5,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useEffect, useState } from "react";
+import { fetchAdminDashboardData, fetchPlatformRevenueChartData, fetchUsersGrowthChartData } from "@/api/admin/dashboard.api.service";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { toast } from "sonner";
 
 // StatsCard component
 function StatsCard({ title, value, description, trend, percentage, icon: Icon }: { title: string; value: number; description: string; trend: "up" | "down"; percentage: string; icon: React.ElementType }) {
 	return (
 		<Card>
-			<CardContent className="px-6">
+			<CardContent className="px-6 pt-6">
 				<div className="flex items-center justify-between">
 					<div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
 						<Icon className="h-6 w-6 text-primary" />
@@ -30,12 +37,31 @@ function StatsCard({ title, value, description, trend, percentage, icon: Icon }:
 	);
 }
 
+// StatsCardSkeleton component
+function StatsCardSkeleton() {
+	return (
+		<Card>
+			<CardContent className="px-6 pt-6">
+				<div className="flex items-center justify-between">
+					<Skeleton className="h-12 w-12 rounded-full bg-gray-200" />
+					<Skeleton className="h-4 w-16 bg-gray-200" />
+				</div>
+				<div className="mt-4">
+					<Skeleton className="h-8 w-24 bg-gray-200" />
+					<Skeleton className="mt-2 h-4 w-32 bg-gray-200" />
+				</div>
+				<Skeleton className="mt-2 h-3 w-48 bg-gray-200" />
+			</CardContent>
+		</Card>
+	);
+}
+
 // QuickLinkCard component
 function QuickLinkCard({ title, description, href, icon: Icon }: { title: string; description: string; href: string; icon: React.ElementType }) {
 	return (
 		<Card className="overflow-hidden">
 			<Link to={href} className="block h-full">
-				<CardContent className="px-6">
+				<CardContent className="px-6 pt-6">
 					<div className="flex items-center justify-between">
 						<div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
 							<Icon className="h-6 w-6 text-primary" />
@@ -48,6 +74,24 @@ function QuickLinkCard({ title, description, href, icon: Icon }: { title: string
 					</div>
 				</CardContent>
 			</Link>
+		</Card>
+	);
+}
+
+// QuickLinkCardSkeleton component
+function QuickLinkCardSkeleton() {
+	return (
+		<Card className="overflow-hidden">
+			<CardContent className="px-6 pt-6">
+				<div className="flex items-center justify-between">
+					<Skeleton className="h-12 w-12 rounded-full bg-gray-200" />
+					<Skeleton className="h-5 w-5 bg-gray-200" />
+				</div>
+				<div className="mt-4">
+					<Skeleton className="h-5 w-32 bg-gray-200" />
+					<Skeleton className="mt-2 h-4 w-48 bg-gray-200" />
+				</div>
+			</CardContent>
 		</Card>
 	);
 }
@@ -117,6 +161,56 @@ function TopMentorsTable() {
 	);
 }
 
+// TopMentorsTableSkeleton component
+function TopMentorsTableSkeleton() {
+	return (
+		<Card className="lg:col-span-4">
+			<CardHeader>
+				<Skeleton className="h-6 w-32 bg-gray-200" />
+				<Skeleton className="mt-2 h-4 w-48 bg-gray-200" />
+			</CardHeader>
+			<CardContent>
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>
+								<Skeleton className="h-4 w-20 bg-gray-200" />
+							</TableHead>
+							<TableHead>
+								<Skeleton className="h-4 w-20 bg-gray-200" />
+							</TableHead>
+							<TableHead>
+								<Skeleton className="h-4 w-20 bg-gray-200" />
+							</TableHead>
+							<TableHead>
+								<Skeleton className="h-4 w-20 bg-gray-200" />
+							</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{[...Array(5)].map((_, index) => (
+							<TableRow key={index}>
+								<TableCell>
+									<Skeleton className="h-4 w-32 bg-gray-200" />
+								</TableCell>
+								<TableCell>
+									<Skeleton className="h-4 w-16 bg-gray-200" />
+								</TableCell>
+								<TableCell>
+									<Skeleton className="h-4 w-16 bg-gray-200" />
+								</TableCell>
+								<TableCell>
+									<Skeleton className="h-4 w-16 bg-gray-200" />
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</CardContent>
+		</Card>
+	);
+}
+
 // PlatformMetrics component
 interface Metric {
 	id: number;
@@ -158,19 +252,41 @@ function PlatformMetrics() {
 	);
 }
 
+// PlatformMetricsSkeleton component
+function PlatformMetricsSkeleton() {
+	return (
+		<Card className="lg:col-span-3">
+			<CardHeader>
+				<Skeleton className="h-6 w-32 bg-gray-200" />
+				<Skeleton className="mt-2 h-4 w-48 bg-gray-200" />
+			</CardHeader>
+			<CardContent>
+				<div className="grid gap-4 sm:grid-cols-2">
+					{[...Array(4)].map((_, index) => (
+						<div key={index} className="flex items-center gap-3">
+							<Skeleton className="h-10 w-10 rounded-full bg-gray-200" />
+							<div>
+								<Skeleton className="h-4 w-24 bg-gray-200" />
+								<Skeleton className="mt-2 h-5 w-16 bg-gray-200" />
+							</div>
+						</div>
+					))}
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
 // RevenueChart component
-import { Bar, BarChart } from "recharts";
-
-const revenueData = [
-	{ name: "Jan", total: 4200 },
-	{ name: "Feb", total: 5100 },
-	{ name: "Mar", total: 4800 },
-	{ name: "Apr", total: 6300 },
-	{ name: "May", total: 7200 },
-	{ name: "Jun", total: 8100 },
-];
-
 function RevenueChart({ data, isLoading }: { data: { name: string; total: number }[]; isLoading: boolean }) {
+	if (isLoading) {
+		return (
+			<div className="space-y-4">
+				<Skeleton className="h-6 w-32 bg-gray-200" />
+				<Skeleton className="h-64 w-full bg-gray-200" />
+			</div>
+		);
+	}
 	return (
 		<ResponsiveContainer width="100%" height={300}>
 			<BarChart data={data}>
@@ -184,23 +300,15 @@ function RevenueChart({ data, isLoading }: { data: { name: string; total: number
 }
 
 // UserGrowthChart component
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { useEffect, useState } from "react";
-import { fetchAdminDashboardData, fetchPlatformRevenueChartData } from "@/api/admin/dashboard.api.service";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import { toast } from "sonner";
-
-const userGrowthData = [
-	{ name: "Jan", users: 120, mentors: 15 },
-	{ name: "Feb", users: 180, mentors: 22 },
-	{ name: "Mar", users: 250, mentors: 28 },
-	{ name: "Apr", users: 310, mentors: 35 },
-	{ name: "May", users: 420, mentors: 48 },
-	{ name: "Jun", users: 520, mentors: 62 },
-];
-
-function UserGrowthChart() {
+function UserGrowthChart({ userGrowthData, isLoading }: { userGrowthData: { name: string; users: number; mentors: number }[]; isLoading: boolean }) {
+	if (isLoading) {
+		return (
+			<div className="space-y-4">
+				<Skeleton className="h-6 w-32 bg-gray-200" />
+				<Skeleton className="h-64 w-full bg-gray-200" />
+			</div>
+		);
+	}
 	return (
 		<ResponsiveContainer width="100%" height={300}>
 			<LineChart data={userGrowthData}>
@@ -227,6 +335,11 @@ export default function AdminDashboardPage() {
 
 	const [revenue, setRevenue] = useState<{ name: string; total: number }[]>([]);
 	const [isRevenueLoading, setIsRevenueLoading] = useState(false);
+	const [revenueFilter, setRevenueFilter] = useState<"all" | "30days" | "1year">("all");
+
+	const [userGrowth, setUserGrowth] = useState<{ name: string; users: number; mentors: number }[]>([]);
+	const [isUserGrowthLoading, setIsUserGrowthLoading] = useState(false);
+	const [userGrowthFilter, setUserGrowthFilter] = useState<"all" | "30days" | "1year">("all");
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -249,7 +362,7 @@ export default function AdminDashboardPage() {
 		const fetchRevenue = async () => {
 			setIsRevenueLoading(true);
 			try {
-				const response = await fetchPlatformRevenueChartData(user?.id!);
+				const response = await fetchPlatformRevenueChartData(user?.id!, revenueFilter);
 				if (response.success) {
 					setRevenue(response.chartData);
 				}
@@ -260,7 +373,24 @@ export default function AdminDashboardPage() {
 			}
 		};
 		fetchRevenue();
-	}, [user?.id]);
+	}, [user?.id, revenueFilter]);
+
+	useEffect(() => {
+		const fetchUserGrowth = async () => {
+			setIsUserGrowthLoading(true);
+			try {
+				const response = await fetchUsersGrowthChartData(user?.id!, userGrowthFilter);
+				if (response.success) {
+					setUserGrowth(response.chartData);
+				}
+			} catch (error) {
+				if (error instanceof Error) toast.error(error.message);
+			} finally {
+				setIsUserGrowthLoading(false);
+			}
+		};
+		fetchUserGrowth();
+	}, [user?.id, userGrowthFilter]);
 
 	return (
 		<div className="space-y-6">
@@ -269,17 +399,26 @@ export default function AdminDashboardPage() {
 					<h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
 					<p className="text-muted-foreground">Overview of your platform's performance and activity</p>
 				</div>
-				<div className="flex items-center gap-2">
-					<Button>Export Reports</Button>
-				</div>
+				<div className="flex items-center gap-2">{isRevenueLoading || isUserGrowthLoading || isStatsLoading ? <Skeleton className="h-10 w-32 bg-gray-200" /> : <Button>Export Report</Button>}</div>
 			</div>
 
 			{/* Stats Cards */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<StatsCard title="Total Users" value={stats.totalUsers} description="128 new this month" trend="up" percentage="12%" icon={Users} />
-				<StatsCard title="Total Mentors" value={stats.totalMentors} description="24 new this month" trend="down" percentage="8%" icon={UserCog} />
-				<StatsCard title="Sessions Conducted" value={stats.totalSessions} description="9 scheduled today" trend="up" percentage="23%" icon={Calendar} />
-				<StatsCard title="Total Revenue" value={stats.totalRevenue} description="$5,231 this month" trend="up" percentage="4%" icon={CreditCard} />
+				{isStatsLoading ? (
+					<>
+						<StatsCardSkeleton />
+						<StatsCardSkeleton />
+						<StatsCardSkeleton />
+						<StatsCardSkeleton />
+					</>
+				) : (
+					<>
+						<StatsCard title="Total Users" value={stats.totalUsers} description="128 new this month" trend="up" percentage="12%" icon={Users} />
+						<StatsCard title="Total Mentors" value={stats.totalMentors} description="24 new this month" trend="down" percentage="8%" icon={UserCog} />
+						<StatsCard title="Sessions Conducted" value={stats.totalSessions} description="9 scheduled today" trend="up" percentage="23%" icon={Calendar} />
+						<StatsCard title="Total Revenue" value={stats.totalRevenue} description="$5,231 this month" trend="up" percentage="4%" icon={CreditCard} />
+					</>
+				)}
 			</div>
 
 			{/* Charts */}
@@ -290,34 +429,61 @@ export default function AdminDashboardPage() {
 							<CardTitle>Revenue Overview</CardTitle>
 							<CardDescription>Monthly revenue breakdown</CardDescription>
 						</div>
+						<Tabs defaultValue="all" onValueChange={(value) => setRevenueFilter(value as "all" | "30days" | "1year")}>
+							<TabsList>
+								<TabsTrigger value="all">All</TabsTrigger>
+								<TabsTrigger value="30days">30 Days</TabsTrigger>
+								<TabsTrigger value="1year">1 Year</TabsTrigger>
+							</TabsList>
+						</Tabs>
 					</CardHeader>
 					<CardContent>
 						<RevenueChart data={revenue} isLoading={isRevenueLoading} />
 					</CardContent>
 				</Card>
 				<Card className="lg:col-span-3">
-					<CardHeader>
-						<CardTitle>User Growth</CardTitle>
-						<CardDescription>New users over time</CardDescription>
+					<CardHeader className="flex flex-row items-center justify-between">
+						<div>
+							<CardTitle>User Growth</CardTitle>
+							<CardDescription>New users over time</CardDescription>
+						</div>
+						<Tabs defaultValue="all" onValueChange={(value) => setUserGrowthFilter(value as "all" | "30days" | "1year")}>
+							<TabsList>
+								<TabsTrigger value="all">All</TabsTrigger>
+								<TabsTrigger value="30days">30 Days</TabsTrigger>
+								<TabsTrigger value="1year">1 Year</TabsTrigger>
+							</TabsList>
+						</Tabs>
 					</CardHeader>
 					<CardContent>
-						<UserGrowthChart />
+						<UserGrowthChart isLoading={isUserGrowthLoading} userGrowthData={userGrowth} />
 					</CardContent>
 				</Card>
 			</div>
 
 			{/* Top Mentors and Platform Metrics */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-				<PlatformMetrics />
-				<TopMentorsTable />
+				{isStatsLoading ? <PlatformMetricsSkeleton /> : <PlatformMetrics />}
+				{isStatsLoading ? <TopMentorsTableSkeleton /> : <TopMentorsTable />}
 			</div>
 
 			{/* Quick Links */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<QuickLinkCard title="Manage Users" description="View and manage all platform users" href="/admin/users" icon={Users} />
-				<QuickLinkCard title="Manage Mentors" description="Review and verify mentor applications" href="/admin/mentors" icon={UserCog} />
-				<QuickLinkCard title="View Sessions" description="Monitor all scheduled and completed sessions" href="/admin/sessions" icon={Calendar} />
-				<QuickLinkCard title="View Payments" description="Track all platform transactions" href="/admin/payments" icon={CreditCard} />
+				{isStatsLoading ? (
+					<>
+						<QuickLinkCardSkeleton />
+						<QuickLinkCardSkeleton />
+						<QuickLinkCardSkeleton />
+						<QuickLinkCardSkeleton />
+					</>
+				) : (
+					<>
+						<QuickLinkCard title="Manage Users" description="View and manage all platform users" href="/admin/users" icon={Users} />
+						<QuickLinkCard title="Manage Mentors" description="Review and verify mentor applications" href="/admin/mentors" icon={UserCog} />
+						<QuickLinkCard title="View Sessions" description="Monitor all scheduled and completed sessions" href="/admin/sessions" icon={Calendar} />
+						<QuickLinkCard title="View Payments" description="Track all platform transactions" href="/admin/payments" icon={CreditCard} />
+					</>
+				)}
 			</div>
 		</div>
 	);

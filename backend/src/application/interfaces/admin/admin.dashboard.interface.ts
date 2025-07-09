@@ -10,5 +10,9 @@ export interface IGetAdminStatsUseCase {
 }
 
 export interface IGetPlatformRevenueChartDataUseCase {
-	execute(adminId: string): Promise<any>;
+	execute(adminId: string): Promise<{ name: string; total: number }[]>;
+}
+
+export interface IGetUsersGrowthChartDataUseCase {
+	execute(adminId: string, months?: number): Promise<{ users: number; mentors: number; name: string }[]>;
 }

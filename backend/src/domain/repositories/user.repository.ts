@@ -30,4 +30,5 @@ export interface IUserRepository {
 	deleteUser(id: string): Promise<void | null>;
 	countUsers(): Promise<number>;
 	countMentors(): Promise<number>;
+	userGrowthChartData(months: number): Promise<{ users: number; mentors: number; name: string }[]>;
 }
