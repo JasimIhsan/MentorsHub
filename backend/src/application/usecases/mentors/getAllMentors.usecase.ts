@@ -1,5 +1,5 @@
 import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
-import { IMentorDTO } from "../../dtos/mentor.dtos";
+import { IMentorDTO, mapToMentorDTOWithoutUser } from "../../dtos/mentor.dtos";
 import { IGetAllMentorsUsecase } from "../../interfaces/mentors/mentors.interface";
 
 export class GetAllMentorsUseCase implements IGetAllMentorsUsecase {
@@ -14,6 +14,6 @@ export class GetAllMentorsUseCase implements IGetAllMentorsUsecase {
 		const page = query.page || 1;
 		const limit = query.limit || 10;
 		const { mentors, total } = await this.mentorRepo.findAllMentors(query);
-		return { mentors, total, page, limit };
+		return { mentors: mentors.map(mapToMentorDTOWithoutUser), total, page, limit };
 	}
 }

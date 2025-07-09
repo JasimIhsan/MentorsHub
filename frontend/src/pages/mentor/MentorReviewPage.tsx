@@ -5,31 +5,13 @@ import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-
-// Reuse ReviewDTO interface from the original code
-export interface ReviewerDTO {
-	id: string;
-	firstName: string;
-	lastName: string;
-	avatar?: string;
-}
-
-export interface ReviewDTO {
-	id: string;
-	reviewerId: ReviewerDTO;
-	mentorId: string;
-	sessionId: string;
-	rating: number;
-	comment: string;
-	createdAt: Date;
-	updatedAt: Date;
-}
+import { fetchReviewsByMentor } from "@/api/review.api.service";
+import { IReviewDTO } from "@/interfaces/review.dto";
 
 export function MentorReviewsPage() {
-	const [reviews, setReviews] = useState<ReviewDTO[]>([]);
+	const [reviews, setReviews] = useState<IReviewDTO[]>([]);
 	const [reviewsLoading, setReviewsLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
@@ -53,13 +35,13 @@ export function MentorReviewsPage() {
 				if (selectedRating) {
 					params.rating = selectedRating;
 				}
-				const response = await axiosInstance.get(`/user/reviews/${user.id}`, { params });
-				if (response.data?.reviews) {
-					setReviews(response.data.reviews);
-					setTotalPages(Math.ceil(response.data.total / reviewsPerPage) || 1);
+				const response = await fetchReviewsByMentor(user.id, params.page, params.limit, params.rating);
+				if (response.reviews) {
+					setReviews(response.reviews);
+					setTotalPages(Math.ceil(response.total / reviewsPerPage) || 1);
 				}
-			} catch (err: any) {
-				toast.error(err.response?.data?.message || "Failed to load reviews.");
+			} catch (err) {
+				if (err instanceof Error) toast.error(err.message || "Failed to fetch reviews.");
 			} finally {
 				setReviewsLoading(false);
 			}

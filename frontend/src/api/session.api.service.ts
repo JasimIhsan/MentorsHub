@@ -77,3 +77,14 @@ export const verifySessionPaymentAPI = async (sessionId: string, userId: string)
 		throw new Error(error.response?.data?.message || "Failed to verify session payment.");
 	}
 };
+
+export const fetchSessionsByUser = async (userId: string, page: number, limit: number, status?: string) => {
+	try {
+		const res = await axiosInstance.get(`/user/sessions/${userId}`, {
+			params: { page, limit, status },
+		});
+		return res.data;
+	} catch (error: any) {
+		throw new Error(error.response?.data?.message || "Failed to fetch user sessions.");
+	}
+};

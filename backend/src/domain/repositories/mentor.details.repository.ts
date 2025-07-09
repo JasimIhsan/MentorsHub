@@ -13,4 +13,5 @@ export interface IMentorProfileRepository {
 	findAllApprovedMentors(params: { page?: number; limit?: number; search?: string; sortBy?: string; priceMin?: number; priceMax?: number; interests?: string[] }, browserId: string): Promise<{ mentors: MentorEntity[]; total: number }>;
 	findMentorByUserId(userId: string): Promise<MentorEntity | null>;
 	getAvailability(userId: string): Promise<IAvailabilityDTO | null>;
+	getTopFiveMentors(): Promise<{id: string; name: string; totalSessions: number; totalRevenue: number; averageRating: number; avatar: string }[]>;
 }

@@ -1,3 +1,5 @@
+import { MentorRequestStatusEnum } from "../../../application/interfaces/enums/mentor.request.status.enum";
+import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { FindUsersParams, IUserRepository, PaginatedUsers } from "../../../domain/repositories/user.repository";
 import { handleExceptionError } from "../../utils/handle.exception.error";
@@ -126,6 +128,107 @@ export class UserRepositoryImpl implements IUserRepository {
 			return docs.map(mapDocToEntity);
 		} catch (error) {
 			return handleExceptionError(error, "Error finding users by IDs");
+		}
+	}
+
+	countMentors(): Promise<number> {
+		try {
+			return UserModel.countDocuments({ role: RoleEnum.MENTOR, mentorRequestStatus: MentorRequestStatusEnum.APPROVED });
+		} catch (error) {
+			return handleExceptionError(error, "Error counting mentors");
+		}
+	}
+
+	async countUsers(): Promise<number> {
+		try {
+			return await UserModel.countDocuments();
+		} catch (error) {
+			return handleExceptionError(error, "Error counting users");
+		}
+	}
+
+	async userGrowthChartData(months: number): Promise<{users: number; mentors: number; name: string}[]> {
+		try {
+			const matchFilter: any = {
+				role: { $in: ["user", "mentor"] },
+			};
+
+			// Add createdAt filter only if months > 0
+			if (months > 0) {
+				matchFilter.createdAt = {
+					$gte: new Date(new Date().setMonth(new Date().getMonth() - months)),
+				};
+			}
+			const userGrowthData = await UserModel.aggregate([
+				{
+					// Filter for users and mentors in the specified time range
+					$match: matchFilter,
+				},
+				{
+					// Group by year, month, and role
+					$group: {
+						_id: {
+							year: { $year: "$createdAt" },
+							month: { $month: "$createdAt" },
+							role: "$role",
+						},
+						count: { $sum: 1 },
+					},
+				},
+				{
+					// Pivot the data to have users and mentors as separate fields
+					$group: {
+						_id: {
+							year: "$_id.year",
+							month: "$_id.month",
+						},
+						users: {
+							$sum: { $cond: [{ $eq: ["$_id.role", "user"] }, "$count", 0] },
+						},
+						mentors: {
+							$sum: { $cond: [{ $eq: ["$_id.role", "mentor"] }, "$count", 0] },
+						},
+					},
+				},
+				{
+					$project: {
+						name: {
+							$concat: [
+								{
+									$arrayElemAt: [["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], { $subtract: ["$_id.month", 1] }],
+								},
+								" ",
+								{ $toString: "$_id.year" },
+							],
+						},
+						users: 1,
+						mentors: 1,
+						sortDate: {
+							$dateFromParts: {
+								year: "$_id.year",
+								month: "$_id.month",
+								day: 1,
+							},
+						},
+						_id: 0,
+					},
+				},
+				{
+					$sort: {
+						sortDate: 1,
+					},
+				},
+				{
+					$project: {
+						name: 1,
+						users: 1,
+						mentors: 1,
+					},
+				},
+			]);
+			return userGrowthData;
+		} catch (error) {
+			return handleExceptionError(error, "Error fetching user growth chart data");
 		}
 	}
 }

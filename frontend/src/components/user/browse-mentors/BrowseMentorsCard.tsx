@@ -18,7 +18,7 @@ export const BrowseMentorsCard = ({ mentor }: { mentor: IMentorDTO }) => (
 						<AvatarFallback className="bg-indigo-50 text-indigo-600 text-xl">{mentor.firstName.charAt(0)}</AvatarFallback>
 					</Avatar>
 					<div>
-						<h3 className="text-lg font-semibold text-gray-900 inline-flex items-center">{mentor.firstName}</h3>
+						<h3 className="text-lg font-semibold text-gray-900 inline-flex items-center">{`${mentor.firstName} ${mentor.lastName}`}</h3>
 						<p className="text-sm text-gray-500">{mentor.professionalTitle}</p>
 					</div>
 				</div>

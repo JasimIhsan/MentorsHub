@@ -28,4 +28,7 @@ export interface IUserRepository {
 	// findMentors(params: BrowseMentorsParams): Promise<PaginatedUsers>;
 	updateUser(userId: string, user: UserEntity): Promise<UserEntity>;
 	deleteUser(id: string): Promise<void | null>;
+	countUsers(): Promise<number>;
+	countMentors(): Promise<number>;
+	userGrowthChartData(months: number): Promise<{ users: number; mentors: number; name: string }[]>;
 }

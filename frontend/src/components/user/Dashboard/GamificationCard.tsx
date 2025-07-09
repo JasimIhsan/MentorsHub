@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 import { Award, Zap, Star, Trophy, Medal } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -98,7 +99,24 @@ const GamificationCard: React.FC<GamificationCardProps> = ({ onTestClick }) => {
 		return (
 			<Card className="bg-gradient-to-r from-purple-900 to-purple-700">
 				<CardContent className="px-6 py-3">
-					<p className="text-muted text-center">Loading stats...</p>
+					<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+						<div className="flex items-center gap-4">
+							<Skeleton className="bg-gray-200 h-15 w-15 rounded-full" /> {/* Skeleton for icon */}
+							<div className="space-y-2">
+								<Skeleton className="bg-gray-200 h-6 w-40" /> {/* Skeleton for level title */}
+								<Skeleton className="bg-gray-200 h-4 w-60" /> {/* Skeleton for XP text */}
+							</div>
+						</div>
+						<Skeleton className="bg-gray-200 h-10 w-20" /> {/* Skeleton for Test button */}
+						<Skeleton className="bg-gray-200 h-8 w-28" /> {/* Skeleton for View Progress button */}
+					</div>
+					{/* <div className="mt-4">
+						<Skeleton className="bg-gray-200 h-4 w-20" /> 
+						<div className="flex flex-wrap gap-2 mt-2">
+							<Skeleton className="bg-gray-200 h-6 w-24 rounded-full" /> 
+							<Skeleton className="bg-gray-200 h-6 w-24 rounded-full" /> 
+						</div>
+					</div> */}
 				</CardContent>
 			</Card>
 		);
@@ -137,7 +155,7 @@ const GamificationCard: React.FC<GamificationCardProps> = ({ onTestClick }) => {
 					</div>
 					<Button onClick={onTestClick}>Test</Button>
 					<div className="flex flex-col gap-2">
-						<Button asChild size="sm" className="bg-background text-primary hover:bg-secondary">
+						<Button asChild size="sm" className=" hover:bg-secondary">
 							<Link to="/gamification">View Progress</Link>
 						</Button>
 					</div>

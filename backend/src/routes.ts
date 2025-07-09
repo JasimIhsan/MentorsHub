@@ -18,6 +18,8 @@ import { adminWalletRouter } from "./presentation/routes/admin/admin.wallet.rout
 import { messageRouter } from "./presentation/routes/user/message.routes";
 import { adminGamificationTaskRouter } from "./presentation/routes/admin/admin.gamification.task.routes";
 import { gamificationRoute } from "./presentation/routes/user/gamification.routes";
+import { mentorDashboardRoutes } from "./presentation/routes/mentors/mentor.dashboard.routes";
+import { adminDashboardRouter } from "./presentation/routes/admin/admin.dashboard.routes";
 
 export function registerRoutes(app: Express) {
 	app.use("/api/user", authRouter);
@@ -35,9 +37,11 @@ export function registerRoutes(app: Express) {
 	app.use("/api/admin/mentor-application", mentorApplicationRouter);
 	app.use("/api/admin/wallet", adminWalletRouter);
 	app.use("/api/admin/gamification", adminGamificationTaskRouter);
+	app.use("/api/admin/dashboard", adminDashboardRouter);
 
 	app.use("/api/mentor", mentorRouter);
 	app.use("/api/mentor/sessions", mentorSessionRouter);
+	app.use("/api/mentor/dashboard", mentorDashboardRoutes);
 
 	app.use("/api/documents", documentsRouter);
 	app.use("/api/notifications", notificationRouter);

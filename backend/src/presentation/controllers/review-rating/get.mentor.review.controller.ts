@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { IGetMentorReviewsUseCase } from "../../../application/interfaces/review";
 import { logger } from "../../../infrastructure/utils/logger";
+import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 
 export class GetMentorReviewsController {
 	constructor(private getMentorReviewsUseCase: IGetMentorReviewsUseCase) {}
@@ -21,7 +22,7 @@ export class GetMentorReviewsController {
 				rating: rating ? parseInt(rating as string) : undefined,
 			});
 
-			res.status(200).json({ success: true, ...reviews });
+			res.status(HttpStatusCode.OK).json({ success: true, ...reviews });
 		} catch (error) {
 			logger.error(`❌ Error in GetMentorReviewsController: ${error}`);
 			next(error);

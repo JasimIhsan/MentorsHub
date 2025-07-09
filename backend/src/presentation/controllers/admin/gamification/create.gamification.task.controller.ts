@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ICreateGamificationTaskUseCase } from "../../../../application/interfaces/gamification";
 import { logger } from "../../../../infrastructure/utils/logger";
+import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class CreateGamificationTaskController {
 	constructor(private useCase: ICreateGamificationTaskUseCase) {}
@@ -10,7 +11,7 @@ export class CreateGamificationTaskController {
 
 			const task = await this.useCase.execute({ title, xpReward, targetCount, actionType });
 
-			res.status(200).json({ success: true, message: "Task created successfully", task });
+			res.status(HttpStatusCode.OK).json({ success: true, message: "Task created successfully", task });
 		} catch (error) {
 			logger.error(`❌ Error in CreateGamificationTaskController: ${error}`);
 			next(error);

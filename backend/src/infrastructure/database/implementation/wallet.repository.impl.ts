@@ -9,6 +9,8 @@ import { handleExceptionError } from "../../utils/handle.exception.error";
 import { WalletTransactionEntity } from "../../../domain/entities/wallet/wallet.transaction.entity";
 import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
 import { TransactionsTypeEnum } from "../../../application/interfaces/enums/transaction.type.enum";
+import mongoose from "mongoose";
+import { TransactionPurposeEnum } from "../../../application/interfaces/enums/transaction.purpose.enum";
 
 export class WalletRepositoryImpl implements IWalletRepository {
 	async findWalletByUserId(userId: string): Promise<WalletEntity | null> {
@@ -110,6 +112,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 				.lean(); // Optional: better performance if you're not mutating the doc
 
 			const data = docs.map((doc) => WalletTransactionEntity.fromDBDocument(doc));
+			console.log("data: ", data);
 
 			return { data, total };
 		} catch (error) {
@@ -139,6 +142,84 @@ export class WalletRepositoryImpl implements IWalletRepository {
 			return { data, total };
 		} catch (error) {
 			return handleExceptionError(error, "Error fetching withdrawal requests");
+		}
+	}
+
+	async adminRevenue(adminId: string): Promise<number> {
+		try {
+			const result = await WalletTransactionModel.aggregate([
+				{
+					$match: {
+						toUserId: new mongoose.Types.ObjectId(adminId),
+						toRole: RoleEnum.ADMIN,
+						purpose: TransactionPurposeEnum.PLATFORM_FEE,
+						type: TransactionsTypeEnum.CREDIT,
+					},
+				},
+				{
+					$group: {
+						_id: null,
+						totalRevenue: { $sum: "$amount" },
+					},
+				},
+			]);
+
+			return result[0]?.totalRevenue || 0;
+		} catch (error) {
+			return handleExceptionError(error, "Error fetching admin revenue");
+		}
+	}
+
+	async revenueChartData(adminId: string): Promise<{ name: string; total: number }[]> {
+		try {
+			const revenueData = await WalletTransactionModel.aggregate([
+				{
+					// Filter for revenue-generating transactions
+					$match: {
+						toUserId: new mongoose.Types.ObjectId(adminId),
+						toRole: "admin",
+						type: "credit",
+						purpose: { $in: ["session_fee", "platform_fee"] },
+						createdAt: {
+							$gte: new Date(new Date().setMonth(new Date().getMonth() - 6)), // Last 6 months
+						},
+					},
+				},
+				{
+					// Group by month and year
+					$group: {
+						_id: {
+							year: { $year: "$createdAt" },
+							month: { $month: "$createdAt" },
+						},
+						total: { $sum: "$amount" },
+					},
+				},
+				{
+					// Format the output
+					$project: {
+						name: {
+							$concat: [{ $arrayElemAt: [["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], { $subtract: ["$_id.month", 1] }] }, " ", { $toString: "$_id.year" }],
+						},
+						total: 1,
+						_id: 0,
+					},
+				},
+				{
+					// Sort by year and month
+					$sort: {
+						"_id.year": 1,
+						"_id.month": 1,
+					},
+				},
+			]);
+
+			// console.log("revenueData: ", revenueData);
+			console.log("length : ", revenueData.length);
+
+			return revenueData;
+		} catch (error) {
+			return handleExceptionError(error, "Error fetching admin revenue chart data");
 		}
 	}
 }

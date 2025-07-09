@@ -89,4 +89,44 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 			return handleExceptionError(error, "Error finding review by ID");
 		}
 	}
+
+	async getWeeklyRatings(mentorId: string, period: "month" | "sixMonths" | "year"): Promise<{ week: string; averageRating: number }[]> {
+		try {
+			const startDate = new Date();
+			if (period === "month") startDate.setDate(startDate.getDate() - 30);
+			else if (period === "sixMonths") startDate.setMonth(startDate.getMonth() - 6);
+			else startDate.setFullYear(startDate.getFullYear() - 1);
+
+			const result = await ReviewModel.aggregate([
+				{
+					$match: {
+						mentorId: new mongoose.Types.ObjectId(mentorId),
+						createdAt: { $gte: startDate },
+					},
+				},
+				{
+					$group: {
+						_id: {
+							week: { $isoWeek: "$createdAt" },
+							year: { $isoWeekYear: "$createdAt" },
+						},
+						averageRating: { $avg: "$rating" },
+					},
+				},
+				{
+					$sort: { "_id.year": 1, "_id.week": 1 },
+				},
+				{
+					$project: {
+						week: { $concat: ["Week ", { $toString: "$_id.week" }, " ", { $toString: "$_id.year" }] },
+						averageRating: { $round: ["$averageRating", 1] },
+					},
+				},
+			]);
+
+			return result.map((r) => ({ week: r.week, averageRating: r.averageRating }));
+		} catch (error) {
+			return handleExceptionError(error, "Error fetching weekly ratings");
+		}
+	}
 }

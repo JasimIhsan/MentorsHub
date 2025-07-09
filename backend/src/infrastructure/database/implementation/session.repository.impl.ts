@@ -6,6 +6,7 @@ import { SessionEntity } from "../../../domain/entities/session.entity";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 import { SessionStatusEnum } from "../../../application/interfaces/enums/session.status.enums";
 import { SessionPaymentStatusEnum } from "../../../application/interfaces/enums/session.payment.status.enum";
+import mongoose from "mongoose";
 
 export class SessionRepositoryImpl implements ISessionRepository {
 	async create(session: SessionEntity): Promise<SessionEntity> {
@@ -57,10 +58,39 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async findByUser(userId: string): Promise<SessionEntity[]> {
+	async findByUser(
+		userId: string,
+		options?: {
+			page?: number;
+			limit?: number;
+			search?: string;
+			status?: string;
+		},
+	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
-			const sessions = await SessionModel.find({ "participants.userId": userId }).populate("mentorId", "firstName lastName avatar").populate("participants.userId", "firstName lastName avatar");
-			return sessions.map(SessionEntity.fromDB);
+			const { page = 1, limit = 10, search = "", status = "" } = options || {};
+			const skip = (page - 1) * limit;
+
+			const filter: any = {
+				"participants.userId": userId,
+			};
+
+			// Optional: Filter by session status
+			if (status && status !== "all") {
+				filter.status = status;
+			}
+
+			// Optional: Search by mentor name (populate won't work directly in match, so do text-based if needed)
+			if (search) {
+				filter.$or = [
+					{ title: { $regex: search, $options: "i" } }, // If sessions have a title
+					// You can also implement `$lookup` + `$match` in aggregation if you want to search mentor name
+				];
+			}
+
+			const sessions = await SessionModel.find(filter).populate("mentorId", "firstName lastName avatar").populate("participants.userId", "firstName lastName avatar").sort({ updatedAt: -1 }).skip(skip).limit(limit);
+			const total = await SessionModel.countDocuments(filter);
+			return { sessions: sessions.map(SessionEntity.fromDB), total };
 		} catch (error) {
 			return handleExceptionError(error, "Error getting sessions by user");
 		}
@@ -125,6 +155,15 @@ export class SessionRepositoryImpl implements ISessionRepository {
 				total,
 				sessions: docs.map(SessionEntity.fromDB),
 			};
+		} catch (error) {
+			return handleExceptionError(error, "Error finding sessions by mentor");
+		}
+	}
+
+	async findSessionCount(mentorId: string, status: SessionStatusEnum): Promise<number> {
+		try {
+			const total = await SessionModel.countDocuments({ mentorId, status });
+			return total;
 		} catch (error) {
 			return handleExceptionError(error, "Error finding sessions by mentor");
 		}
@@ -206,6 +245,106 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			return sessions.map(SessionEntity.fromDB);
 		} catch (error) {
 			return handleExceptionError(error, "Error getting sessions by date");
+		}
+	}
+
+	async getWeeklyPerformance(mentorId: string, period: "month" | "sixMonths" | "year"): Promise<{ week: string; sessions: number; revenue: number }[]> {
+		try {
+			const startDate = new Date();
+			if (period === "month") startDate.setDate(startDate.getDate() - 30);
+			else if (period === "sixMonths") startDate.setMonth(startDate.getMonth() - 6);
+			else startDate.setFullYear(startDate.getFullYear() - 1);
+
+			const result = await SessionModel.aggregate([
+				{
+					$match: {
+						mentorId: new mongoose.Types.ObjectId(mentorId),
+						status: SessionStatusEnum.COMPLETED,
+						date: { $gte: startDate },
+					},
+				},
+				{
+					$group: {
+						_id: {
+							week: { $isoWeek: "$date" },
+							year: { $isoWeekYear: "$date" },
+						},
+						sessions: { $sum: 1 },
+						revenue: { $sum: "$totalAmount" },
+					},
+				},
+				{
+					$sort: { "_id.year": 1, "_id.week": 1 },
+				},
+				{
+					$project: {
+						week: { $concat: ["Week ", { $toString: "$_id.week" }, " ", { $toString: "$_id.year" }] },
+						sessions: 1,
+						revenue: 1,
+					},
+				},
+			]);
+
+			return result.map((r) => ({ week: r.week, sessions: r.sessions, revenue: r.revenue }));
+		} catch (error) {
+			return handleExceptionError(error, "Error fetching weekly performance");
+		}
+	}
+	async findRevenueByMentor(mentorId: string): Promise<number> {
+		try {
+			const result = await SessionModel.aggregate([
+				{
+					$match: {
+						mentorId: new mongoose.Types.ObjectId(mentorId),
+						pricing: "paid",
+						status: "completed",
+					},
+				},
+				{
+					$project: {
+						participants: 1,
+						paidParticipants: {
+							$filter: {
+								input: "$participants",
+								as: "participant",
+								cond: { $eq: ["$$participant.paymentStatus", "completed"] },
+							},
+						},
+						totalAmount: 1,
+					},
+				},
+				{
+					$project: {
+						revenue: {
+							$cond: [
+								{ $gt: ["$totalAmount", 0] },
+								{
+									$multiply: [{ $size: "$paidParticipants" }, { $divide: ["$totalAmount", { $size: "$participants" }] }],
+								},
+								0,
+							],
+						},
+					},
+				},
+				{
+					$group: {
+						_id: null,
+						totalRevenue: { $sum: "$revenue" },
+					},
+				},
+			]);
+
+			return result[0]?.totalRevenue || 0;
+		} catch (error) {
+			return handleExceptionError(error, "Error fetching revenue by mentor");
+		}
+	}
+
+	async countSessions(): Promise<number> {
+		try {
+			return await SessionModel.countDocuments({ status: SessionStatusEnum.COMPLETED });
+		} catch (error) {
+			return handleExceptionError(error, "Error counting sessions");
 		}
 	}
 }
