@@ -2,7 +2,6 @@ import type React from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, Users, UserCog, Calendar, CreditCard, ArrowUp, ArrowDown, Star, Clock, DollarSign } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,12 +12,14 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AdminDashboardPDF } from "@/components/admin/dashboard/ReportPdf";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 
 // StatsCard component
 function StatsCard({ title, value, description, trend, percentage, icon: Icon }: { title: string; value: number; description: string; trend: "up" | "down"; percentage: string; icon: React.ElementType }) {
 	return (
 		<Card>
-			<CardContent className="px-6 pt-6">
+			<CardContent className="px-6 py-0">
 				<div className="flex items-center justify-between">
 					<div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
 						<Icon className="h-6 w-6 text-primary" />
@@ -42,7 +43,7 @@ function StatsCard({ title, value, description, trend, percentage, icon: Icon }:
 function StatsCardSkeleton() {
 	return (
 		<Card>
-			<CardContent className="px-6 pt-6">
+			<CardContent className="px-6 py-0 pt-6">
 				<div className="flex items-center justify-between">
 					<Skeleton className="h-12 w-12 rounded-full bg-gray-200" />
 					<Skeleton className="h-4 w-16 bg-gray-200" />
@@ -60,7 +61,7 @@ function StatsCardSkeleton() {
 // QuickLinkCard component
 function QuickLinkCard({ title, description, href, icon: Icon }: { title: string; description: string; href: string; icon: React.ElementType }) {
 	return (
-		<Card className="overflow-hidden">
+		<Card className="overflow-hidden py-0">
 			<Link to={href} className="block h-full">
 				<CardContent className="px-6 pt-6">
 					<div className="flex items-center justify-between">
@@ -419,7 +420,29 @@ export default function AdminDashboardPage() {
 					<h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
 					<p className="text-muted-foreground">Overview of your platform's performance and activity</p>
 				</div>
-				<div className="flex items-center gap-2">{isRevenueLoading || isUserGrowthLoading || isStatsLoading ? <Skeleton className="h-10 w-32 bg-gray-200" /> : <Button>Export Report</Button>}</div>
+				<div className="flex items-center gap-2">
+					{isRevenueLoading || isUserGrowthLoading || isStatsLoading || isTopMentorsLoading ? (
+						<Skeleton className="h-10 w-32 bg-gray-200" />
+					) : (
+						<PDFDownloadLink
+							document={
+								<AdminDashboardPDF
+									name={user?.username!}
+									stats={stats}
+									revenue={revenue}
+									revenueFilter={revenueFilter}
+									userGrowth={userGrowth}
+									userGrowthFilter={userGrowthFilter}
+									topMentors={topMentors}
+									isLoading={isRevenueLoading || isUserGrowthLoading || isStatsLoading || isTopMentorsLoading}
+								/>
+							}
+							fileName="Platform_Analytics_Report.pdf"
+							className="flex justify-center items-center h-10 px-4 bg-primary text-white rounded-md hover:bg-primary/90 transition">
+							{({ loading }) => (loading ? "Generating PDF..." : "Download Report")}
+						</PDFDownloadLink>
+					)}
+				</div>
 			</div>
 
 			{/* Stats Cards */}
