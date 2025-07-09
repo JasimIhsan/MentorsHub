@@ -1,5 +1,3 @@
-import { fetchMentorWeeklyRatingChartData } from "@/api/mentors.api.service";
-import { useState, useEffect } from "react";
 import { Line, LineChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,43 +7,15 @@ interface ChartData {
 	averageRating: number;
 }
 
-export function MentorReviewRatingChart({ userId }: { userId: string }) {
-	const [filterPeriod, setFilterPeriod] = useState("month");
-	const [data, setData] = useState<ChartData[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+interface MentorPerformanceChartProps {
+	data: ChartData[];
+	isLoading: boolean;
+	error: string | null;
+	filterPeriod: string;
+	handleFilterChange: (value: string) => void;
+}
 
-	// Fetch data when component mounts or filterPeriod changes
-	useEffect(() => {
-		const fetchData = async () => {
-			setIsLoading(true);
-			setError(null);
-			try {
-				const response = await fetchMentorWeeklyRatingChartData(userId, filterPeriod);
-				console.log("response rating: ", response);
-				if (response.success) {
-					const transformedData = response.weeklyRatings.map((item: { week: string; averageRating: string }) => ({
-						name: item.week,
-						averageRating: parseFloat(item.averageRating),
-					}));
-					setData(transformedData);
-				}
-			} catch (err) {
-				setError("Failed to load rating data.");
-				console.error(err);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchData();
-	}, [userId, filterPeriod]);
-
-	// Handle filter change
-	const handleFilterChange = (value: string) => {
-		setFilterPeriod(value);
-	};
-
+export function MentorReviewRatingChart({ data, isLoading, error, filterPeriod, handleFilterChange }: MentorPerformanceChartProps) {
 	// Render loading state
 	if (isLoading) {
 		return (

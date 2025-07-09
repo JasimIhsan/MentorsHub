@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { getMentorStatsController, getMentorWeeklyPerformanceController, getMentorWeeklyRatingsController } from "../../controllers/mentors/dashboard/composer";
-import { get } from "axios";
 
 export const mentorDashboardRoutes = Router();
 

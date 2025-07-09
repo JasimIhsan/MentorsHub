@@ -15,7 +15,7 @@ export class GetSessionByUserController {
 			const status = (req.query.status as string) || ""; // "completed", "upcoming", etc.
 
 			// Use case call with filters
-			const {sessions, total} = await this.getSessionByUserUsecase.execute(userId, {
+			const { sessions, total } = await this.getSessionByUserUsecase.execute(userId, {
 				page,
 				limit,
 				search,

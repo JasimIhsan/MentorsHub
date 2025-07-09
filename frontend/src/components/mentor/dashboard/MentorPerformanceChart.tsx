@@ -1,40 +1,20 @@
-import { fetchMetorPerfomanceChartData } from "@/api/mentors.api.service";
-import { useState, useEffect } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Shadcn/UI Select components
 
-export function MentorPerformanceChart({ userId }: { userId: string }) {
-	const [filterPeriod, setFilterPeriod] = useState("month");
-	const [data, setData] = useState([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+interface MentorPerformanceChartProps {
+	isLoading: boolean;
+	error: string | null;
+	filterPeriod: string;
+	data: {
+		week: string;
+		sessions: number;
+		revenue: number;
+	}[];
+	handleFilterChange: (value: string) => void;
+}
 
-	// Fetch data when component mounts or filterPeriod changes
-	useEffect(() => {
-		const fetchData = async () => {
-			setIsLoading(true);
-			setError(null);
-			try {
-				const response = await fetchMetorPerfomanceChartData(userId, filterPeriod);
-				console.log("response per: ", response);
-				if (response.success) setData(response.performance);
-			} catch (err) {
-				setError("Failed to load performance data.");
-				console.error(err);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchData();
-	}, [userId, filterPeriod]);
-
-	// Handle filter change
-	const handleFilterChange = (value: string) => {
-		setFilterPeriod(value);
-	};
-
+export function MentorPerformanceChart({ data, isLoading, error, filterPeriod, handleFilterChange }: MentorPerformanceChartProps) {
 	// Render loading state
 	if (isLoading) {
 		return (
@@ -80,7 +60,7 @@ export function MentorPerformanceChart({ userId }: { userId: string }) {
 							bottom: 5,
 						}}>
 						<CartesianGrid strokeDasharray="3 3" />
-						<XAxis dataKey="name" />
+						<XAxis dataKey="week" />
 						<YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
 						<YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
 						<Tooltip />

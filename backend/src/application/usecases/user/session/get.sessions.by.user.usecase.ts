@@ -15,7 +15,7 @@ export class GetSessionsByUserUseCase implements IGetSessionsByUserUseCase {
 			limit?: number;
 			search?: string;
 			status?: string;
-		}
+		},
 	): Promise<{ sessions: ISessionUserDTO[]; total: number }> {
 		if (!userId) {
 			throw new Error(CommonStringMessage.USER_NOT_FOUND);
@@ -23,13 +23,13 @@ export class GetSessionsByUserUseCase implements IGetSessionsByUserUseCase {
 
 		const { page = 1, limit = 10, search = "", status = "" } = options || {};
 
-		const {sessions, total} = await this.sessionRepo.findByUser(userId, {
+		const { sessions, total } = await this.sessionRepo.findByUser(userId, {
 			page,
 			limit,
 			search,
 			status,
 		});
 
-		return {sessions: sessions.map((session) => mapToUserSessionDTO(session, userId)), total}
+		return { sessions: sessions.map((session) => mapToUserSessionDTO(session, userId)), total };
 	}
 }

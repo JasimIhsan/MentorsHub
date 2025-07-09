@@ -8,12 +8,23 @@ import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
-import { fetchMentorDashboardData } from "@/api/mentors.api.service";
+import { fetchMentorDashboardData, fetchMentorWeeklyRatingChartData, fetchMetorPerfomanceChartData } from "@/api/mentors.api.service";
 import { IReviewDTO } from "@/interfaces/review.dto";
 import { MentorReviewRatingChart } from "@/components/mentor/dashboard/AverageRatingChart";
 import { MentorPerformanceChart } from "@/components/mentor/dashboard/MentorPerformanceChart";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { MentorReportDocument } from "@/components/mentor/dashboard/MentorReportDocument";
+
+export interface PerformanceData {
+	week: string;
+	sessions: number;
+	revenue: number;
+}
+
+interface ChartData {
+	name: string;
+	averageRating: number;
+}
 
 export function MentorDashboardPage() {
 	const [sessions, setSessions] = useState<ISessionMentorDTO[]>([]);
@@ -26,6 +37,10 @@ export function MentorDashboardPage() {
 		revenue: number;
 	}>({ upcomingSessions: 0, pendingRequests: 0, averageRating: 0, revenue: 0 });
 	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [filterPerfomancePeriod, setFilterPerformancePeriod] = useState("month");
+	const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
+	const [isPerformanceLoading, setIsPerformanceLoading] = useState(true);
+	const [performanceError, setPerformanceError] = useState<string | null>(null);
 	const user = useSelector((state: RootState) => state.userAuth.user);
 
 	useEffect(() => {
@@ -47,6 +62,67 @@ export function MentorDashboardPage() {
 		fetchSessions();
 	}, []);
 
+	// Fetch data when component mounts or filterPeriod changes
+	useEffect(() => {
+		const fetchData = async () => {
+			setIsPerformanceLoading(true);
+			setPerformanceError(null);
+			try {
+				const response = await fetchMetorPerfomanceChartData(user?.id!, filterPerfomancePeriod);
+				console.log("response per: ", response);
+				if (response.success) setPerformanceData(response.performance);
+			} catch (err) {
+				setPerformanceError("Failed to load performance data.");
+				console.error(err);
+			} finally {
+				setIsPerformanceLoading(false);
+			}
+		};
+
+		fetchData();
+	}, [user?.id, filterPerfomancePeriod]);
+
+	// Handle filter change
+	const handlePerformanceFilterChange = (value: string) => {
+		setFilterPerformancePeriod(value);
+	};
+
+	const [filterRatingPeriod, setFilterRatingPeriod] = useState("month");
+	const [ratings, setRatings] = useState<ChartData[]>([]);
+	const [isRatingLoading, setIsRatingLoading] = useState(true);
+	const [ratingError, setRatingError] = useState<string | null>(null);
+
+	// Fetch data when component mounts or filterPeriod changes
+	useEffect(() => {
+		const fetchData = async () => {
+			setIsRatingLoading(true);
+			setRatingError(null);
+			try {
+				const response = await fetchMentorWeeklyRatingChartData(user?.id!, filterRatingPeriod);
+				console.log("response rating: ", response);
+				if (response.success) {
+					const transformedData = response.weeklyRatings.map((item: { week: string; averageRating: string }) => ({
+						name: item.week,
+						averageRating: parseFloat(item.averageRating),
+					}));
+					setRatings(transformedData);
+				}
+			} catch (err) {
+				setRatingError("Failed to load rating data.");
+				console.error(err);
+			} finally {
+				setIsRatingLoading(false);
+			}
+		};
+
+		fetchData();
+	}, [user?.id, filterRatingPeriod]);
+
+	// Handle filter change
+	const handleRatingsFilterChange = (value: string) => {
+		setFilterRatingPeriod(value);
+	};
+
 	return (
 		<div className="space-y-6">
 			<div className="flex flex-col md:flex-row justify-between gap-4">
@@ -56,7 +132,21 @@ export function MentorDashboardPage() {
 				</div>
 				{!isLoading && (
 					<PDFDownloadLink
-						document={<MentorReportDocument stats={stats} sessions={sessions} requests={requests} reviews={reviews} />}
+						document={
+							<MentorReportDocument
+								stats={stats}
+								sessions={sessions}
+								requests={requests}
+								reviews={reviews}
+								filterPerformancePeriod={filterPerfomancePeriod}
+								performanceData={performanceData}
+								ratingsData={ratings}
+								filterRatingsPeriod={filterRatingPeriod}
+								generatedDate={generatedDate}
+								mentorEmail={user?.email!}
+								mentorName={`${user?.firstName} ${user?.lastName}`}
+							/>
+						}
 						fileName="mentor-report.pdf"
 						className="flex justify-center items-center h-10 btn px-4 bg-primary text-white rounded-md hover:bg-primary/90 transition">
 						{({ loading }) => (loading ? "Generating PDF..." : "Download Report")}
@@ -105,7 +195,7 @@ export function MentorDashboardPage() {
 						<CardDescription>Average rating of your reviews</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<MentorReviewRatingChart userId={user?.id!} />
+						<MentorReviewRatingChart data={ratings} isLoading={isRatingLoading} error={ratingError} filterPeriod={filterRatingPeriod} handleFilterChange={handleRatingsFilterChange} />
 					</CardContent>
 				</Card>
 
@@ -126,9 +216,15 @@ export function MentorDashboardPage() {
 					<CardDescription>Popularity and revenue by premium plan</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<MentorPerformanceChart userId={user?.id!} />
+					<MentorPerformanceChart data={performanceData} isLoading={isPerformanceLoading} error={performanceError} filterPeriod={filterPerfomancePeriod} handleFilterChange={handlePerformanceFilterChange} />
 				</CardContent>
 			</Card>
 		</div>
 	);
 }
+
+const generatedDate = new Date().toLocaleDateString("en-IN", {
+	day: "numeric",
+	month: "long",
+	year: "numeric",
+});

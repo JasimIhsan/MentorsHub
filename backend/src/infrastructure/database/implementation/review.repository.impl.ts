@@ -50,7 +50,7 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 			sessionId?: string;
 			rating: number;
 			comment: string;
-		}
+		},
 	): Promise<ReviewEntity> {
 		try {
 			const updated = await ReviewModel.findByIdAndUpdate(reviewId, data, { new: true });
