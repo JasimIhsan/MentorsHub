@@ -29,3 +29,13 @@ export const fetchUsersGrowthChartData = async (adminId: string, range: string) 
 		throw new Error("Failed to fetch users growth chart data");
 	}
 };
+
+export const fetchTopMentorsData = async () => {
+	try {
+		const response = await axiosInstance.get(`/admin/dashboard/top-mentors`);
+		return response.data;
+	} catch (error) {
+		if (error instanceof Error) throw new Error(error.message);
+		throw new Error("Failed to fetch top mentors data");
+	}
+};

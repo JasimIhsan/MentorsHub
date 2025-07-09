@@ -2,14 +2,13 @@ import { IAdminRepository } from "../../../../domain/repositories/admin.reposito
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
-import { AdminStatsResponse, IGetAdminStatsUseCase } from "../../../interfaces/admin/admin.dashboard.interface";
-
-
+import { IAdminStatsDTO } from "../../../dtos/admin.dashboard.dtos";
+import { IGetAdminStatsUseCase } from "../../../interfaces/admin/admin.dashboard.interface";
 
 export class GetAdminStatsUseCase implements IGetAdminStatsUseCase {
 	constructor(private readonly _adminRepository: IAdminRepository, private readonly _userRepo: IUserRepository, private readonly _sessionRepo: ISessionRepository, private readonly _walletRepo: IWalletRepository) {}
 
-	async execute(adminId: string): Promise<AdminStatsResponse> {
+	async execute(adminId: string): Promise<IAdminStatsDTO> {
 		try {
 			const adminEntity = await this._adminRepository.findAdminById(adminId);
 			if (!adminEntity) throw new Error("Admin not found");

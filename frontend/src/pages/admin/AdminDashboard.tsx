@@ -8,10 +8,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useEffect, useState } from "react";
-import { fetchAdminDashboardData, fetchPlatformRevenueChartData, fetchUsersGrowthChartData } from "@/api/admin/dashboard.api.service";
+import { fetchAdminDashboardData, fetchPlatformRevenueChartData, fetchTopMentorsData, fetchUsersGrowthChartData } from "@/api/admin/dashboard.api.service";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // StatsCard component
 function StatsCard({ title, value, description, trend, percentage, icon: Icon }: { title: string; value: number; description: string; trend: "up" | "down"; percentage: string; icon: React.ElementType }) {
@@ -98,22 +99,15 @@ function QuickLinkCardSkeleton() {
 
 // TopMentorsTable component
 interface Mentor {
-	id: number;
+	id: string;
 	name: string;
-	sessions: number;
+	avatar: string;
 	rating: number;
-	revenue: string;
+	revenue: number;
+	sessions: number;
 }
 
-const topMentors: Mentor[] = [
-	{ id: 1, name: "Dr. Jane Smith", sessions: 45, rating: 4.9, revenue: "$3,200" },
-	{ id: 2, name: "Prof. Mark Wilson", sessions: 38, rating: 4.7, revenue: "$2,850" },
-	{ id: 3, name: "Sarah Brown", sessions: 32, rating: 4.8, revenue: "$2,400" },
-	{ id: 4, name: "James Lee", sessions: 29, rating: 4.6, revenue: "$2,100" },
-	{ id: 5, name: "Emily Davis", sessions: 25, rating: 4.9, revenue: "$1,900" },
-];
-
-function TopMentorsTable() {
+function TopMentorsTable({ topMentors }: { topMentors: Mentor[] }) {
 	return (
 		<Card className="lg:col-span-4">
 			<CardHeader>
@@ -124,7 +118,7 @@ function TopMentorsTable() {
 				<Table>
 					<TableHeader>
 						<TableRow>
-							<TableHead>Name</TableHead>
+							<TableHead>Mentor</TableHead>
 							<TableHead>Sessions</TableHead>
 							<TableHead>Rating</TableHead>
 							<TableHead>Revenue</TableHead>
@@ -133,7 +127,13 @@ function TopMentorsTable() {
 					<TableBody>
 						{topMentors.map((mentor) => (
 							<TableRow key={mentor.id}>
-								<TableCell className="font-medium">{mentor.name}</TableCell>
+								<TableCell className="font-medium flex items-center gap-2">
+									<Avatar>
+										<AvatarImage src={mentor.avatar} />
+										<AvatarFallback>{mentor.name.charAt(0)}</AvatarFallback>
+									</Avatar>
+									{mentor.name}
+								</TableCell>
 								<TableCell>
 									<div className="flex items-center gap-1">
 										<Clock className="h-4 w-4 text-muted-foreground" />
@@ -341,6 +341,9 @@ export default function AdminDashboardPage() {
 	const [isUserGrowthLoading, setIsUserGrowthLoading] = useState(false);
 	const [userGrowthFilter, setUserGrowthFilter] = useState<"all" | "30days" | "1year">("all");
 
+	const [topMentors, setTopMentors] = useState<Mentor[]>([]);
+	const [isTopMentorsLoading, setIsTopMentorsLoading] = useState(false);
+
 	useEffect(() => {
 		const fetchData = async () => {
 			setIsStatsLoading(true);
@@ -391,6 +394,23 @@ export default function AdminDashboardPage() {
 		};
 		fetchUserGrowth();
 	}, [user?.id, userGrowthFilter]);
+
+	useEffect(() => {
+		const fetchTopMentors = async () => {
+			setIsTopMentorsLoading(true);
+			try {
+				const response = await fetchTopMentorsData();
+				if (response.success) {
+					setTopMentors(response.topMentors);
+				}
+			} catch (error) {
+				if (error instanceof Error) toast.error(error.message);
+			} finally {
+				setIsTopMentorsLoading(false);
+			}
+		};
+		fetchTopMentors();
+	}, [user?.id]);
 
 	return (
 		<div className="space-y-6">
@@ -464,7 +484,7 @@ export default function AdminDashboardPage() {
 			{/* Top Mentors and Platform Metrics */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
 				{isStatsLoading ? <PlatformMetricsSkeleton /> : <PlatformMetrics />}
-				{isStatsLoading ? <TopMentorsTableSkeleton /> : <TopMentorsTable />}
+				{isTopMentorsLoading ? <TopMentorsTableSkeleton /> : <TopMentorsTable topMentors={topMentors} />}
 			</div>
 
 			{/* Quick Links */}

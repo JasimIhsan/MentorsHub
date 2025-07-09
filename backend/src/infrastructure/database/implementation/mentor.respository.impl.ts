@@ -1,12 +1,14 @@
 import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
 import { MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
 import { IMentorProfileModel, MentorProfileModel } from "../models/user/mentor.details.model";
-import { IUsersDocument } from "../models/user/user.model";
+import { IUsersDocument, UserModel } from "../models/user/user.model";
 import { IAvailabilityDTO } from "../../../application/dtos/availability.dto";
 import { MentorEntity } from "../../../domain/entities/mentor.entity";
 import mongoose from "mongoose";
 import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../application/interfaces/enums/mentor.request.status.enum";
+import { WalletTransactionModel } from "../models/wallet/wallet.transaction.model";
+import { SessionModel } from "../models/session/session.model";
 
 type AggregatedMentorDoc = IMentorProfileModel & {
 	user: IUsersDocument; // because $lookup + $unwind gives you a single user object
@@ -94,7 +96,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			priceMax?: number;
 			interests?: string[];
 		},
-		browserId: string,
+		browserId: string
 	): Promise<{ mentors: MentorEntity[]; total: number }> {
 		try {
 			const page = params.page ?? 1;
@@ -221,7 +223,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 						sessionFormat: doc.sessionFormat,
 						sessionTypes: doc.sessionTypes,
 						hourlyRate: doc.hourlyRate,
-					}),
+					})
 			);
 
 			return { mentors, total };
@@ -247,6 +249,80 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			return { userId, availability: result.availability };
 		} catch (error) {
 			throw handleExceptionError(error, "Error finding mentor availability");
+		}
+	}
+
+	async getTopFiveMentors(): Promise<{ id: string; name: string; totalSessions: number; totalRevenue: number; averageRating: number; avatar: string }[]> {
+		try {
+			// Step 1: Get Top 5 Mentors sorted by averageRating
+			const topMentors = await UserModel.find({ role: "mentor" }).sort({ averageRating: -1 }).limit(5).select("_id firstName lastName avatar averageRating sessionCompleted");
+
+			const mentorIds = topMentors.map((mentor) => mentor._id);
+
+			// Step 2: Get total revenue for each mentor
+			const revenueData = await WalletTransactionModel.aggregate([
+				{
+					$match: {
+						toUserId: { $in: mentorIds },
+						purpose: "session_fee",
+					},
+				},
+				{
+					$group: {
+						_id: "$toUserId",
+						totalRevenue: { $sum: "$amount" },
+					},
+				},
+			]);
+
+			// Step 3: Get session count for each mentor
+			const sessionData = await SessionModel.aggregate([
+				{
+					$match: {
+						mentorId: { $in: mentorIds },
+						status: "completed", // assuming this field marks a finished session
+					},
+				},
+				{
+					$group: {
+						_id: "$mentorId",
+						totalSessions: { $sum: 1 },
+					},
+				},
+			]);
+
+			// Convert revenue and session data into maps for fast lookup
+			const revenueMap = new Map<string, number>();
+			revenueData.forEach((item) => {
+				revenueMap.set(item._id.toString(), item.totalRevenue);
+			});
+
+			const sessionMap = new Map<string, number>();
+			sessionData.forEach((item) => {
+				sessionMap.set(item._id.toString(), item.totalSessions);
+			});
+
+			// Step 4: Merge everything into final result
+			const chartData = topMentors.map((mentor) => {
+				const fullName = `${mentor.firstName} ${mentor.lastName || ""}`.trim();
+				const avatar = mentor.avatar || "";
+				const totalRevenue = revenueMap.get(mentor._id.toString()) || 0;
+				const totalSessions = mentor.sessionCompleted || 0;
+				const averageRating = mentor.averageRating || 0;
+
+				return {
+					id: mentor._id.toString(),
+					name: fullName,
+					avatar,
+					averageRating,
+					totalRevenue,
+					totalSessions,
+				};
+			});
+
+			return chartData;
+		} catch (error) {
+			throw handleExceptionError(error, "Error fetching top mentors data for admin chart");
 		}
 	}
 }
