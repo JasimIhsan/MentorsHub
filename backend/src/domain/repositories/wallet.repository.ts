@@ -15,7 +15,7 @@ export interface IWalletRepository {
 		fromRole: RoleEnum;
 		toRole: RoleEnum;
 		amount: number;
-		type: TransactionsTypeEnum
+		type: TransactionsTypeEnum;
 		purpose: string;
 		description?: string;
 		sessionId?: string | null;
@@ -23,4 +23,6 @@ export interface IWalletRepository {
 	getTransactionsByUser(userId: string, page?: number, limit?: number, filter?: Record<string, any>): Promise<{ data: WalletTransactionEntity[]; total: number }>;
 	createWithdrawalRequest(data: Partial<WithdrawalRequestEntity>): Promise<WithdrawalRequestEntity>;
 	getWithdrawalRequests(mentorId: string, page?: number, limit?: number, filter?: Record<string, any>): Promise<{ data: WithdrawalRequestEntity[]; total: number }>;
+	adminRevenue(adminId: string): Promise<number>;
+	revenueChartData(adminId: string): Promise<{ name: string; total: number }[]>;
 }

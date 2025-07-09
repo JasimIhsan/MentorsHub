@@ -1,99 +1,13 @@
 import type React from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Users, UserCog, Calendar, CreditCard, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUpRight, Users, UserCog, Calendar, CreditCard, ArrowUp, ArrowDown, Star, Clock, DollarSign } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RevenueChart } from "@/components/admin/dashboard/charts/RevenueChart";
-import { UserGrowthChart } from "@/components/admin/dashboard/charts/UserGrowthChart";
-import { SessionsChart } from "@/components/admin/dashboard/charts/SessionChart";
-import { RecentActivityList } from "@/components/admin/dashboard/RecentActivityList";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-export default function AdminDashboardPage() {
-	return (
-		<div className="space-y-6">
-			<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-					<p className="text-muted-foreground">Overview of your platform's performance and activity</p>
-				</div>
-				<div className="flex items-center gap-2">
-					<Button>Export Reports</Button>
-				</div>
-			</div>
-
-			{/* Stats Cards */}
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<StatsCard title="Total Users" value="2,543" description="128 new this month" trend="up" percentage="12%" icon={Users} />
-				<StatsCard title="Total Mentors" value="342" description="24 new this month" trend="up" percentage="8%" icon={UserCog} />
-				<StatsCard title="Active Sessions" value="1,257" description="89 scheduled today" trend="up" percentage="23%" icon={Calendar} />
-				<StatsCard title="Total Revenue" value="$48,395" description="$5,231 this month" trend="down" percentage="4%" icon={CreditCard} />
-			</div>
-
-			{/* Charts */}
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-				<Card className="lg:col-span-4">
-					<CardHeader className="flex flex-row items-center justify-between">
-						<div>
-							<CardTitle>Revenue Overview</CardTitle>
-							<CardDescription>Monthly revenue breakdown</CardDescription>
-						</div>
-						<Tabs defaultValue="6months">
-							<TabsList>
-								<TabsTrigger value="30days">30 days</TabsTrigger>
-								<TabsTrigger value="6months">6 months</TabsTrigger>
-								<TabsTrigger value="1year">1 year</TabsTrigger>
-							</TabsList>
-						</Tabs>
-					</CardHeader>
-					<CardContent>
-						<RevenueChart />
-					</CardContent>
-				</Card>
-				<Card className="lg:col-span-3">
-					<CardHeader>
-						<CardTitle>User Growth</CardTitle>
-						<CardDescription>New users over time</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<UserGrowthChart />
-					</CardContent>
-				</Card>
-			</div>
-
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-				<Card className="lg:col-span-3">
-					<CardHeader>
-						<CardTitle>Sessions Overview</CardTitle>
-						<CardDescription>Sessions by category</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<SessionsChart />
-					</CardContent>
-				</Card>
-				<Card className="lg:col-span-4">
-					<CardHeader>
-						<CardTitle>Recent Activity</CardTitle>
-						<CardDescription>Latest platform activities</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<RecentActivityList />
-					</CardContent>
-				</Card>
-			</div>
-
-			{/* Quick Links */}
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<QuickLinkCard title="Manage Users" description="View and manage all platform users" href="/admin/users" icon={Users} />
-				<QuickLinkCard title="Manage Mentors" description="Review and verify mentor applications" href="/admin/mentors" icon={UserCog} />
-				<QuickLinkCard title="View Sessions" description="Monitor all scheduled and completed sessions" href="/admin/sessions" icon={Calendar} />
-				<QuickLinkCard title="View Payments" description="Track all platform transactions" href="/admin/payments" icon={CreditCard} />
-			</div>
-		</div>
-	);
-}
-
-function StatsCard({ title, value, description, trend, percentage, icon: Icon }: { title: string; value: string; description: string; trend: "up" | "down"; percentage: string; icon: React.ElementType }) {
+// StatsCard component
+function StatsCard({ title, value, description, trend, percentage, icon: Icon }: { title: string; value: number; description: string; trend: "up" | "down"; percentage: string; icon: React.ElementType }) {
 	return (
 		<Card>
 			<CardContent className="px-6">
@@ -116,6 +30,7 @@ function StatsCard({ title, value, description, trend, percentage, icon: Icon }:
 	);
 }
 
+// QuickLinkCard component
 function QuickLinkCard({ title, description, href, icon: Icon }: { title: string; description: string; href: string; icon: React.ElementType }) {
 	return (
 		<Card className="overflow-hidden">
@@ -134,5 +49,276 @@ function QuickLinkCard({ title, description, href, icon: Icon }: { title: string
 				</CardContent>
 			</Link>
 		</Card>
+	);
+}
+
+// TopMentorsTable component
+interface Mentor {
+	id: number;
+	name: string;
+	sessions: number;
+	rating: number;
+	revenue: string;
+}
+
+const topMentors: Mentor[] = [
+	{ id: 1, name: "Dr. Jane Smith", sessions: 45, rating: 4.9, revenue: "$3,200" },
+	{ id: 2, name: "Prof. Mark Wilson", sessions: 38, rating: 4.7, revenue: "$2,850" },
+	{ id: 3, name: "Sarah Brown", sessions: 32, rating: 4.8, revenue: "$2,400" },
+	{ id: 4, name: "James Lee", sessions: 29, rating: 4.6, revenue: "$2,100" },
+	{ id: 5, name: "Emily Davis", sessions: 25, rating: 4.9, revenue: "$1,900" },
+];
+
+function TopMentorsTable() {
+	return (
+		<Card className="lg:col-span-4">
+			<CardHeader>
+				<CardTitle>Top Mentors</CardTitle>
+				<CardDescription>Performance metrics for top-performing mentors</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>Name</TableHead>
+							<TableHead>Sessions</TableHead>
+							<TableHead>Rating</TableHead>
+							<TableHead>Revenue</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{topMentors.map((mentor) => (
+							<TableRow key={mentor.id}>
+								<TableCell className="font-medium">{mentor.name}</TableCell>
+								<TableCell>
+									<div className="flex items-center gap-1">
+										<Clock className="h-4 w-4 text-muted-foreground" />
+										{mentor.sessions}
+									</div>
+								</TableCell>
+								<TableCell>
+									<div className="flex items-center gap-1">
+										<Star className="h-4 w-4 text-yellow-400" />
+										{mentor.rating}
+									</div>
+								</TableCell>
+								<TableCell>
+									<div className="flex items-center gap-1">
+										<DollarSign className="h-4 w-4 text-green-600" />
+										{mentor.revenue}
+									</div>
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</CardContent>
+		</Card>
+	);
+}
+
+// PlatformMetrics component
+interface Metric {
+	id: number;
+	title: string;
+	value: string;
+	icon: React.ElementType;
+}
+
+const metrics: Metric[] = [
+	{ id: 1, title: "Avg. Session Duration", value: "45 min", icon: Clock },
+	{ id: 2, title: "User Retention Rate", value: "78%", icon: Users },
+	{ id: 3, title: "Avg. Mentor Rating", value: "4.8", icon: Star },
+	{ id: 4, title: "Monthly Active Users", value: "1,892", icon: Calendar },
+];
+
+function PlatformMetrics() {
+	return (
+		<Card className="lg:col-span-3">
+			<CardHeader>
+				<CardTitle>Platform Metrics</CardTitle>
+				<CardDescription>Key performance indicators</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<div className="grid gap-4 sm:grid-cols-2">
+					{metrics.map((metric) => (
+						<div key={metric.id} className="flex items-center gap-3">
+							<div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+								<metric.icon className="h-5 w-5 text-primary" />
+							</div>
+							<div>
+								<p className="text-sm text-muted-foreground">{metric.title}</p>
+								<p className="text-lg font-semibold">{metric.value}</p>
+							</div>
+						</div>
+					))}
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+// RevenueChart component
+import { Bar, BarChart } from "recharts";
+
+const revenueData = [
+	{ name: "Jan", total: 4200 },
+	{ name: "Feb", total: 5100 },
+	{ name: "Mar", total: 4800 },
+	{ name: "Apr", total: 6300 },
+	{ name: "May", total: 7200 },
+	{ name: "Jun", total: 8100 },
+];
+
+function RevenueChart({ data, isLoading }: { data: { name: string; total: number }[]; isLoading: boolean }) {
+	return (
+		<ResponsiveContainer width="100%" height={300}>
+			<BarChart data={data}>
+				<XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+				<YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} />
+				<Tooltip formatter={(value: number) => [`₹${value}`, "Revenue"]} cursor={{ fill: "rgba(0, 0, 0, 0.05)" }} />
+				<Bar dataKey="total" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
+			</BarChart>
+		</ResponsiveContainer>
+	);
+}
+
+// UserGrowthChart component
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useEffect, useState } from "react";
+import { fetchAdminDashboardData, fetchPlatformRevenueChartData } from "@/api/admin/dashboard.api.service";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { toast } from "sonner";
+
+const userGrowthData = [
+	{ name: "Jan", users: 120, mentors: 15 },
+	{ name: "Feb", users: 180, mentors: 22 },
+	{ name: "Mar", users: 250, mentors: 28 },
+	{ name: "Apr", users: 310, mentors: 35 },
+	{ name: "May", users: 420, mentors: 48 },
+	{ name: "Jun", users: 520, mentors: 62 },
+];
+
+function UserGrowthChart() {
+	return (
+		<ResponsiveContainer width="100%" height={300}>
+			<LineChart data={userGrowthData}>
+				<XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+				<YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+				<Tooltip />
+				<Line type="monotone" dataKey="users" stroke="#2563eb" strokeWidth={2} activeDot={{ r: 6 }} />
+				<Line type="monotone" dataKey="mentors" stroke="#16a34a" strokeWidth={2} activeDot={{ r: 6 }} />
+			</LineChart>
+		</ResponsiveContainer>
+	);
+}
+
+// Main AdminDashboardPage component
+export default function AdminDashboardPage() {
+	const [stats, setStats] = useState<{
+		totalUsers: number;
+		totalMentors: number;
+		totalSessions: number;
+		totalRevenue: number;
+	}>({ totalMentors: 0, totalSessions: 0, totalUsers: 0, totalRevenue: 0 });
+	const [isStatsLoading, setIsStatsLoading] = useState(false);
+	const user = useSelector((state: RootState) => state.adminAuth.admin);
+
+	const [revenue, setRevenue] = useState<{ name: string; total: number }[]>([]);
+	const [isRevenueLoading, setIsRevenueLoading] = useState(false);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			setIsStatsLoading(true);
+			try {
+				const response = await fetchAdminDashboardData(user?.id!);
+				if (response.success) {
+					setStats(response.stats);
+				}
+			} catch (error) {
+				if (error instanceof Error) toast.error(error.message);
+			} finally {
+				setIsStatsLoading(false);
+			}
+		};
+		fetchData();
+	}, [user?.id]);
+
+	useEffect(() => {
+		const fetchRevenue = async () => {
+			setIsRevenueLoading(true);
+			try {
+				const response = await fetchPlatformRevenueChartData(user?.id!);
+				if (response.success) {
+					setRevenue(response.chartData);
+				}
+			} catch (error) {
+				if (error instanceof Error) toast.error(error.message);
+			} finally {
+				setIsRevenueLoading(false);
+			}
+		};
+		fetchRevenue();
+	}, [user?.id]);
+
+	return (
+		<div className="space-y-6">
+			<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+				<div>
+					<h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+					<p className="text-muted-foreground">Overview of your platform's performance and activity</p>
+				</div>
+				<div className="flex items-center gap-2">
+					<Button>Export Reports</Button>
+				</div>
+			</div>
+
+			{/* Stats Cards */}
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<StatsCard title="Total Users" value={stats.totalUsers} description="128 new this month" trend="up" percentage="12%" icon={Users} />
+				<StatsCard title="Total Mentors" value={stats.totalMentors} description="24 new this month" trend="down" percentage="8%" icon={UserCog} />
+				<StatsCard title="Sessions Conducted" value={stats.totalSessions} description="9 scheduled today" trend="up" percentage="23%" icon={Calendar} />
+				<StatsCard title="Total Revenue" value={stats.totalRevenue} description="$5,231 this month" trend="up" percentage="4%" icon={CreditCard} />
+			</div>
+
+			{/* Charts */}
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+				<Card className="lg:col-span-4">
+					<CardHeader className="flex flex-row items-center justify-between">
+						<div>
+							<CardTitle>Revenue Overview</CardTitle>
+							<CardDescription>Monthly revenue breakdown</CardDescription>
+						</div>
+					</CardHeader>
+					<CardContent>
+						<RevenueChart data={revenue} isLoading={isRevenueLoading} />
+					</CardContent>
+				</Card>
+				<Card className="lg:col-span-3">
+					<CardHeader>
+						<CardTitle>User Growth</CardTitle>
+						<CardDescription>New users over time</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<UserGrowthChart />
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* Top Mentors and Platform Metrics */}
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+				<PlatformMetrics />
+				<TopMentorsTable />
+			</div>
+
+			{/* Quick Links */}
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<QuickLinkCard title="Manage Users" description="View and manage all platform users" href="/admin/users" icon={Users} />
+				<QuickLinkCard title="Manage Mentors" description="Review and verify mentor applications" href="/admin/mentors" icon={UserCog} />
+				<QuickLinkCard title="View Sessions" description="Monitor all scheduled and completed sessions" href="/admin/sessions" icon={Calendar} />
+				<QuickLinkCard title="View Payments" description="Track all platform transactions" href="/admin/payments" icon={CreditCard} />
+			</div>
+		</div>
 	);
 }

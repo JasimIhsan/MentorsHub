@@ -1,4 +1,3 @@
-
 import { SessionPaymentStatusEnum } from "../../application/interfaces/enums/session.payment.status.enum";
 import { SessionStatusEnum } from "../../application/interfaces/enums/session.status.enums";
 import { SessionEntity } from "../entities/session.entity";
@@ -34,4 +33,5 @@ export interface ISessionRepository {
 	getWeeklyPerformance(mentorId: string, period: "month" | "sixMonths" | "year"): Promise<{ week: string; sessions: number; revenue: number }[]>;
 	findSessionCount(mentorId: string, status: SessionStatusEnum): Promise<number>;
 	findRevenueByMentor(mentorId: string): Promise<number>;
+	countSessions(): Promise<number>;
 }

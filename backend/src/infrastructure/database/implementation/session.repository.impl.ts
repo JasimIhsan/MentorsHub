@@ -65,7 +65,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			limit?: number;
 			search?: string;
 			status?: string;
-		},
+		}
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const { page = 1, limit = 10, search = "", status = "" } = options || {};
@@ -108,7 +108,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			filter?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
-		},
+		}
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const query: any = { mentorId };
@@ -190,7 +190,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 						"participants.$.paymentId": paymentId,
 						status: newStatus,
 					},
-				},
+				}
 			);
 		} catch (error) {
 			return handleExceptionError(error, "Error updating session payment");
@@ -337,6 +337,14 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			return result[0]?.totalRevenue || 0;
 		} catch (error) {
 			return handleExceptionError(error, "Error fetching revenue by mentor");
+		}
+	}
+
+	async countSessions(): Promise<number> {
+		try {
+			return await SessionModel.countDocuments({ status: SessionStatusEnum.COMPLETED });
+		} catch (error) {
+			return handleExceptionError(error, "Error counting sessions");
 		}
 	}
 }

@@ -1,3 +1,5 @@
+import { MentorRequestStatusEnum } from "../../../application/interfaces/enums/mentor.request.status.enum";
+import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { FindUsersParams, IUserRepository, PaginatedUsers } from "../../../domain/repositories/user.repository";
 import { handleExceptionError } from "../../utils/handle.exception.error";
@@ -126,6 +128,22 @@ export class UserRepositoryImpl implements IUserRepository {
 			return docs.map(mapDocToEntity);
 		} catch (error) {
 			return handleExceptionError(error, "Error finding users by IDs");
+		}
+	}
+
+	countMentors(): Promise<number> {
+		try {
+			return UserModel.countDocuments({ role: RoleEnum.MENTOR, mentorRequestStatus: MentorRequestStatusEnum.APPROVED });
+		} catch (error) {
+			return handleExceptionError(error, "Error counting mentors");
+		}
+	}
+
+	async countUsers(): Promise<number> {
+		try {
+			return await UserModel.countDocuments();
+		} catch (error) {
+			return handleExceptionError(error, "Error counting users");
 		}
 	}
 }
