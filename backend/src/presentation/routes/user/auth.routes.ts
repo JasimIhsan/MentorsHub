@@ -28,7 +28,7 @@ authRouter.post("/send-otp", (req, res, next) => sendOtpController.handle(req, r
 authRouter.post("/resend-otp", (req, res, next) => sendOtpController.handle(req, res, next));
 
 // Test Route
-authRouter.get("/test", verifyAccessToken, requireRole(RoleEnum.ADMIN, RoleEnum.USER), (req, res) => {
+authRouter.get("/test", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res) => {
 	res.json({ success: true, message: "Hello, authenticated user!" });
 });
 
