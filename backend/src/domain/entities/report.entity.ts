@@ -7,7 +7,7 @@ export interface ReportProps {
 	reportedId: string;
 	reason: string;
 	status: ReportStatusEnum;
-	adminNote: string;
+	adminNote?: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -35,7 +35,7 @@ export class ReportEntity {
 		return this.props.status;
 	}
 
-	get adminNote(): string {
+	get adminNote(): string | undefined {
 		return this.props.adminNote;
 	}
 

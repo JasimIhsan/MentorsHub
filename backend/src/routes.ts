@@ -21,6 +21,7 @@ import { gamificationRoute } from "./presentation/routes/user/gamification.route
 import { mentorDashboardRoutes } from "./presentation/routes/mentors/mentor.dashboard.routes";
 import { adminDashboardRouter } from "./presentation/routes/admin/admin.dashboard.routes";
 import { userReportRouter } from "./presentation/routes/user/report.routes";
+import { adminReportRouter } from "./presentation/routes/admin/admin.reports.routes";
 
 export function registerRoutes(app: Express) {
 	app.use("/api/user", authRouter);
@@ -40,6 +41,7 @@ export function registerRoutes(app: Express) {
 	app.use("/api/admin/wallet", adminWalletRouter);
 	app.use("/api/admin/gamification", adminGamificationTaskRouter);
 	app.use("/api/admin/dashboard", adminDashboardRouter);
+	app.use("/api/admin/reports", adminReportRouter)
 
 	app.use("/api/mentor", mentorRouter);
 	app.use("/api/mentor/sessions", mentorSessionRouter);
