@@ -7,6 +7,7 @@ export class GetReportsController {
 	constructor(private readonly _useCase: IGetReportsUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
+			console.log(`req.query : `, req.query);
 			const { search, status } = req.query;
 
 			const page = parseInt(req.query.page as string) || 1;
@@ -15,6 +16,7 @@ export class GetReportsController {
 			const reports = await this._useCase.execute(page, limit, search as string, status as string);
 			res.status(HttpStatusCode.OK).json({ success: true, reports: reports.reports, total: reports.totalCount });
 		} catch (error) {
+			console.error(`❌❌❌ Error in GetReportsController: ${error}`);
 			logger.error(`❌ Error in GetReportsController: ${error}`);
 			next(error);
 		}

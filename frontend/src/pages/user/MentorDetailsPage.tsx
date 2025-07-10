@@ -10,22 +10,25 @@ import { MentorAbout } from "@/components/user/mentor-details/MentorAbout";
 import { MentorAvailability } from "@/components/user/mentor-details/MentorAvailibility";
 import { MentorExperience } from "@/components/user/mentor-details/MentorExperience";
 import { MentorReviews } from "@/components/user/mentor-details/MentorReviews";
-import { ReviewDTO } from "../mentor/MentorReviewPage";
 import { MentorReviewModal } from "@/components/user/mentor-details/MentorReviewModal";
 import { MentorDetailsSkeleton } from "@/components/user/mentor-details/MentorDetailsSkeleton";
 import { MentorHeader } from "@/components/user/mentor-details/MentorHeader";
+import { IReviewDTO } from "@/interfaces/review.dto";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 // Main Mentor Details Page Component
 export function MentorDetailsPage() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [reviews, setReviews] = useState<ReviewDTO[]>([]);
+	const [reviews, setReviews] = useState<IReviewDTO[]>([]);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [selectedRating, setSelectedRating] = useState<number | null>(null);
-	const [reviewToEdit, setReviewToEdit] = useState<ReviewDTO | null>(null);
+	const [reviewToEdit, setReviewToEdit] = useState<IReviewDTO | null>(null);
 	const [selectedDay, setSelectedDay] = useState<WeekDay>(WeekDay.Monday);
 	const [activeTab, setActiveTab] = useState("about");
 	const { mentorId } = useParams<{ mentorId: string }>();
 	const { mentor, loading } = useMentor(mentorId as string);
+	const user = useSelector((state: RootState) => state.userAuth.user);
 
 	if (loading) {
 		return <MentorDetailsSkeleton />;
@@ -45,7 +48,7 @@ export function MentorDetailsPage() {
 	return (
 		<div className="w-full flex flex-col py-8 px-10 md:px-20 xl:px-25">
 			<div className="flex flex-col gap-8">
-				<MentorHeader mentor={mentor} />
+				<MentorHeader mentor={mentor} userId={user?.id!} />
 				<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
 					<div className="flex items-center justify-between md:justify-start">
 						<div className="block md:hidden">

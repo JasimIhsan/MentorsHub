@@ -9,5 +9,5 @@ export interface ICreateReportUseCase {
 }
 
 export interface IGetReportsUseCase {
-	execute(page: number, limit: number, search: string, status: string): Promise<{ reports: IReportDTO[]; totalCount: number }>
+	execute(page: number, limit: number, search?: string, status?: string): Promise<{ reports: IReportDTO[]; totalCount: number }>
 }

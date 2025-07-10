@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { ReportEntity } from "../../../domain/entities/report.entity";
 import { IReportRepository } from "../../../domain/repositories/report.repository";
 import { handleExceptionError } from "../../utils/handle.exception.error";
@@ -58,13 +59,12 @@ export class ReportRepositoryImpl implements IReportRepository {
 
 			const query: any = {};
 
-			if (searchTerm) query.title = new RegExp(searchTerm, "i");
+			if (searchTerm) query.reportedId = new mongoose.Types.ObjectId(searchTerm);
 			if (status) query.status = status;
-
 			const totalCount = await ReportModel.countDocuments(query);
 
 			const docs = await ReportModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
-			
+
 			return { tasks: docs.map((doc) => ReportEntity.fromDbDocument(doc)), totalCount };
 		} catch (error) {
 			return handleExceptionError(error, "Error finding all reports");
