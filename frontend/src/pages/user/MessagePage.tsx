@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, Plus, MessageCircle, ArrowLeft, MoreVertical, Paperclip, Phone, Send, Smile, Video, CheckCheck, Trash2, Info } from "lucide-react";
+import { Search, Plus, MessageCircle, ArrowLeft, MoreVertical, Paperclip, Phone, Send, Smile, Video, CheckCheck, Trash2, Info, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -263,7 +263,7 @@ export function MessagePage() {
 			id: "",
 			participants: [
 				{
-					id: mentor.id,
+					id: mentor.userId,
 					name: `${mentor.firstName} ${mentor.lastName}`,
 					avatar: mentor.avatar || "/placeholder.svg",
 					status: "offline",
@@ -289,6 +289,7 @@ export function MessagePage() {
 
 	const handleSendMessage = async (content: string) => {
 		if (!selectedChat || !socket || !user?.id) return;
+		console.log(`selectedChat : `, selectedChat);
 
 		const chatId = selectedChatId;
 
@@ -300,6 +301,8 @@ export function MessagePage() {
 			content,
 			type: "text",
 		};
+
+		console.log(`message : `, message);
 
 		try {
 			socket.emit("send-message", message);
@@ -323,7 +326,7 @@ export function MessagePage() {
 				<>
 					{!showChat ? (
 						<div className="w-full h-full">
-							<ChatSidebar chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading || statusSyncLoading} />
+							<ChatSidebar userId={user?.id!} chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading || statusSyncLoading} />
 						</div>
 					) : (
 						<div className="w-full h-full">
@@ -345,7 +348,7 @@ export function MessagePage() {
 			) : (
 				<>
 					<div className="w-1/3 min-w-[320px] max-w-[400px] h-full">
-						<ChatSidebar chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading || statusSyncLoading} />
+						<ChatSidebar userId={user?.id!} chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading || statusSyncLoading} />
 					</div>
 					<div className="flex-1 h-full">
 						<ChatWindow
@@ -368,6 +371,7 @@ export function MessagePage() {
 }
 
 interface ChatSidebarProps {
+	userId: string;
 	chats: Chat[];
 	selectedChatId?: string;
 	onChatSelect: (chatId: string) => void;
@@ -375,7 +379,7 @@ interface ChatSidebarProps {
 	loading: boolean;
 }
 
-export function ChatSidebar({ chats, selectedChatId, onChatSelect, onMentorSelect, loading }: ChatSidebarProps) {
+export function ChatSidebar({ userId, chats, selectedChatId, onChatSelect, onMentorSelect, loading }: ChatSidebarProps) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [mentors, setMentors] = useState<IMentorDTO[]>([]);
 	const [mentorLoading, setMentorLoading] = useState(false);
@@ -390,7 +394,7 @@ export function ChatSidebar({ chats, selectedChatId, onChatSelect, onMentorSelec
 		const fetchMentors = async () => {
 			setMentorLoading(true);
 			try {
-				const response = await fetchAllApprovedMentors();
+				const response = await fetchAllApprovedMentors(userId);
 				if (response.success) {
 					const approvedMentors = response.mentors;
 					const filteredMentors = approvedMentors.filter((mentor: IMentorDTO) => mentor.firstName.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) || mentor.lastName.toLowerCase().includes(debouncedSearchQuery.toLowerCase()));
@@ -455,9 +459,18 @@ export function ChatSidebar({ chats, selectedChatId, onChatSelect, onMentorSelec
 						<p className="text-sm">No conversations or mentors found</p>
 					</div>
 				) : (
+					// Map through chats to display them
 					chats.map((chat) => {
-						const displayName = chat.isGroupChat ? chat.groupName || "Group Chat" : `${chat.participants[0]?.firstName} ${chat.participants[0]?.lastName}`;
-						const displayAvatar = chat.isGroupChat ? "/group-placeholder.svg" : chat.participants[0]?.avatar || "/placeholder.svg";
+						// For non-group chats, find the participant who is not the current user
+						const otherParticipant = chat.isGroupChat ? null : chat.participants.find((participant) => participant.id !== userId);
+
+						// Set display name: use group name for group chats, otherwise use other participant's name
+						const displayName = chat.isGroupChat ? chat.groupName || "Group Chat" : otherParticipant ? `${otherParticipant.firstName} ${otherParticipant.lastName}` : "Unknown User"; // Fallback if no other participant is found
+
+						// Set display avatar: use group placeholder for group chats, otherwise use other participant's avatar
+						const displayAvatar = chat.isGroupChat ? "/group-placeholder.svg" : otherParticipant?.avatar || "/placeholder.svg";
+
+						// Check if this chat is selected
 						const isSelected = selectedChatId === chat.id;
 
 						return (
@@ -473,7 +486,7 @@ export function ChatSidebar({ chats, selectedChatId, onChatSelect, onMentorSelec
 												.toUpperCase()}
 										</AvatarFallback>
 									</Avatar>
-									{!chat.isGroupChat && chat.participants[0]?.status === "online" && <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"></div>}
+									{!chat.isGroupChat && otherParticipant?.status === "online" && <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"></div>}
 								</div>
 								<div className="ml-3 flex-1 min-w-0">
 									<div className="flex items-center justify-between">

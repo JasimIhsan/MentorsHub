@@ -26,7 +26,7 @@ export class WalletTopUpUseCase implements IWalletTopUpUsecase {
 		let wallet = await this.walletRepo.findWalletByUserId(userId);
 
 		if (!wallet) {
-			wallet = await this.walletRepo.createWallet(userId);
+			wallet = await this.walletRepo.createWallet(userId, RoleEnum.USER);
 		}
 
 		const updatedWallet = await this.walletRepo.updateBalance(userId, amount);

@@ -5,11 +5,11 @@ import { RoleEnum } from "../enums/role.enum";
 
 export interface IGetAllUsersUsecase {
 	execute(params: FindUsersParams): Promise<{
-	users: IUserDTO[];
-	totalUsers: number;
-	totalPages: number;
-	currentPage: number;
-}>;
+		users: IUserDTO[];
+		totalUsers: number;
+		totalPages: number;
+		currentPage: number;
+	}>;
 }
 export interface ICreateUserUsecase {
 	execute(firstName: string, lastName: string, email: string, role: RoleEnum): Promise<IUserDTO>;
@@ -24,5 +24,5 @@ export interface IDeleteUserUsecase {
 }
 
 export interface IUpdateUserUsecase {
-	execute(userId: string, data: Partial<IUserDTO>): Promise<UserEntity>;
+	execute(userId: string, data: Partial<IUserDTO>): Promise<IUserDTO>;
 }

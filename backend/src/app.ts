@@ -4,7 +4,7 @@ import { errorHandler } from "./presentation/middlewares/error.handler.middlewar
 import connectDB from "./infrastructure/database/models/config/database.config";
 import { registerRoutes } from "./routes";
 import { applyGlobalMiddlewares } from "./middlewares";
-import { startSessionExpiryJob } from "./infrastructure/schedulers/session.expiry.job";
+import { startSessionExpiryJob } from "./infrastructure/schdulers/session.expiry.job";
 
 export const app = express();
 
