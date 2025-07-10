@@ -1,7 +1,7 @@
 import { ReportStatusEnum } from "../../application/interfaces/enums/report.status.enum";
 import { IReportDocument } from "../../infrastructure/database/models/report/report.model";
 
-interface ReportProps {
+export interface ReportProps {
 	id: string;
 	reporterId: string;
 	reportedId: string;
@@ -45,6 +45,19 @@ export class ReportEntity {
 
 	get updatedAt(): Date {
 		return this.props.updatedAt;
+	}
+
+	static createNew(input: Omit<ReportProps, "id" | "status" | "adminNote" | "createdAt" | "updatedAt">): ReportEntity {
+		return new ReportEntity({
+			id: "", // will be handled in DB
+			reporterId: input.reporterId,
+			reportedId: input.reportedId,
+			reason: input.reason,
+			status: ReportStatusEnum.PENDING,
+			adminNote: "",
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		});
 	}
 
 	static fromDbDocument = (doc: IReportDocument): ReportEntity => {

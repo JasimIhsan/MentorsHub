@@ -37,6 +37,7 @@ import { IHashService } from "../application/interfaces/services/hash.service";
 import { HashServiceImpl } from "./services/hash-serveice/hash.service";
 import { KmsServiceImpl } from "./services/kms-service/kms.service";
 import { IKmsService } from "../application/interfaces/services/kms.service";
+import { ReportRepositoryImpl } from "./database/implementation/report.repository.impl";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -53,6 +54,7 @@ export const gamificationTaskRepository = new GamificationTaskRepositoryImpl();
 export const userTaskprogressRepository = new UserTaskProgressRepositoryImpl();
 export const actionTypeRepository = new ActionTypeRepositoryImpl();
 export const userProgressRepository = new UserProgressRepositoryImpl();
+export const reportRepository = new ReportRepositoryImpl();
 
 // Initialize services implementation
 export const hashService: IHashService = new HashServiceImpl();
