@@ -1,26 +1,26 @@
 import axiosInstance from "@/api/config/api.config";
 import { DialogHeader, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { ReviewDTO } from "@/pages/mentor/MentorReviewPage";
 import { RootState } from "@/store/store";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@radix-ui/react-dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
+import { IReviewDTO } from "@/interfaces/review.dto";
 
 // Define interface for modal props
 interface MentorReviewModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	setReviews: React.Dispatch<React.SetStateAction<ReviewDTO[]>>;
+	setReviews: React.Dispatch<React.SetStateAction<IReviewDTO[]>>;
 	mentor: {
 		id: string;
 		firstName: string;
 		lastName: string;
 	};
-	reviewToEdit?: ReviewDTO | null;
+	reviewToEdit?: IReviewDTO | null;
 }
 
 // Mentor Review Modal Component
