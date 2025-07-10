@@ -27,11 +27,11 @@ export interface ISessionRepository {
 	updateStatus(sessionId: string, status: SessionStatusEnum, reason?: string): Promise<SessionEntity>;
 	markPayment(sessionId: string, userId: string, paymentStatus: SessionPaymentStatusEnum, paymentId: string, newStatus: SessionStatusEnum): Promise<void>;
 	getAllByMentor(mentorId: string): Promise<SessionEntity[]>;
-	getExpirableSessions(): Promise<SessionEntity[]>;
 	deleteById(sessionId: string): Promise<void>;
 	findByDate(mentorId: string, date: Date): Promise<SessionEntity[]>;
 	getWeeklyPerformance(mentorId: string, period: "month" | "sixMonths" | "year"): Promise<{ week: string; sessions: number; revenue: number }[]>;
 	findSessionCount(mentorId: string, status: SessionStatusEnum): Promise<number>;
 	findRevenueByMentor(mentorId: string): Promise<number>;
 	countSessions(): Promise<number>;
+	getExpirableSessions(): Promise<SessionEntity[]>;
 }

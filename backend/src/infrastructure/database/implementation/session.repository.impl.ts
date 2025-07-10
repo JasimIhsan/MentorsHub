@@ -65,7 +65,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			limit?: number;
 			search?: string;
 			status?: string;
-		},
+		}
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const { page = 1, limit = 10, search = "", status = "" } = options || {};
@@ -108,7 +108,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			filter?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
-		},
+		}
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const query: any = { mentorId };
@@ -190,7 +190,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 						"participants.$.paymentId": paymentId,
 						status: newStatus,
 					},
-				},
+				}
 			);
 		} catch (error) {
 			return handleExceptionError(error, "Error updating session payment");
@@ -207,17 +207,24 @@ export class SessionRepositoryImpl implements ISessionRepository {
 	}
 
 	async getExpirableSessions(): Promise<SessionEntity[]> {
-		try {
-			const sessions = await SessionModel.find({
-				status: { $in: [SessionStatusEnum.APPROVED, SessionStatusEnum.PENDING, SessionStatusEnum.UPCOMING] },
-			})
-				.populate("mentorId", "firstName lastName avatar")
-				.populate("participants.userId", "firstName lastName avatar");
+		const now = new Date();
 
-			return sessions.map(SessionEntity.fromDB);
-		} catch (error) {
-			return handleExceptionError(error, "Error getting sessions to expire");
-		}
+		const sessions = await SessionModel.find({
+			status: { $in: [SessionStatusEnum.APPROVED, SessionStatusEnum.PENDING, SessionStatusEnum.UPCOMING] },
+		}).lean();
+
+		const expirable = sessions.filter((session) => {
+			const [hours, minutes] = session.time.split(":").map(Number);
+			const sessionStart = new Date(session.date);
+			sessionStart.setHours(hours);
+			sessionStart.setMinutes(minutes);
+			sessionStart.setSeconds(0);
+
+			const sessionEnd = new Date(sessionStart.getTime() + session.hours * 60 * 60 * 1000);
+			return sessionEnd < now;
+		});
+
+		return expirable.map((doc) => SessionEntity.fromDB(doc));
 	}
 
 	async deleteById(sessionId: string): Promise<void> {
