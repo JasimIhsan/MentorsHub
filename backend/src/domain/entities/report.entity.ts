@@ -73,6 +73,10 @@ export class ReportEntity {
 		});
 	};
 
+	updateReport(reportEntity: Partial<ReportEntity>): ReportEntity {
+		return new ReportEntity({ ...this.props, ...reportEntity });
+	}
+
 	toObject(): ReportProps {
 		return { ...this.props };
 	}

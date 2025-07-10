@@ -3,6 +3,7 @@ import { ReportEntity } from "../../../domain/entities/report.entity";
 import { IReportRepository } from "../../../domain/repositories/report.repository";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 import { ReportModel } from "../models/report/report.model";
+import { ReportStatusEnum } from "../../../application/interfaces/enums/report.status.enum";
 
 export class ReportRepositoryImpl implements IReportRepository {
 	async create(report: ReportEntity): Promise<ReportEntity> {
@@ -68,6 +69,16 @@ export class ReportRepositoryImpl implements IReportRepository {
 			return { tasks: docs.map((doc) => ReportEntity.fromDbDocument(doc)), totalCount };
 		} catch (error) {
 			return handleExceptionError(error, "Error finding all reports");
+		}
+	}
+
+	async updateReportsByReportedId(reportedId: string, status: string): Promise<number> {
+		try {
+			const result = await ReportModel.updateMany({ reportedId, status: ReportStatusEnum.PENDING }, { $set: { status } });
+
+			return result.modifiedCount;
+		} catch (error) {
+			return handleExceptionError(error, "Error updating many reports by reported ID");
 		}
 	}
 }

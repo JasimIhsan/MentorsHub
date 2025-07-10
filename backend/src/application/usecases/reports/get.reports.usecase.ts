@@ -15,11 +15,8 @@ export class GetReportsUseCase implements IGetReportsUseCase {
 			usersIds.add(task.reporterId);
 		});
 
-		console.log(`usersIds : `, usersIds);
-
 		const users = await this._userRepo.findUsersByIds([...usersIds]);
 		const usersMap = new Map(users.map((u) => [u.id!, u]));
-		console.log('usersMap: ', usersMap);
 
 		const reportsDTO = reportEntities.tasks.map((task) => mapToReportDTO(task, usersMap.get(task.reporterId)!, usersMap.get(task.reportedId)!));
 

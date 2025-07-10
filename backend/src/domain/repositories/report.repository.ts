@@ -7,4 +7,5 @@ export interface IReportRepository {
 	deleteById(id: string): Promise<void>;
 	update(report: ReportEntity): Promise<ReportEntity>;
 	updateStatus(reportId: string, status: string): Promise<ReportEntity>;
+	updateReportsByReportedId(reportedId: string, status: string): Promise<number>;
 }

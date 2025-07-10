@@ -41,7 +41,7 @@ export function registerRoutes(app: Express) {
 	app.use("/api/admin/wallet", adminWalletRouter);
 	app.use("/api/admin/gamification", adminGamificationTaskRouter);
 	app.use("/api/admin/dashboard", adminDashboardRouter);
-	app.use("/api/admin/reports", adminReportRouter)
+	app.use("/api/admin/reports", adminReportRouter);
 
 	app.use("/api/mentor", mentorRouter);
 	app.use("/api/mentor/sessions", mentorSessionRouter);

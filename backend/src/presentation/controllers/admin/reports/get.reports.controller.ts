@@ -7,7 +7,6 @@ export class GetReportsController {
 	constructor(private readonly _useCase: IGetReportsUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
-			console.log(`req.query : `, req.query);
 			const { search, status } = req.query;
 
 			const page = parseInt(req.query.page as string) || 1;

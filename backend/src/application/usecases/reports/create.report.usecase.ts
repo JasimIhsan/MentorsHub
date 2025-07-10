@@ -1,4 +1,4 @@
-import { ReportEntity, ReportProps } from "../../../domain/entities/report.entity";
+import { ReportEntity } from "../../../domain/entities/report.entity";
 import { IReportRepository } from "../../../domain/repositories/report.repository";
 import { ICreateReportUseCase, ReportInput } from "../../interfaces/reports";
 

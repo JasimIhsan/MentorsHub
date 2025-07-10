@@ -19,3 +19,12 @@ export const fetchReportsAdminAPI = async (search: string, status: string, page:
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const updateReportStatusAPI = async (reportId: string, status: string, adminNote?: string) => {
+	try {
+		const response = await axiosInstance.put(`/admin/reports/${reportId}/status`, { status, adminNote });
+		return response.data;
+	} catch (error: any) {
+		throw new Error(error.response.data.message);
+	}
+};

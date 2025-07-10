@@ -4,10 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from "@/components/ui/pagination";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { fetchReportsAdminAPI } from "@/api/report.api.service";
+import { fetchReportsAdminAPI, updateReportStatusAPI } from "@/api/report.api.service";
+import { PaginationControls } from "@/components/custom/PaginationControls";
 
 // Interface for report data
 interface IReportDTO {
@@ -23,6 +24,7 @@ interface IReportDTO {
 		firstName: string;
 		lastName: string;
 		avatar?: string;
+		status: "blocked" | "unblocked";
 	};
 	reason: string;
 	status: "pending" | "dismissed" | "action_taken";
@@ -35,11 +37,14 @@ export function AdminReportsPage() {
 	const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 	const [isReasonDialogOpen, setIsReasonDialogOpen] = useState(false);
 	const [selectedReason, setSelectedReason] = useState<string | null>(null);
+	const [isDismissDialogOpen, setIsDismissDialogOpen] = useState(false);
+	const [dismissReportId, setDismissReportId] = useState<string | null>(null);
+	const [adminNote, setAdminNote] = useState("");
 	const [reports, setReports] = useState<IReportDTO[]>([]);
 	const [reportedUsers, setReportedUsers] = useState<{ id: string; name: string }[]>([]);
 	const [page, setPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
-	const reportsPerPage = 5;
+	const reportsPerPage = 10;
 
 	// Character limit for reason truncation
 	const REASON_CHAR_LIMIT = 25;
@@ -76,7 +81,48 @@ export function AdminReportsPage() {
 			}
 		};
 		fetchReports();
-	}, [selectedUserId, selectedStatus, page, reportsPerPage]); // Added page and reportsPerPage to dependencies
+	}, [selectedUserId, selectedStatus, page, reportsPerPage]);
+
+	const handleBlockUser = async (reportId: string) => {
+		try {
+			const response = await updateReportStatusAPI(reportId, "block");
+			if (response.success && response.report) {
+				toast.success("User blocked and reports updated!");
+
+				const updated = response.report;
+				const reportedUserId = updated.reported.id;
+
+				setReports((prevReports) => prevReports.map((report) => (report.reported.id === reportedUserId ? { ...report, status: "action_taken" } : report)));
+			} else {
+				toast.error("Failed to block user.");
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				toast.error(error.message);
+			}
+		}
+	};
+
+	const handleDismissReport = async () => {
+		if (!dismissReportId) return;
+		try {
+			const response = await updateReportStatusAPI(dismissReportId, "dismiss", adminNote);
+			if (response.success) {
+				toast.success("Report dismissed successfully!");
+				const updated = response.report;
+				setReports((prevReports) => prevReports.map((report) => (report.id === updated.id ? updated : report)));
+				setIsDismissDialogOpen(false);
+				setAdminNote("");
+				setDismissReportId(null);
+			} else {
+				toast.error("Failed to dismiss report.");
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				toast.error(error.message);
+			}
+		}
+	};
 
 	// Badge variant based on status
 	const getBadgeVariant = (status: string) => {
@@ -98,6 +144,12 @@ export function AdminReportsPage() {
 		setIsReasonDialogOpen(true);
 	};
 
+	// Handle opening the dismiss dialog
+	const handleOpenDismissDialog = (reportId: string) => {
+		setDismissReportId(reportId);
+		setIsDismissDialogOpen(true);
+	};
+
 	// Handle page change
 	const handlePageChange = (newPage: number) => {
 		if (newPage >= 1 && newPage <= totalPages) {
@@ -106,9 +158,13 @@ export function AdminReportsPage() {
 	};
 
 	return (
-		<div className="p-6 max-w-7xl mx-auto">
+		<div className="max-w-7xl mx-auto">
 			<div className="flex justify-between items-center mb-6">
-				<h1 className="text-2xl font-bold">Reports Management</h1>
+				<div>
+					<h1 className="text-2xl font-bold">Reports Management</h1>
+					<p className="text-sm text-muted-foreground">Review and manage reports against users or mentors. Take appropriate actions based on the report details.</p>
+				</div>
+
 				<div className="flex items-center gap-4">
 					<Select
 						value={selectedUserId || "all"}
@@ -146,7 +202,6 @@ export function AdminReportsPage() {
 					</Select>
 				</div>
 			</div>
-
 			<Table>
 				<TableHeader>
 					<TableRow>
@@ -210,10 +265,10 @@ export function AdminReportsPage() {
 							<TableCell>
 								{report.status === "pending" && (
 									<div className="flex gap-2">
-										<Button variant="destructive" size="sm" onClick={() => console.log(`Block user ${report.reported.id}`)}>
+										<Button variant="destructive" size="sm" onClick={() => handleBlockUser(report.id)}>
 											Block
 										</Button>
-										<Button variant="outline" size="sm" onClick={() => console.log(`Dismiss report ${report.id}`)}>
+										<Button variant="outline" size="sm" onClick={() => handleOpenDismissDialog(report.id)}>
 											Dismiss
 										</Button>
 									</div>
@@ -223,34 +278,36 @@ export function AdminReportsPage() {
 					))}
 				</TableBody>
 			</Table>
-
-			{/* Pagination Controls */}
-			<div className="mt-4">
-				<Pagination>
-					<PaginationContent>
-						<PaginationItem>
-							<PaginationPrevious onClick={() => handlePageChange(page - 1)} className={page === 1 ? "pointer-events-none opacity-50" : ""} />
-						</PaginationItem>
-						{Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-							<PaginationItem key={pageNum}>
-								<PaginationLink onClick={() => handlePageChange(pageNum)} isActive={page === pageNum}>
-									{pageNum}
-								</PaginationLink>
-							</PaginationItem>
-						))}
-						<PaginationItem>
-							<PaginationNext onClick={() => handlePageChange(page + 1)} className={page === totalPages ? "pointer-events-none opacity-50" : ""} />
-						</PaginationItem>
-					</PaginationContent>
-				</Pagination>
+			<div className="my-4">
+				<PaginationControls totalPages={totalPages} currentPage={page} onPageChange={handlePageChange} />
 			</div>
-
 			<Dialog open={isReasonDialogOpen} onOpenChange={setIsReasonDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Full Report Reason</DialogTitle>
 						<DialogDescription>{selectedReason || "No reason selected"}</DialogDescription>
 					</DialogHeader>
+				</DialogContent>
+			</Dialog>
+			<Dialog open={isDismissDialogOpen} onOpenChange={setIsDismissDialogOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Dismiss Report</DialogTitle>
+						<DialogDescription>Please provide a note explaining why this report is being dismissed.</DialogDescription>
+					</DialogHeader>
+					<Input value={adminNote} onChange={(e) => setAdminNote(e.target.value)} placeholder="Enter admin note" className="mt-2" />
+					<DialogFooter className="mt-4">
+						<Button
+							variant="outline"
+							onClick={() => {
+								setIsDismissDialogOpen(false);
+								setAdminNote("");
+								setDismissReportId(null);
+							}}>
+							Cancel
+						</Button>
+						<Button onClick={handleDismissReport}>Confirm Dismiss</Button>
+					</DialogFooter>
 				</DialogContent>
 			</Dialog>
 		</div>
