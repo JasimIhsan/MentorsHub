@@ -104,7 +104,7 @@ export function MentorDetailsPage() {
 						setIsModalOpen(false);
 						setReviewToEdit(null);
 					}}
-					mentor={{ id: mentor.id, firstName: mentor.firstName, lastName: mentor.lastName }}
+					mentor={{ id: mentor.userId, firstName: mentor.firstName, lastName: mentor.lastName }}
 					setReviews={setReviews}
 					reviewToEdit={reviewToEdit}
 				/>

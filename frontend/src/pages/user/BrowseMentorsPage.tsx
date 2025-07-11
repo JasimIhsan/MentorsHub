@@ -83,6 +83,7 @@ export default function BrowseMentorsPage() {
 
 	// Calculate total pages
 	const totalPages = Math.ceil(total / mentorsPerPage);
+	console.log('totalPages: ', totalPages);
 
 	return (
 		<div className="min-h-screen bg-background w-full px-10 md:px-20 xl:px-25 justify-center">

@@ -40,7 +40,9 @@ export const BrowseMentorsMentorList = ({ mentors, isFetching, total, totalPages
 						<BrowseMentorsCard key={mentor.id} mentor={mentor} />
 					))}
 				</div>
-				<PaginationControls totalPages={totalPages} currentPage={currentPage} onPageChange={handlePageChange} maxPagesToShow={mentorsPerPage} />
+				<div className="mt-8">
+					<PaginationControls totalPages={totalPages} currentPage={currentPage} onPageChange={handlePageChange} maxPagesToShow={mentorsPerPage} />
+				</div>
 			</>
 		)}
 	</div>
