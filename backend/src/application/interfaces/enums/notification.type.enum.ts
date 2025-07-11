@@ -3,4 +3,5 @@ export enum NotificationTypeEnum {
 	WARNING="warning",
 	SUCCESS="success",
 	ERROR="error",
+	REMINDER="reminder",
 }

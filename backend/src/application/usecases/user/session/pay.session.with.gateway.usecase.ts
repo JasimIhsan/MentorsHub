@@ -12,57 +12,60 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository) {}
 
 	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: SessionPaymentStatusEnum, status: SessionStatusEnum): Promise<void> {
-		// Get session
+		// 1. Get session
 		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 
-		// Validate date and time (not expired)
+		// 2. Validate session datetime
 		const sessionDate = new Date(session.date);
 		const [hour, minute] = session.time.split(":").map(Number);
 		sessionDate.setHours(hour);
 		sessionDate.setMinutes(minute);
-
 		if (sessionDate.getTime() < Date.now()) {
 			throw new Error("Session is already expired. You cannot make payment.");
 		}
 
-		// Find the participant
+		// 3. Get participant
 		const participant = session.participants.find((p) => p.user.id === userId);
 		if (!participant) throw new Error("Unauthorized");
-		if (participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) throw new Error("Already paid for this session");
+		if (participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) {
+			throw new Error("Already paid for this session");
+		}
 
-		// Calculate payment distribution
-		const sessionFee = session.fee;
+		// 4. Get mentor & platform
 		const mentorId = session.mentor.id;
+		const platformWallet = await this.walletRepo.platformWallet();
+
+		// 5. Total amount user paid (stored in session.fee)
+		const totalPaid = session.totalAmount; // 💰 this includes platform fee + mentor earning
 
 		const platformFeeFixed = 40;
-		const platformCommission = sessionFee * 0.15;
+		const platformCommission = session.fee * 0.15;
 		const totalPlatformFee = platformFeeFixed + platformCommission;
-		const mentorEarning = sessionFee - totalPlatformFee;
 
-		// Credit mentor
-		await this.walletRepo.updateBalance(mentorId, mentorEarning, TransactionsTypeEnum.CREDIT);
+		// 6. Calculate mentor earning
+		const mentorEarning = Math.max(totalPaid - totalPlatformFee, 0);
 
-		// Credit platform
-		const platformWallet = await this.walletRepo.platformWallet();
+		// 7. Credit Mentor (if any)
+		if (mentorEarning > 0) {
+			await this.walletRepo.updateBalance(mentorId, mentorEarning, TransactionsTypeEnum.CREDIT);
+			await this.walletRepo.createTransaction({
+				fromUserId: userId,
+				toUserId: mentorId,
+				fromRole: RoleEnum.USER,
+				toRole: RoleEnum.MENTOR,
+				amount: mentorEarning,
+				type: TransactionsTypeEnum.CREDIT,
+				purpose: TransactionPurposeEnum.SESSION_FEE,
+				description: `Mentor earning for session ${session.topic}`,
+				sessionId,
+			});
+		}
+
+		// 8. Credit platform (fixed + commission)
 		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, TransactionsTypeEnum.CREDIT, RoleEnum.ADMIN);
 
-		// Create transactions
-
-		//  Mentor receives their share
-		await this.walletRepo.createTransaction({
-			fromUserId: userId,
-			toUserId: mentorId,
-			fromRole: RoleEnum.USER,
-			toRole: RoleEnum.MENTOR,
-			amount: mentorEarning,
-			type: TransactionsTypeEnum.CREDIT,
-			purpose: TransactionPurposeEnum.SESSION_FEE,
-			description: `Mentor earning for session ${session.topic}`,
-			sessionId,
-		});
-
-		//  Admin receives fixed ₹40
+		// a. Fixed ₹40
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: platformWallet.userId,
@@ -75,20 +78,22 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 			sessionId,
 		});
 
-		//  Admin receives 15% commission
-		await this.walletRepo.createTransaction({
-			fromUserId: userId,
-			toUserId: platformWallet.userId,
-			fromRole: RoleEnum.USER,
-			toRole: RoleEnum.ADMIN,
-			amount: platformCommission,
-			type: TransactionsTypeEnum.CREDIT,
-			purpose: TransactionPurposeEnum.PLATFORM_FEE,
-			description: `15% commission from session ${session.topic}`,
-			sessionId,
-		});
+		// b. 15% Commission
+		if(platformCommission > 0) {
+			await this.walletRepo.createTransaction({
+				fromUserId: userId,
+				toUserId: platformWallet.userId,
+				fromRole: RoleEnum.USER,
+				toRole: RoleEnum.ADMIN,
+				amount: platformCommission,
+				type: TransactionsTypeEnum.CREDIT,
+				purpose: TransactionPurposeEnum.PLATFORM_COMMISSION,
+				description: `Commission from session ${session.topic}`,
+				sessionId,
+			});
+		}
 
-		// Update session payment details
+		// 9. Mark session payment
 		await this.sessionRepo.markPayment(sessionId, userId, paymentStatus, paymentId, status);
 	}
 }
