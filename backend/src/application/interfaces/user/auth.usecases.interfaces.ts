@@ -18,7 +18,7 @@ export interface ISignInUseCase {
 }
 
 export interface ISignupUseCase {
-	execute(otp: string, firstName: string, lastName: string, email: string, password: string): Promise<{ user: UserEntity; refreshToken: string; accessToken: string }>;
+	execute(otp: string, firstName: string, lastName: string, email: string, password: string): Promise<{ user: IUserDTO; refreshToken: string; accessToken: string }>;
 }
 
 export interface ISendOtpUsecase {
@@ -30,7 +30,7 @@ export interface IVerifyOtpUsecase {
 }
 
 export interface IGoogleAuthUsecase {
-	execute(googleToken: string): Promise<{ user: UserEntity; refreshToken: string; accessToken: string }>;
+	execute(googleToken: string): Promise<{ user: IUserDTO; refreshToken: string; accessToken: string }>;
 }
 
 export interface IRefreshTokenUsecase {

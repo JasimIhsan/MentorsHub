@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
 import { format } from "date-fns";
-import { fetchTransactionsAPI, fetchWalletDataAPI, topupWalletAPI, withdrawWalletAPI } from "@/api/wallet.api.service";
+import { createWalletAPI, fetchTransactionsAPI, fetchWalletDataAPI, topupWalletAPI, withdrawWalletAPI } from "@/api/wallet.api.service";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useMotionValue } from "framer-motion";
@@ -121,13 +121,11 @@ export function WalletPage() {
 	const handleCreateWallet = async () => {
 		try {
 			setIsLoadingWallet(true);
-			setNotification({ type: "success", message: "Wallet creation request submitted successfully!" });
-			setTimeout(() => {
+			const response = await createWalletAPI(user?.id!, user?.role!);
+			if (response.success) {
 				setIsWalletCreated(true);
-				setWalletBalance(0);
-				setNotification({ type: "success", message: "Wallet created successfully!" });
-				setTimeout(() => setNotification(null), 3000);
-			}, 2000);
+				setWalletBalance(response.wallet.balance);
+			}
 		} catch (error: any) {
 			setNotification({ type: "error", message: error.message || "Failed to create wallet" });
 			setTimeout(() => setNotification(null), 3000);

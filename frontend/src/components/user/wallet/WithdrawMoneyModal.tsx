@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export interface AddMoneyModalProps {
 	isOpen: boolean;

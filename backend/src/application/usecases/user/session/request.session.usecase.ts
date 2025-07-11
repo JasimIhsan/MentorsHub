@@ -22,7 +22,7 @@ export interface SessionRequestInput {
 	totalAmount?: number;
 }
 
-export class RequestSessionUseCase implements IRequestSessionUseCase{
+export class RequestSessionUseCase implements IRequestSessionUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly mentorRepo: IMentorProfileRepository, private readonly getAvailability: IGetAvailabilityUseCase) {}
 
 	async execute(dto: SessionRequestInput): Promise<ISessionUserDTO> {
@@ -39,12 +39,12 @@ export class RequestSessionUseCase implements IRequestSessionUseCase{
 		}
 
 		/* Build participants array with the *new* shape */
-		const participantPayment: SessionPaymentStatusEnum = dto.pricing === "free" ? SessionPaymentStatusEnum.COMPLETED : SessionPaymentStatusEnum.PENDING;
+		// const participantPayment: SessionPaymentStatusEnum = dto.pricing === "free" ? SessionPaymentStatusEnum.COMPLETED : SessionPaymentStatusEnum.PENDING;
 
 		const participants: SessionParticipantEntity[] = [
 			{
 				user: { id: dto.userId }, // PersonEntity with just an id for now
-				paymentStatus: participantPayment,
+				paymentStatus: SessionPaymentStatusEnum.PENDING,
 				paymentId: undefined,
 			},
 		];

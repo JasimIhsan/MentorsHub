@@ -73,3 +73,13 @@ export const withdrawPlatformWalletAPI = async (userId: string, amount: number) 
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const createWalletAPI = async (userId: string, role: string) => {
+	try {
+		const response = await axiosInstance.post(`/user/wallet/create`, { userId, role }); 
+		return response.data;
+	} catch (error: any) {
+		console.error("Error in createWalletAPI:", error);
+		throw new Error(error.response.data.message);
+	}
+};

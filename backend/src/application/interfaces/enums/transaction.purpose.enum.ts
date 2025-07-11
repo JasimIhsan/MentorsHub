@@ -4,4 +4,5 @@ export enum TransactionPurposeEnum {
 	REFUND = "refund",
 	WITHDRAWAL = "withdrawal",
 	WALLET_TOPUP = "wallet_topup",
+	PLATFORM_COMMISSION = "platform_commission",
 }

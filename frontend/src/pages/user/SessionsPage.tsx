@@ -94,9 +94,6 @@ export function SessionsPage() {
 				}
 				setSessions(sessionsResponse.sessions);
 				setTotalPages(Math.ceil(sessionsResponse.total / itemsPerPage));
-				// Fetch wallet balance
-				const walletResponse = await axiosInstance.get(`/user/wallet/${user.id}`);
-				setWalletBalance(walletResponse.data.wallet.balance || 0);
 			} catch (err: any) {
 				const message = err.response?.data?.message || "Failed to load data.";
 				setError(message);
@@ -107,6 +104,20 @@ export function SessionsPage() {
 		};
 		fetchData();
 	}, [user?.id, currentPage, selectedCategory]);
+
+	useEffect(() => {
+		const fetchWalletBalance = async () => {
+			try {
+				const response = await axiosInstance.get(`/user/wallet/${user?.id}`);
+				if (response.data.success) {
+					setWalletBalance(response.data.wallet.balance || 0);
+				}
+			} catch (error) {
+				setWalletBalance(0);
+			}
+		};
+		fetchWalletBalance();
+	}, [user?.id]);
 
 	// Handle session cancellation
 	const handleCancelSession = async () => {

@@ -7,6 +7,7 @@ import { IHashService } from "../../../interfaces/services/hash.service";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
 import { UserStatusEnums } from "../../../interfaces/enums/user.status.enums";
+import { mapToUserDTO } from "../../../dtos/user.dtos";
 
 interface GoogleUserData {
 	email: string;
@@ -58,7 +59,7 @@ export class GoogleAuthUsecase implements IGoogleAuthUsecase {
 			const accessToken = this.tokenService.generateAccessToken(user.id!);
 			const refreshToken = this.tokenService.generateRefreshToken(user.id!);
 
-			return { user, accessToken, refreshToken };
+			return { user: mapToUserDTO(user), accessToken, refreshToken };
 		} catch (err) {
 			console.error("Google authentication error:", err);
 			throw new Error(err instanceof Error ? err.message : "An error occurred during Google authentication");

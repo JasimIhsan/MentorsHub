@@ -99,8 +99,10 @@ export const VideoCallPage = () => {
 
 		const determineRole = async (): Promise<"mentor" | "user" | null> => {
 			try {
-				const response = await axiosInstance.get(`/user/sessions/${sessionId}`);
+				const response = await axiosInstance.get(`/user/sessions/session/${sessionId}`);
+				console.log('response: ', response);
 				const session = response.data.session;
+				console.log('session: ', session);
 				if (session.mentorId._id === user.id) {
 					setRole("mentor");
 					return "mentor";

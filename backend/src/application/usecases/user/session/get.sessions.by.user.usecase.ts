@@ -15,7 +15,7 @@ export class GetSessionsByUserUseCase implements IGetSessionsByUserUseCase {
 			limit?: number;
 			search?: string;
 			status?: string;
-		},
+		}
 	): Promise<{ sessions: ISessionUserDTO[]; total: number }> {
 		if (!userId) {
 			throw new Error(CommonStringMessage.USER_NOT_FOUND);

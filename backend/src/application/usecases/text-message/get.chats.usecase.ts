@@ -6,11 +6,7 @@ import { IChatDTO, mapToChatDTO } from "../../dtos/chats.dto";
 import { IGetUserChatsUseCase } from "../../interfaces/messages";
 
 export class GetUserChatsUseCase implements IGetUserChatsUseCase {
-	constructor(
-		private readonly chatRepository: IChatRepository,
-		private readonly userRepository: IUserRepository,
-		private readonly messageRepository: IMessageRepository,
-	) {}
+	constructor(private readonly chatRepository: IChatRepository, private readonly userRepository: IUserRepository, private readonly messageRepository: IMessageRepository) {}
 
 	async execute(userId: string): Promise<IChatDTO[]> {
 		const chats = await this.chatRepository.findByUser(userId);
@@ -26,13 +22,10 @@ export class GetUserChatsUseCase implements IGetUserChatsUseCase {
 		});
 
 		// Fetch all needed users and messages at once
-		const [users, messages] = await Promise.all([
-			this.userRepository.findUsersByIds(Array.from(userIds)),
-			this.messageRepository.findByIds(Array.from(messageIds)),
-		]);
+		const [users, messages] = await Promise.all([this.userRepository.findUsersByIds([...userIds]), this.messageRepository.findByIds([...messageIds])]);
 
 		// Map for fast access
-		const userMap = new Map(users.map((u) => [u.id, u]));
+		const userMap = new Map(users.map((u) => [u.id!, u]));
 		const messageMap = new Map(messages.map((m) => [m.id, m]));
 
 		// Build DTOs

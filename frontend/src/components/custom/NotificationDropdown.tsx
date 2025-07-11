@@ -69,9 +69,9 @@ export const NotificationDropdown: React.FC = () => {
 	const user = useSelector((state: RootState) => state.userAuth.user);
 	const { notifications, markAsRead, markAllAsRead, unreadCount, isLoading } = useNotifications(user?.id || "");
 
-	const handleViewAll = () => {
-		setIsOpen(false);
-	};
+	// const handleViewAll = () => {
+	// 	setIsOpen(false);
+	// };
 
 	return (
 		<DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -101,10 +101,10 @@ export const NotificationDropdown: React.FC = () => {
 						<div className="p-3 text-center text-sm text-muted-foreground">No notifications</div>
 					)}
 				</div>
-				<DropdownMenuSeparator />
-				<Button asChild className="w-full" variant="ghost" onClick={handleViewAll}>
+				{/* <DropdownMenuSeparator /> */}
+				{/* <Button asChild className="w-full" variant="ghost" onClick={handleViewAll}>
 					<Link to="/notifications">View all notifications</Link>
-				</Button>
+				</Button> */}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

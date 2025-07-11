@@ -73,7 +73,7 @@ export function mapToUserSessionDTO(session: SessionEntity, userId: string): ISe
 		status: session.status,
 		pricing: session.pricing,
 		rejectReason: session.rejectReason,
-		totalAmount: session.fee,
+		totalAmount: session.totalAmount,
 		createdAt: session.createdAt.toISOString(),
 	};
 }

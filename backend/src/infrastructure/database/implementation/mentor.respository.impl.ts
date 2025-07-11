@@ -96,44 +96,45 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			priceMax?: number;
 			interests?: string[];
 		},
-		browserId: string,
+		browserId: string
 	): Promise<{ mentors: MentorEntity[]; total: number }> {
 		try {
 			const page = params.page ?? 1;
 			const limit = params.limit ?? 12;
 			const skip = (page - 1) * limit;
 
-			// Build the aggregation pipeline
 			const pipeline: any[] = [];
 
-			// Stage 1: Price filter on MentorProfile
-			const priceFilter: any = {};
-			if (params.priceMin !== undefined) priceFilter.$gte = params.priceMin;
-			if (params.priceMax !== undefined) priceFilter.$lte = params.priceMax;
-			if (Object.keys(priceFilter).length) {
+			// 💰 Price filter (includes free mentors always)
+			if (params.priceMin !== undefined || params.priceMax !== undefined) {
+				const priceRange: any = {};
+
+				if (params.priceMin !== undefined) priceRange.$gte = params.priceMin;
+				if (params.priceMax !== undefined) priceRange.$lte = params.priceMax;
+
 				pipeline.push({
 					$match: {
-						hourlyRate: priceFilter,
+						$or: [
+							{ hourlyRate: priceRange },
+							{ hourlyRate: null }, // ⬅️ always include free mentors
+						],
 					},
 				});
 			}
 
-			// Stage 2: Lookup user (join with UserModel)
+			// Join with users
 			pipeline.push({
 				$lookup: {
-					from: "users", // collection name (check your MongoDB if plural)
+					from: "users",
 					localField: "userId",
 					foreignField: "_id",
-					as: RoleEnum.USER,
+					as: "user",
 				},
 			});
 
-			// Stage 3: Unwind user array
-			pipeline.push({
-				$unwind: "$user",
-			});
+			pipeline.push({ $unwind: "$user" });
 
-			// Stage 4: Filter for approved mentors only and exclude self
+			// Filter only approved mentors (not self)
 			pipeline.push({
 				$match: {
 					"user.role": RoleEnum.MENTOR,
@@ -142,36 +143,33 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 				},
 			});
 
-			// Stage 5: Apply search filter if present
+			// Search
 			if (params.search?.trim()) {
-				const searchRegex = new RegExp(params.search.trim(), "i");
+				const regex = new RegExp(params.search.trim(), "i");
 				pipeline.push({
 					$match: {
-						$or: [{ "user.firstName": searchRegex }, { "user.lastName": searchRegex }, { professionalTitle: searchRegex }],
+						$or: [{ "user.firstName": regex }, { "user.lastName": regex }, { professionalTitle: regex }],
 					},
 				});
 			}
 
-			// Stage 6: Filter by interests (if given)
+			// Filter by interests
 			if (params.interests?.length) {
 				pipeline.push({
-					$match: {
-						"user.interests": { $in: params.interests },
-					},
+					$match: { "user.interests": { $in: params.interests } },
 				});
 			}
 
-			// Stage 7: Sorting
+			// Sorting
 			const sortMap: Record<string, any> = {
 				recommended: { "user.averageRating": -1 },
 				priceLowToHigh: { hourlyRate: 1 },
 				priceHighToLow: { hourlyRate: -1 },
 				experience: { yearsExperience: -1 },
 			};
-			const sortStage = sortMap[params.sortBy ?? "recommended"] || sortMap["recommended"];
-			pipeline.push({ $sort: sortStage });
+			pipeline.push({ $sort: sortMap[params.sortBy ?? "recommended"] });
 
-			// Stage 8: Facet to get paginated data and total count together
+			// Facet
 			pipeline.push({
 				$facet: {
 					data: [{ $skip: skip }, { $limit: limit }],
@@ -179,13 +177,10 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 				},
 			});
 
-			// Execute pipeline
 			const result = await MentorProfileModel.aggregate(pipeline);
+			const mentorsRaw = result[0]?.data || [];
+			const total = result[0]?.total[0]?.count ?? 0;
 
-			const mentorsRaw = result[0].data;
-			const total = result[0].total[0]?.count ?? 0;
-
-			// Convert documents into MentorEntity (optional step)
 			const mentors = mentorsRaw.map(
 				(doc: AggregatedMentorDoc) =>
 					new MentorEntity({
@@ -208,9 +203,8 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 						badges: doc.user.badges,
 						userId: doc.user._id.toString(),
 
-						// 💡 the three you missed:
 						pricing: doc.pricing,
-						availability: doc.availability, // that Map from your schema
+						availability: doc.availability,
 						documents: doc.documents,
 
 						professionalTitle: doc.professionalTitle,
@@ -223,7 +217,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 						sessionFormat: doc.sessionFormat,
 						sessionTypes: doc.sessionTypes,
 						hourlyRate: doc.hourlyRate,
-					}),
+					})
 			);
 
 			return { mentors, total };

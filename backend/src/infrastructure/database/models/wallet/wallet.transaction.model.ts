@@ -74,7 +74,7 @@ const WalletTransactionSchema = new Schema<IWalletTransactionDocument>(
 		},
 		purpose: {
 			type: String,
-			enum: ["session_fee", "platform_fee", "refund", "withdrawal", "wallet_topup"],
+			enum: ["session_fee", "platform_fee", "refund", "withdrawal", "wallet_topup", "platform_commission"],
 			required: true,
 		},
 		description: {

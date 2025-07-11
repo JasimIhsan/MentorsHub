@@ -26,7 +26,7 @@ export class CreateSessionPaymentOrderUseCase implements ICreateSessionPaymentOr
 		if (!participant) throw new Error("Unauthorized: User is not a participant in this session");
 		if (participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) throw new Error("Session already paid");
 
-		const amount = session.fee * 100;
+		const amount = session.totalAmount * 100;
 		const receipt = `sess_${uuidv4().slice(0, 8)}`;
 		const notes = { sessionId, userId };
 

@@ -257,6 +257,8 @@ const initializeSocket = (io: Server, SessionModel: Model<ISessionDocument>) => 
 					fileUrl,
 				});
 
+				console.log(`✅ Message sent : ${message}`, );
+
 				// 2. Emit the message to all users in the chat room
 				io.to(`chat_${chatId}`).emit("receive-message", message);
 			} catch (err) {

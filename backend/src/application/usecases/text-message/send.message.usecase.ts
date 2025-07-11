@@ -21,10 +21,12 @@ export class SendMessageUseCase {
 
 		// Validate sender and receiver
 		const senderUser = await this.userRepo.findUserById(sender);
-		if (!senderUser) throw new Error("Sender not found");
+		if (!senderUser) throw new Error("User not found");
 
 		const receiverUser = await this.userRepo.findUserById(receiver);
-		if (!receiverUser) throw new Error("Receiver not found");
+		if (!receiverUser) {
+			await this.chatRepo.findPrivateBetween(sender, receiver);
+		};
 
 		// Get or create the chat
 		let chat = chatId ? await this.chatRepo.findById(chatId) : await this.chatRepo.findPrivateBetween(sender, receiver);

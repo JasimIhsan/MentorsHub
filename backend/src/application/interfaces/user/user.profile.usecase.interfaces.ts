@@ -3,7 +3,7 @@ import { MentorProfileProps, MentorProfileEntity } from "../../../domain/entitie
 import { IUserDTO } from "../../dtos/user.dtos";
 
 export interface IUpdateUserProfileUseCase {
-	execute(userId: string, data: Partial<UserEntityProps>, imageUrl?: string): Promise<UserEntity>;
+	execute(userId: string, data: Partial<UserEntityProps>, imageUrl?: string): Promise<IUserDTO>;
 }
 
 export interface ICloudinaryService {
@@ -11,7 +11,7 @@ export interface ICloudinaryService {
 }
 
 export interface IChangePasswordUseCase {
-	execute(userId: string, oldPassword: string, newPassword: string): Promise<UserEntity | null>;
+	execute(userId: string, oldPassword: string, newPassword: string): Promise<IUserDTO | null>;
 }
 export interface IBecomeMentorUseCase {
 	execute(

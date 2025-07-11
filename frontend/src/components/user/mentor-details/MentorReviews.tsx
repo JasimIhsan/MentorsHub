@@ -10,18 +10,18 @@ import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { ReviewsSkeleton } from "./ReviewSkeleton";
-import { ReviewDTO } from "@/pages/mentor/MentorReviewPage";
+import { IReviewDTO } from "@/interfaces/review.dto";
 
 interface MentorReviewsProps {
 	mentorId: string;
 	mentor: IMentorDTO;
-	reviews: ReviewDTO[];
-	setReviews: React.Dispatch<React.SetStateAction<ReviewDTO[]>>;
+	reviews: IReviewDTO[];
+	setReviews: React.Dispatch<React.SetStateAction<IReviewDTO[]>>;
 	currentPage: number;
 	setCurrentPage: (page: number) => void;
 	selectedRating: number | null;
 	setSelectedRating: (rating: number | null) => void;
-	setReviewToEdit: (review: ReviewDTO | null) => void;
+	setReviewToEdit: (review: IReviewDTO | null) => void;
 	setIsModalOpen: (open: boolean) => void;
 }
 
@@ -66,7 +66,7 @@ export function MentorReviews({ mentorId, mentor, reviews, setReviews, currentPa
 		}
 	};
 
-	const handleEditReview = (review: ReviewDTO) => {
+	const handleEditReview = (review: IReviewDTO) => {
 		setReviewToEdit(review);
 		setIsModalOpen(true);
 	};

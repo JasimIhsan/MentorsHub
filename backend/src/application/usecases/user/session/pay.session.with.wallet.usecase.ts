@@ -13,11 +13,10 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository) {}
 
 	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: SessionPaymentStatusEnum, status: SessionStatusEnum): Promise<void> {
-		/* Fetch the session */
+		/* 1. Fetch and validate session */
 		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 
-		/* Check if session is expired */
 		const sessionDate = new Date(session.date);
 		const [hour, minute] = session.time.split(":").map(Number);
 		sessionDate.setHours(hour);
@@ -26,82 +25,98 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 			throw new Error("Session is already expired. You cannot make payment.");
 		}
 
-		/* Validate participant */
+		/* 2. Validate participant */
 		const participant = session.participants.find((p) => p.user.id === userId);
 		if (!participant) throw new Error("Unauthorized: User is not a participant in this session");
-		if (participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) throw new Error("Session already booked");
+		if (participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) {
+			throw new Error("Session already booked");
+		}
 
-		/* Calculate fees */
-		const sessionFee = session.fee;
-		const mentorId = session.mentor.id;
-		const platformFeeFixed = 40;
-		const platformCommission = sessionFee * 0.15;
-		const totalPlatformFee = platformFeeFixed + platformCommission;
-		const mentorEarning = sessionFee - totalPlatformFee;
+		/* 3. Fee breakdown */
+		const totalPaid = session.totalAmount; // ₹ paid by user
+		const platformFixedFee = 40;
+		const platformCommission = session.fee * 0.15;
+		const totalPlatformFee = platformFixedFee + platformCommission;
+		const mentorEarning = Math.max(totalPaid - totalPlatformFee, 0);
 
-		/* Check user wallet balance */
+		/* 4. Check user wallet balance */
 		const userWallet = await this.walletRepo.findWalletByUserId(userId);
-		if (!userWallet || userWallet.balance < sessionFee) {
+		if (!userWallet || userWallet.balance < totalPaid) {
 			throw new Error("Insufficient wallet balance");
 		}
 
-		/* Wallet operations */
-		await this.walletRepo.updateBalance(userId, sessionFee, TransactionsTypeEnum.DEBIT); // debit user
-		await this.walletRepo.updateBalance(mentorId, mentorEarning, TransactionsTypeEnum.CREDIT); // credit mentor
+		/* 5. Debit user wallet once */
+		await this.walletRepo.updateBalance(userId, totalPaid, TransactionsTypeEnum.DEBIT);
 
+		/* 6. Credit mentor (if any) */
+		const mentorId = session.mentor.id;
+		if (mentorEarning > 0) {
+			await this.walletRepo.updateBalance(mentorId, mentorEarning, TransactionsTypeEnum.CREDIT);
+		}
+
+		/* 7. Credit platform wallet (fixed + commission) */
 		const platformWallet = await this.walletRepo.platformWallet();
-		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, TransactionsTypeEnum.CREDIT, RoleEnum.ADMIN); // credit platform
+		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, TransactionsTypeEnum.CREDIT, RoleEnum.ADMIN);
 
-		/* Transactions */
+		/* 8. Transaction records */
+
+		// a)  User → (split) : overall debit
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: mentorId,
 			fromRole: RoleEnum.USER,
 			toRole: RoleEnum.MENTOR,
-			amount: sessionFee,
+			amount: totalPaid,
 			type: TransactionsTypeEnum.DEBIT,
 			purpose: TransactionPurposeEnum.SESSION_FEE,
-			description: `Payment for session ${session.topic}`,
+			description: `Wallet payment for session ${session.topic}`,
 			sessionId,
 		});
 
-		await this.walletRepo.createTransaction({
-			fromUserId: userId,
-			toUserId: mentorId,
-			fromRole: RoleEnum.USER,
-			toRole: RoleEnum.MENTOR,
-			amount: mentorEarning,
-			type: TransactionsTypeEnum.CREDIT,
-			purpose: TransactionPurposeEnum.SESSION_FEE,
-			description: `Mentor earning for session ${session.topic}`,
-			sessionId,
-		});
+		// b)  User → Mentor credit (if > 0)
+		if (mentorEarning > 0) {
+			await this.walletRepo.createTransaction({
+				fromUserId: userId,
+				toUserId: mentorId,
+				fromRole: RoleEnum.USER,
+				toRole: RoleEnum.MENTOR,
+				amount: mentorEarning,
+				type: TransactionsTypeEnum.CREDIT,
+				purpose: TransactionPurposeEnum.SESSION_FEE,
+				description: `Mentor earning for session ${session.topic}`,
+				sessionId,
+			});
+		}
 
-		await this.walletRepo.createTransaction({
-			fromUserId: userId,
-			toUserId: platformWallet.userId,
-			fromRole: RoleEnum.USER,
-			toRole: RoleEnum.ADMIN,
-			amount: platformFeeFixed,
-			type: TransactionsTypeEnum.CREDIT,
-			purpose: TransactionPurposeEnum.PLATFORM_FEE,
-			description: `Platform fixed fee from session ${session.topic}`,
-			sessionId,
-		});
-
+		// c)  User → Platform fixed ₹40
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: platformWallet.userId,
 			fromRole: RoleEnum.USER,
 			toRole: RoleEnum.ADMIN,
-			amount: platformCommission,
+			amount: platformFixedFee,
 			type: TransactionsTypeEnum.CREDIT,
 			purpose: TransactionPurposeEnum.PLATFORM_FEE,
-			description: `Platform 15% commission from session ${session.topic}`,
+			description: `Fixed platform fee for session ${session.topic}`,
 			sessionId,
 		});
 
-		/* Mark payment in session */
+		// d)  User → Platform 15 % commission
+		if (platformCommission > 0) {
+			await this.walletRepo.createTransaction({
+				fromUserId: userId,
+				toUserId: platformWallet.userId,
+				fromRole: RoleEnum.USER,
+				toRole: RoleEnum.ADMIN,
+				amount: platformCommission,
+				type: TransactionsTypeEnum.CREDIT,
+				purpose: TransactionPurposeEnum.PLATFORM_COMMISSION,
+				description: `15% commission for session ${session.topic}`,
+				sessionId,
+			});
+		}
+
+		/* 9. Mark payment in session */
 		await this.sessionRepo.markPayment(sessionId, userId, paymentStatus, paymentId, status);
 	}
 }

@@ -6,7 +6,7 @@ import { WithdrawalRequestEntity } from "../entities/wallet/wallet.withdrawel.re
 
 export interface IWalletRepository {
 	findWalletByUserId(userId: string): Promise<WalletEntity | null>;
-	createWallet(userId: string): Promise<WalletEntity>;
+	createWallet(userId: string, role: RoleEnum): Promise<WalletEntity>;
 	platformWallet(): Promise<WalletEntity>;
 	updateBalance(userId: string, amount: number, type?: TransactionsTypeEnum, role?: RoleEnum): Promise<WalletEntity | null>;
 	createTransaction(data: {

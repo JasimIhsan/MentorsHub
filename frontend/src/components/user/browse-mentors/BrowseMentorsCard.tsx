@@ -42,7 +42,7 @@ export const BrowseMentorsCard = ({ mentor }: { mentor: IMentorDTO }) => (
 						<span className="text-base font-medium text-gray-900">{mentor.averageRating?.toFixed(1) ?? "N/A"}</span>
 						<span className="text-sm text-gray-500">({mentor.totalReviews ?? 0})</span>
 					</div>
-					<span className="text-base font-semibold text-primary">{mentor.hourlyRate === 0 ? "FREE" : `₹${mentor.hourlyRate}/-`}</span>
+					<span className="text-base font-semibold text-primary">{mentor.hourlyRate === 0 || !mentor.hourlyRate ? "FREE" : `₹${mentor.hourlyRate}/-`}</span>
 				</div>
 				<Button variant="default" size="lg" className="mt-6" asChild>
 					<Link to={`/browse/mentor-profile/${mentor.userId}`}>View Profile</Link>

@@ -32,7 +32,7 @@ export interface SessionData {
 	hours: number;
 	message: string;
 	totalAmount: number;
-	pricing: "free" | "paid";
+	pricing: "free" | "paid" | "both-pricing";
 }
 
 export function RequestSessionPage() {

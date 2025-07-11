@@ -53,6 +53,7 @@ const SessionSchema = new Schema(
 			type: String,
 			enum: ["one-on-one", "group"],
 			required: true,
+			default: "one-on-one",
 		},
 		date: { type: Date, required: true },
 		time: { type: String, required: true },

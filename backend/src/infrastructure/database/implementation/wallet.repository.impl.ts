@@ -22,9 +22,9 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		}
 	}
 
-	async createWallet(userId: string): Promise<WalletEntity> {
+	async createWallet(userId: string, role: RoleEnum): Promise<WalletEntity> {
 		try {
-			const doc = await WalletModel.create({ userId, balance: 0 });
+			const doc = await WalletModel.create({ userId, balance: 0, role });
 			return WalletEntity.fromDBDocument(doc);
 		} catch (error) {
 			return handleExceptionError(error, "Error creating wallet");
