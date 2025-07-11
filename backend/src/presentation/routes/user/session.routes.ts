@@ -32,7 +32,7 @@ sessionRouter.post("/pay/gateway", verifyAccessToken, requireRole(RoleEnum.MENTO
 sessionRouter.put("/cancel-session", verifyAccessToken, requireRole(RoleEnum.USER, RoleEnum.MENTOR), (req, res, next) => cancelSessionController.handle(req, res, next));
 
 // In mentorSessionRouter
-sessionRouter.get("/:sessionId", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), async (req, res, next) => {
+sessionRouter.get("/session/:sessionId", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), async (req, res, next) => {
 	try {
 		const session = await SessionModel.findById(req.params.sessionId).populate("mentorId");
 		if (!session) {
