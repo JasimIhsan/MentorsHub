@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Users, Calendar, CreditCard, Settings, FileBarChart, Home, Menu, BookPlus, Gamepad2 } from "lucide-react";
+import { Users, CreditCard, FileBarChart, Home, Menu, BookPlus, Gamepad2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -95,11 +95,11 @@ const routes = [
 		icon: BookPlus,
 		href: "/admin/mentor-applications",
 	},
-	{
-		label: "Sessions",
-		icon: Calendar,
-		href: "/admin/sessions",
-	},
+	// {
+	// 	label: "Sessions",
+	// 	icon: Calendar,
+	// 	href: "/admin/sessions",
+	// },
 	{
 		label: "Payments",
 		icon: CreditCard,
@@ -115,9 +115,9 @@ const routes = [
 		icon: FileBarChart,
 		href: "/admin/reports",
 	},
-	{
-		label: "Settings",
-		icon: Settings,
-		href: "/admin/settings",
-	},
+	// {
+	// 	label: "Settings",
+	// 	icon: Settings,
+	// 	href: "/admin/settings",
+	// },
 ];

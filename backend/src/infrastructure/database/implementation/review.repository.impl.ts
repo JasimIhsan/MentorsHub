@@ -124,6 +124,8 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 				},
 			]);
 
+			console.log(`Weekly ratings for mentor ${mentorId} : `, result);
+
 			return result.map((r) => ({ week: r.week, averageRating: r.averageRating }));
 		} catch (error) {
 			return handleExceptionError(error, "Error fetching weekly ratings");

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Calendar, ClipboardList, Clock, CreditCard, MessageSquare, Settings, Star, Users, Menu, BarChart3, BookOpenText } from "lucide-react";
+import { ClipboardList, Star, Users, Menu, BarChart3, BookOpenText } from "lucide-react";
 
 interface Route {
 	title: string;
@@ -42,24 +42,24 @@ export function MentorSidebar() {
 			href: "/mentor/upcoming-sessions",
 			active: pathname === "/mentor/upcoming-sessions",
 		},
-		{
-			title: "Calendar",
-			icon: Calendar,
-			href: "/mentor/calendar",
-			active: pathname === "/mentor/calendar",
-		},
-		{
-			title: "Availability",
-			icon: Clock,
-			href: "/mentor/availability",
-			active: pathname === "/mentor/availability",
-		},
-		{
-			title: "Premium Plans",
-			icon: CreditCard,
-			href: "/mentor/plans",
-			active: pathname === "/mentor/plans",
-		},
+		// {
+		// 	title: "Calendar",
+		// 	icon: Calendar,
+		// 	href: "/mentor/calendar",
+		// 	active: pathname === "/mentor/calendar",
+		// },
+		// {
+		// 	title: "Availability",
+		// 	icon: Clock,
+		// 	href: "/mentor/availability",
+		// 	active: pathname === "/mentor/availability",
+		// },
+		// {
+		// 	title: "Premium Plans",
+		// 	icon: CreditCard,
+		// 	href: "/mentor/plans",
+		// 	active: pathname === "/mentor/plans",
+		// },
 
 		{
 			title: "Reviews",
@@ -67,18 +67,18 @@ export function MentorSidebar() {
 			href: "/mentor/reviews",
 			active: pathname === "/mentor/reviews",
 		},
-		{
-			title: "Messages",
-			icon: MessageSquare,
-			href: "/mentor/messages",
-			active: pathname === "/mentor/messages",
-		},
-		{
-			title: "Settings",
-			icon: Settings,
-			href: "/mentor/settings",
-			active: pathname === "/mentor/settings",
-		},
+		// {
+		// 	title: "Messages",
+		// 	icon: MessageSquare,
+		// 	href: "/mentor/messages",
+		// 	active: pathname === "/mentor/messages",
+		// },
+		// {
+		// 	title: "Settings",
+		// 	icon: Settings,
+		// 	href: "/mentor/settings",
+		// 	active: pathname === "/mentor/settings",
+		// },
 	];
 
 	return (
