@@ -246,4 +246,26 @@ export class MentorProfileEntity {
 	private touch(): void {
 		this._updatedAt = new Date();
 	}
+
+	static toObject(mentor: MentorProfileEntity) {
+		return {
+			id: mentor.id,
+			userId: mentor.userId,
+			professionalTitle: mentor.professionalTitle,
+			languages: mentor.languages,
+			primaryExpertise: mentor.primaryExpertise,
+			yearsExperience: mentor.yearsExperience,
+			workExperiences: mentor.workExperiences,
+			educations: mentor.educations,
+			certifications: mentor.certifications,
+			sessionFormat: mentor.sessionFormat,
+			sessionTypes: mentor.sessionTypes,
+			pricing: mentor.pricing,
+			hourlyRate: mentor.hourlyRate,
+			availability: mentor.availability,
+			documents: mentor.documents,
+			createdAt: mentor.createdAt,
+			updatedAt: mentor.updatedAt,
+		};
+	}
 }

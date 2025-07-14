@@ -42,7 +42,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 
 	async createMentorProfile(userId: string, data: MentorProfileEntity): Promise<MentorProfileEntity> {
 		try {
-			const mentor = new MentorProfileModel({ ...data, userId });
+			const mentor = new MentorProfileModel(MentorProfileEntity.toObject(data));
 			const saved = await mentor.save();
 			return MentorProfileEntity.fromDBDocument(saved);
 		} catch (error) {
