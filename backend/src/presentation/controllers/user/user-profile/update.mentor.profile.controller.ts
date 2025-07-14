@@ -52,7 +52,7 @@ export class ReApplyMentorApplicationController {
 					bio,
 					skills: parsedData.skills,
 				},
-				documents
+				documents,
 			);
 
 			res.status(HttpStatusCode.OK).json({

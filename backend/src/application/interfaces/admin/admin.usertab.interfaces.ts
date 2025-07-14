@@ -1,4 +1,3 @@
-import { UserEntity } from "../../../domain/entities/user.entity";
 import { FindUsersParams } from "../../../domain/repositories/user.repository";
 import { IUserDTO } from "../../dtos/user.dtos";
 import { RoleEnum } from "../enums/role.enum";
