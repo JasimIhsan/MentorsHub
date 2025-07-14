@@ -150,7 +150,7 @@ export class UserRepositoryImpl implements IUserRepository {
 	async userGrowthChartData(months: number): Promise<{ users: number; mentors: number; name: string }[]> {
 		try {
 			const matchFilter: any = {
-				role: { $in: ["user", "mentor"] },
+				role: { $in: [RoleEnum.USER, RoleEnum.MENTOR] },
 			};
 
 			const now = new Date();
@@ -188,12 +188,12 @@ export class UserRepositoryImpl implements IUserRepository {
 						},
 						users: {
 							$sum: {
-								$cond: [{ $in: ["$_id.role", ["user", "mentor"]] }, "$count", 0],
+								$cond: [{ $in: ["$_id.role", [RoleEnum.USER, RoleEnum.MENTOR]] }, "$count", 0],
 							},
 						},
 						mentors: {
 							$sum: {
-								$cond: [{ $eq: ["$_id.role", "mentor"] }, "$count", 0],
+								$cond: [{ $eq: ["$_id.role", RoleEnum.MENTOR] }, "$count", 0],
 							},
 						},
 					},

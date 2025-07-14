@@ -152,7 +152,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 					$match: {
 						toUserId: new mongoose.Types.ObjectId(adminId),
 						toRole: RoleEnum.ADMIN,
-						purpose: TransactionPurposeEnum.PLATFORM_FEE,
+						purpose: { $in: [TransactionPurposeEnum.PLATFORM_FEE, TransactionPurposeEnum.PLATFORM_COMMISSION] },
 						type: TransactionsTypeEnum.CREDIT,
 					},
 				},
@@ -170,52 +170,72 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		}
 	}
 
-	async revenueChartData(adminId: string): Promise<{ name: string; total: number }[]> {
+	async revenueChartData(
+		adminId: string,
+		months: number // 0 = all, 1 = last‑30‑days, 6 = 6 months, 12 = 1 year
+	): Promise<{ name: string; total: number }[]> {
 		try {
+			/* ---------- 1. Match filter ------------------------------------ */
+			const matchFilter: any = {
+				toUserId: new mongoose.Types.ObjectId(adminId),
+				toRole: "admin",
+				type: "credit",
+				purpose: { $in: [TransactionPurposeEnum.PLATFORM_FEE, TransactionPurposeEnum.PLATFORM_COMMISSION] },
+			};
+
+			// date‑range window (identical logic to userGrowthChartData)
+			const today = new Date();
+			if (months === 1) {
+				matchFilter.createdAt = {
+					$gte: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 30),
+				};
+			} else if (months > 1) {
+				matchFilter.createdAt = {
+					$gte: new Date(today.getFullYear(), today.getMonth() - months, today.getDate()),
+				};
+			}
+			// months === 0  →  no date filter  (all‑time)
+
+			/* ---------- 2. Aggregation ------------------------------------- */
 			const revenueData = await WalletTransactionModel.aggregate([
+				{ $match: matchFilter },
+
+				// a) group PER‑DAY  (year‑month‑day)
 				{
-					// Filter for revenue-generating transactions
-					$match: {
-						toUserId: new mongoose.Types.ObjectId(adminId),
-						toRole: "admin",
-						type: "credit",
-						purpose: { $in: ["session_fee", "platform_fee"] },
-						createdAt: {
-							$gte: new Date(new Date().setMonth(new Date().getMonth() - 6)), // Last 6 months
-						},
-					},
-				},
-				{
-					// Group by month and year
 					$group: {
 						_id: {
 							year: { $year: "$createdAt" },
 							month: { $month: "$createdAt" },
+							day: { $dayOfMonth: "$createdAt" },
 						},
 						total: { $sum: "$amount" },
 					},
 				},
+
+				// b) build label & sortable date
 				{
-					// Format the output
 					$project: {
 						name: {
-							$concat: [{ $arrayElemAt: [["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], { $subtract: ["$_id.month", 1] }] }, " ", { $toString: "$_id.year" }],
+							$concat: [{ $toString: "$_id.day" }, "-", { $toString: "$_id.month" }, "-", { $toString: "$_id.year" }],
 						},
 						total: 1,
+						sortDate: {
+							$dateFromParts: {
+								year: "$_id.year",
+								month: "$_id.month",
+								day: "$_id.day",
+							},
+						},
 						_id: 0,
 					},
 				},
-				{
-					// Sort by year and month
-					$sort: {
-						"_id.year": 1,
-						"_id.month": 1,
-					},
-				},
-			]);
 
-			// console.log("revenueData: ", revenueData);
-			console.log("length : ", revenueData.length);
+				// c) chronological order
+				{ $sort: { sortDate: 1 } },
+
+				// d) final shape
+				{ $project: { name: 1, total: 1 } },
+			]);
 
 			return revenueData;
 		} catch (error) {
