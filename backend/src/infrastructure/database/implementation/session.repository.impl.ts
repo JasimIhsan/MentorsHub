@@ -64,7 +64,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			limit?: number;
 			search?: string;
 			status?: string;
-		},
+		}
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const { page = 1, limit = 10, search = "", status = "" } = options || {};
@@ -107,7 +107,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			filter?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
-		},
+		}
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const query: any = { mentorId };
@@ -189,7 +189,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 						"participants.$.paymentId": paymentId,
 						status: newStatus,
 					},
-				},
+				}
 			);
 		} catch (error) {
 			return handleExceptionError(error, "Error updating session payment");
@@ -254,49 +254,70 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
-	async getWeeklyPerformance(mentorId: string, period: "month" | "sixMonths" | "year"): Promise<{ week: string; sessions: number; revenue: number }[]> {
+	async getDailyPerformance(mentorId: string, period: "all" | "month" | "sixMonths" | "year"): Promise<{ name: string; sessions: number; revenue: number }[]> {
 		try {
-			const startDate = new Date();
-			if (period === "month") startDate.setDate(startDate.getDate() - 30);
-			else if (period === "sixMonths") startDate.setMonth(startDate.getMonth() - 6);
-			else startDate.setFullYear(startDate.getFullYear() - 1);
+			/* ---------- 1. Build match filter -------------------------------- */
+			const match: any = {
+				mentorId: new mongoose.Types.ObjectId(mentorId),
+				status: SessionStatusEnum.COMPLETED,
+			};
+
+			if (period !== "all") {
+				const now = new Date();
+				if (period === "month") now.setDate(now.getDate() - 30);
+				else if (period === "sixMonths") now.setMonth(now.getMonth() - 6);
+				else if (period === "year") now.setFullYear(now.getFullYear() - 1);
+
+				match.date = { $gte: now };
+			}
+			/* ------------------------------------------------------------------ */
 
 			const result = await SessionModel.aggregate([
-				{
-					$match: {
-						mentorId: new mongoose.Types.ObjectId(mentorId),
-						status: SessionStatusEnum.COMPLETED,
-						date: { $gte: startDate },
-					},
-				},
+				{ $match: match },
+
+				// group by calendar DAY
 				{
 					$group: {
 						_id: {
-							week: { $isoWeek: "$date" },
-							year: { $isoWeekYear: "$date" },
+							year: { $year: "$date" },
+							month: { $month: "$date" },
+							day: { $dayOfMonth: "$date" },
 						},
 						sessions: { $sum: 1 },
 						revenue: { $sum: "$totalAmount" },
 					},
 				},
-				{
-					$sort: { "_id.year": 1, "_id.week": 1 },
-				},
+
+				// readable label + sortable date
 				{
 					$project: {
-						week: { $concat: ["Week ", { $toString: "$_id.week" }, " ", { $toString: "$_id.year" }] },
+						name: {
+							$concat: [{ $toString: "$_id.day" }, "-", { $toString: "$_id.month" }, "-", { $toString: "$_id.year" }],
+						},
 						sessions: 1,
 						revenue: 1,
+						sortDate: {
+							$dateFromParts: {
+								year: "$_id.year",
+								month: "$_id.month",
+								day: "$_id.day",
+							},
+						},
+						_id: 0,
 					},
 				},
+
+				{ $sort: { sortDate: 1 } },
+
+				{ $project: { name: 1, sessions: 1, revenue: 1 } },
 			]);
 
-			return result.map((r) => ({ week: r.week, sessions: r.sessions, revenue: r.revenue }));
+			return result as { name: string; sessions: number; revenue: number }[];
 		} catch (error) {
-			return handleExceptionError(error, "Error fetching weekly performance");
+			return handleExceptionError(error, "Error fetching daily performance");
 		}
 	}
-	
+
 	async findRevenueByMentor(mentorId: string): Promise<number> {
 		try {
 			const result = await SessionModel.aggregate([

@@ -9,7 +9,7 @@ export class GetMentorWeeklyPerformanceController {
 		try {
 			const mentorId = req.params.mentorId;
 			const period = req.query.period;
-			const performance = await this._useCase.execute(mentorId, period as "month" | "sixMonths" | "year");
+			const performance = await this._useCase.execute(mentorId, period as "all" | "month" | "sixMonths" | "year");
 			res.status(HttpStatusCode.OK).json({ success: true, performance });
 		} catch (error) {
 			logger.error(`❌ Error in GetMentorWeeklyPerformanceController: ${error}`);
