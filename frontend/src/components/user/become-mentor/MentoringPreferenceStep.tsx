@@ -1,10 +1,9 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { IndianRupee } from "lucide-react";
-import { MentorApplicationFormData } from "@/types/mentor.application";
+import { MentorApplicationFormData } from "@/interfaces/mentor.application";
 
 interface MentoringPreferencesStepProps {
 	formData: MentorApplicationFormData;
@@ -12,7 +11,7 @@ interface MentoringPreferencesStepProps {
 	handleArrayChange: (field: keyof MentorApplicationFormData, value: string, checked: boolean) => void;
 }
 
-export function MentoringPreferencesStep({ formData, handleInputChange, handleArrayChange }: MentoringPreferencesStepProps) {
+export function MentoringPreferencesStep({ formData, handleInputChange }: MentoringPreferencesStepProps) {
 	return (
 		<>
 			<div className="space-y-4">
@@ -26,36 +25,18 @@ export function MentoringPreferencesStep({ formData, handleInputChange, handleAr
 							</Label>
 						</div>
 						<div className="flex items-center space-x-2">
-							<RadioGroupItem value="group" id="group" />
-							<Label htmlFor="group" className="font-normal">
-								Group Sessions Only
+							<RadioGroupItem value="group" id="group" disabled />
+							<Label htmlFor="group" className="font-normal text-gray-400">
+								Group Sessions Only (Coming Soon)
 							</Label>
 						</div>
 						<div className="flex items-center space-x-2">
-							<RadioGroupItem value="both" id="both" />
-							<Label htmlFor="both" className="font-normal">
-								Both One-on-One and Group Sessions
+							<RadioGroupItem value="both" id="both" disabled />
+							<Label htmlFor="both" className="font-normal text-gray-400">
+								Both One-on-One and Group Sessions (Coming Soon)
 							</Label>
 						</div>
 					</RadioGroup>
-				</div>
-
-				<div className="space-y-2">
-					<Label className="font-bold">Session Type</Label>
-					<div className="space-y-2">
-						<div className="flex items-center space-x-2">
-							<Checkbox id="video-calls" checked={formData.sessionTypes.includes("video-calls")} onCheckedChange={(checked) => handleArrayChange("sessionTypes", "video-calls", !!checked)} />
-							<Label htmlFor="video-calls" className="font-normal">
-								Video Calls
-							</Label>
-						</div>
-						<div className="flex items-center space-x-2">
-							<Checkbox id="chat" checked={formData.sessionTypes.includes("chat")} onCheckedChange={(checked) => handleArrayChange("sessionTypes", "chat", !!checked)} />
-							<Label htmlFor="chat" className="font-normal">
-								Text Chat
-							</Label>
-						</div>
-					</div>
 				</div>
 
 				<Separator />
@@ -78,16 +59,18 @@ export function MentoringPreferencesStep({ formData, handleInputChange, handleAr
 					</RadioGroup>
 				</div>
 
-				<div className="space-y-2">
-					<Label className="font-bold" htmlFor="hourly-rate">
-						Hourly Rate (INR)
-					</Label>
-					<div className="relative">
-						<IndianRupee className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-						<Input id="hourly-rate" className="pl-9" value={formData.hourlyRate} onChange={(e) => handleInputChange("hourlyRate", e.target.value)} placeholder="e.g. 150" type="number" />
+				{formData.pricing === "paid" && (
+					<div className="space-y-2">
+						<Label className="font-bold" htmlFor="hourly-rate">
+							Hourly Rate (INR)
+						</Label>
+						<div className="relative">
+							<IndianRupee className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+							<Input id="hourly-rate" className="pl-9" value={formData.hourlyRate} onChange={(e) => handleInputChange("hourlyRate", e.target.value)} placeholder="e.g. 150" type="number" />
+						</div>
+						<p className="text-xs text-gray-500">Set your hourly rate for paid sessions. The platform fee is 15%.</p>
 					</div>
-					<p className="text-xs text-gray-500">Set your hourly rate for paid sessions. The platform fee is 15%.</p>
-				</div>
+				)}
 			</div>
 		</>
 	);

@@ -17,7 +17,6 @@
 // 		formData.append("educations", JSON.stringify(data.educations || []));
 // 		formData.append("certifications", JSON.stringify(data.certifications || []));
 // 		formData.append("sessionFormat", data.sessionFormat);
-// 		formData.append("sessionTypes", JSON.stringify(data.sessionTypes));
 // 		formData.append("pricing", data.pricing);
 // 		if (data.hourlyRate) formData.append("hourlyRate", data.hourlyRate);
 // 		formData.append("availability", JSON.stringify(data.availability));

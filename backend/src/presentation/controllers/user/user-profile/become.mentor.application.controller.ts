@@ -8,7 +8,7 @@ export class BecomeMentorController {
 
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
-			const { userId, firstName, lastName, bio, professionalTitle, languages, primaryExpertise, skills, yearsExperience, workExperiences, educations, certifications, sessionFormat, sessionTypes, pricing, hourlyRate, availability } =
+			const { userId, firstName, lastName, bio, professionalTitle, languages, primaryExpertise, skills, yearsExperience, workExperiences, educations, certifications, sessionFormat, pricing, hourlyRate, availability } =
 				req.body;
 			// Parse stringified fields
 			const parsedData = {
@@ -17,7 +17,6 @@ export class BecomeMentorController {
 				workExperiences: JSON.parse(workExperiences || "[]"),
 				educations: JSON.parse(educations || "[]"),
 				certifications: JSON.parse(certifications || "[]"),
-				sessionTypes: JSON.parse(sessionTypes || "[]"),
 				availability: JSON.parse(availability || "[]"),
 			};
 
@@ -44,7 +43,6 @@ export class BecomeMentorController {
 					educations: parsedData.educations,
 					certifications: parsedData.certifications,
 					sessionFormat,
-					sessionTypes: parsedData.sessionTypes,
 					pricing,
 					hourlyRate,
 					availability: parsedData.availability,

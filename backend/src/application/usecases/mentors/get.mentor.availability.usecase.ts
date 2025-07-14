@@ -19,6 +19,8 @@ export class GetAvailabilityUseCase implements IGetAvailabilityUseCase {
 
 		const slotsInDate = allSlots.availability[dayName];
 
+		if(!slotsInDate) return [];
+
 		const sessions = await this.sessionRepo.findByDate(userId, date);
 
 		const bookedSessions = sessions?.filter((s) => s.status !== SessionStatusEnum.APPROVED && s.status !== SessionStatusEnum.UPCOMING);

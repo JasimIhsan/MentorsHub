@@ -1,7 +1,7 @@
 // components/sessions/SessionCard.tsx
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, Video, IndianRupee, MessageSquare } from "lucide-react";
+import { CalendarDays, Clock, Video, IndianRupee } from "lucide-react";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
 import SessionParticipants from "./SessionParticipants";
 import SessionActions from "./SessionActions";
@@ -49,10 +49,6 @@ export function SessionCard({ session, onStartSession, setSelectedSession, handl
 							<div className="flex items-center gap-2">
 								<IndianRupee className="h-4 w-4 text-muted-foreground" />
 								<span className="text-sm">{session.pricing === "free" ? "Free" : `${session.totalAmount?.toFixed(2) || 0}`}</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<MessageSquare className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">{session.sessionType}</span>
 							</div>
 						</div>
 					</div>

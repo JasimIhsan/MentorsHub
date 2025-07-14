@@ -56,7 +56,6 @@ export interface IMentorDTO {
 		expiryDate: string | null;
 	}[];
 	sessionFormat: "one-on-one" | "group" | "both";
-	sessionTypes: string[];
 	pricing: "free" | "paid" | "both-pricing";
 	hourlyRate: number | null;
 	availability: Availability;

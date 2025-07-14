@@ -20,7 +20,6 @@ export class SessionRepositoryImpl implements ISessionRepository {
 					paymentId: p.paymentId,
 				})),
 				topic: obj.topic,
-				sessionType: obj.sessionType,
 				sessionFormat: obj.sessionFormat,
 				date: obj.date,
 				time: obj.time,

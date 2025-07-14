@@ -17,8 +17,11 @@ export class GetMentorAvailabilityController {
 
 			const availability = await this.getAvailabilityUsecase.execute(mentorId, date);
 
-			res.status(HttpStatusCode.OK).json({ success: true, availability });
+			const isExist = availability.length > 0 ? true : false;
+
+			res.status(HttpStatusCode.OK).json({ success: true, isExist, availability });
 		} catch (error) {
+			console.error(`❌❌❌ Error in GetMentorAvailabilityController: ${error}`);
 			logger.error(`❌ Error in GetMentorAvailabilityController: ${error}`);
 			next(error);
 		}

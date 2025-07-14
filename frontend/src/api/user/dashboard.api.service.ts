@@ -63,7 +63,6 @@ export const fetchDashboardDatas = async (userId: string) => {
 // 				avatar: "https://example.com/avatar/alice.jpg",
 // 				isPaid: true,
 // 				tags: ["React", "Node.js", "MongoDB"],
-// 				sessionType: "video",
 // 				rate: "$40/hour",
 // 			},
 // 		];

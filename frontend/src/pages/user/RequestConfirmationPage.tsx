@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { CheckCircle, CalendarDays, Clock, MessageSquare, ArrowRight, Download } from "lucide-react";
+import { CheckCircle, CalendarDays, Clock, ArrowRight, Download } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { format } from "date-fns";
 import { SessionData } from "./RequestSessionPage"; // Assuming SessionData is exported from RequestSessionPage
+import { formatTime } from "@/utility/time-data-formatter";
 
 export function RequestConfirmationPage() {
 	const location = useLocation();
@@ -53,26 +54,8 @@ export function RequestConfirmationPage() {
 										</div>
 										<div>
 											<p className="text-sm text-muted-foreground">Time</p>
-											<p className="font-medium">{requestData.time || "Not set"}</p>
+											<p className="font-medium">{formatTime(requestData.time) || "Not set"}</p>
 										</div>
-									</div>
-									<div className="flex items-center gap-3">
-										<div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-											<MessageSquare className="h-5 w-5 text-primary" />
-										</div>
-										<div>
-											<p className="text-sm text-muted-foreground">Session Type</p>
-											<p className="font-medium">{requestData.sessionType === "video" ? "Video Call" : "Chat"}</p>
-										</div>
-									</div>
-									<div className="flex items-center gap-3">
-										<div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-											<MessageSquare className="h-5 w-5 text-primary" />
-										</div>
-										{/* <div>
-											<p className="text-sm text-muted-foreground">Format</p>
-											<p className="font-medium">{requestData.sessionFormat === "one-on-one" ? "One-on-One" : "Group Session"}</p>
-										</div> */}
 									</div>
 									<div className="flex items-center gap-3">
 										<div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">

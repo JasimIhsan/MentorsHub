@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { formatTime } from "@/utility/time-data-formatter";
-import { MentorApplicationFormData, WeekDay } from "@/types/mentor.application";
+import { MentorApplicationFormData, WeekDay } from "@/interfaces/mentor.application";
 
 interface AvailabilityStepProps {
 	formData: MentorApplicationFormData;

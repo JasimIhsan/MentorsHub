@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
-import { CalendarDays, Clock, Video, MessageSquare, User, Users2 } from "lucide-react";
+import { CalendarDays, Clock, User, Users2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CustomHeader } from "@/components/custom/header";
 import { ISessionUserDTO } from "@/interfaces/ISessionDTO";
@@ -87,10 +87,6 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, isLoading
 										<div className="flex items-center gap-1">
 											<Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
 											<span>{formatTime(session.time)}</span>
-										</div>
-										<div className="flex items-center gap-1">
-											{session.sessionType === "video" ? <Video className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" /> : <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />}
-											<span>{session.sessionType === "video" ? "Video Call" : "Chat"}</span>
 										</div>
 										<div className="flex items-center gap-1">
 											{session.sessionFormat === "one-on-one" ? <User className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" /> : <Users2 className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />}

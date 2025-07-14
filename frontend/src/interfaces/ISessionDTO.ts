@@ -2,7 +2,6 @@ export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" |
 
 interface BaseSession {
 	topic: string;
-	sessionType: string;
 	sessionFormat: string;
 	date: string;
 	time: string;

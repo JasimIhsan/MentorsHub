@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Upload, BookOpen, X } from "lucide-react";
-import { MentorApplicationFormData } from "@/types/mentor.application";
+import { MentorApplicationFormData } from "@/interfaces/mentor.application";
 
 interface DocumentsVerificationStepProps {
   formData: MentorApplicationFormData;

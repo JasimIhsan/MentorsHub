@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import axiosInstance from "@/api/config/api.config";
 import { validateFormData } from "@/schema/mentor.application.form";
 import { RootState } from "@/store/store";
-import { MentorApplication, FormErrors } from "@/types/mentor.application";
+import { MentorApplicationFormData } from "@/interfaces/mentor.application";
 import { TOTAL_STEPS } from "@/constants/mentor.application";
 
 export const useMentorForm = () => {
@@ -13,10 +13,10 @@ export const useMentorForm = () => {
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [showErrorModal, setShowErrorModal] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	const [formErrors, setFormErrors] = useState<FormErrors>({});
+	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 	const user = useSelector((state: RootState) => state.userAuth.user);
 
-	const [formData, setFormData] = useState<MentorApplication>({
+	const [formData, setFormData] = useState<MentorApplicationFormData>({
 		firstName: user?.firstName || "",
 		lastName: user?.lastName || "",
 		professionalTitle: "",
@@ -28,24 +28,30 @@ export const useMentorForm = () => {
 		workExperiences: [{ jobTitle: "", company: "", startDate: "", endDate: "", currentJob: false, description: "" }],
 		educations: [{ degree: "", institution: "", startYear: "", endYear: "" }],
 		certifications: [{ name: "", issuingOrg: "", issueDate: "", expiryDate: "" }],
-		sessionFormat: "both",
-		sessionTypes: [],
-		pricing: "both-pricing",
-		hourlyRate: "",
-		availability: [],
-		hoursPerWeek: "",
+		sessionFormat: "one-on-one",
+		pricing: "free",
+		hourlyRate: 0,
+		availability: {
+			Monday: [],
+			Tuesday: [],
+			Wednesday: [],
+			Thursday: [],
+			Friday: [],
+			Saturday: [],
+			Sunday: [],
+		},
 		documents: [],
 		terms: false,
 		guidelines: false,
 		interview: false,
 	});
 
-	const handleInputChange = (field: keyof MentorApplication, value: any) => {
+	const handleInputChange = (field: keyof MentorApplicationFormData, value: any) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
 		setFormErrors((prev) => ({ ...prev, [field]: "" }));
 	};
 
-	const handleArrayChange = (field: keyof MentorApplication, value: string, checked: boolean) => {
+	const handleArrayChange = (field: keyof MentorApplicationFormData, value: string, checked: boolean) => {
 		setFormData((prev) => {
 			const current = prev[field] as string[];
 			if (checked) {
@@ -131,7 +137,14 @@ export const useMentorForm = () => {
 	const handleNext = async () => {
 		if (step === TOTAL_STEPS) {
 			const { isValid, errors } = validateFormData(formData);
-			setFormErrors(errors);
+			const errorObject: Record<string, string> = Array.isArray(errors)
+				? errors.reduce((acc, msg, idx) => {
+						acc[`error${idx}`] = msg;
+						return acc;
+				  }, {} as Record<string, string>)
+				: errors; // already an object? just keep it.
+
+			setFormErrors(errorObject);
 			if (!isValid) {
 				setShowErrorModal(true);
 				return;
@@ -153,11 +166,9 @@ export const useMentorForm = () => {
 			submissionData.append("educations", JSON.stringify(formData.educations));
 			submissionData.append("certifications", JSON.stringify(formData.certifications));
 			submissionData.append("sessionFormat", formData.sessionFormat);
-			submissionData.append("sessionTypes", JSON.stringify(formData.sessionTypes));
 			submissionData.append("pricing", formData.pricing);
-			submissionData.append("hourlyRate", formData.hourlyRate);
+			submissionData.append("hourlyRate", formData.hourlyRate.toString());
 			submissionData.append("availability", JSON.stringify(formData.availability));
-			submissionData.append("hoursPerWeek", formData.hoursPerWeek);
 
 			formData.documents.forEach((file) => {
 				submissionData.append("documents", file);

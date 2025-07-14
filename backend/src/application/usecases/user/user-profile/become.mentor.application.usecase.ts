@@ -13,8 +13,6 @@ export class BecomeMentorUseCase implements IBecomeMentorUseCase {
 	constructor(private mentorProfileRepo: IMentorProfileRepository, private userRepo: IUserRepository, private uploadDocumentUseCase: IUploadMentorDocuments) {}
 
 	async execute(userId: string, data: MentorProfileProps, userData: Partial<UserEntityProps>, documents: Express.Multer.File[]): Promise<{ savedUser: IUserDTO; mentorProfile: MentorProfileEntity }> {
-		console.log('data: ', data);
-		console.log('userData: ', userData);
 		const userEntity = await this.userRepo.findUserById(userId);
 		if (!userEntity) throw new Error(CommonStringMessage.USER_NOT_FOUND);
 		if (userEntity.role === RoleEnum.MENTOR) {

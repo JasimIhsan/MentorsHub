@@ -215,7 +215,6 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 						educations: doc.educations,
 						certifications: doc.certifications,
 						sessionFormat: doc.sessionFormat,
-						sessionTypes: doc.sessionTypes,
 						hourlyRate: doc.hourlyRate,
 					})
 			);

@@ -8,7 +8,7 @@ export class ReApplyMentorApplicationController {
 
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
-			const { userId, firstName, lastName, bio, professionalTitle, languages, primaryExpertise, skills, yearsExperience, workExperiences, educations, certifications, sessionFormat, sessionTypes, pricing, hourlyRate, availability } = req.body;
+			const { userId, firstName, lastName, bio, professionalTitle, languages, primaryExpertise, skills, yearsExperience, workExperiences, educations, certifications, sessionFormat, pricing, hourlyRate, availability } = req.body;
 
 			// Parse stringified fields
 			const parsedData = {
@@ -17,7 +17,6 @@ export class ReApplyMentorApplicationController {
 				workExperiences: JSON.parse(workExperiences || "[]"),
 				educations: JSON.parse(educations || "[]"),
 				certifications: JSON.parse(certifications || "[]"),
-				sessionTypes: JSON.parse(sessionTypes || "[]"),
 				availability: JSON.parse(availability || "{}"), // Changed to object to match Partial<Record<WeekDay, string[]>>
 			};
 
@@ -43,7 +42,6 @@ export class ReApplyMentorApplicationController {
 					educations: parsedData.educations,
 					certifications: parsedData.certifications,
 					sessionFormat,
-					sessionTypes: parsedData.sessionTypes,
 					pricing,
 					hourlyRate,
 					availability: parsedData.availability,
@@ -54,7 +52,7 @@ export class ReApplyMentorApplicationController {
 					bio,
 					skills: parsedData.skills,
 				},
-				documents,
+				documents
 			);
 
 			res.status(HttpStatusCode.OK).json({
@@ -68,3 +66,4 @@ export class ReApplyMentorApplicationController {
 		}
 	}
 }
+

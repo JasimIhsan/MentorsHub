@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarDays, Clock, Video, MessageSquare, FileText, MoreHorizontal, Search, CreditCard, ChevronDown, CheckCircle, ArrowRight, Download, Star, Wallet } from "lucide-react";
+import { CalendarDays, Clock, MessageSquare, FileText, MoreHorizontal, Search, CreditCard, ChevronDown, CheckCircle, ArrowRight, Download, Star, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -389,10 +389,6 @@ function SessionCard({ session, isRazorpayLoaded, setSelectedSession, setShowCan
 									<div className="flex items-center gap-1">
 										<Clock className="h-4 w-4 text-muted-foreground" />
 										<span className="text-sm">{formatTime(session.time)}</span>
-									</div>
-									<div className="flex items-center gap-1">
-										{session.sessionType === "video" ? <Video className="h-4 w-4 text-muted-foreground" /> : <MessageSquare className="h-4 w-4 text-muted-foreground" />}
-										<span className="text-sm">{session.sessionType === "video" ? "Video Call" : "Chat"}</span>
 									</div>
 									<div className="flex items-center gap-1">
 										<MessageSquare className="h-4 w-4 text-muted-foreground" />

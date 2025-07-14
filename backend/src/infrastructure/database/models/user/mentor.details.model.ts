@@ -41,11 +41,9 @@ export interface IMentorProfileModel extends Document {
 		expiryDate: string | null;
 	}[];
 	sessionFormat: "one-on-one" | "group" | "both";
-	sessionTypes: string[];
 	pricing: "free" | "paid";
-	hourlyRate: number | null;
+	hourlyRate: number;
 	availability: Availability;
-	hoursPerWeek: string;
 	documents: string[]; // Array of S3 URLs
 	createdAt: Date;
 	updatedAt: Date;
@@ -85,9 +83,8 @@ const MentorProfileSchema: Schema = new Schema(
 			},
 		],
 		sessionFormat: { type: String, enum: ["one-on-one", "group", "both"], required: true },
-		sessionTypes: [{ type: String, required: true }],
 		pricing: { type: String, enum: ["free", "paid"], required: true },
-		hourlyRate: { type: Number },
+		hourlyRate: { type: Number, default: 0 },
 		availability: {
 			type: Map,
 			of: [String],

@@ -122,7 +122,7 @@ export function MentorProfilePage() {
 								<div className="mt-4 flex items-center gap-4">
 									<div className="flex items-center gap-1">
 										<Badge variant="secondary">{mentor.averageRating?.toFixed(1) || "N/A"}</Badge>
-										<span className="text-sm text-muted-foreground">({mentor.reviews?.length || 0} reviews)</span>
+										<span className="text-sm text-muted-foreground">({mentor.totalReviews || 0} reviews)</span>
 									</div>
 									<span className="text-sm text-muted-foreground">|</span>
 									<span className="text-sm text-muted-foreground">{mentor.sessionCompleted || 0} sessions completed</span>
@@ -537,22 +537,6 @@ export function MentorProfilePage() {
 								<Separator />
 
 								<div className="space-y-2">
-									<Label>Session Types</Label>
-									<div className="space-y-2">
-										{["Video Calls", "Text Chat", "In-Person"].map((type) => (
-											<div key={type} className="flex items-center space-x-2">
-												<Switch id={type.toLowerCase().replace(" ", "-")} defaultChecked={mentor.sessionTypes.includes(type)} />
-												<Label htmlFor={type.toLowerCase().replace(" ", "-")} className="font-normal">
-													{type}
-												</Label>
-											</div>
-										))}
-									</div>
-								</div>
-
-								<Separator />
-
-								<div className="space-y-2">
 									<Label htmlFor="session-length">Default Session Length</Label>
 									<Select defaultValue="60">
 										<SelectTrigger id="session-length">
@@ -585,13 +569,6 @@ export function MentorProfilePage() {
 												<p className="text-sm text-muted-foreground">Display your available time slots on your profile</p>
 											</div>
 											{/* <Switch id="availability-visibility" defaultChecked={mentor.availability.length > 0} /> */}
-										</div>
-										<div className="flex items-center justify-between">
-											<div className="space-y-0.5">
-												<Label htmlFor="featured-mentor">Featured Mentor</Label>
-												<p className="text-sm text-muted-foreground">Apply to be featured on the homepage (requires admin approval)</p>
-											</div>
-											<Switch id="featured-mentor" defaultChecked={mentor.featuredMentor || false} />
 										</div>
 									</div>
 								</div>
