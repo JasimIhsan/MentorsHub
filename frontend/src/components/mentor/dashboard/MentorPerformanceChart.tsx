@@ -1,20 +1,17 @@
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Line, LineChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Shadcn/UI Select components
 
 interface MentorPerformanceChartProps {
 	isLoading: boolean;
 	error: string | null;
-	filterPeriod: string;
 	data: {
 		week: string;
 		sessions: number;
 		revenue: number;
 	}[];
-	handleFilterChange: (value: string) => void;
 }
 
-export function MentorPerformanceChart({ data, isLoading, error, filterPeriod, handleFilterChange }: MentorPerformanceChartProps) {
+export function MentorPerformanceChart({ data, isLoading, error }: MentorPerformanceChartProps) {
 	// Render loading state
 	if (isLoading) {
 		return (
@@ -37,21 +34,9 @@ export function MentorPerformanceChart({ data, isLoading, error, filterPeriod, h
 	// Render chart
 	return (
 		<div className="w-full">
-			<div className="mb-4">
-				<Select value={filterPeriod} onValueChange={handleFilterChange}>
-					<SelectTrigger className="w-[180px]">
-						<SelectValue placeholder="Select period" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="month">Last Month</SelectItem>
-						<SelectItem value="sixMonths">Last 6 Months</SelectItem>
-						<SelectItem value="year">Last Year</SelectItem>
-					</SelectContent>
-				</Select>
-			</div>
 			<div className="h-[300px]">
 				<ResponsiveContainer width="100%" height="100%">
-					<BarChart
+					<LineChart
 						data={data}
 						margin={{
 							top: 20,
@@ -61,13 +46,13 @@ export function MentorPerformanceChart({ data, isLoading, error, filterPeriod, h
 						}}>
 						<CartesianGrid strokeDasharray="3 3" />
 						<XAxis dataKey="week" />
-						<YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-						<YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
+						<YAxis yAxisId="left" orientation="left" stroke="#6366f1" />
+						<YAxis yAxisId="right" orientation="right" stroke="#10b981" />
 						<Tooltip />
 						<Legend />
-						<Bar yAxisId="left" dataKey="sessions" fill="#8884d8" name="Sessions" />
-						<Bar yAxisId="right" dataKey="revenue" fill="#82ca9d" name="Revenue ($)" />
-					</BarChart>
+						<Line yAxisId="left" dataKey="sessions" stroke="#6366f1" name="Sessions" />
+						<Line yAxisId="right" dataKey="revenue" stroke="#10b981" name="Revenue ($)" />
+					</LineChart>
 				</ResponsiveContainer>
 			</div>
 		</div>

@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
 			const response = await adminLoginAPI(data.username, data.password);
 			if (response.success) {
 				// navigate('/admin/dashboard', { replace: true });
-				navigate("/admin/dashboard");
+				navigate("/admin/login", { replace: true });
 				dispatch(logout());
 				dispatch(adminLogin(response.admin));
 				toast.success("Login successful!");

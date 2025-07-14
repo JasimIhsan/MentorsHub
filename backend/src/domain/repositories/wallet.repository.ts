@@ -24,5 +24,5 @@ export interface IWalletRepository {
 	createWithdrawalRequest(data: Partial<WithdrawalRequestEntity>): Promise<WithdrawalRequestEntity>;
 	getWithdrawalRequests(mentorId: string, page?: number, limit?: number, filter?: Record<string, any>): Promise<{ data: WithdrawalRequestEntity[]; total: number }>;
 	adminRevenue(adminId: string): Promise<number>;
-	revenueChartData(adminId: string): Promise<{ name: string; total: number }[]>;
+	revenueChartData(adminId: string, months: number): Promise<{ name: string; total: number }[]>;
 }

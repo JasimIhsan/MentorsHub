@@ -6,12 +6,12 @@ import { IGetPlatformRevenueChartDataUseCase } from "../../../interfaces/admin/a
 export class GetPlatformRevenueChartDataUseCase implements IGetPlatformRevenueChartDataUseCase {
 	constructor(private readonly _walletRepo: IWalletRepository, private readonly _adminRepo: IAdminRepository) {}
 
-	async execute(adminId: string): Promise<IPlatformRevenueChartDataDTO[]> {
+	async execute(adminId: string, months: number): Promise<IPlatformRevenueChartDataDTO[]> {
 		try {
 			const adminEntity = await this._adminRepo.findAdminById(adminId);
 			if (!adminEntity) throw new Error("Admin not found");
 
-			const revenueData = await this._walletRepo.revenueChartData(adminId);
+			const revenueData = await this._walletRepo.revenueChartData(adminId, months);
 			return revenueData.map((revenue) => {
 				return {
 					name: revenue.name,

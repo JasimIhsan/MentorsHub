@@ -2,10 +2,9 @@ import type React from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, Users, UserCog, Calendar, CreditCard, ArrowUp, ArrowDown, Star, Clock, DollarSign } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useEffect, useState } from "react";
 import { fetchAdminDashboardData, fetchPlatformRevenueChartData, fetchTopMentorsData, fetchUsersGrowthChartData } from "@/api/admin/dashboard.api.service";
 import { useSelector } from "react-redux";
@@ -14,6 +13,7 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AdminDashboardPDF } from "@/components/admin/dashboard/ReportPdf";
 import { PDFDownloadLink } from "@react-pdf/renderer";
+import { SelectContent, Select, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // StatsCard component
 function StatsCard({ title, value, description, trend, percentage, icon: Icon }: { title: string; value: number; description: string; trend: "up" | "down"; percentage: string; icon: React.ElementType }) {
@@ -290,12 +290,12 @@ function RevenueChart({ data, isLoading }: { data: { name: string; total: number
 	}
 	return (
 		<ResponsiveContainer width="100%" height={300}>
-			<BarChart data={data}>
+			<LineChart data={data}>
 				<XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
 				<YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} />
 				<Tooltip formatter={(value: number) => [`₹${value}`, "Revenue"]} cursor={{ fill: "rgba(0, 0, 0, 0.05)" }} />
-				<Bar dataKey="total" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
-			</BarChart>
+				<Line type="monotone" dataKey="total" stroke="currentColor" strokeWidth={2} className="text-primary" dot={false} activeDot={{ r: 6 }} />
+			</LineChart>
 		</ResponsiveContainer>
 	);
 }
@@ -323,6 +323,8 @@ function UserGrowthChart({ userGrowthData, isLoading }: { userGrowthData: { name
 	);
 }
 
+type DashboardFilters = "all" | "30days" | "6months" | "1year";
+
 // Main AdminDashboardPage component
 export default function AdminDashboardPage() {
 	const [stats, setStats] = useState<{
@@ -336,11 +338,11 @@ export default function AdminDashboardPage() {
 
 	const [revenue, setRevenue] = useState<{ name: string; total: number }[]>([]);
 	const [isRevenueLoading, setIsRevenueLoading] = useState(false);
-	const [revenueFilter, setRevenueFilter] = useState<"all" | "30days" | "1year">("all");
+	const [revenueFilter, setRevenueFilter] = useState<DashboardFilters>("all");
 
 	const [userGrowth, setUserGrowth] = useState<{ name: string; users: number; mentors: number }[]>([]);
 	const [isUserGrowthLoading, setIsUserGrowthLoading] = useState(false);
-	const [userGrowthFilter, setUserGrowthFilter] = useState<"all" | "30days" | "1year">("all");
+	const [userGrowthFilter, setUserGrowthFilter] = useState<DashboardFilters>("all");
 
 	const [topMentors, setTopMentors] = useState<Mentor[]>([]);
 	const [isTopMentorsLoading, setIsTopMentorsLoading] = useState(false);
@@ -413,6 +415,13 @@ export default function AdminDashboardPage() {
 		fetchTopMentors();
 	}, [user?.id]);
 
+	const filters = [
+		{ label: "All Time", value: "all" },
+		{ label: "Last 30 Days", value: "30days" },
+		{ label: "Last 6 Months", value: "6months" },
+		{ label: "Last 1 Year", value: "1year" },
+	];
+
 	return (
 		<div className="space-y-6">
 			<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -465,38 +474,48 @@ export default function AdminDashboardPage() {
 			</div>
 
 			{/* Charts */}
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-				<Card className="lg:col-span-4">
+			<div className="grid gap-4 md:grid-cols-2">
+				<Card>
 					<CardHeader className="flex flex-row items-center justify-between">
 						<div>
 							<CardTitle>Revenue Overview</CardTitle>
 							<CardDescription>Monthly revenue breakdown</CardDescription>
 						</div>
-						<Tabs defaultValue="all" onValueChange={(value) => setRevenueFilter(value as "all" | "30days" | "1year")}>
-							<TabsList>
-								<TabsTrigger value="all">All</TabsTrigger>
-								<TabsTrigger value="30days">30 Days</TabsTrigger>
-								<TabsTrigger value="1year">1 Year</TabsTrigger>
-							</TabsList>
-						</Tabs>
+						<Select defaultValue="all" onValueChange={(value) => setRevenueFilter(value as DashboardFilters)}>
+							<SelectTrigger className="w-[180px]">
+								<SelectValue placeholder="Select timeframe" />
+							</SelectTrigger>
+							<SelectContent>
+								{filters.map((filter, index) => (
+									<SelectItem key={index} value={filter.value} className="capitalize">
+										{filter.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</CardHeader>
 					<CardContent>
 						<RevenueChart data={revenue} isLoading={isRevenueLoading} />
 					</CardContent>
 				</Card>
-				<Card className="lg:col-span-3">
+				<Card>
 					<CardHeader className="flex flex-row items-center justify-between">
 						<div>
 							<CardTitle>User Growth</CardTitle>
 							<CardDescription>New users over time</CardDescription>
 						</div>
-						<Tabs defaultValue="all" onValueChange={(value) => setUserGrowthFilter(value as "all" | "30days" | "1year")}>
-							<TabsList>
-								<TabsTrigger value="all">All</TabsTrigger>
-								<TabsTrigger value="30days">30 Days</TabsTrigger>
-								<TabsTrigger value="1year">1 Year</TabsTrigger>
-							</TabsList>
-						</Tabs>
+						<Select defaultValue="all" onValueChange={(value) => setUserGrowthFilter(value as DashboardFilters)}>
+							<SelectTrigger className="w-[180px]">
+								<SelectValue placeholder="Select timeframe" />
+							</SelectTrigger>
+							<SelectContent>
+								{filters.map((filter, index) => (
+									<SelectItem key={index} value={filter.value} className="capitalize">
+										{filter.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</CardHeader>
 					<CardContent>
 						<UserGrowthChart isLoading={isUserGrowthLoading} userGrowthData={userGrowth} />

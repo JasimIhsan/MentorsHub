@@ -7,7 +7,25 @@ export class GetPlatformRevenueChartDataController {
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const adminId = req.params.adminId;
-			const chartData = await this._useCase.execute(adminId);
+			const range = req.query.range;
+
+			let months = 0;
+			switch (range) {
+				case "30days":
+					months = 1;
+					break;
+				case "6months":
+					months = 6;
+					break;
+				case "1year":
+					months = 12;
+					break;
+				case "all":
+					months = 0;
+					break;
+			}
+
+			const chartData = await this._useCase.execute(adminId, months);
 
 			res.status(200).json({ success: true, chartData });
 		} catch (error) {

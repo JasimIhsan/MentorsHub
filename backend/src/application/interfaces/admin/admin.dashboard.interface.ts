@@ -5,7 +5,7 @@ export interface IGetAdminStatsUseCase {
 }
 
 export interface IGetPlatformRevenueChartDataUseCase {
-	execute(adminId: string): Promise<IPlatformRevenueChartDataDTO[]>;
+	execute(adminId: string, months?: number): Promise<IPlatformRevenueChartDataDTO[]>;
 }
 
 export interface IGetUsersGrowthChartDataUseCase {

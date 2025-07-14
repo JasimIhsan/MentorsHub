@@ -6,28 +6,52 @@ import { formatDate, formatTime } from "@/utility/time-data-formatter";
 // Import the logo image
 import logo from "@/assets/MentorsHub logo image.jpg";
 
-// Register Noto Sans font to support the rupee symbol
+// Register Winky Sans font
 Font.register({
-	// family: "Winky Sans",
-	// src: "https://fonts.gstatic.com/s/Winky Sans/v28/o-0IIpQlx3QUlC5A4PNr5TRASf6M7Q.ttf", // Noto Sans Regular
-
 	family: "Winky Sans",
 	src: "/fonts/WinkySans-Regular.ttf",
 	fontWeight: "normal",
 	fontStyle: "normal",
 });
 
-// Alternatively, if using a local font file:
-// Font.register({
-//   family: "Winky Sans",
-//   src: require("@/assets/fonts/Winky Sans-Regular.ttf"),
-// });
+// Define PeriodType
+type PeriodType = "all" | "month" | "sixMonths" | "year";
 
+// Utility function to generate date range based on PeriodType
+const getDateRange = (filter: PeriodType, currentDate: Date = new Date("2025-07-14")) => {
+	const endDate = new Date(currentDate);
+	let startDate = new Date(currentDate);
+	let dateFormat = { month: "short", day: "2-digit", year: "numeric" } as const;
+
+	switch (filter) {
+		case "all":
+			// For "all", only return the end date
+			return endDate.toLocaleDateString("en-US", dateFormat);
+		case "month":
+			startDate.setDate(endDate.getDate() - 30); // Last 30 days
+			break;
+		case "sixMonths":
+			startDate.setMonth(endDate.getMonth() - 6); // Last 6 months
+			break;
+		case "year":
+			startDate.setFullYear(endDate.getFullYear() - 1); // Last 12 months
+			break;
+		default:
+			startDate.setDate(endDate.getDate() - 30); // Default to last 30 days
+	}
+
+	// Format dates as "MMM DD, YYYY" for other periods
+	const formattedStart = startDate.toLocaleDateString("en-US", dateFormat);
+	const formattedEnd = endDate.toLocaleDateString("en-US", dateFormat);
+	return `${formattedStart} - ${formattedEnd}`;
+};
+
+// Existing styles (unchanged)
 const styles = StyleSheet.create({
 	page: {
 		padding: 40,
 		fontSize: 10,
-		fontFamily: "Winky Sans", // Updated to Winky Sans
+		fontFamily: "Winky Sans",
 		color: "#333",
 		backgroundColor: "#fff",
 	},
@@ -100,10 +124,6 @@ const styles = StyleSheet.create({
 		marginBottom: 4,
 		fontFamily: "Winky Sans",
 	},
-	bold: {
-		fontWeight: "bold",
-		fontFamily: "Winky Sans",
-	},
 	table: {
 		width: "100%",
 		borderWidth: 1,
@@ -162,15 +182,10 @@ const styles = StyleSheet.create({
 	},
 });
 
+// Interfaces
 interface ChartData {
 	name: string;
 	averageRating: number;
-}
-
-interface PerformanceData {
-	week: string;
-	sessions: number;
-	revenue: number;
 }
 
 interface MentorReportDocumentProps {
@@ -184,153 +199,134 @@ interface MentorReportDocumentProps {
 	requests: ISessionMentorDTO[];
 	reviews: IReviewDTO[];
 	ratingsData: ChartData[];
-	performanceData: PerformanceData[];
-	filterPerformancePeriod: string;
-	filterRatingsPeriod: string;
+	filterRatingsPeriod: PeriodType; // Updated to use PeriodType
 	mentorName: string;
 	mentorEmail: string;
 	generatedDate: string;
 }
 
-export const MentorReportDocument = ({ stats, sessions, requests, reviews, ratingsData, performanceData, filterPerformancePeriod, filterRatingsPeriod, mentorName, mentorEmail, generatedDate }: MentorReportDocumentProps) => (
-	<Document>
-		{/* Page 1: Mentor Info, Sidebar, Sessions, Requests, Reviews */}
-		<Page size="A4" style={styles.page}>
-			{/* Header */}
-			<View style={styles.header} fixed>
-				<Image style={styles.logoPlaceholder} src={logo} />
-				<Text style={styles.title}>Mentor Summary Report</Text>
-			</View>
+// MentorReportDocument component
+export const MentorReportDocument = ({ stats, sessions, requests, reviews, ratingsData, filterRatingsPeriod, mentorName, mentorEmail, generatedDate }: MentorReportDocumentProps) => {
+	// Generate date range for the filter
+	const dateRange = getDateRange(filterRatingsPeriod);
 
-			{/* Main Content with Sidebar */}
-			<View style={{ flexDirection: "row" }}>
-				{/* Sidebar */}
-				<View style={styles.sidebar}>
-					<Text style={styles.sidebarTitle}>Quick Stats</Text>
-					<Text style={styles.sidebarText}>Upcoming Sessions: {stats.upcomingSessions}</Text>
-					<Text style={styles.sidebarText}>Pending Requests: {stats.pendingRequests}</Text>
-					<Text style={styles.sidebarText}>Average Rating: {stats.averageRating.toFixed(1)} ★</Text>
-					<Text style={styles.sidebarText}>Total Revenue: ₹{stats.revenue.toLocaleString()}</Text>
+	return (
+		<Document>
+			{/* Page 1: Mentor Info, Sidebar, Sessions, Requests, Reviews */}
+			<Page size="A4" style={styles.page}>
+				{/* Header */}
+				<View style={styles.header} fixed>
+					<Image style={styles.logoPlaceholder} src={logo} />
+					<Text style={styles.title}>Mentor Summary Report</Text>
 				</View>
 
-				{/* Content */}
-				<View style={styles.content}>
-					{/* Mentor Info */}
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Mentor Information</Text>
-						<Text style={styles.text}>Mentor: {mentorName}</Text>
-						<Text style={styles.text}>Email: {mentorEmail}</Text>
-						<Text style={styles.text}>Generated Date: {generatedDate}</Text>
+				{/* Main Content with Sidebar */}
+				<View style={{ flexDirection: "row" }}>
+					{/* Sidebar */}
+					<View style={styles.sidebar}>
+						<Text style={styles.sidebarTitle}>Quick Stats</Text>
+						<Text style={styles.sidebarText}>Upcoming Sessions: {stats.upcomingSessions}</Text>
+						<Text style={styles.sidebarText}>Pending Requests: {stats.pendingRequests}</Text>
+						<Text style={styles.sidebarText}>Average Rating: {stats.averageRating.toFixed(1)} ★</Text>
+						<Text style={styles.sidebarText}>Total Revenue: ₹{stats.revenue.toLocaleString()}</Text>
 					</View>
 
-					{/* Upcoming Sessions */}
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Upcoming Sessions</Text>
-						{sessions.length === 0 ? (
-							<Text style={styles.text}>No upcoming sessions</Text>
-						) : (
-							sessions.map((s, idx) => (
-								<Text key={idx} style={styles.text}>
-									• {s.topic} on {formatTime(s.time)} in {formatDate(s.date)}
-								</Text>
-							))
-						)}
-					</View>
+					{/* Content */}
+					<View style={styles.content}>
+						{/* Mentor Info */}
+						<View style={styles.section}>
+							<Text style={styles.sectionTitle}>Mentor Information</Text>
+							<Text style={styles.text}>Mentor: {mentorName}</Text>
+							<Text style={styles.text}>Email: {mentorEmail}</Text>
+							<Text style={styles.text}>Generated Date: {generatedDate}</Text>
+						</View>
 
-					{/* Pending Requests */}
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Pending Requests</Text>
-						{requests.length === 0 ? (
-							<Text style={styles.text}>No pending requests</Text>
-						) : (
-							requests.map((r, idx) => (
-								<Text key={idx} style={styles.text}>
-									• {r.topic} from {r.participants?.length ?? 0} participant(s)
-								</Text>
-							))
-						)}
-					</View>
+						{/* Upcoming Sessions */}
+						<View style={styles.section}>
+							<Text style={styles.sectionTitle}>Upcoming Sessions</Text>
+							{sessions.length === 0 ? (
+								<Text style={styles.text}>No upcoming sessions</Text>
+							) : (
+								sessions.map((s, idx) => (
+									<Text key={idx} style={styles.text}>
+										• {s.topic} on {formatTime(s.time)} in {formatDate(s.date)}
+									</Text>
+								))
+							)}
+						</View>
 
-					{/* Recent Reviews */}
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Recent Reviews</Text>
-						{reviews.length === 0 ? (
-							<Text style={styles.text}>No reviews yet</Text>
-						) : (
-							reviews.slice(0, 5).map((review, idx) => (
-								<Text key={idx} style={styles.text}>
-									★ {review.rating} - {review.comment?.slice(0, 60)}...
-								</Text>
-							))
-						)}
+						{/* Pending Requests */}
+						<View style={styles.section}>
+							<Text style={styles.sectionTitle}>Pending Requests</Text>
+							{requests.length === 0 ? (
+								<Text style={styles.text}>No pending requests</Text>
+							) : (
+								requests.map((r, idx) => (
+									<Text key={idx} style={styles.text}>
+										• {r.topic} from {r.participants?.length ?? 0} participant(s)
+									</Text>
+								))
+							)}
+						</View>
+
+						{/* Recent Reviews */}
+						<View style={styles.section}>
+							<Text style={styles.sectionTitle}>Recent Reviews</Text>
+							{reviews.length === 0 ? (
+								<Text style={styles.text}>No reviews yet</Text>
+							) : (
+								reviews.slice(0, 5).map((review, idx) => (
+									<Text key={idx} style={styles.text}>
+										★ {review.rating} - {review.comment?.slice(0, 60)}...
+									</Text>
+								))
+							)}
+						</View>
 					</View>
 				</View>
-			</View>
 
-			{/* Footer */}
-			<View style={styles.footer} fixed>
-				<Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
-				<Text>Contact: support@mentoringplatform.com</Text>
-			</View>
-		</Page>
+				{/* Footer */}
+				<View style={styles.footer} fixed>
+					<Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
+					<Text>Contact: support@mentoringplatform.com</Text>
+				</View>
+			</Page>
 
-		{/* Page 2: Rating Performance and Plan Performance Tables */}
-		<Page size="A4" style={styles.page}>
-			{/* Header */}
-			<View style={styles.header} fixed>
-				<Image style={styles.logoPlaceholder} src={logo} />
-				<Text style={styles.title}>Mentor Summary Report</Text>
-			</View>
+			{/* Page 2: Rating Performance Table */}
+			<Page size="A4" style={styles.page}>
+				{/* Header */}
+				<View style={styles.header} fixed>
+					<Image style={styles.logoPlaceholder} src={logo} />
+					<Text style={styles.title}>Mentor Summary Report</Text>
+				</View>
 
-			{/* Rating Performance Table */}
-			<View style={styles.section}>
-				<Text style={styles.subSectionTitle}>Rating Performance ({filterRatingsPeriod})</Text>
-				{ratingsData.length === 0 ? (
-					<Text style={styles.text}>No rating data available</Text>
-				) : (
-					<View style={styles.table}>
-						<View style={[styles.tableRow, styles.tableHeader]}>
-							<Text style={styles.tableCell}>Period</Text>
-							<Text style={styles.tableCellLast}>Average Rating (★)</Text>
-						</View>
-						{ratingsData.map((data, idx) => (
-							<View key={idx} style={[styles.tableRow, idx % 2 === 1 ? styles.tableRowAlternate : {}]}>
-								<Text style={styles.tableCell}>{data.name}</Text>
-								<Text style={styles.tableCellLast}>{data.averageRating.toFixed(1)}</Text>
+				{/* Rating Performance Table */}
+				<View style={styles.section}>
+					<Text style={styles.subSectionTitle}>Rating Performance ({dateRange})</Text>
+					{ratingsData.length === 0 ? (
+						<Text style={styles.text}>No rating data available</Text>
+					) : (
+						<View style={styles.table}>
+							<View style={[styles.tableRow, styles.tableHeader]}>
+								<Text style={styles.tableCell}>Period</Text>
+								<Text style={styles.tableCellLast}>Average Rating</Text>
 							</View>
-						))}
-					</View>
-				)}
-			</View>
-
-			{/* Plan Performance Table */}
-			<View style={styles.section}>
-				<Text style={styles.subSectionTitle}>Plan Performance ({filterPerformancePeriod})</Text>
-				{performanceData.length === 0 ? (
-					<Text style={styles.text}>No performance data available</Text>
-				) : (
-					<View style={styles.table}>
-						<View style={[styles.tableRow, styles.tableHeader]}>
-							<Text style={styles.tableCell}>Period</Text>
-							<Text style={styles.tableCell}>Sessions</Text>
-							<Text style={styles.tableCellLast}>Revenue (₹)</Text>
+							{ratingsData.map((data, idx) => (
+								<View key={idx} style={[styles.tableRow, idx % 2 === 1 ? styles.tableRowAlternate : {}]}>
+									<Text style={styles.tableCell}>{data.name}</Text>
+									<Text style={styles.tableCellLast}>{data.averageRating.toFixed(1)}</Text>
+								</View>
+							))}
 						</View>
-						{performanceData.map((data, idx) => (
-							<View key={idx} style={[styles.tableRow, idx % 2 === 1 ? styles.tableRowAlternate : {}]}>
-								<Text style={styles.tableCell}>{data.week}</Text>
-								<Text style={styles.tableCell}>{data.sessions}</Text>
-								<Text style={styles.tableCellLast}>{data.revenue.toLocaleString()}</Text>
-							</View>
-						))}
-					</View>
-				)}
-			</View>
+					)}
+				</View>
 
-			{/* Footer */}
-			<View style={styles.footer} fixed>
-				<Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
-				<Text>Contact: support@mentoringplatform.com</Text>
-			</View>
-		</Page>
-	</Document>
-);
+				{/* Footer */}
+				<View style={styles.footer} fixed>
+					<Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
+					<Text>Contact: support@mentoringplatform.com</Text>
+				</View>
+			</Page>
+		</Document>
+	);
+};

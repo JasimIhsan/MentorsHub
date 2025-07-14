@@ -167,9 +167,9 @@ interface AdminDashboardPDFProps {
 		totalRevenue: number;
 	};
 	revenue: { name: string; total: number }[];
-	revenueFilter: "all" | "30days" | "1year";
+	revenueFilter:"all" | "30days" | "6months" | "1year";
 	userGrowth: { name: string; users: number; mentors: number }[];
-	userGrowthFilter: "all" | "30days" | "1year";
+	userGrowthFilter:"all" | "30days" | "6months" | "1year";
 	topMentors: Mentor[];
 	isLoading: boolean;
 }

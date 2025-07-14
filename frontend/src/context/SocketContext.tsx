@@ -26,6 +26,8 @@ export function SocketProvider({ userId, children }: SocketProviderProps) {
 		return () => {
 			unsubscribe();
 			if (!userId) {
+				console.log(`userID : `, userId); // showed as undifined when reloading
+				console.log('Disconnecting socket from SocketProvider');
 				socketService.disconnect();
 			}
 		};

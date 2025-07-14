@@ -9,7 +9,7 @@ export class GetMentorWeeklyRatingsController {
 		try {
 			const mentorId = req.params.mentorId;
 			const period = req.query.period;
-			const weeklyRatings = await this.useCase.execute(mentorId, period as "month" | "sixMonths" | "year");
+			const weeklyRatings = await this.useCase.execute(mentorId, period as "all" | "month" | "sixMonths" | "year");
 			res.status(HttpStatusCode.OK).json({ success: true, weeklyRatings });
 		} catch (error) {
 			logger.error(`❌ Error in GetMentorWeeklyRatingsController: ${error}`);

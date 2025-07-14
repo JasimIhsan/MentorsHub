@@ -10,9 +10,9 @@ export interface IGetMentorStatsUseCase {
 }
 
 export interface IGetMentorWeeklyPerformanceUseCase {
-	execute(mentorId: string, period: "month" | "sixMonths" | "year"): Promise<{ week: string; sessions: number; revenue: number }[]>;
+	execute(mentorId: string, period: "all" | "month" | "sixMonths" | "year"): Promise<{ name: string; sessions: number; revenue: number }[]>;
 }
 
 export interface IGetMentorWeeklyRatingsUseCase {
-	execute(mentorId: string, period: "month" | "sixMonths" | "year"): Promise<{ week: string; averageRating: number }[]>;
+	execute(mentorId: string, period: "all" | "month" | "sixMonths" | "year"): Promise<{ name: string; averageRating: number }[]>;
 }
