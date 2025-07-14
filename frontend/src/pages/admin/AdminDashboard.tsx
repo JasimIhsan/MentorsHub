@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AdminDashboardPDF } from "@/components/admin/dashboard/ReportPdf";
 import { PDFDownloadLink } from "@react-pdf/renderer";
+import { SelectContent, Select, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // StatsCard component
 function StatsCard({ title, value, description, trend, percentage, icon: Icon }: { title: string; value: number; description: string; trend: "up" | "down"; percentage: string; icon: React.ElementType }) {
@@ -340,7 +341,7 @@ export default function AdminDashboardPage() {
 
 	const [userGrowth, setUserGrowth] = useState<{ name: string; users: number; mentors: number }[]>([]);
 	const [isUserGrowthLoading, setIsUserGrowthLoading] = useState(false);
-	const [userGrowthFilter, setUserGrowthFilter] = useState<"all" | "30days" | "1year">("all");
+	const [userGrowthFilter, setUserGrowthFilter] = useState<"all" | "30days" | "6months" | "1year">("all");
 
 	const [topMentors, setTopMentors] = useState<Mentor[]>([]);
 	const [isTopMentorsLoading, setIsTopMentorsLoading] = useState(false);
@@ -412,6 +413,13 @@ export default function AdminDashboardPage() {
 		};
 		fetchTopMentors();
 	}, [user?.id]);
+
+	const filters = [
+		{ label: "All Time", value: "all" },
+		{ label: "Last 30 Days", value: "30days" },
+		{ label: "Last 6 Months", value: "6months" },
+		{ label: "Last 1 Year", value: "1year" },
+	];
 
 	return (
 		<div className="space-y-6">
@@ -490,13 +498,18 @@ export default function AdminDashboardPage() {
 							<CardTitle>User Growth</CardTitle>
 							<CardDescription>New users over time</CardDescription>
 						</div>
-						<Tabs defaultValue="all" onValueChange={(value) => setUserGrowthFilter(value as "all" | "30days" | "1year")}>
-							<TabsList>
-								<TabsTrigger value="all">All</TabsTrigger>
-								<TabsTrigger value="30days">30 Days</TabsTrigger>
-								<TabsTrigger value="1year">1 Year</TabsTrigger>
-							</TabsList>
-						</Tabs>
+						<Select defaultValue="all" onValueChange={(value) => setUserGrowthFilter(value)}>
+							<SelectTrigger className="w-[180px]">
+								<SelectValue placeholder="Select timeframe" />
+							</SelectTrigger>
+							<SelectContent>
+								{filters.map((filter, index) => (
+									<SelectItem key={index} value={filter.value} className="capitalize">
+										{filter.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</CardHeader>
 					<CardContent>
 						<UserGrowthChart isLoading={isUserGrowthLoading} userGrowthData={userGrowth} />

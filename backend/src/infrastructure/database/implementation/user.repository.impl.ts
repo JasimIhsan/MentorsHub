@@ -147,59 +147,61 @@ export class UserRepositoryImpl implements IUserRepository {
 		}
 	}
 
-	async userGrowthChartData(months: number): Promise<{users: number; mentors: number; name: string}[]> {
+	async userGrowthChartData(months: number): Promise<{ users: number; mentors: number; name: string }[]> {
 		try {
 			const matchFilter: any = {
 				role: { $in: ["user", "mentor"] },
 			};
 
-			// Add createdAt filter only if months > 0
-			if (months > 0) {
+			const now = new Date();
+
+			// Add date filter based on the selected range
+			if (months === 1) {
 				matchFilter.createdAt = {
-					$gte: new Date(new Date().setMonth(new Date().getMonth() - months)),
+					$gte: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30),
+				};
+			} else if (months > 1) {
+				matchFilter.createdAt = {
+					$gte: new Date(now.getFullYear(), now.getMonth() - months, now.getDate()),
 				};
 			}
+
 			const userGrowthData = await UserModel.aggregate([
+				{ $match: matchFilter },
 				{
-					// Filter for users and mentors in the specified time range
-					$match: matchFilter,
-				},
-				{
-					// Group by year, month, and role
 					$group: {
 						_id: {
 							year: { $year: "$createdAt" },
 							month: { $month: "$createdAt" },
+							day: { $dayOfMonth: "$createdAt" },
 							role: "$role",
 						},
 						count: { $sum: 1 },
 					},
 				},
 				{
-					// Pivot the data to have users and mentors as separate fields
 					$group: {
 						_id: {
 							year: "$_id.year",
 							month: "$_id.month",
+							day: "$_id.day",
 						},
 						users: {
-							$sum: { $cond: [{ $eq: ["$_id.role", "user"] }, "$count", 0] },
+							$sum: {
+								$cond: [{ $in: ["$_id.role", ["user", "mentor"]] }, "$count", 0],
+							},
 						},
 						mentors: {
-							$sum: { $cond: [{ $eq: ["$_id.role", "mentor"] }, "$count", 0] },
+							$sum: {
+								$cond: [{ $eq: ["$_id.role", "mentor"] }, "$count", 0],
+							},
 						},
 					},
 				},
 				{
 					$project: {
 						name: {
-							$concat: [
-								{
-									$arrayElemAt: [["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], { $subtract: ["$_id.month", 1] }],
-								},
-								" ",
-								{ $toString: "$_id.year" },
-							],
+							$concat: [{ $toString: "$_id.day" }, "-", { $toString: "$_id.month" }, "-", { $toString: "$_id.year" }],
 						},
 						users: 1,
 						mentors: 1,
@@ -207,25 +209,16 @@ export class UserRepositoryImpl implements IUserRepository {
 							$dateFromParts: {
 								year: "$_id.year",
 								month: "$_id.month",
-								day: 1,
+								day: "$_id.day",
 							},
 						},
 						_id: 0,
 					},
 				},
-				{
-					$sort: {
-						sortDate: 1,
-					},
-				},
-				{
-					$project: {
-						name: 1,
-						users: 1,
-						mentors: 1,
-					},
-				},
+				{ $sort: { sortDate: 1 } },
+				{ $project: { name: 1, users: 1, mentors: 1 } },
 			]);
+
 			return userGrowthData;
 		} catch (error) {
 			return handleExceptionError(error, "Error fetching user growth chart data");
