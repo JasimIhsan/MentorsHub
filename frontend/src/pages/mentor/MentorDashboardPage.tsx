@@ -14,6 +14,7 @@ import { MentorReviewRatingChart } from "@/components/mentor/dashboard/AverageRa
 import { MentorPerformanceChart } from "@/components/mentor/dashboard/MentorPerformanceChart";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { MentorReportDocument } from "@/components/mentor/dashboard/MentorReportDocument";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export interface PerformanceData {
 	week: string;
@@ -87,7 +88,7 @@ export function MentorDashboardPage() {
 		setFilterPerformancePeriod(value);
 	};
 
-	const [filterRatingPeriod, setFilterRatingPeriod] = useState("month");
+	const [filterRatingPeriod, setFilterRatingPeriod] = useState("all");
 	const [ratings, setRatings] = useState<ChartData[]>([]);
 	const [isRatingLoading, setIsRatingLoading] = useState(true);
 	const [ratingError, setRatingError] = useState<string | null>(null);
@@ -101,8 +102,8 @@ export function MentorDashboardPage() {
 				const response = await fetchMentorWeeklyRatingChartData(user?.id!, filterRatingPeriod);
 				console.log("response rating: ", response);
 				if (response.success) {
-					const transformedData = response.weeklyRatings.map((item: { week: string; averageRating: string }) => ({
-						name: item.week,
+					const transformedData = response.weeklyRatings.map((item: { name: string; averageRating: string }) => ({
+						name: item.name,
 						averageRating: parseFloat(item.averageRating),
 					}));
 					setRatings(transformedData);
@@ -190,12 +191,27 @@ export function MentorDashboardPage() {
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				<Card className="lg:col-span-2">
-					<CardHeader>
-						<CardTitle>Review Rating</CardTitle>
-						<CardDescription>Average rating of your reviews</CardDescription>
+					<CardHeader className="flex justify-between">
+						<div>
+							<CardTitle>Review Rating</CardTitle>
+							<CardDescription>Average rating of your reviews</CardDescription>
+						</div>
+						<div>
+							<Select value={filterRatingPeriod} onValueChange={handleRatingsFilterChange}>
+								<SelectTrigger className="w-[180px]">
+									<SelectValue placeholder="Select period" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="all">All Time</SelectItem>
+									<SelectItem value="month">Last Month</SelectItem>
+									<SelectItem value="sixMonths">Last 6 Months</SelectItem>
+									<SelectItem value="year">Last Year</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
 					</CardHeader>
 					<CardContent>
-						<MentorReviewRatingChart data={ratings} isLoading={isRatingLoading} error={ratingError} filterPeriod={filterRatingPeriod} handleFilterChange={handleRatingsFilterChange} />
+						<MentorReviewRatingChart data={ratings} isLoading={isRatingLoading} error={ratingError} />
 					</CardContent>
 				</Card>
 

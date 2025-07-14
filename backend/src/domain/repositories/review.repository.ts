@@ -20,5 +20,5 @@ export interface IReviewRepository {
 	// findAllByMentor(mentorId: string): Promise<ReviewEntity[]>;
 	// Optional: helper
 	calculateMentorRating(mentorId: string): Promise<{ average: number; total: number }>;
-	getWeeklyRatings(mentorId: string, period: "month" | "sixMonths" | "year"): Promise<{ week: string; averageRating: number }[]>;
+	getMentorRatingChartData(mentorId: string, period: "all" | "month" | "sixMonths" | "year"): Promise<{ name: string; averageRating: number }[]>
 }

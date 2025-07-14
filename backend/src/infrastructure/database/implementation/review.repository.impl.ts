@@ -50,7 +50,7 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 			sessionId?: string;
 			rating: number;
 			comment: string;
-		},
+		}
 	): Promise<ReviewEntity> {
 		try {
 			const updated = await ReviewModel.findByIdAndUpdate(reviewId, data, { new: true });
@@ -90,45 +90,65 @@ export class ReviewRepositoryImpl implements IReviewRepository {
 		}
 	}
 
-	async getWeeklyRatings(mentorId: string, period: "month" | "sixMonths" | "year"): Promise<{ week: string; averageRating: number }[]> {
+	async getMentorRatingChartData(mentorId: string, period: "all" | "month" | "sixMonths" | "year"): Promise<{ name: string; averageRating: number }[]> {
 		try {
-			const startDate = new Date();
-			if (period === "month") startDate.setDate(startDate.getDate() - 30);
-			else if (period === "sixMonths") startDate.setMonth(startDate.getMonth() - 6);
-			else startDate.setFullYear(startDate.getFullYear() - 1);
+			const match: any = {
+				mentorId: new mongoose.Types.ObjectId(mentorId),
+			};
+
+			if (period !== "all") {
+				const now = new Date();
+				if (period === "month") now.setDate(now.getDate() - 30);
+				else if (period === "sixMonths") now.setMonth(now.getMonth() - 6);
+				else if (period === "year") now.setFullYear(now.getFullYear() - 1);
+
+				match.createdAt = { $gte: now };
+			}
 
 			const result = await ReviewModel.aggregate([
-				{
-					$match: {
-						mentorId: new mongoose.Types.ObjectId(mentorId),
-						createdAt: { $gte: startDate },
-					},
-				},
+				{ $match: match },
+
 				{
 					$group: {
 						_id: {
-							week: { $isoWeek: "$createdAt" },
-							year: { $isoWeekYear: "$createdAt" },
+							year: { $year: "$createdAt" },
+							month: { $month: "$createdAt" },
+							day: { $dayOfMonth: "$createdAt" },
 						},
 						averageRating: { $avg: "$rating" },
 					},
 				},
-				{
-					$sort: { "_id.year": 1, "_id.week": 1 },
-				},
+
 				{
 					$project: {
-						week: { $concat: ["Week ", { $toString: "$_id.week" }, " ", { $toString: "$_id.year" }] },
+						name: {
+							$concat: [{ $toString: "$_id.day" }, "-", { $toString: "$_id.month" }, "-", { $toString: "$_id.year" }],
+						},
 						averageRating: { $round: ["$averageRating", 1] },
+						sortDate: {
+							$dateFromParts: {
+								year: "$_id.year",
+								month: "$_id.month",
+								day: "$_id.day",
+							},
+						},
+						_id: 0,
+					},
+				},
+
+				{ $sort: { sortDate: 1 } },
+
+				{
+					$project: {
+						name: 1,
+						averageRating: 1,
 					},
 				},
 			]);
 
-			console.log(`Weekly ratings for mentor ${mentorId} : `, result);
-
-			return result.map((r) => ({ week: r.week, averageRating: r.averageRating }));
+			return result as { name: string; averageRating: number }[];
 		} catch (error) {
-			return handleExceptionError(error, "Error fetching weekly ratings");
+			return handleExceptionError(error, "Error fetching daily ratings");
 		}
 	}
 }

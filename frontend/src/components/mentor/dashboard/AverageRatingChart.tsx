@@ -1,6 +1,5 @@
-import { Line, LineChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ChartData {
 	name: string;
@@ -11,11 +10,9 @@ interface MentorPerformanceChartProps {
 	data: ChartData[];
 	isLoading: boolean;
 	error: string | null;
-	filterPeriod: string;
-	handleFilterChange: (value: string) => void;
 }
 
-export function MentorReviewRatingChart({ data, isLoading, error, filterPeriod, handleFilterChange }: MentorPerformanceChartProps) {
+export function MentorReviewRatingChart({ data, isLoading, error }: MentorPerformanceChartProps) {
 	// Render loading state
 	if (isLoading) {
 		return (
@@ -38,21 +35,9 @@ export function MentorReviewRatingChart({ data, isLoading, error, filterPeriod, 
 	// Render chart
 	return (
 		<div className="w-full">
-			<div className="mb-4 flex justify-end">
-				<Select value={filterPeriod} onValueChange={handleFilterChange}>
-					<SelectTrigger className="w-[180px]">
-						<SelectValue placeholder="Select period" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="month">Last Month</SelectItem>
-						<SelectItem value="sixMonths">Last 6 Months</SelectItem>
-						<SelectItem value="year">Last Year</SelectItem>
-					</SelectContent>
-				</Select>
-			</div>
 			<div className="h-[300px]">
 				<ResponsiveContainer width="100%" height="100%">
-					<LineChart
+					<AreaChart
 						data={data}
 						margin={{
 							top: 20,
@@ -60,13 +45,17 @@ export function MentorReviewRatingChart({ data, isLoading, error, filterPeriod, 
 							left: 20,
 							bottom: 5,
 						}}>
-						<CartesianGrid strokeDasharray="3 3" />
+						{/* <CartesianGrid strokeDasharray="3 3" /> */}
 						<XAxis dataKey="name" />
-						<YAxis domain={[1, 5]} unit="★" tickFormatter={(value) => `${value}`} />
-						<Tooltip formatter={(value) => `${value}★`} />
+						<YAxis
+							domain={[1, 5]}
+							ticks={[1, 2, 3, 4, 5]} // Explicit ticks for 1 to 5
+							tickFormatter={(value) => "★".repeat(value)} // Show stars: ★, ★★, ★★★, ★★★★, ★★★★★
+						/>
+						<Tooltip formatter={(value) => "★".repeat(Number(value))} /> {/* Show stars in tooltip */}
 						<Legend />
-						<Line type="monotone" dataKey="averageRating" stroke="#8884d8" name="Average Rating" dot={false} />
-					</LineChart>
+						<Area type="monotone" dataKey="averageRating" stroke="#8884d8" fill="#8884d8" fillOpacity={0.3} name="Average Rating" />
+					</AreaChart>
 				</ResponsiveContainer>
 			</div>
 		</div>
