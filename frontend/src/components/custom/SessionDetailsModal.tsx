@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, Video, IndianRupee } from "lucide-react";
+import { CalendarDays, Clock, IndianRupee } from "lucide-react";
 import { ISessionUserDTO, ISessionMentorDTO } from "@/interfaces/ISessionDTO";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
 
@@ -71,13 +71,7 @@ export function SessionDetailsModal({ session, onClose }: SessionDetailsModalPro
 										</p>
 									</div>
 								</div>
-								<div className="flex items-center gap-2">
-									<Video className="h-4 w-4 text-muted-foreground" />
-									<div>
-										<Label className="text-sm font-medium text-muted-foreground">Type</Label>
-										<p className="text-foreground">{session.sessionType === "video" ? "Video Call" : "Chat"}</p>
-									</div>
-								</div>
+								
 							</div>
 						</div>
 

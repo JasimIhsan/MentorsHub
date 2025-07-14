@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
-import { Video, MessageSquare, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { IMentorDTO } from "@/interfaces/IMentorDTO";
 
@@ -84,12 +84,6 @@ const TopRatedMentors: React.FC<TopRatedMentorsProps> = ({ mentors, isLoading })
 									</div>
 									<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 										<div className="flex flex-wrap gap-2 sm:gap-3">
-											{mentor.sessionTypes.map((type, index) => (
-												<span key={index} className="flex items-center gap-1">
-													{type === "video" ? <Video className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" /> : <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />}
-													<span className="text-xs sm:text-sm text-muted-foreground">{type === "video" ? "Video Call" : "Chat"}</span>
-												</span>
-											))}
 											{mentor.pricing === "paid" || mentor.pricing === "both-pricing" ? (
 												<span className="text-xs sm:text-sm text-muted-foreground font-medium">₹{mentor.hourlyRate}</span>
 											) : (

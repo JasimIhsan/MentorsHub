@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { BriefcaseBusiness, GraduationCap, BookOpen, Plus, X } from "lucide-react";
-import { MentorApplicationFormData } from "@/types/mentor.application";
+import { MentorApplicationFormData } from "@/interfaces/mentor.application";
 
 interface ExperienceEducationStepProps {
 	formData: MentorApplicationFormData;

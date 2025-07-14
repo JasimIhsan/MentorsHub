@@ -43,10 +43,6 @@ export const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({ sele
 								</div>
 								<div className="grid grid-cols-2 gap-4">
 									<div>
-										<span className="text-sm font-medium text-muted-foreground">Session Type</span>
-										<p className="text-sm">{selectedRequest.sessionType}</p>
-									</div>
-									<div>
 										<span className="text-sm font-medium text-muted-foreground">Session Format</span>
 										<p className="text-sm">{selectedRequest.sessionFormat}</p>
 									</div>

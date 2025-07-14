@@ -1,5 +1,4 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import { UserEntity } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
 import { IUpdateUserUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";

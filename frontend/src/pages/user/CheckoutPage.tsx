@@ -15,19 +15,10 @@ import { format } from "date-fns"; // For formatting dates
 import { toast } from "sonner";
 
 interface RequestData {
-	sessionType: string;
 	sessionFormat: string;
 	date: Date | undefined;
 	time: string;
 	message: string;
-}
-
-interface Mentor {
-	userId: string;
-	name: string;
-	professionalTitle: string;
-	avatar?: string;
-	hourlyRate?: number;
 }
 
 export function CheckoutPage() {
@@ -43,13 +34,13 @@ export function CheckoutPage() {
 	// Access requestData and pricing from location.state
 	const { requestData } = (location.state || {}) as { requestData?: RequestData };
 	console.log("requestData: ", requestData);
-	const { mentor, loading, error } = useMentor(mentorId as string) as { mentor: Mentor | null; loading: boolean; error: string | null };
+	const { mentor, loading, error } = useMentor(mentorId as string);
 
 	if (error) {
 		toast.error(error);
 		return;
 	}
-	
+
 	// Validate payment inputs
 	const isPaymentValid = () => {
 		return cardNumber.length >= 16 && cardName.trim() && expiryDate.match(/^\d{2}\/\d{2}$/) && cvv.match(/^\d{3,4}$/);
@@ -95,7 +86,7 @@ export function CheckoutPage() {
 			<div className="mx-auto max-w-3xl">
 				<div className="mb-8">
 					<h1 className="text-3xl font-bold tracking-tight">Checkout</h1>
-					<p className="text-muted-foreground">Complete your booking with {mentor.name}</p>
+					<p className="text-muted-foreground">Complete your booking with {`${mentor.firstName} ${mentor.lastName}`}</p>
 				</div>
 
 				<div className="grid gap-8 md:grid-cols-[1fr_300px]">
@@ -184,11 +175,11 @@ export function CheckoutPage() {
 							<CardContent className="pb-2">
 								<div className="flex items-start gap-4">
 									<Avatar className="h-12 w-12 border-2 border-primary/20">
-										<AvatarImage src={mentor.avatar} alt={mentor.name} />
-										<AvatarFallback>{mentor.name.charAt(0)}</AvatarFallback>
+										<AvatarImage src={mentor.avatar || ""} alt={mentor.firstName} />
+										<AvatarFallback>{mentor.firstName.charAt(0)}</AvatarFallback>
 									</Avatar>
 									<div>
-										<h3 className="font-bold">{mentor.name}</h3>
+										<h3 className="font-bold">{`${mentor.firstName} ${mentor.lastName}`}</h3>
 										<p className="text-sm text-muted-foreground">{mentor.professionalTitle}</p>
 									</div>
 								</div>
@@ -201,10 +192,6 @@ export function CheckoutPage() {
 									<div className="flex items-center gap-2">
 										<Clock className="h-4 w-4 text-muted-foreground" />
 										<span className="text-sm">{requestData.time || "Not selected"}</span>
-									</div>
-									<div className="flex items-center gap-2">
-										<MessageSquare className="h-4 w-4 text-muted-foreground" />
-										<span className="text-sm">{requestData.sessionType === "video" ? "Video Call" : "Chat"}</span>
 									</div>
 									<div className="flex items-center gap-2">
 										<MessageSquare className="h-4 w-4 text-muted-foreground" />

@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MentorApplicationFormData } from "@/types/mentor.application";
+import { MentorApplicationFormData } from "@/interfaces/mentor.application";
 
 interface PersonalInfoStepProps {
   formData: MentorApplicationFormData;

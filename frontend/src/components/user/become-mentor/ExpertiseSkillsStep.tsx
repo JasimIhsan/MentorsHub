@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import MultipleSelector from "@/components/ui/multiple-selector";
 import { SKILL_OPTIONS } from "@/constants/skill.option";
-import { MentorApplicationFormData } from "@/types/mentor.application";
+import { MentorApplicationFormData } from "@/interfaces/mentor.application";
 
 interface ExpertiseSkillsStepProps {
 	formData: MentorApplicationFormData;

@@ -16,7 +16,6 @@ export interface ISessionDocument extends Document {
 	participants: ISessionParticipant[];
 	mentorId: mongoose.Types.ObjectId;
 	topic: string;
-	sessionType: string;
 	sessionFormat: SessionFormat;
 	date: Date;
 	time: string;
@@ -48,7 +47,6 @@ const SessionSchema = new Schema(
 		participants: { type: [ParticipantSchema], required: true },
 		mentorId: { type: Schema.Types.ObjectId, ref: "Users", required: true },
 		topic: { type: String, required: true },
-		sessionType: { type: String, required: true },
 		sessionFormat: {
 			type: String,
 			enum: ["one-on-one", "group"],

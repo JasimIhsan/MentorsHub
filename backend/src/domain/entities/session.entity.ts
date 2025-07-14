@@ -22,7 +22,6 @@ export interface SessionProps {
 	mentor: PersonEntity;
 	participants: SessionParticipantEntity[];
 	topic: string;
-	sessionType: string;
 	sessionFormat: SessionFormat;
 	date: Date;
 	time: string;
@@ -50,9 +49,7 @@ export class SessionEntity {
 	get topic() {
 		return this.props.topic;
 	}
-	get sessionType() {
-		return this.props.sessionType;
-	}
+
 	get sessionFormat() {
 		return this.props.sessionFormat;
 	}
@@ -122,7 +119,6 @@ export class SessionEntity {
 			},
 			participants,
 			topic: doc.topic,
-			sessionType: doc.sessionType,
 			sessionFormat: doc.sessionFormat,
 			date: doc.date,
 			time: doc.time,
@@ -136,4 +132,3 @@ export class SessionEntity {
 		});
 	}
 }
-

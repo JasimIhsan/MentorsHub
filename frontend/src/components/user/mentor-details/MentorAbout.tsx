@@ -88,12 +88,6 @@ export function MentorAbout({ mentor }: MentorAboutProps) {
 								<span>60 minutes</span>
 							</div>
 							<div className="flex items-center justify-between">
-								<span className="font-medium">Session Type</span>
-								<div className="flex items-center gap-1">
-									<span>{mentor.sessionTypes?.join(", ") || "Not specified"}</span>
-								</div>
-							</div>
-							<div className="flex items-center justify-between">
 								<span className="font-medium">Format</span>
 								<div className="flex items-center gap-1">
 									<Users className="h-4 w-4" />

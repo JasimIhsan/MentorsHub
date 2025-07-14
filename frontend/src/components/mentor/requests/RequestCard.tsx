@@ -42,10 +42,6 @@ export const RequestCard: React.FC<RequestCardProps> = memo(({ request, status, 
 					</div>
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-1">
-							<span className="text-sm font-medium text-muted-foreground">Session Type</span>
-							<p className="text-sm">{request.sessionType}</p>
-						</div>
-						<div className="space-y-1">
 							<span className="text-sm font-medium text-muted-foreground">Format</span>
 							<p className="text-sm">{request.sessionFormat}</p>
 						</div>

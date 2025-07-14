@@ -4,7 +4,6 @@ import { SessionStatusEnum } from "../interfaces/enums/session.status.enums";
 
 interface BaseSession {
 	topic: string;
-	sessionType: string;
 	sessionFormat: string;
 	date: string;
 	time: string;
@@ -64,7 +63,6 @@ export function mapToUserSessionDTO(session: SessionEntity, userId: string): ISe
 		mentor: mapToPerson(mentor),
 		userId,
 		topic: session.topic,
-		sessionType: session.sessionType,
 		sessionFormat: session.sessionFormat,
 		date: session.date.toISOString(),
 		time: session.time,
@@ -91,7 +89,6 @@ export function mapToMentorSessionDTO(session: SessionEntity): ISessionMentorDTO
 		mentor: session.mentor.id,
 		participants,
 		topic: session.topic,
-		sessionType: session.sessionType,
 		sessionFormat: session.sessionFormat,
 		date: session.date.toISOString(),
 		time: session.time,

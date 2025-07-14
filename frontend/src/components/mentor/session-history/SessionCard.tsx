@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, Video, Users, MessageSquare, IndianRupee, FileText } from "lucide-react";
+import { CalendarDays, Clock, Video, Users, IndianRupee, FileText } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
@@ -47,10 +47,6 @@ export function SessionCard({ session, onSelect }: SessionCardProps) {
 							<div className="flex items-center gap-2">
 								<IndianRupee className="h-4 w-4 text-muted-foreground" />
 								<span className="text-sm">{session.pricing === "free" ? "Free" : `${session.totalAmount?.toFixed(2) || 0}`}</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<MessageSquare className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">{session.sessionType}</span>
 							</div>
 						</div>
 					</div>

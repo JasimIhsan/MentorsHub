@@ -5,7 +5,6 @@ import { SessionStatusEnum } from "../../interfaces/enums/session.status.enums";
 import { SessionPaymentStatusEnum } from "../../interfaces/enums/session.payment.status.enum";
 import { ActionTypeEnum } from "../../interfaces/enums/gamification.action.type.enum";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
-import { UserEntity } from "../../../domain/entities/user.entity";
 
 export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly updateUserProgress: IUpdateUserTaskProgressUseCase, private readonly userRepo: IUserRepository) {}

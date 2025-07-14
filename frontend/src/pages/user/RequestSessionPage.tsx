@@ -3,11 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MessageSquare, Video, Users, ArrowRight, CalendarDays, Clock } from "lucide-react";
+import { Users, ArrowRight, CalendarDays, Clock } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,7 +25,6 @@ export interface SessionData {
 	mentorId: string;
 	userId: string;
 	topic: string;
-	sessionType: string;
 	date: Date;
 	time: string;
 	hours: number;
@@ -39,7 +37,6 @@ export function RequestSessionPage() {
 	const [date, setDate] = useState<Date | null>(new Date());
 	const [time, setTime] = useState<string>("");
 	const [topic, setTopic] = useState<string>("");
-	const [sessionType, setSessionType] = useState<string>("video");
 	const [message, setMessage] = useState<string>("");
 	const [hours, setHours] = useState<number>(1);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,9 +53,16 @@ export function RequestSessionPage() {
 			if (!date) return;
 			try {
 				const response = await fetchMentorAvailabilityAPI(mentorId as string, date);
-				setAvailability(response.availability);
-				setTime("");
-				setIsSlotValid(true);
+				if (response.success && response.isExist) {
+					setAvailability(response.availability);
+					setTime("");
+					setIsSlotValid(true);
+				} else {
+					setAvailability([]);
+					setTime("");
+					setIsSlotValid(false);
+					toast.error("Mentor is not available on this date.");
+				}
 			} catch (error) {
 				console.error("Error fetching availability:", error);
 				toast.error("Failed to fetch mentor availability. Please try again.");
@@ -84,7 +88,7 @@ export function RequestSessionPage() {
 	}
 
 	const isFormValid = () => {
-		return date && time && sessionType && topic && message.trim() && hours > 0 && isSlotValid;
+		return date && time && topic && message.trim() && hours > 0 && isSlotValid;
 	};
 
 	const calculateTotal = () => {
@@ -129,7 +133,6 @@ export function RequestSessionPage() {
 		mentorId: mentorId,
 		userId: user?.id as string,
 		topic: topic,
-		sessionType: sessionType,
 		date: (date ? new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())) : date) as Date,
 		time: time,
 		hours: hours,
@@ -188,26 +191,6 @@ export function RequestSessionPage() {
 										Session Topic
 									</Label>
 									<Input id="topic" type="text" value={topic} onChange={(e) => setTopic(e.target.value)} className="w-full" placeholder="Enter your topic" aria-label="Session topic" />
-								</div>
-
-								<div>
-									<Label className="mb-2 block">Session Type</Label>
-									<RadioGroup value={sessionType} onValueChange={setSessionType} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-										<div className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 ${sessionType === "video" ? "border-primary bg-primary/5" : ""}`}>
-											<RadioGroupItem value="video" id="video" />
-											<Label htmlFor="video" className="flex cursor-pointer items-center gap-2 font-normal">
-												<Video className="h-5 w-5" />
-												Video Call
-											</Label>
-										</div>
-										<div className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 ${sessionType === "chat" ? "border-primary bg-primary/5" : ""}`}>
-											<RadioGroupItem value="chat" id="chat" />
-											<Label htmlFor="chat" className="flex cursor-pointer items-center gap-2 font-normal">
-												<MessageSquare className="h-5 w-5" />
-												Chat
-											</Label>
-										</div>
-									</RadioGroup>
 								</div>
 
 								<div>
@@ -310,13 +293,6 @@ export function RequestSessionPage() {
 									<Separator className="my-4" />
 									<div className="space-y-3">
 										<div className="flex items-center justify-between">
-											<span className="text-sm">Preferred Session Type</span>
-											<div className="flex items-center gap-1">
-												{mentor.sessionTypes.includes("video") ? <Video className="h-4 w-4 text-muted-foreground" /> : mentor.sessionTypes.includes("chat") ? <MessageSquare className="h-4 w-4 text-muted-foreground" /> : null}
-												<span className="text-sm">{mentor.sessionTypes.join(", ")}</span>
-											</div>
-										</div>
-										<div className="flex items-center justify-between">
 											<span className="text-sm">Preferred Format</span>
 											<div className="flex items-center gap-1">
 												<Users className="h-4 w-4 text-muted-foreground" />
@@ -351,10 +327,6 @@ export function RequestSessionPage() {
 										<div className="flex items-center gap-2">
 											<Clock className="h-4 w-4 text-muted-foreground" />
 											<span className="text-sm">{requestData.time || "Not selected"}</span>
-										</div>
-										<div className="flex items-center gap-2">
-											<MessageSquare className="h-4 w-4 text-muted-foreground" />
-											<span className="text-sm">{requestData.sessionType === "video" ? "Video Call" : "Chat"}</span>
 										</div>
 										<div className="flex items-center gap-2">
 											<Clock className="h-4 w-4 text-muted-foreground" />
@@ -393,7 +365,7 @@ export function RequestSessionPage() {
 						<DialogHeader>
 							<DialogTitle>Confirm Session Request</DialogTitle>
 							<DialogDescription>
-								You're about to request a {sessionType} session with {mentor.firstName} {mentor.lastName} for {hours} {hours === 1 ? "hour" : "hours"} on {date ? format(date, "MMMM d, yyyy") : "selected date"} at {time || "selected time"}.
+								You're about to request a session with {mentor.firstName} {mentor.lastName} for {hours} {hours === 1 ? "hour" : "hours"} on {date ? format(date, "MMMM d, yyyy") : "selected date"} at {time || "selected time"}.
 								{mentor.pricing === "free"
 									? "A platform fee of ₹40 will be charged upon mentor approval."
 									: `A session fee of ₹${mentor.hourlyRate ? Number(mentor.hourlyRate) * hours : 0} plus a ₹40 platform fee will be charged upon mentor approval.`}

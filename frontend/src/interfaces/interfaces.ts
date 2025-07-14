@@ -48,7 +48,6 @@ export interface Mentor {
 	expertise: string;
 	avatar: string;
 	tags: string[];
-	sessionType: "video" | "chat";
 	isPaid: boolean;
 	rate?: string; // Optional, only present if isPaid is true
 }

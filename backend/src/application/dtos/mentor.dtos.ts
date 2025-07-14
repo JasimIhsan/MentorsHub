@@ -49,9 +49,8 @@ export interface IMentorDTO {
 		expiryDate: string | null;
 	}[];
 	sessionFormat: "one-on-one" | "group" | "both";
-	sessionTypes: string[];
 	pricing: "free" | "paid" | "both-pricing";
-	hourlyRate: number | null;
+	hourlyRate: number;
 	availability: Availability;
 	documents: string[];
 }
@@ -86,7 +85,6 @@ export function mapToMentorDTO(userEntity: UserEntity, mentorEntity: MentorProfi
 		certifications: mentorEntity.certifications,
 		documents: mentorEntity.documents,
 		sessionFormat: mentorEntity.sessionFormat,
-		sessionTypes: mentorEntity.sessionTypes,
 		pricing: mentorEntity.pricing,
 		hourlyRate: mentorEntity.hourlyRate,
 	};
@@ -123,7 +121,6 @@ export function mapToMentorDTOWithoutUser(mentorEntity: MentorEntity): IMentorDT
 		certifications: mentorEntity.certifications,
 		documents: mentorEntity.documents,
 		sessionFormat: mentorEntity.sessionFormat,
-		sessionTypes: mentorEntity.sessionTypes,
 		pricing: mentorEntity.pricing,
 		hourlyRate: mentorEntity.hourlyRate,
 	};

@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { ProfileHeader } from "@/components/user/user-profile/ProfileHeader";
 import { BioSection } from "@/components/user/user-profile/BioSection";
 import { SkillsInterestsSection } from "@/components/user/user-profile/SkillsInterestSection";
-import { SessionHistorySection } from "@/components/user/user-profile/SessionHistory";
 import { PersonalInfoSection } from "@/components/user/user-profile/PersonalInformation";
 import { AccountSettingsSection } from "@/components/user/user-profile/AccountSettings";
 import { updateProfileSchema, UpdateProfileFormData } from "@/schema/updateProfilePersonalInfo";
@@ -211,7 +210,7 @@ export default function UserProfilePage() {
 					<div className="space-y-6 lg:col-span-2">
 						<BioSection bio={formData.bio} isEditing={isEditing} handleInputChange={handleInputChange} errors={errors} />
 						<SkillsInterestsSection formData={formData} isEditing={isEditing} handleInputChange={handleInputChange} errors={errors} />
-						<SessionHistorySection user={user} pastSessions={[]} upcomingSessions={[]} />
+						{/* <SessionHistorySection user={user} pastSessions={[]} upcomingSessions={[]} /> */}
 					</div>
 					<div className="space-y-6">
 						<PersonalInfoSection formData={formData} isEditing={isEditing} handleInputChange={handleInputChange} errors={errors} />

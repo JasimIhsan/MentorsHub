@@ -44,9 +44,8 @@ export interface MentorApplicationFormData {
 	educations: Education[];
 	certifications: Certification[];
 	sessionFormat: "one-on-one" | "group" | "both";
-	sessionTypes: string[];
 	pricing: "free" | "paid";
-	hourlyRate: string;
+	hourlyRate: number;
 	availability: Partial<Record<WeekDay, string[]>>;
 	documents: File[];
 	terms: boolean;

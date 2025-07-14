@@ -18,7 +18,6 @@ export class RazorpayGatewayImpl implements IPaymentGateway {
 	}
 
 	async createOrder(amount: number, receipt: string, notes: Record<string, any>): Promise<any> {
-		console.log(`amount : `, amount);
 		try {
 			return await this.client.orders.create({
 				amount,

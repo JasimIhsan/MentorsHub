@@ -12,7 +12,6 @@ export interface SessionRequestInput {
 	mentorId: string; // who you’re booking
 	userId: string; // current logged‑in user
 	topic: string;
-	sessionType: string;
 	sessionFormat: "one-on-one" | "group";
 	date: Date;
 	time: string;
@@ -55,7 +54,6 @@ export class RequestSessionUseCase implements IRequestSessionUseCase {
 			mentor: { id: dto.mentorId },
 			participants,
 			topic: dto.topic,
-			sessionType: dto.sessionType,
 			sessionFormat: dto.sessionFormat,
 			date: dto.date,
 			time: dto.time,

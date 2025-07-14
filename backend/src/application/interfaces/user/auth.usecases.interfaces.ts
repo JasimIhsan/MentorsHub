@@ -1,4 +1,3 @@
-import { UserEntity } from "../../../domain/entities/user.entity";
 import { IUserDTO } from "../../dtos/user.dtos";
 
 export interface IForgotPasswordUseCase {

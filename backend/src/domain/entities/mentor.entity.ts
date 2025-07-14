@@ -47,9 +47,8 @@ export interface MentorEntityProps {
 		expiryDate: string | null;
 	}[];
 	sessionFormat: "one-on-one" | "group" | "both";
-	sessionTypes: string[];
 	pricing: "free" | "paid" | "both-pricing";
-	hourlyRate: number | null;
+	hourlyRate: number;
 	availability: Availability;
 	documents: string[];
 }
@@ -161,10 +160,6 @@ export class MentorEntity {
 		return this.props.sessionFormat;
 	}
 
-	get sessionTypes() {
-		return this.props.sessionTypes;
-	}
-
 	get pricing() {
 		return this.props.pricing;
 	}
@@ -210,7 +205,6 @@ export class MentorEntity {
 			educations: doc.educations,
 			certifications: doc.certifications,
 			sessionFormat: doc.sessionFormat,
-			sessionTypes: doc.sessionTypes,
 			pricing: doc.pricing,
 			hourlyRate: doc.hourlyRate,
 			availability: doc.availability,

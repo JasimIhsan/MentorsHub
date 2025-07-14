@@ -51,9 +51,8 @@ export interface MentorProfileProps {
 	educations: Education[];
 	certifications: Certification[];
 	sessionFormat: SessionFormat;
-	sessionTypes: string[];
 	pricing: PricingType;
-	hourlyRate: number | null; // must be null if pricing === "free"
+	hourlyRate: number;
 	availability: Availability;
 	documents: string[];
 	createdAt?: Date;
@@ -73,9 +72,8 @@ export class MentorProfileEntity {
 	private _educations: Education[];
 	private _certifications: Certification[];
 	private _sessionFormat: SessionFormat;
-	private _sessionTypes: string[];
 	private _pricing: PricingType;
-	private _hourlyRate: number | null;
+	private _hourlyRate: number;
 	private _availability: Availability;
 	private _documents: string[];
 	private readonly _createdAt: Date;
@@ -86,8 +84,8 @@ export class MentorProfileEntity {
 	/** Use when *creating a brand‑new* mentor profile */
 	public static create(props: MentorProfileProps): MentorProfileEntity {
 		//  Basic domain‑level validation
-		if (props.pricing === "free" && props.hourlyRate !== null) {
-			throw new Error("hourlyRate must be null when pricing is 'free'");
+		if (props.pricing === "free" && props.hourlyRate !== 0) {
+			throw new Error("hourlyRate must be 0 when pricing is 'free'");
 		}
 		if (props.pricing === "paid" && (props.hourlyRate === null || props.hourlyRate < 0)) {
 			throw new Error("hourlyRate must be a positive number when pricing is 'paid'");
@@ -108,7 +106,6 @@ export class MentorProfileEntity {
 			educations: doc.educations ?? [],
 			certifications: doc.certifications ?? [],
 			sessionFormat: doc.sessionFormat,
-			sessionTypes: doc.sessionTypes ?? [],
 			pricing: doc.pricing,
 			hourlyRate: doc.hourlyRate ?? null,
 			availability: doc.availability ?? {},
@@ -130,7 +127,6 @@ export class MentorProfileEntity {
 		this._educations = [...props.educations];
 		this._certifications = [...props.certifications];
 		this._sessionFormat = props.sessionFormat;
-		this._sessionTypes = [...props.sessionTypes];
 		this._pricing = props.pricing;
 		this._hourlyRate = props.hourlyRate;
 		this._availability = { ...props.availability };
@@ -171,13 +167,10 @@ export class MentorProfileEntity {
 	get sessionFormat(): SessionFormat {
 		return this._sessionFormat;
 	}
-	get sessionTypes(): string[] {
-		return [...this._sessionTypes];
-	}
 	get pricing(): PricingType {
 		return this._pricing;
 	}
-	get hourlyRate(): number | null {
+	get hourlyRate(): number {
 		return this._hourlyRate;
 	}
 	get availability(): Availability {
@@ -206,7 +199,6 @@ export class MentorProfileEntity {
 		if (updatedData.workExperiences !== undefined) this._workExperiences = [...updatedData.workExperiences];
 		if (updatedData.educations !== undefined) this._educations = [...updatedData.educations];
 		if (updatedData.certifications !== undefined) this._certifications = [...updatedData.certifications];
-		if (updatedData.sessionTypes !== undefined) this._sessionTypes = [...updatedData.sessionTypes];
 		if (updatedData.documents !== undefined) this._documents = [...updatedData.documents];
 		// Enums & logic-handled
 		if (updatedData.pricing !== undefined || updatedData.hourlyRate !== undefined) this.setPricing(updatedData.pricing ?? this._pricing, updatedData.hourlyRate !== undefined ? updatedData.hourlyRate : this._hourlyRate);
@@ -215,11 +207,11 @@ export class MentorProfileEntity {
 		this.touch();
 	}
 
-	public setPricing(pricing: PricingType, hourlyRate: number | null): void {
-		if (pricing === "free" && hourlyRate !== null) {
-			throw new Error("hourlyRate must be null when pricing is 'free'");
+	public setPricing(pricing: PricingType, hourlyRate: number): void {
+		if (pricing === "free" && hourlyRate !== 0) {
+			throw new Error("hourlyRate must be 0 when pricing is 'free'");
 		}
-		if (pricing === "paid" && (hourlyRate === null || hourlyRate < 0)) {
+		if (pricing === "paid" || hourlyRate < 0) {
 			throw new Error("hourlyRate must be a positive number when pricing is 'paid'");
 		}
 		this._pricing = pricing;
@@ -259,7 +251,6 @@ export class MentorProfileEntity {
 			educations: mentor.educations,
 			certifications: mentor.certifications,
 			sessionFormat: mentor.sessionFormat,
-			sessionTypes: mentor.sessionTypes,
 			pricing: mentor.pricing,
 			hourlyRate: mentor.hourlyRate,
 			availability: mentor.availability,
