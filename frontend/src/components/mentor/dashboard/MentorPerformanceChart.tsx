@@ -11,7 +11,7 @@ interface MentorPerformanceChartProps {
 		sessions: number;
 		revenue: number;
 	}[];
-	handleFilterChange: (value: string) => void;
+	handleFilterChange: (value: "all" | "month" | "sixMonths" | "year") => void;
 }
 
 export function MentorPerformanceChart({ data, isLoading, error, filterPeriod, handleFilterChange }: MentorPerformanceChartProps) {

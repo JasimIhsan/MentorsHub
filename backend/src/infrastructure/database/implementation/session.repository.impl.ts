@@ -296,6 +296,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			return handleExceptionError(error, "Error fetching weekly performance");
 		}
 	}
+	
 	async findRevenueByMentor(mentorId: string): Promise<number> {
 		try {
 			const result = await SessionModel.aggregate([
