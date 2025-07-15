@@ -3,7 +3,7 @@ import { IUserRepository } from "../../../../domain/repositories/user.repository
 import { UserEntity } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IVerifyMentorApplicationUsecase } from "../../../interfaces/admin/admin.mentor.application.interface";
-import { ICreateNotificationUseCase } from "../../../interfaces/notification";
+import { ICreateNotificationUseCase } from "../../../interfaces/notification/notification.usecase";
 import { Server } from "socket.io";
 import { findUserSocket } from "../../../../infrastructure/socket/old/socket.io";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";

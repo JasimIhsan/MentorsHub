@@ -24,9 +24,9 @@ export function useNotifications(userId: string, options: PaginationOptions = {}
 		if (!userId) return;
 
 		// Subscribe to new notifications via socket
-		const unsubscribe = socket.onNewNotification("receive-notification", (notification: INotification) => {
-			dispatch(addNotification(notification));
-		});
+		// const unsubscribe = socket.onNewNotification("receive-notification", (notification: INotification) => {
+		// 	dispatch(addNotification(notification));
+		// });
 
 		// Fetch notifications with pagination and filters
 		dispatch(
@@ -40,7 +40,7 @@ export function useNotifications(userId: string, options: PaginationOptions = {}
 		);
 
 		return () => {
-			unsubscribe();
+			// unsubscribe();
 		};
 	}, [dispatch, socket, userId, page, limit, search, isRead]);
 

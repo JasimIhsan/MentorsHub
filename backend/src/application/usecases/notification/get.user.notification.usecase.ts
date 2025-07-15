@@ -1,10 +1,10 @@
 import { INotificationRepository } from "../../../domain/repositories/notification.repository";
-import { INotificationEntity } from "../../../domain/entities/notification.entity";
-import { IGetUserNotificationsUseCase } from "../../interfaces/notification";
+import { NotificationEntityProps } from "../../../domain/entities/notification.entity";
+import { IGetUserNotificationsUseCase } from "../../interfaces/notification/notification.usecase";
 
 // Interface for paginated response
 interface PaginatedNotificationResponse {
-	notifications: INotificationEntity[];
+	notifications: NotificationEntityProps[];
 	total: number;
 	currentPage: number;
 	totalPages: number;

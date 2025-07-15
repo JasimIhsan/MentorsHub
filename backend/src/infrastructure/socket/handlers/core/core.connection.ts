@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import { onlineUsers } from "../../context";
 import { broadcastOnlineUsers } from "../../utils/broadcast.online.users";
 import { sendNotificationToUser } from "../notification/send.notification.to.user";
+import { broadcastNotification } from "../notification/broadcast.notification";
 
 export function registerCoreConnectionHandlers(io: Server, socket: Socket) {
 	console.log(`socket.data : `, socket.data);
@@ -10,11 +11,13 @@ export function registerCoreConnectionHandlers(io: Server, socket: Socket) {
 
 	onlineUsers.set(userId, socket);
 
-	sendNotificationToUser(userId, "Welcome to the platform!");
-
 	console.log("🟢 Online users:", Array.from(onlineUsers.keys()));
 
-	if (wasOffline) broadcastOnlineUsers(io);
+	if (wasOffline) {
+		broadcastOnlineUsers(io);
+		sendNotificationToUser(userId, "Welcome to the platform!");
+		// broadcastNotification("New user joined the platform!");
+	}
 
 	socket.on("get-online-users", () => {
 		broadcastOnlineUsers(io);

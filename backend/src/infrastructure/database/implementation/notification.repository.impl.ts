@@ -1,12 +1,12 @@
 import { NotificationTypeEnum } from "../../../application/interfaces/enums/notification.type.enum";
-import { INotificationEntity, NotificationEntity } from "../../../domain/entities/notification.entity";
+import { NotificationEntityProps, NotificationEntity } from "../../../domain/entities/notification.entity";
 import { INotificationRepository } from "../../../domain/repositories/notification.repository";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 import { NotificationModel } from "../models/notification/notification.model";
 import { INotificationDocument } from "../models/notification/notification.model";
 
 export class NotificationRepositoryImpl implements INotificationRepository {
-	async createNotification(userId: string, title: string, message: string, type: NotificationTypeEnum): Promise<INotificationEntity> {
+	async createNotification(userId: string, title: string, message: string, type: NotificationTypeEnum): Promise<NotificationEntity> {
 		try {
 			const notification: INotificationDocument = await NotificationModel.create({
 				recipientId: userId,
@@ -15,22 +15,13 @@ export class NotificationRepositoryImpl implements INotificationRepository {
 				type,
 			});
 
-			return new NotificationEntity({
-				id: notification._id.toString(),
-				recipientId: notification.recipientId.toString(),
-				title: notification.title,
-				message: notification.message,
-				type: notification.type,
-				link: notification.link,
-				isRead: notification.isRead,
-				createdAt: notification.createdAt,
-			}).toObject();
+			return NotificationEntity.fromDBDocument(notification);
 		} catch (error) {
 			return handleExceptionError(error, "Error creating notification");
 		}
 	}
 
-	async getUserNotifications(params: { userId: string; page: number; limit: number; isRead?: boolean; search?: string }): Promise<INotificationEntity[]> {
+	async getUserNotifications(params: { userId: string; page: number; limit: number; isRead?: boolean; search?: string }): Promise<NotificationEntityProps[]> {
 		try {
 			const { userId, page, limit, isRead, search } = params;
 
@@ -57,7 +48,7 @@ export class NotificationRepositoryImpl implements INotificationRepository {
 					link: n.link,
 					isRead: n.isRead,
 					createdAt: n.createdAt,
-				}).toObject(),
+				}).toObject()
 			);
 		} catch (error) {
 			return handleExceptionError(error, "Error fetching notifications");

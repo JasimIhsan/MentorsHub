@@ -1,5 +1,5 @@
 import { INotificationRepository } from "../../../domain/repositories/notification.repository";
-import { IMarkAllAsReadUseCase } from "../../interfaces/notification";
+import { IMarkAllAsReadUseCase } from "../../interfaces/notification/notification.usecase";
 
 export class MarkAllNotificationsAsReadUseCase implements IMarkAllAsReadUseCase {
 	constructor(private notificationRepo: INotificationRepository) {}

@@ -154,7 +154,7 @@ const UserRoutes = () => {
 			</Route>
 
 			{/* <Route path="/video-call" element={<SampleVideoCall />} /> */}
-			<Route path="/video-call" element={<VideoCallPage />} />
+			{/* <Route path="/video-call" element={<VideoCallPage />} /> */}
 		</Routes>
 	);
 };
