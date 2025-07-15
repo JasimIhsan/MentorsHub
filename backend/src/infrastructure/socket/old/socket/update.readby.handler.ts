@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import { markMessageAsReadUsecase } from "../../../application/usecases/text-message/composer";
+import { markMessageAsReadUsecase } from "../../../../application/usecases/text-message/composer";
 
 export const registerMessageReadHandlers = (io: Server, socket: Socket) => {
 	socket.on("mark-chat-as-read", async ({ chatId, userId }: { chatId: string; userId: string }) => {

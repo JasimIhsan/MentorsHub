@@ -1,13 +1,13 @@
 import { Server, Socket } from "socket.io";
 import { Model } from "mongoose";
-import { ISessionDocument } from "../database/models/session/session.model";
-import { markMessageAsReadUsecase, sendMessageUsecase } from "../../application/usecases/text-message/composer";
+import { ISessionDocument } from "../../database/models/session/session.model";
+import { markMessageAsReadUsecase, sendMessageUsecase } from "../../../application/usecases/text-message/composer";
 import { deleteMessageHandler } from "./socket/delete.message.handler";
 import { registerMessageReadHandlers } from "./socket/update.readby.handler";
 import { getMessageUnreadCountHandler } from "./socket/get.message.unread.count.handler";
-import { CommonStringMessage } from "../../shared/constants/string.messages";
-import { RoleEnum } from "../../application/interfaces/enums/role.enum";
-import { SessionStatusEnum } from "../../application/interfaces/enums/session.status.enums";
+import { CommonStringMessage } from "../../../shared/constants/string.messages";
+import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
+import { SessionStatusEnum } from "../../../application/interfaces/enums/session.status.enums";
 
 interface SessionParticipant {
 	userId: string;

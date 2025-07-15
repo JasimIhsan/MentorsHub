@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import { deleteMessageUseCase } from "../../../application/usecases/text-message/composer";
+import { deleteMessageUseCase } from "../../../../application/usecases/text-message/composer";
 
 export const deleteMessageHandler = (io: Server, socket: Socket) => {
 	socket.on("delete-message", async (data) => {

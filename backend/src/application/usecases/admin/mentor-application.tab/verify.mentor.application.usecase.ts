@@ -5,7 +5,7 @@ import { CommonStringMessage } from "../../../../shared/constants/string.message
 import { IVerifyMentorApplicationUsecase } from "../../../interfaces/admin/admin.mentor.application.interface";
 import { ICreateNotificationUseCase } from "../../../interfaces/notification";
 import { Server } from "socket.io";
-import { findUserSocket } from "../../../../infrastructure/socket/socket.io";
+import { findUserSocket } from "../../../../infrastructure/socket/old/socket.io";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";

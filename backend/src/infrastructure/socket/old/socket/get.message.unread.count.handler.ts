@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import { getMessageUnreadCountsByUser } from "../../../application/usecases/text-message/composer";
+import { getMessageUnreadCountsByUser } from "../../../../application/usecases/text-message/composer";
 
 export const getMessageUnreadCountHandler = (io: Server, socket: Socket) => {
 	socket.on("get-unread-counts", async ({ userId, chatIds }: { userId: string; chatIds: string[] }) => {

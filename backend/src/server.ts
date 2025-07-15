@@ -1,12 +1,13 @@
 import { createServer } from "http";
 import { app } from "./app";
 import { logger } from "./infrastructure/utils/logger";
-import { createSocketServer } from "./infrastructure/socket/socket.server";
-import initializeSocket from "./infrastructure/socket/socket.io";
+import { createSocketServer } from "./infrastructure/socket/old/socket.server";
+import initializeSocket from "./infrastructure/socket/old/socket.io";
 import { SessionModel } from "./infrastructure/database/models/session/session.model";
 import { loadSecrets } from "./load.secretes";
 import { configurePassport } from "./infrastructure/auth/passport/passport.config";
 import { hashService, tokenService, userRepository } from "./infrastructure/composer";
+import { createSocketLayer } from "./infrastructure/socket";
 
 (async () => {
 	try {
@@ -18,8 +19,9 @@ import { hashService, tokenService, userRepository } from "./infrastructure/comp
 
 		// Create HTTP + Socket.IO server
 		const server = createServer(app);
-		const io = createSocketServer(server);
-		initializeSocket(io, SessionModel);
+		// const io = createSocketServer(server);
+		// initializeSocket(io, SessionModel);
+		createSocketLayer(server);
 
 		// Start listening
 		const PORT = process.env.PORT || 5858;
