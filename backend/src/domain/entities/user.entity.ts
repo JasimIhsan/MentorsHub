@@ -160,6 +160,7 @@ export class UserEntity {
 		if (updated.firstName !== undefined) this._firstName = updated.firstName;
 		if (updated.lastName !== undefined) this._lastName = updated.lastName;
 		if (updated.avatar !== undefined) this._avatar = updated.avatar;
+		if (updated.role !== undefined) this._role = updated.role;
 		if (updated.bio !== undefined) this._bio = updated.bio;
 		if (updated.interests !== undefined) this._interests = updated.interests;
 		if (updated.skills !== undefined) this._skills = updated.skills;

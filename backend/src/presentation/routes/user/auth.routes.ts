@@ -38,20 +38,20 @@ authRouter.post("/resend-otp", (req, res, next) => sendOtpController.handle(req,
 // Test Route
 authRouter.get("/test", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res) => {
 	async function runSessionReminderCheck() {
-		console.log(`running remninder check`);
+		console.log("running remninder check");
 		const now = new Date();
 
 		const sessions = await SessionModel.find({
 			status: SessionStatusEnum.UPCOMING,
 			"participants.paymentStatus": "completed",
 		});
-		console.log('sessions: ', sessions);
+		console.log("sessions: ", sessions);
 
 		for (const session of sessions) {
 			const sessionDateTime = getFullSessionDate(session.date, session.time);
-			console.log('sessionDateTime: ', sessionDateTime);
+			console.log("sessionDateTime: ", sessionDateTime);
 			const diff = differenceInMinutes(sessionDateTime, now);
-			console.log('diff: ', diff);
+			console.log("diff: ", diff);
 
 			if ([60, 10, 0].includes(diff)) {
 				const messageMap: Record<number, string> = {
@@ -69,11 +69,11 @@ authRouter.get("/test", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum
 							userId,
 							type: diff.toString(),
 						});
-						console.log('alreadySent: ', alreadySent);
+						console.log("alreadySent: ", alreadySent);
 
 						if (!alreadySent) {
-							const notification = await notificationRepository.createNotification(userId, "Session Reminder", messageMap[diff], NotificationTypeEnum.REMINDER, `/sessions`);
-							console.log('notification: ', notification);
+							const notification = await notificationRepository.createNotification(userId, "Session Reminder", messageMap[diff], NotificationTypeEnum.REMINDER, "/sessions");
+							console.log("notification: ", notification);
 
 							notifierGateway.notifyUser(userId, mapToNotificationDTO(notification));
 
@@ -83,7 +83,7 @@ authRouter.get("/test", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum
 								type: diff.toString(),
 							});
 						}
-					})
+					}),
 				);
 			}
 		}

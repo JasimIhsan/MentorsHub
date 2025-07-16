@@ -14,13 +14,11 @@ export function startSessionReminderJob() {
 	cron.schedule("* * * * *", async () => {
 		console.log("🔔 Cron Job Running: Checking session reminder (every minute)");
 		const now = new Date();
-		console.log("now: ", now);
 
 		const sessions = await SessionModel.find({
 			status: SessionStatusEnum.UPCOMING,
 			"participants.paymentStatus": "completed",
 		});
-		console.log("sessions: ", sessions);
 
 		const targetDiffs = [60, 10, 0];
 
@@ -30,12 +28,10 @@ export function startSessionReminderJob() {
 				10: `Only 10 minutes left until your "${session.topic}" session!`,
 				0: `Your "${session.topic}" session is starting now!`,
 			};
-			
+
 			const sessionDateTime = getFullSessionDate(session.date, session.time);
-			console.log("sessionDateTime: ", sessionDateTime);
 
 			const diff = differenceInMinutes(sessionDateTime, now);
-			console.log("diff: ", diff);
 
 			// Find nearest matching target diff (to account for slight timing drift)
 			const matchedTarget = targetDiffs.find((target) => diff >= target - 1 && diff <= target);
@@ -52,11 +48,9 @@ export function startSessionReminderJob() {
 							userId,
 							type: matchedTarget.toString(),
 						});
-						console.log("alreadySent: ", alreadySent);
 
 						if (!alreadySent) {
-							const notification = await notificationRepository.createNotification(userId, "Session Reminder", message, NotificationTypeEnum.REMINDER, `/sessions`);
-							console.log("notification: ", notification);
+							const notification = await notificationRepository.createNotification(userId, "Session Reminder", message, NotificationTypeEnum.REMINDER, "/sessions");
 
 							notifierGateway.notifyUser(userId, mapToNotificationDTO(notification));
 
@@ -66,7 +60,7 @@ export function startSessionReminderJob() {
 								type: matchedTarget.toString(),
 							});
 						}
-					})
+					}),
 				);
 			}
 		}

@@ -2,7 +2,6 @@ import { Server, Socket } from "socket.io";
 import { onlineUsers } from "../../context";
 import { broadcastOnlineUsers } from "../../utils/broadcast.online.users";
 import { sendNotificationToUser } from "../notification/send.notification.to.user";
-import { broadcastNotification } from "../notification/broadcast.notification";
 
 export function registerCoreConnectionHandlers(io: Server, socket: Socket) {
 	// console.log(`socket.data : `, socket.data);

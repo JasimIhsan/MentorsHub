@@ -1,4 +1,5 @@
 import { sessionRepository, userRepository, walletRepository } from "../../../infrastructure/composer";
+import { notifyUserUseCase } from "../notification/composer";
 import { CreateTransactionUseCase } from "./create.transaction.usecase";
 import { CreateWalletUseCase } from "./create.wallet.usecase";
 import { CreateWithdrawalRequestUseCase } from "./create.withdrawel.usecase";
@@ -16,5 +17,5 @@ export const getTransactionsUsecase = new GetTransactionsUseCase(walletRepositor
 export const getWithdrawalRequestsUsecase = new GetWithdrawalRequestsUseCase(walletRepository);
 export const updateWalletBalanceUseCase = new UpdateWalletBalanceUseCase(walletRepository);
 export const getWalletUsecase = new GetWalletUsecase(walletRepository);
-export const topupWalletUsecase = new WalletTopUpUseCase(walletRepository, createTransactionUsecase);
-export const withdrawWalletUsecase = new WithdrawWalletUseCase(walletRepository, createTransactionUsecase);
+export const topupWalletUsecase = new WalletTopUpUseCase(walletRepository, createTransactionUsecase, notifyUserUseCase);
+export const withdrawWalletUsecase = new WithdrawWalletUseCase(walletRepository, createTransactionUsecase, notifyUserUseCase);

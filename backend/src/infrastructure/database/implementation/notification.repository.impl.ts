@@ -1,5 +1,5 @@
 import { NotificationTypeEnum } from "../../../application/interfaces/enums/notification.type.enum";
-import { NotificationEntityProps, NotificationEntity } from "../../../domain/entities/notification.entity";
+import { NotificationEntity } from "../../../domain/entities/notification.entity";
 import { INotificationRepository } from "../../../domain/repositories/notification.repository";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 import { NotificationModel } from "../models/notification/notification.model";

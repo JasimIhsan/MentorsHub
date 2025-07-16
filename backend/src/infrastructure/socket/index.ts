@@ -2,7 +2,6 @@ import { Server as HTTPServer } from "http";
 import { Server } from "socket.io";
 import { authMiddleware } from "./middlewares/auth";
 import { registerCoreConnectionHandlers } from "./handlers/core/core.connection";
-import { sendNotificationToUser } from "./handlers/notification/send.notification.to.user";
 
 export function createSocketLayer(server: HTTPServer): Server {
 	const io = new Server(server, {

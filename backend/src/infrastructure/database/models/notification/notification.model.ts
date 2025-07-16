@@ -1,7 +1,5 @@
-
 import mongoose, { Schema, Document } from "mongoose";
 import { NotificationTypeEnum } from "../../../../application/interfaces/enums/notification.type.enum";
-
 
 export interface INotificationDocument extends Document {
 	_id: mongoose.Types.ObjectId;
@@ -9,9 +7,9 @@ export interface INotificationDocument extends Document {
 	// sender?: mongoose.Types.ObjectId; // Optional: who triggered the notification
 	title: string;
 	message: string;
-	type: NotificationTypeEnum; 
+	type: NotificationTypeEnum;
 	link?: string; // Optional: link to redirect when clicked
-	isRead: boolean; 
+	isRead: boolean;
 	createdAt: Date;
 }
 
@@ -21,7 +19,7 @@ const NotificationSchema: Schema = new Schema(
 		// sender: { type: Schema.Types.ObjectId, ref: "User" },
 		title: { type: String, required: true },
 		message: { type: String, required: true },
-		type: { type: String, enum: ["info", "warning", "success", "error", "reminder"], default: "info" },
+		type: { type: String, enum: ["info", "warning", "success", "error", "reminder", "review", "payment", "task_completed", "welcome", "session"], default: "info" },
 		link: { type: String },
 		isRead: { type: Boolean, default: false },
 	},

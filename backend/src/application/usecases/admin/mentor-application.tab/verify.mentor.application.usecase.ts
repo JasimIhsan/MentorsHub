@@ -3,20 +3,13 @@ import { IUserRepository } from "../../../../domain/repositories/user.repository
 import { UserEntity } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IVerifyMentorApplicationUsecase } from "../../../interfaces/admin/admin.mentor.application.interface";
-import { ICreateNotificationUseCase } from "../../../interfaces/notification/notification.usecase";
-import { Server } from "socket.io";
-import { findUserSocket } from "../../../../infrastructure/socket/old/socket.io";
+import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 
 export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationUsecase {
-	constructor(
-		private mentorRepo: IMentorProfileRepository,
-		private userRepo: IUserRepository,
-		private createNotificationUseCase: ICreateNotificationUseCase,
-		private io?: Server, // Optional io
-	) {}
+	constructor(private mentorRepo: IMentorProfileRepository, private userRepo: IUserRepository, private notifyUserUseCase: INotifyUserUseCase) {}
 
 	async execute(userId: string, status: MentorRequestStatusEnum, reason?: string): Promise<UserEntity> {
 		const user = await this.userRepo.findUserById(userId);
@@ -31,31 +24,16 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 			user.updateUserDetails({ mentorRequestStatus: status });
 		}
 
-		const notificationTitle = `Mentor Application ${status.charAt(0).toUpperCase() + status.slice(1)}`;
-		const notificationMessage = status === MentorRequestStatusEnum.APPROVED ? "Congratulations! Your mentor application has been approved." : `Your mentor application has been rejected. ${reason ? `Reason: ${reason}` : ""}`;
+		await this.notifyUserUseCase.execute({
+			title: status === MentorRequestStatusEnum.APPROVED ? "🎓 Mentor Application Approved" : "🎓 Mentor Application Rejected",
+			message: reason || "Your mentor application has been " + (status === MentorRequestStatusEnum.APPROVED ? "approved" : "rejected"),
+			isRead: false,
+			recipientId: userId,
+			type: NotificationTypeEnum.SUCCESS,
+			link: "/mentor/da",
+		});
 
-		const notification = await this.createNotificationUseCase.execute(userId, notificationTitle, notificationMessage, status === MentorRequestStatusEnum.APPROVED ? NotificationTypeEnum.SUCCESS : NotificationTypeEnum.INFO);
-		console.log("notification:", JSON.stringify(notification, null, 2));
-
-		if (this.io) {
-			const recipientSocketId = findUserSocket(userId);
-			if (recipientSocketId) {
-				this.io.to(recipientSocketId).emit("receive-notification", {
-					_id: notification.id,
-					userId,
-					title: notificationTitle,
-					message: notificationMessage,
-					type: status === MentorRequestStatusEnum.APPROVED ? NotificationTypeEnum.SUCCESS : NotificationTypeEnum.ERROR,
-					read: false,
-					createdAt: notification.createdAt || new Date(),
-				});
-				console.log(`Notification emitted to user ${userId} at socket ${recipientSocketId}`);
-			} else {
-				console.log(`User ${userId} offline. Notification saved to database.`);
-			}
-		} else {
-			console.warn("Socket.IO instance not initialized. Notification saved to database.");
-		}
+		console.log("user : ", user);
 
 		return await this.userRepo.updateUser(userId, user);
 	}

@@ -7,7 +7,7 @@ const reminderLogSchema = new Schema(
 		type: { type: String, enum: ["60", "10", "0"], required: true },
 		sentAt: { type: Date, default: Date.now },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const ReminderLogModel = mongoose.model("ReminderLog", reminderLogSchema);

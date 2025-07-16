@@ -8,6 +8,7 @@ import { GetAllListedGamificationTasksUseCase } from "./get.all.listed.gamificat
 import { GetUserProgressUseCase } from "./get.user.progress.usecase";
 import { CreateUserProgressUseCase } from "./create.new.user.progress.usecase";
 import { UpdateUserTaskProgressUseCase } from "./update.user.task.progress.usecase";
+import { notifyUserUseCase } from "../notification/composer";
 
 export const createGamificationTaskUseCase = new CreateGamificationTaskUseCase(gamificationTaskRepository, actionTypeRepository);
 export const getAllGamificationTasksUseCase = new GetAllGamificationTasksUseCase(gamificationTaskRepository);
@@ -17,4 +18,4 @@ export const editGamificationTaskUseCase = new EditGamificationTaskUseCase(gamif
 export const getAllListedGamificationTasksUseCase = new GetAllListedGamificationTasksUseCase(gamificationTaskRepository, userTaskprogressRepository);
 export const getUserProgressUseCase = new GetUserProgressUseCase(userProgressRepository);
 export const createUserProgressUseCase = new CreateUserProgressUseCase(userProgressRepository);
-export const updateUserTaskProgressUseCase = new UpdateUserTaskProgressUseCase(gamificationTaskRepository, userTaskprogressRepository, userProgressRepository);
+export const updateUserTaskProgressUseCase = new UpdateUserTaskProgressUseCase(gamificationTaskRepository, userTaskprogressRepository, userProgressRepository, notifyUserUseCase);

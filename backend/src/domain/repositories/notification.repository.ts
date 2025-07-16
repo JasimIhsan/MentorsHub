@@ -1,5 +1,5 @@
 import { NotificationType } from "aws-sdk/clients/budgets";
-import { NotificationEntity, NotificationEntityProps } from "../entities/notification.entity";
+import { NotificationEntity } from "../entities/notification.entity";
 
 export interface INotificationRepository {
 	createNotification(userId: string, title: string, message: string, type: NotificationType, link?: string): Promise<NotificationEntity>;

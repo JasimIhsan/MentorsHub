@@ -1,4 +1,4 @@
-import { NotificationEntity, NotificationEntityProps } from "../../../domain/entities/notification.entity";
+import { NotificationEntityProps } from "../../../domain/entities/notification.entity";
 import { INotificationDTO } from "../../dtos/notification.dto";
 import { NotificationTypeEnum } from "../enums/notification.type.enum";
 

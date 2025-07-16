@@ -38,7 +38,7 @@ export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 				message: msg(updatedSession.topic),
 				type,
 				isRead: false,
-				link: `/sessions`,
+				link: "/sessions",
 			});
 		}
 	}

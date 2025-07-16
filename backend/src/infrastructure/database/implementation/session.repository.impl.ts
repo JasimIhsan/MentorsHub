@@ -64,7 +64,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			limit?: number;
 			search?: string;
 			status?: string;
-		}
+		},
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const { page = 1, limit = 10, search = "", status = "" } = options || {};
@@ -107,7 +107,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			filter?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
-		}
+		},
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const query: any = { mentorId };
@@ -189,7 +189,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 						"participants.$.paymentId": paymentId,
 						status: newStatus,
 					},
-				}
+				},
 			);
 		} catch (error) {
 			return handleExceptionError(error, "Error updating session payment");

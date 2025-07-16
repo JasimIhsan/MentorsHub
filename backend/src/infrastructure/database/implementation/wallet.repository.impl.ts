@@ -172,7 +172,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 
 	async revenueChartData(
 		adminId: string,
-		months: number // 0 = all, 1 = last‑30‑days, 6 = 6 months, 12 = 1 year
+		months: number, // 0 = all, 1 = last‑30‑days, 6 = 6 months, 12 = 1 year
 	): Promise<{ name: string; total: number }[]> {
 		try {
 			/* ---------- 1. Match filter ------------------------------------ */

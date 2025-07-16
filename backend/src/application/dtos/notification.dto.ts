@@ -22,6 +22,6 @@ export function mapToNotificationDTO(entity: NotificationEntity): INotificationD
 		link: entity.link,
 		isRead: entity.isRead,
 		createdAt: entity.createdAt,
-	}
+	};
 }
 
