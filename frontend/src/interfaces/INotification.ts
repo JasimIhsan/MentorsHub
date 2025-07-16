@@ -8,5 +8,5 @@ export interface INotification {
 	type: NotificationType;
 	link?: string;
 	isRead: boolean;
-	createdAt: Date | string;
+	createdAt: Date;
 }

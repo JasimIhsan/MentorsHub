@@ -21,9 +21,9 @@ export class NotificationRepositoryImpl implements INotificationRepository {
 		}
 	}
 
-	async getUserNotifications(params: { userId: string; page: number; limit: number; isRead?: boolean; search?: string }): Promise<NotificationEntityProps[]> {
+	async getUserNotifications(params: { userId: string; isRead?: boolean; search?: string }): Promise<NotificationEntity[]> {
 		try {
-			const { userId, page, limit, isRead, search } = params;
+			const { userId, isRead, search } = params;
 
 			const query: any = { recipientId: userId };
 
@@ -33,23 +33,11 @@ export class NotificationRepositoryImpl implements INotificationRepository {
 				query.$or = [{ title: { $regex: search, $options: "i" } }, { message: { $regex: search, $options: "i" } }];
 			}
 
-			const notifications = await NotificationModel.find(query)
-				.sort({ createdAt: -1 })
-				.skip((page - 1) * limit)
-				.limit(limit);
+			const notifications = await NotificationModel.find(query).sort({ createdAt: -1 });
+			// .skip((page - 1) * limit)
+			// .limit(limit);
 
-			return notifications.map((n) =>
-				new NotificationEntity({
-					id: n._id.toString(),
-					recipientId: n.recipientId.toString(),
-					title: n.title,
-					message: n.message,
-					type: n.type,
-					link: n.link,
-					isRead: n.isRead,
-					createdAt: n.createdAt,
-				}).toObject()
-			);
+			return notifications.map(NotificationEntity.fromDBDocument);
 		} catch (error) {
 			return handleExceptionError(error, "Error fetching notifications");
 		}

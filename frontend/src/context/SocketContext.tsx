@@ -58,10 +58,12 @@
 // 	return context;
 // }
 
-import { Bell, CircleAlert, CircleCheckBig, CircleX, Info } from "lucide-react";
+import { INotification } from "@/interfaces/INotification";
+import { handleIncomingNotification } from "@/utility/handleIncomingNotification";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { io, type Socket } from "socket.io-client";
-import { toast } from "sonner";
 
 interface IOnlineUsers {
 	userId: string;
@@ -75,20 +77,14 @@ interface ISocketContextType {
 	disconnectSocket: () => void;
 }
 
-interface NotificationPayload {
-	title: string;
-	message: string;
-	type: "success" | "error" | "info" | "warning" | "reminder";
-	link?: string;
-	createdAt: number;
-}
-
 const SocketContext = createContext<ISocketContextType | undefined>(undefined);
 
 export const SocketProvider = ({ children, userId }: { children: React.ReactNode; userId: string }) => {
 	const [isConnected, setIsConnected] = useState(false);
 	const [onlineUsers, setOnlineUsers] = useState<IOnlineUsers[]>([]);
 	const socketRef = useRef<Socket | null>(null);
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
 
 	useEffect(() => {
 		if (!userId || socketRef.current) return;
@@ -96,6 +92,7 @@ export const SocketProvider = ({ children, userId }: { children: React.ReactNode
 		const socket = io("http://localhost:5858", {
 			auth: { userId },
 		});
+
 		socketRef.current = socket;
 
 		socket.on("connect", () => {
@@ -109,18 +106,8 @@ export const SocketProvider = ({ children, userId }: { children: React.ReactNode
 			setOnlineUsers(payload);
 		});
 
-		socket.on("notify-user", (payload: NotificationPayload) => {
-			console.log('payload 📖📖: ', payload);
-			toast(payload.title, {
-				description: payload.message,
-				icon: getIcon(payload.type),
-				className: "text-black",
-				position: "top-center",
-				
-				style: {
-					animation: "slideIn 0.3s ease-out, slideOut 0.3s ease-in 3.7s forwards",
-				},
-			});
+		socket.on("notify-user", (notification: INotification) => {
+			handleIncomingNotification(notification, dispatch, navigate);
 		});
 
 		socket.on("disconnect", () => {
@@ -163,19 +150,3 @@ export const useSocket = () => {
 };
 
 // Map notification types to icons (using Heroicons)
-export const getIcon = (type: "success" | "error" | "info" | "warning" | "reminder") => {
-	switch (type) {
-		case "success":
-			return <CircleCheckBig className="w-6 h-6 pr-2 text-green-500" />;
-		case "error":
-			return <CircleX className="w-6 h-6 pr-2 text-red-500" />;
-		case "info":
-			return <Info className="w-6 h-6 pr-2 text-blue-500" />;
-		case "warning":
-			return <CircleAlert className="w-6 h-6 pr-2 text-yellow-500" />;
-		case "reminder":
-			return <Bell className="w-6 h-6 pr-2 text-purple-500" />;
-		default:
-			return null;
-	}
-};

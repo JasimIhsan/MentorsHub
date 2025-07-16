@@ -2,9 +2,9 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
-import { Bell, AlertTriangle, CheckCircle, XCircle, Calendar } from "lucide-react";
+import { Bell, CheckCircle, XCircle, Info, TriangleAlert } from "lucide-react";
 import { CustomHeader } from "@/components/custom/header";
-import { INotification } from "@/interfaces/INotification";
+import { INotification, NotificationType } from "@/interfaces/INotification";
 import { formatRelativeTime } from "@/utility/format-relative-time";
 
 interface NotificationsProps {
@@ -16,18 +16,21 @@ interface NotificationsProps {
 }
 
 const Notifications: React.FC<NotificationsProps> = ({ notifications, markAllAsRead, markAsRead, userId, isLoading }) => {
-	const getNotificationStyles = (type: INotification["type"]) => {
+	console.log('notifications: ', notifications);
+	const getNotificationStyles = (type: NotificationType) => {
 		switch (type) {
 			case "info":
-				return { bg: "bg-blue-100", text: "text-blue-600", icon: <Bell className="h-5 w-5" /> };
+				return { bg: "bg-blue-100", text: "text-blue-600", icon: <Info className="h-5 w-5" /> };
 			case "warning":
-				return { bg: "bg-yellow-100", text: "text-yellow-600", icon: <AlertTriangle className="h-5 w-5" /> };
+				return { bg: "bg-yellow-100", text: "text-yellow-600", icon: <TriangleAlert className="h-5 w-5" /> };
 			case "success":
 				return { bg: "bg-green-100", text: "text-green-600", icon: <CheckCircle className="h-5 w-5" /> };
 			case "error":
 				return { bg: "bg-red-100", text: "text-red-600", icon: <XCircle className="h-5 w-5" /> };
 			case "reminder":
-				return { bg: "bg-purple-100", text: "text-purple-600", icon: <Calendar className="h-5 w-5" /> };
+				return { bg: "bg-purple-100", text: "text-purple-600", icon: <Bell className="h-5 w-5" /> };
+			default:
+				return { bg: "bg-blue-100", text: "text-blue-600", icon: <Info className="h-5 w-5" /> };
 		}
 	};
 

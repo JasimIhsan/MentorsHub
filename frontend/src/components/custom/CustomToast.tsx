@@ -23,7 +23,7 @@ interface ToastNotificationProps {
 export function ToastNotification({ payload, toastId }: ToastNotificationProps) {
 	console.log('payload: ', payload);
 	// Calculate relative time
-	const relativeTime = formatRelativeTime(new Date(payload.createdAt));
+	const relativeTime = formatRelativeTime(payload.createdAt);
 
 	// Map notification type to icon and styles
 	const typeStyles = {

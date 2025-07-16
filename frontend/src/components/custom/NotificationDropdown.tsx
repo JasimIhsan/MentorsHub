@@ -16,7 +16,9 @@ interface NotificationItemProps {
 	onMarkAsRead: (id: string) => void;
 }
 
+
 const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onMarkAsRead }) => {
+	console.log('notification: ', notification);
 	const { title, message, type = "info", link, isRead, createdAt, id } = notification;
 
 	const icons = {
