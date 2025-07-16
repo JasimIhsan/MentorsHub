@@ -20,7 +20,7 @@ export const handleIncomingNotification = (notification: INotification, dispatch
 			  }
 			: undefined,
 		actionButtonStyle: {
-			backgroundColor: "#3b82f6",
+			backgroundColor: "#112d4e",
 			color: "white",
 			borderRadius: "0.375rem",
 			padding: "0.25rem 0.75rem",

@@ -6,13 +6,14 @@ import { NotificationModel } from "../models/notification/notification.model";
 import { INotificationDocument } from "../models/notification/notification.model";
 
 export class NotificationRepositoryImpl implements INotificationRepository {
-	async createNotification(userId: string, title: string, message: string, type: NotificationTypeEnum): Promise<NotificationEntity> {
+	async createNotification(userId: string, title: string, message: string, type: NotificationTypeEnum, link?: string): Promise<NotificationEntity> {
 		try {
 			const notification: INotificationDocument = await NotificationModel.create({
 				recipientId: userId,
 				title,
 				message,
 				type,
+				link,
 			});
 
 			return NotificationEntity.fromDBDocument(notification);

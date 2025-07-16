@@ -5,13 +5,13 @@ import { sendNotificationToUser } from "../notification/send.notification.to.use
 import { broadcastNotification } from "../notification/broadcast.notification";
 
 export function registerCoreConnectionHandlers(io: Server, socket: Socket) {
-	console.log(`socket.data : `, socket.data);
+	// console.log(`socket.data : `, socket.data);
 	const userId = socket.data.userId;
 	const wasOffline = !onlineUsers.get(userId);
 
 	onlineUsers.set(userId, socket);
 
-	console.log("🟢 Online users:", Array.from(onlineUsers.keys()));
+	// console.log("🟢 Online users:", Array.from(onlineUsers.keys()));
 
 	if (wasOffline) {
 		broadcastOnlineUsers(io);
