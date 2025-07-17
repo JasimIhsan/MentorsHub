@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { onlineUsers } from "../../context";
-import { broadcastOnlineUsers } from "../../utils/broadcast.online.users";
+import { broadcastOnlineUsers } from "../notification/utils/broadcast.online.users";
 import { sendNotificationToUser } from "../notification/send.notification.to.user";
 
 export function registerCoreConnectionHandlers(io: Server, socket: Socket) {
@@ -14,7 +14,7 @@ export function registerCoreConnectionHandlers(io: Server, socket: Socket) {
 
 	if (wasOffline) {
 		broadcastOnlineUsers(io);
-		sendNotificationToUser(userId, "Welcome to the platform!");
+		sendNotificationToUser(userId, "👋 Welcome to the platform!");
 		// broadcastNotification("New user joined the platform!");
 	}
 

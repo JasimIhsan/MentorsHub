@@ -83,7 +83,6 @@ interface UserStatsProps {
 }
 
 function UserStats({ stats }: UserStatsProps) {
-	console.log("stats: ", stats);
 
 	const levelProgress = ((stats.totalXP % stats.xpToNextLevel) / stats.xpToNextLevel) * 100;
 

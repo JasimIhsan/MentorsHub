@@ -2,6 +2,8 @@ import { Server as HTTPServer } from "http";
 import { Server } from "socket.io";
 import { authMiddleware } from "./middlewares/auth";
 import { registerCoreConnectionHandlers } from "./handlers/core/core.connection";
+import { registerChatConnectionHandlers } from "./handlers/chat/chat.connection";
+import { registerMessageHandlers } from "./handlers/chat/message.handler";
 
 export function createSocketLayer(server: HTTPServer): Server {
 	const io = new Server(server, {
@@ -20,10 +22,11 @@ export function createSocketLayer(server: HTTPServer): Server {
 
 		// Register User on core connection
 		registerCoreConnectionHandlers(io, socket);
+		registerChatConnectionHandlers(io, socket)
 
 		
 		// Placeholder for future feature handlers
-		// registerChatHandlers(io, socket);
+		registerMessageHandlers(io, socket);
 		// registerVideoSessionHandlers(io, socket, SessionModel);
 		// registerNotificationHandlers(io, socket);
 		// etc...

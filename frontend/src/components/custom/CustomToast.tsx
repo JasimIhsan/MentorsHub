@@ -21,7 +21,6 @@ interface ToastNotificationProps {
 }
 
 export function ToastNotification({ payload, toastId }: ToastNotificationProps) {
-	console.log('payload: ', payload);
 	// Calculate relative time
 	const relativeTime = formatRelativeTime(payload.createdAt);
 

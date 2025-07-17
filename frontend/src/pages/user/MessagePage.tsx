@@ -7,14 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { useSocket } from "@/context/SocketContext";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { formatTime } from "@/utility/time-data-formatter";
+// import { formatTime } from "@/utility/time-data-formatter";
 import { useDebounce } from "@/hooks/useDebounce";
 import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import { fetchAllApprovedMentors } from "@/api/mentors.api.service";
 import axiosInstance from "@/api/config/api.config";
-import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Alert } from "@/components/custom/alert";
+import { set } from "lodash";
 
 // Define interfaces
 export interface User {
@@ -29,12 +29,16 @@ export interface User {
 
 export interface ISendMessage {
 	id: string;
-	chatId?: string;
-	senderId: string;
+	chatId?: string; // optional, can be created server-side if new
+	sender: {
+		id: string;
+		fullName: string;
+		avatar?: string;
+	};
 	receiverId: string;
 	content: string;
 	type: "text" | "image" | "file" | "video";
-	fileUrl?: string;
+	fileUrl?: string; // only if it's not text
 }
 
 export interface IReceiveMessage {
@@ -42,8 +46,7 @@ export interface IReceiveMessage {
 	chatId: string;
 	sender: {
 		id: string;
-		firstName: string;
-		lastName: string;
+		fullName: string;
 		avatar?: string;
 	};
 	content: string;
@@ -71,8 +74,7 @@ export function MessagePage() {
 	const [isMobile, setIsMobile] = useState(false);
 	const [showChat, setShowChat] = useState(false);
 	const [loading, setLoading] = useState(false);
-	const [statusSyncLoading, setStatusSyncLoading] = useState(true);
-	const { socket } = useSocket();
+	const { socket, isUserOnline } = useSocket();
 	const user = useSelector((state: RootState) => state.userAuth.user);
 
 	// Check for mobile view
@@ -95,7 +97,6 @@ export function MessagePage() {
 				if (response.data.success) {
 					const fetchedChats = response.data.chats;
 					setChats(fetchedChats);
-					// Fetch unread counts for all chats
 					const chatIds = fetchedChats.map((chat: Chat) => chat.id);
 					socket.emit("get-unread-counts", { userId: user.id, chatIds });
 				}
@@ -107,30 +108,6 @@ export function MessagePage() {
 		};
 		fetchChats();
 	}, [user?.id, socket]);
-
-	// Handle socket unread counts response
-	useEffect(() => {
-		if (!socket) return;
-
-		socket.on("unread-counts-response", (counts: { [chatId: string]: number }) => {
-			setChats((prev) =>
-				prev.map((chat) => ({
-					...chat,
-					unreadCount: counts[chat.id] || 0,
-				}))
-			);
-		});
-
-		socket.on("unread-counts-error", (error: { message: string }) => {
-			console.error("Unread counts error:", error.message);
-			toast.error(error.message);
-		});
-
-		return () => {
-			socket.off("unread-counts-response");
-			socket.off("unread-counts-error");
-		};
-	}, [socket]);
 
 	// Fetch messages for the selected chat
 	useEffect(() => {
@@ -156,106 +133,49 @@ export function MessagePage() {
 
 	// Handle socket messages
 	useEffect(() => {
-		if (!socket || !user?.id) {
-			console.log(`Socket or user.id is null`);
-			return;
-		}
-		socket.on("receive-message", (socketMessage: IReceiveMessage) => {
-			if (socketMessage.chatId === selectedChatId) {
-				setAllMessages((prev) => [...prev, socketMessage]);
-			}
-			setChats((prev) =>
-				prev.map((chat) =>
-					chat.id === socketMessage.chatId
-						? {
-								...chat,
-								lastMessage: socketMessage,
-								unreadCount: chat.id === selectedChatId ? 0 : chat.unreadCount + 1, // Increment unread count if not in the selected chat
-						  }
-						: chat
-				)
-			);
-			if (socketMessage.chatId === selectedChatId && !socketMessage.readBy.includes(user.id as string)) {
-				socket.emit("mark-as-read", { chatId: socketMessage.chatId, userId: user.id });
-				socket.emit("mark-chat-as-read", { chatId: socketMessage.chatId, userId: user.id });
-			}
-		});
+		if (!socket || !user?.id || !selectedChatId) return;
 
-		// Handle message deletion
-		socket.on("message-deleted", ({ messageId }: { messageId: string }) => {
-			setAllMessages((prev) => prev.filter((msg) => msg.id !== messageId));
-			setChats((prev) => prev.map((chat) => (chat.lastMessage?.id === messageId ? { ...chat, lastMessage: undefined } : chat)));
-			toast.success("Message deleted successfully");
-		});
+		const handleReceiveMessage = (message: IReceiveMessage) => {
+			// Only add the message if it belongs to the currently selected chat
+			if (message.chatId === selectedChatId) {
+				setAllMessages((prev) => {
+					// Prevent duplicates by checking if the message ID already exists
+					if (prev.some((msg) => msg.id === message.id)) {
+						return prev;
+					}
+					return [...prev, message];
+				});
+			}
+		};
+
+		socket.on("receive-message", handleReceiveMessage);
 
 		return () => {
-			socket.off("receive-message");
-			socket.off("message-deleted");
+			socket.off("receive-message", handleReceiveMessage);
 		};
 	}, [socket, selectedChatId, user?.id]);
-
-	// Handle user status updates
-	useEffect(() => {
-		if (!socket) return;
-
-		const handleUserStatusUpdate = ({ userId, status }: { userId: string; status: "online" | "offline" }) => {
-			setChats((prevChats) =>
-				prevChats.map((chat) => {
-					if (chat.isGroupChat) return chat;
-					const participant = chat.participants.find((p) => p.id === userId);
-					if (participant) {
-						return {
-							...chat,
-							participants: chat.participants.map((p) => (p.id === userId ? { ...p, status } : p)),
-						};
-					}
-					return chat;
-				})
-			);
-
-			setTempChat((prevTempChat) =>
-				prevTempChat && prevTempChat.participants.some((p) => p.id === userId)
-					? {
-							...prevTempChat,
-							participants: prevTempChat.participants.map((p) => (p.id === userId ? { ...p, status } : p)),
-					  }
-					: prevTempChat
-			);
-		};
-
-		socket.on("user-status-update", handleUserStatusUpdate);
-
-		// Handle initial online users and set status sync loading
-		socket.on("online-users", (onlineUsers: { userId: string; status: "online" | "offline" }[]) => {
-			onlineUsers.forEach(({ userId, status }) => handleUserStatusUpdate({ userId, status }));
-			setStatusSyncLoading(false);
-		});
-
-		// Ensure initial sync if socket is already connected
-		if (socket) {
-			socket.emit("get-online-users");
-		}
-
-		return () => {
-			socket.off("user-status-update", handleUserStatusUpdate);
-			socket.off("online-users");
-		};
-	}, [socket]);
 
 	const selectedChat = tempChat || (selectedChatId ? chats.find((chat) => chat.id === selectedChatId) : undefined);
 
 	const handleChatSelect = (chatId: string) => {
+		if (socket && selectedChatId) {
+			socket.emit("leave-chat", selectedChatId);
+		}
+
 		setTempChat(null);
 		setSelectedChatId(chatId);
 		if (isMobile) {
 			setShowChat(true);
 		}
 		if (socket) {
-			socket.emit("join-chat-room", { chatId });
+			socket.emit("join-chat", chatId);
 			socket.emit("mark-chat-as-read", { chatId, userId: user?.id });
-			// Update unread count to 0 for the selected chat
 			setChats((prev) => prev.map((chat) => (chat.id === chatId ? { ...chat, unreadCount: 0 } : chat)));
 		}
+	};
+
+	const getChatPartner = (currentUserId: string, participants: User[]) => {
+		return participants.find((user) => user.id !== currentUserId) || null;
 	};
 
 	const handleMentorSelect = (mentor: IMentorDTO) => {
@@ -281,6 +201,9 @@ export function MessagePage() {
 
 	const handleBack = () => {
 		if (isMobile) {
+			if (socket && selectedChatId) {
+				socket.emit("leave-chat", selectedChatId);
+			}
 			setShowChat(false);
 			setTempChat(null);
 			setSelectedChatId(undefined);
@@ -288,26 +211,33 @@ export function MessagePage() {
 	};
 
 	const handleSendMessage = async (content: string) => {
-		if (!selectedChat || !socket || !user?.id) return;
-		console.log(`selectedChat : `, selectedChat);
+		if (!selectedChat || !socket || !user?.id || !content.trim()) return;
 
-		const chatId = selectedChatId;
+		const { id: chatId, isGroupChat, participants } = selectedChat;
+		const receiverId = isGroupChat ? "" : getChatPartner(user.id, participants)?.id ?? "";
+
+		if (!isGroupChat && !receiverId) {
+			console.warn("No receiver found for 1-to-1 chat");
+			return;
+		}
 
 		const message: ISendMessage = {
-			id: "",
-			chatId: chatId,
-			senderId: user.id,
-			receiverId: selectedChat.isGroupChat ? "" : selectedChat.participants[0].id,
-			content,
+			id: Math.random().toString(36).substring(2, 9), // Temporary ID
+			chatId,
+			sender: {
+				id: user.id,
+				fullName: `${user.firstName} ${user.lastName}`,
+				avatar: user.avatar || "",
+			},
+			receiverId,
+			content: content.trim(),
 			type: "text",
 		};
-
-		console.log(`message : `, message);
 
 		try {
 			socket.emit("send-message", message);
 		} catch (error) {
-			console.error("Failed to send message via socket:", error);
+			console.error("Socket emit failed:", error);
 		}
 	};
 
@@ -326,7 +256,7 @@ export function MessagePage() {
 				<>
 					{!showChat ? (
 						<div className="w-full h-full">
-							<ChatSidebar userId={user?.id!} chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading || statusSyncLoading} />
+							<ChatSidebar userId={user?.id!} chats={chats} selectedChatId={selectedChatId} isUserOnline={isUserOnline} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading} />
 						</div>
 					) : (
 						<div className="w-full h-full">
@@ -338,8 +268,10 @@ export function MessagePage() {
 								onSendMessage={handleSendMessage}
 								onDeleteMessage={handleDeleteMessage}
 								isMobile={isMobile}
+								getChatPartner={getChatPartner}
 								loading={loading}
 								socket={socket}
+								isUserOnline={isUserOnline}
 								setAllMessages={setAllMessages}
 							/>
 						</div>
@@ -348,7 +280,7 @@ export function MessagePage() {
 			) : (
 				<>
 					<div className="w-1/3 min-w-[320px] max-w-[400px] h-full">
-						<ChatSidebar userId={user?.id!} chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading || statusSyncLoading} />
+						<ChatSidebar isUserOnline={isUserOnline} userId={user?.id!} chats={chats} selectedChatId={selectedChatId} onChatSelect={handleChatSelect} onMentorSelect={handleMentorSelect} loading={loading} />
 					</div>
 					<div className="flex-1 h-full">
 						<ChatWindow
@@ -359,8 +291,10 @@ export function MessagePage() {
 							onSendMessage={handleSendMessage}
 							onDeleteMessage={handleDeleteMessage}
 							isMobile={isMobile}
+							getChatPartner={getChatPartner}
 							loading={loading}
 							socket={socket}
+							isUserOnline={isUserOnline}
 							setAllMessages={setAllMessages}
 						/>
 					</div>
@@ -376,10 +310,11 @@ interface ChatSidebarProps {
 	selectedChatId?: string;
 	onChatSelect: (chatId: string) => void;
 	onMentorSelect: (mentor: IMentorDTO) => void;
+	isUserOnline: (userId: string) => boolean;
 	loading: boolean;
 }
 
-export function ChatSidebar({ userId, chats, selectedChatId, onChatSelect, onMentorSelect, loading }: ChatSidebarProps) {
+export function ChatSidebar({ userId, chats, selectedChatId, onChatSelect, isUserOnline, onMentorSelect, loading }: ChatSidebarProps) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [mentors, setMentors] = useState<IMentorDTO[]>([]);
 	const [mentorLoading, setMentorLoading] = useState(false);
@@ -486,12 +421,12 @@ export function ChatSidebar({ userId, chats, selectedChatId, onChatSelect, onMen
 												.toUpperCase()}
 										</AvatarFallback>
 									</Avatar>
-									{!chat.isGroupChat && otherParticipant?.status === "online" && <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"></div>}
+									{!chat.isGroupChat && isUserOnline(otherParticipant?.id || "") && <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"></div>}
 								</div>
 								<div className="ml-3 flex-1 min-w-0">
 									<div className="flex items-center justify-between">
 										<p className="text-sm font-medium text-gray-900 truncate">{displayName}</p>
-										{chat.lastMessage && <p className="text-xs text-gray-500">{formatTime(chat.lastMessage.createdAt)}</p>}
+										{/* {chat.lastMessage && <p className="text-xs text-gray-500">{formatTime(chat.lastMessage.createdAt)}</p>} */}
 									</div>
 									<div className="flex items-center justify-between">
 										<p className="text-sm text-gray-500 truncate">{chat.lastMessage?.content || "No messages yet"}</p>
@@ -516,11 +451,13 @@ interface ChatWindowProps {
 	onDeleteMessage: (messageId: string, chatId: string) => void;
 	isMobile?: boolean;
 	loading: boolean;
+	getChatPartner: (currentUserId: string, participants: User[]) => User | null;
 	socket: any; // Replace with Socket type from 'socket.io-client' if available
 	setAllMessages: React.Dispatch<React.SetStateAction<IReceiveMessage[]>>;
+	isUserOnline(userId: string): boolean;
 }
 
-export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage, onDeleteMessage, isMobile, loading, socket, setAllMessages }: ChatWindowProps) {
+export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage, getChatPartner, onDeleteMessage, isUserOnline, isMobile, loading, socket, setAllMessages }: ChatWindowProps) {
 	const [newMessage, setNewMessage] = useState("");
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -533,12 +470,9 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 		if (!socket) return;
 
 		const handleMessagesReadUpdate = ({ chatId, readerId, messageIds }: { chatId: string; readerId: string; messageIds: string[] }) => {
-			console.log(`Received messages-read-update: chatId=${chatId}, readerId=${readerId}, messageIds=`, messageIds);
-
 			if (chatId === selectedChat?.id) {
 				setAllMessages((prevMessages: IReceiveMessage[]) => {
 					const updatedMessages = prevMessages.map((msg: IReceiveMessage) => (messageIds.includes(msg.id) && !msg.readBy.includes(readerId) ? { ...msg, readBy: [...msg.readBy, readerId] } : msg));
-					console.log("Updated messages:", updatedMessages);
 					return updatedMessages;
 				});
 			}
@@ -587,7 +521,9 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 
 	const userMessages = messages.filter((msg) => msg.chatId === selectedChat.id);
 
-	console.log("userMessages: ", userMessages[userMessages.length - 1]);
+	const chatPartner = getChatPartner(user!.id!, selectedChat.participants);
+	if (!chatPartner) return null;
+	const isPartnerOnline = isUserOnline(chatPartner.id);
 
 	return (
 		<div className="flex flex-col h-full bg-white">
@@ -599,20 +535,20 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 				)}
 				<div className="relative">
 					<Avatar className="h-10 w-10">
-						<AvatarImage src={selectedChat.isGroupChat ? "/group-placeholder.svg" : selectedChat.participants[0]?.avatar || "/placeholder.svg"} alt={selectedChat.groupName || selectedChat.participants[0]?.name} />
+						<AvatarImage src={selectedChat.isGroupChat ? "" : chatPartner.avatar || ""} alt={selectedChat.groupName || chatPartner.name} />
 						<AvatarFallback>
-							{(selectedChat.isGroupChat ? selectedChat.groupName : selectedChat.participants[0]?.firstName)
+							{(selectedChat.isGroupChat ? selectedChat.groupName : chatPartner.firstName)
 								?.split(" ")
 								.map((n) => n[0])
 								.join("")
 								.toUpperCase()}
 						</AvatarFallback>
 					</Avatar>
-					{!selectedChat.isGroupChat && selectedChat.participants[0]?.status === "online" && <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"></div>}
+					{!selectedChat.isGroupChat && isPartnerOnline && <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"></div>}
 				</div>
 				<div className="ml-3 flex-1">
-					<h2 className="text-sm font-medium text-gray-900">{selectedChat.isGroupChat ? selectedChat.groupName : `${selectedChat.participants[0]?.firstName} ${selectedChat.participants[0]?.lastName || ""}`}</h2>
-					<p className="text-xs text-gray-500">{selectedChat.isGroupChat ? `${selectedChat.participants.length} members` : selectedChat.participants[0]?.status === "online" ? "Online" : "Offline"}</p>
+					<h2 className="text-sm font-medium text-gray-900">{selectedChat.isGroupChat ? selectedChat.groupName : `${chatPartner.firstName} ${chatPartner.lastName || ""}`}</h2>
+					<p className="text-xs text-gray-500">{selectedChat.isGroupChat ? `${selectedChat.participants.length} members` : isPartnerOnline ? "Online" : "Offline"}</p>
 				</div>
 				<div className="flex items-center space-x-2">
 					<Button variant="ghost" size="sm">
@@ -690,7 +626,7 @@ export function MessageBubble({ chat, message, isOwn, isGroupChat, onDeleteMessa
 	};
 
 	const handleInfoClick = () => {
-		toast.info(`Message sent at ${formatTime(message.createdAt)} by ${message.sender.firstName} ${message.sender.lastName}`);
+		// toast.info(`Message sent at ${formatTime(message.createdAt)} by ${message.sender.fullName}`);
 	};
 
 	return (
@@ -706,10 +642,10 @@ export function MessageBubble({ chat, message, isOwn, isGroupChat, onDeleteMessa
 						{isGroupChat && !isOwn && (
 							<div className="flex items-center mb-1">
 								<Avatar className="h-6 w-6 mr-2">
-									<AvatarImage src={message.sender.avatar || "/placeholder.svg"} alt={`${message.sender.firstName} ${message.sender.lastName}`} />
-									<AvatarFallback>{`${message.sender.firstName[0]}${message.sender.lastName[0]}`.toUpperCase()}</AvatarFallback>
+									<AvatarImage src={message.sender.avatar || "/placeholder.svg"} alt={`${message.sender.fullName}`} />
+									<AvatarFallback>{`${message.sender.fullName}`.toUpperCase()}</AvatarFallback>
 								</Avatar>
-								<p className="text-xs font-medium text-gray-700">{`${message.sender.firstName} ${message.sender.lastName}`}</p>
+								<p className="text-xs font-medium text-gray-700">{message.sender.fullName}</p>
 							</div>
 						)}
 						<div className={`px-4 py-2 rounded-lg ${isOwn ? "bg-green-600 text-white rounded-br-sm" : "bg-gray-200 text-gray-900 rounded-bl-sm"}`}>
@@ -725,8 +661,8 @@ export function MessageBubble({ chat, message, isOwn, isGroupChat, onDeleteMessa
 								</a>
 							)}
 							<div className={`flex items-center justify-end mt-1 space-x-1 ${isOwn ? "text-green-100" : "text-gray-500"}`}>
-								<span className="text-xs">{formatTime(message.createdAt)}</span>
-								{getReadStatus()}
+								{/* <span className="text-xs">{formatTime(message.createdAt)}</span> */}
+								{/* {getReadStatus()} */}
 							</div>
 						</div>
 					</div>

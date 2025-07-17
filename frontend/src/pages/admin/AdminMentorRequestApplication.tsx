@@ -40,7 +40,6 @@ export function AdminMentorApplicationsPage() {
 			try {
 				const response = await updateMentorStatusAPI(userId, status, rejectionReason);
 				if (response.success) {
-					console.log(`MentorsList : `, mentorsList);
 					setMentorsList((prev) => prev.filter((mentor) => mentor.userId !== userId));
 					toast.success(`Mentor application ${status} successfully!`);
 				} else {

@@ -6,7 +6,7 @@ export const adminLoginAPI = async (username: string, password: string) => {
 		return response.data;
 	} catch (error: any) {
 
-		console.log(`Error from admin login api : `, error);
+		console.error(`Error from admin login api : `, error);
 		throw new Error(error.response.data.message);
 	}
 };

@@ -13,7 +13,6 @@ import { SocketProvider } from "./context/SocketContext";
 
 function App() {
 	const userId = useSelector((state: RootState) => state.userAuth.user?.id);
-	console.log("userId: ", userId);
 	const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 	return (
 		<GoogleOAuthProvider clientId={googleClientId}>

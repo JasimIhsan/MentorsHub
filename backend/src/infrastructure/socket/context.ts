@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 import { RoleEnum } from "../../application/interfaces/enums/role.enum";
 
 // Describes a user connected to any real-time feature (chat, call, etc.)
-export interface RealtimeParticipant {
+export interface VideoParticipant {
 	userId: string;
 	socketId: string;
 	peerId: string; // For WebRTC or peer-based features
@@ -12,11 +12,21 @@ export interface RealtimeParticipant {
 	isApproved?: boolean; // Used in mentor approval flows
 }
 
-// Map of userId → socketId (for quick lookup)
+export interface ChatParticipant {
+	userId: string;
+	socketId: string;
+	fullName: string;
+	avatar?: string;
+}
+
+// 👥 Users currently online
 export const onlineUsers = new Map<string, Socket>();
 
-// Map of sessionId → participants[] (could be for call, chat, etc.)
-export const realtimeRooms: Record<string, RealtimeParticipant[]> = {};
+// 💬 Chat rooms (sessionId → participants)
+export const chatRooms = new Map<string, ChatParticipant[]>();
 
-// Map of sessionId → hostSocketId (typically the mentor/creator)
-export const activeHosts: Record<string, string> = {};
+// 🎥 Video rooms (sessionId → participants)
+export const videoRooms = new Map<string, VideoParticipant[]>();
+
+// 👑 Active video call host (sessionId → socketId)
+export const activeHosts = new Map<string, string>();

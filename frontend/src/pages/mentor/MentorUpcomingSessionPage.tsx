@@ -94,7 +94,6 @@ export function MentorUpcomingSessionsPage() {
 	const handleStartSession = useCallback(
 		(sessionId: string) => {
 			try {
-				console.log(`sessionId : `, sessionId);
 				navigate(`/video-call/${sessionId}`);
 			} catch (err: any) {
 				toast.error(err.response?.data?.message || "Failed to start session.");

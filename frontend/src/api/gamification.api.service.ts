@@ -30,7 +30,6 @@ interface TaskResponse {
 export const createActionTypeAdminAPI = async (data: { label: string; id: string }) => {
 	try {
 		const response = await axiosInstance.post("/admin/gamification/create-action-type", data);
-		console.log("createActionTypeAdminAPI response:", response.data); // Debug log
 		return response.data;
 	} catch (error: any) {
 		console.error("Error in createActionTypeAdminAPI:", error);
@@ -42,7 +41,6 @@ export const createActionTypeAdminAPI = async (data: { label: string; id: string
 export const getActionTypesAdminAPI = async () => {
 	try {
 		const response = await axiosInstance.get<ActionTypeResponse>("/admin/gamification/action-types");
-		console.log("getActionTypesAdminAPI response:", response.data); // Debug log
 		return response.data.actionTypes.map((type) => ({
 			id: type._id,
 			label: type._label,
@@ -57,7 +55,6 @@ export const getActionTypesAdminAPI = async () => {
 export const createGamificationTaskAdminAPI = async (data: { title: string; xpReward: number; targetCount: number; actionType: string }) => {
 	try {
 		const response = await axiosInstance.post<TaskResponse>("/admin/gamification/create-task", data);
-		console.log("createGamificationTaskAdminAPI response:", response.data); // Debug log
 		return response.data.task;
 	} catch (error: any) {
 		console.error("Error in createGamificationTaskAdminAPI:", error);
@@ -71,7 +68,6 @@ export const getAllGamificationTasksAdminAPI = async (page = 1, limit = 10, acti
 		const response = await axiosInstance.get("/admin/gamification/", {
 			params: { page, limit, actionType, searchTerm },
 		});
-		console.log("getAllGamificationTasksAdminAPI response:", response.data); // Debug log
 		return response.data;
 	} catch (error: any) {
 		console.error("Error in getAllGamificationTasksAdminAPI:", error);
@@ -83,7 +79,6 @@ export const getAllGamificationTasksAdminAPI = async (page = 1, limit = 10, acti
 export const toggleTaskListStatusAdminAPI = async (taskId: string, status: boolean) => {
 	try {
 		const response = await axiosInstance.patch<TaskResponse>(`/admin/gamification/tasks/${taskId}/toggle-list`, { status });
-		console.log("toggleTaskListStatusAdminAPI response:", response.data); // Debug log
 		return response.data.task;
 	} catch (error: any) {
 		console.error("Error in toggleTaskListStatusAdminAPI:", error);
@@ -95,7 +90,6 @@ export const toggleTaskListStatusAdminAPI = async (taskId: string, status: boole
 export const deleteGamificationTaskAdminAPI = async (taskId: string) => {
 	try {
 		const response = await axiosInstance.delete<TaskResponse>(`/admin/gamification/tasks/${taskId}`);
-		console.log("deleteGamificationTaskAdminAPI response:", response.data); // Debug log
 		return response.data.task;
 	} catch (error: any) {
 		console.error("Error in deleteGamificationTaskAdminAPI:", error);
@@ -106,7 +100,6 @@ export const deleteGamificationTaskAdminAPI = async (taskId: string) => {
 export const updateGamificationTaskAdminAPI = async (taskId: string, data: { title: string; xpReward: number; targetCount: number; actionType: string }) => {
 	try {
 		const response = await axiosInstance.put<TaskResponse>(`/admin/gamification/tasks/${taskId}`, data);
-		console.log("updateGamificationTaskAdminAPI response:", response.data); // Debug log
 		return response.data.task;
 	} catch (error: any) {
 		console.error("Error in updateGamificationTaskAdminAPI:", error);

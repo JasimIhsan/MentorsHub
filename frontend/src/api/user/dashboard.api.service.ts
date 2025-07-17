@@ -4,8 +4,6 @@ import { fetchSessionsByUser } from "../session.api.service";
 export const fetchDashboardDatas = async (userId: string) => {
 	try {
 		const [sessionsRes, mentorRes] = await Promise.all([fetchSessionsByUser(userId, 1, 3, "upcoming"), fetchAllApprovedMentors(userId, 1, 1, "", "recommended")]);
-		console.log(`sessionsRes : `, sessionsRes);
-		console.log(`mentorRes : `, mentorRes);
 		return { sessions: sessionsRes.sessions, mentor: mentorRes.mentors };
 	} catch (error) {
 		console.error("Error fetching data:", error);

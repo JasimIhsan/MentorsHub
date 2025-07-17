@@ -20,10 +20,7 @@ export function MobileNav() {
 
 	const handleLogout = async () => {
 		try {
-			console.log(`Login out...`);
-			console.log(`isConnected : `, isConnected);
 			if (isConnected) {
-				console.log(`Disconnecting socket...`);
 				disconnectSocket();
 			}
 			const response = await logoutSession();

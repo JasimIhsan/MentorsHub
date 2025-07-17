@@ -130,7 +130,6 @@ export default function UserProfilePage() {
 		try {
 			const response = await updateUserApi(user.id as string, formData);
 			if (response.success) {
-				console.log(`user : `, response.user);
 				dispatch(updateUser(response.user));
 				setHasUnsavedChanges(false);
 				setIsEditing(false);
