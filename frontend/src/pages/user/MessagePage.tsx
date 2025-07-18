@@ -7,14 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { useSocket } from "@/context/SocketContext";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-// import { formatTime } from "@/utility/time-data-formatter";
 import { useDebounce } from "@/hooks/useDebounce";
 import { IMentorDTO } from "@/interfaces/IMentorDTO";
 import { fetchAllApprovedMentors } from "@/api/mentors.api.service";
 import axiosInstance from "@/api/config/api.config";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Alert } from "@/components/custom/alert";
-import { set } from "lodash";
+import { formatTime } from "@/utility/time-data-formatter";
+import { toast } from "sonner";
+import { Socket } from "socket.io-client";
 
 // Define interfaces
 export interface User {
@@ -30,11 +31,7 @@ export interface User {
 export interface ISendMessage {
 	id: string;
 	chatId?: string; // optional, can be created server-side if new
-	sender: {
-		id: string;
-		fullName: string;
-		avatar?: string;
-	};
+	senderId: string;
 	receiverId: string;
 	content: string;
 	type: "text" | "image" | "file" | "video";
@@ -67,7 +64,7 @@ export interface Chat {
 }
 
 export function MessagePage() {
-	const [selectedChatId, setSelectedChatId] = useState<string>();
+	const [selectedChatId, setSelectedChatId] = useState<string | undefined>();
 	const [tempChat, setTempChat] = useState<Chat | null>(null);
 	const [allMessages, setAllMessages] = useState<IReceiveMessage[]>([]);
 	const [chats, setChats] = useState<Chat[]>([]);
@@ -87,9 +84,13 @@ export function MessagePage() {
 		return () => window.removeEventListener("resize", checkIsMobile);
 	}, []);
 
-	// Fetch chats and unread counts from API
+	// Join user-specific room and fetch chats
 	useEffect(() => {
 		if (!user?.id || !socket) return;
+
+		// Join user-specific room
+		socket.emit("join-user", { userId: user.id });
+
 		const fetchChats = async () => {
 			setLoading(true);
 			try {
@@ -98,10 +99,15 @@ export function MessagePage() {
 					const fetchedChats = response.data.chats;
 					setChats(fetchedChats);
 					const chatIds = fetchedChats.map((chat: Chat) => chat.id);
-					socket.emit("get-unread-counts", { userId: user.id, chatIds });
+					if (chatIds.length > 0) {
+						socket.emit("get-unread-counts", { userId: user.id, chatIds });
+					}
+				} else {
+					toast.error("Failed to load chats");
 				}
 			} catch (error) {
 				console.error("Failed to fetch chats:", error);
+				toast.error("Failed to load chats");
 			} finally {
 				setLoading(false);
 			}
@@ -121,9 +127,14 @@ export function MessagePage() {
 						limit: 100,
 					},
 				});
-				setAllMessages(response.data.messages);
+				if (response.data.success) {
+					setAllMessages(response.data.messages);
+				} else {
+					toast.error("Failed to load messages");
+				}
 			} catch (error) {
 				console.error("Failed to fetch messages:", error);
+				toast.error("Failed to load messages");
 			} finally {
 				setLoading(false);
 			}
@@ -131,33 +142,109 @@ export function MessagePage() {
 		fetchMessages();
 	}, [selectedChatId, user?.id]);
 
-	// Handle socket messages
+	// Handle socket messages and real-time updates
 	useEffect(() => {
-		if (!socket || !user?.id || !selectedChatId) return;
+		if (!socket || !user?.id) return;
 
 		const handleReceiveMessage = (message: IReceiveMessage) => {
-			// Only add the message if it belongs to the currently selected chat
+			// Validate message
+			if (!message?.id || !message.chatId) {
+				console.error("Invalid message received:", message);
+				return;
+			}
+			// Add message to the selected chat
 			if (message.chatId === selectedChatId) {
 				setAllMessages((prev) => {
-					// Prevent duplicates by checking if the message ID already exists
 					if (prev.some((msg) => msg.id === message.id)) {
 						return prev;
 					}
 					return [...prev, message];
 				});
+			} else if (message.sender.id !== user.id) {
+				// Increment unread count for non-selected chat if not sent by the user
+				setChats((prevChats) => prevChats.map((chat) => (chat.id === message.chatId ? { ...chat, unreadCount: chat.unreadCount + 1, lastMessage: message } : chat)));
+			}
+		};
+
+		const handleMessagesRead = ({ chatId, userId: readerId }: { chatId: string; userId: string }) => {
+			if (!chatId || !readerId) {
+				console.error("Invalid messages-read payload:", { chatId, readerId });
+				return;
+			}
+			if (chatId === selectedChatId) {
+				setAllMessages((prevMessages) =>
+					prevMessages.map((msg) => {
+						if (msg.chatId === chatId && !msg.readBy.includes(readerId) && msg.sender.id !== readerId) {
+							return { ...msg, readBy: [...msg.readBy, readerId] };
+						}
+						return msg;
+					})
+				);
+			}
+			// Reset unread count for the chat
+			setChats((prevChats) => prevChats.map((chat) => (chat.id === chatId ? { ...chat, unreadCount: 0 } : chat)));
+		};
+
+		const handleMessageDeleted = ({ messageId, chatId }: { messageId: string; chatId: string }) => {
+			if (!messageId || !chatId) {
+				console.error("Invalid message-deleted payload:", { messageId, chatId });
+				return;
+			}
+			setAllMessages((prevMessages) => prevMessages.filter((msg) => msg.id !== messageId));
+			// Re-fetch unread counts for the affected chat
+			if (chatId && user.id) {
+				socket.emit("get-unread-counts", { userId: user.id, chatIds: [chatId] });
+			}
+		};
+
+		const handleUnreadCounts = (countsMap: { [chatId: string]: number }) => {
+			console.log("📬 Got unread map:", countsMap);
+			setChats((prevChats) =>
+				prevChats.map((chat) => ({
+					...chat,
+					unreadCount: countsMap[chat.id] !== undefined ? Math.max(0, countsMap[chat.id]) : chat.unreadCount,
+				}))
+			);
+		};
+
+		const handleUnreadCountsError = ({ message }: { message: string }) => {
+			toast.error(message || "Failed to fetch unread counts");
+		};
+
+		const handleSocketConnect = () => {
+			console.log("Socket reconnected, re-fetching unread counts");
+			socket.emit("join-user", { userId: user.id });
+			if (chats.length > 0) {
+				const chatIds = chats.map((chat) => chat.id);
+				socket.emit("get-unread-counts", { userId: user.id, chatIds });
 			}
 		};
 
 		socket.on("receive-message", handleReceiveMessage);
+		socket.on("messages-read", handleMessagesRead);
+		socket.on("message-deleted", handleMessageDeleted);
+		socket.on("unread-counts-response", handleUnreadCounts);
+		socket.on("unread-counts-error", handleUnreadCountsError);
+		socket.on("error", ({ message }) => {
+			toast.error(message || "Something went wrong");
+		});
+		socket.on("connect", handleSocketConnect);
 
 		return () => {
 			socket.off("receive-message", handleReceiveMessage);
+			socket.off("messages-read", handleMessagesRead);
+			socket.off("message-deleted", handleMessageDeleted);
+			socket.off("unread-counts-response", handleUnreadCounts);
+			socket.off("unread-counts-error", handleUnreadCountsError);
+			socket.off("error");
+			socket.off("connect", handleSocketConnect);
 		};
-	}, [socket, selectedChatId, user?.id]);
+	}, [socket, selectedChatId, user?.id, chats]);
 
 	const selectedChat = tempChat || (selectedChatId ? chats.find((chat) => chat.id === selectedChatId) : undefined);
 
 	const handleChatSelect = (chatId: string) => {
+		if (!chatId) return;
 		if (socket && selectedChatId) {
 			socket.emit("leave-chat", selectedChatId);
 		}
@@ -167,9 +254,9 @@ export function MessagePage() {
 		if (isMobile) {
 			setShowChat(true);
 		}
-		if (socket) {
-			socket.emit("join-chat", chatId);
-			socket.emit("mark-chat-as-read", { chatId, userId: user?.id });
+		if (socket && user?.id) {
+			socket.emit("join-chat", { chatId, userId: user.id });
+			socket.emit("mark-chat-as-read", { chatId, userId: user.id });
 			setChats((prev) => prev.map((chat) => (chat.id === chatId ? { ...chat, unreadCount: 0 } : chat)));
 		}
 	};
@@ -179,6 +266,7 @@ export function MessagePage() {
 	};
 
 	const handleMentorSelect = (mentor: IMentorDTO) => {
+		if (!mentor?.userId) return;
 		const tempChat: Chat = {
 			id: "",
 			participants: [
@@ -218,17 +306,14 @@ export function MessagePage() {
 
 		if (!isGroupChat && !receiverId) {
 			console.warn("No receiver found for 1-to-1 chat");
+			toast.error("Cannot send message: No recipient found");
 			return;
 		}
 
 		const message: ISendMessage = {
 			id: Math.random().toString(36).substring(2, 9), // Temporary ID
 			chatId,
-			sender: {
-				id: user.id,
-				fullName: `${user.firstName} ${user.lastName}`,
-				avatar: user.avatar || "",
-			},
+			senderId: user.id,
 			receiverId,
 			content: content.trim(),
 			type: "text",
@@ -238,11 +323,12 @@ export function MessagePage() {
 			socket.emit("send-message", message);
 		} catch (error) {
 			console.error("Socket emit failed:", error);
+			toast.error("Failed to send message");
 		}
 	};
 
 	const handleDeleteMessage = (messageId: string, chatId: string) => {
-		if (!socket || !user?.id) return;
+		if (!socket || !user?.id || !messageId || !chatId) return;
 		socket.emit("delete-message", {
 			messageId,
 			chatId,
@@ -272,7 +358,6 @@ export function MessagePage() {
 								loading={loading}
 								socket={socket}
 								isUserOnline={isUserOnline}
-								setAllMessages={setAllMessages}
 							/>
 						</div>
 					)}
@@ -295,7 +380,6 @@ export function MessagePage() {
 							loading={loading}
 							socket={socket}
 							isUserOnline={isUserOnline}
-							setAllMessages={setAllMessages}
 						/>
 					</div>
 				</>
@@ -334,15 +418,18 @@ export function ChatSidebar({ userId, chats, selectedChatId, onChatSelect, isUse
 					const approvedMentors = response.mentors;
 					const filteredMentors = approvedMentors.filter((mentor: IMentorDTO) => mentor.firstName.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) || mentor.lastName.toLowerCase().includes(debouncedSearchQuery.toLowerCase()));
 					setMentors(filteredMentors);
+				} else {
+					toast.error("Failed to load mentors");
 				}
 			} catch (error) {
 				console.error("Failed to fetch mentors:", error);
+				toast.error("Failed to load mentors");
 			} finally {
 				setMentorLoading(false);
 			}
 		};
 		fetchMentors();
-	}, [debouncedSearchQuery]);
+	}, [debouncedSearchQuery, userId]);
 
 	return (
 		<div className="flex flex-col h-full bg-white border-r border-gray-200">
@@ -394,18 +481,10 @@ export function ChatSidebar({ userId, chats, selectedChatId, onChatSelect, isUse
 						<p className="text-sm">No conversations or mentors found</p>
 					</div>
 				) : (
-					// Map through chats to display them
 					chats.map((chat) => {
-						// For non-group chats, find the participant who is not the current user
 						const otherParticipant = chat.isGroupChat ? null : chat.participants.find((participant) => participant.id !== userId);
-
-						// Set display name: use group name for group chats, otherwise use other participant's name
-						const displayName = chat.isGroupChat ? chat.groupName || "Group Chat" : otherParticipant ? `${otherParticipant.firstName} ${otherParticipant.lastName}` : "Unknown User"; // Fallback if no other participant is found
-
-						// Set display avatar: use group placeholder for group chats, otherwise use other participant's avatar
+						const displayName = chat.isGroupChat ? chat.groupName || "Group Chat" : otherParticipant ? `${otherParticipant.firstName} ${otherParticipant.lastName || ""}` : "Unknown User";
 						const displayAvatar = chat.isGroupChat ? "/group-placeholder.svg" : otherParticipant?.avatar || "/placeholder.svg";
-
-						// Check if this chat is selected
 						const isSelected = selectedChatId === chat.id;
 
 						return (
@@ -426,7 +505,7 @@ export function ChatSidebar({ userId, chats, selectedChatId, onChatSelect, isUse
 								<div className="ml-3 flex-1 min-w-0">
 									<div className="flex items-center justify-between">
 										<p className="text-sm font-medium text-gray-900 truncate">{displayName}</p>
-										{/* {chat.lastMessage && <p className="text-xs text-gray-500">{formatTime(chat.lastMessage.createdAt)}</p>} */}
+										{chat.lastMessage && <p className="text-xs text-gray-500">{formatTime(chat.lastMessage.createdAt)}</p>}
 									</div>
 									<div className="flex items-center justify-between">
 										<p className="text-sm text-gray-500 truncate">{chat.lastMessage?.content || "No messages yet"}</p>
@@ -452,38 +531,29 @@ interface ChatWindowProps {
 	isMobile?: boolean;
 	loading: boolean;
 	getChatPartner: (currentUserId: string, participants: User[]) => User | null;
-	socket: any; // Replace with Socket type from 'socket.io-client' if available
-	setAllMessages: React.Dispatch<React.SetStateAction<IReceiveMessage[]>>;
-	isUserOnline(userId: string): boolean;
+	socket: Socket | null; // Updated to allow null
+	isUserOnline: (userId: string) => boolean;
 }
 
-export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage, getChatPartner, onDeleteMessage, isUserOnline, isMobile, loading, socket, setAllMessages }: ChatWindowProps) {
+export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage, getChatPartner, onDeleteMessage, isUserOnline, isMobile, loading, socket }: ChatWindowProps) {
 	const [newMessage, setNewMessage] = useState("");
 	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
 	const scrollToBottom = () => {
-		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+		if (messagesEndRef.current) {
+			messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+		}
 	};
 
-	// Handle messages read update
-	useEffect(() => {
-		if (!socket) return;
-
-		const handleMessagesReadUpdate = ({ chatId, readerId, messageIds }: { chatId: string; readerId: string; messageIds: string[] }) => {
-			if (chatId === selectedChat?.id) {
-				setAllMessages((prevMessages: IReceiveMessage[]) => {
-					const updatedMessages = prevMessages.map((msg: IReceiveMessage) => (messageIds.includes(msg.id) && !msg.readBy.includes(readerId) ? { ...msg, readBy: [...msg.readBy, readerId] } : msg));
-					return updatedMessages;
-				});
-			}
-		};
-
-		socket.on("messages-read-update", handleMessagesReadUpdate);
-
-		return () => {
-			socket.off("messages-read-update", handleMessagesReadUpdate);
-		};
-	}, [socket, selectedChat?.id, setAllMessages]);
+	// Set ref for each message
+	const setMessageRef = (messageId: string, element: HTMLDivElement | null) => {
+		if (element) {
+			messageRefs.current.set(messageId, element);
+		} else {
+			messageRefs.current.delete(messageId);
+		}
+	};
 
 	useEffect(() => {
 		scrollToBottom();
@@ -520,10 +590,10 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 	}
 
 	const userMessages = messages.filter((msg) => msg.chatId === selectedChat.id);
-
 	const chatPartner = getChatPartner(user!.id!, selectedChat.participants);
-	if (!chatPartner) return null;
-	const isPartnerOnline = isUserOnline(chatPartner.id);
+	if (!chatPartner && !selectedChat.isGroupChat) return null; // Handle null chatPartner for non-group chats
+
+	const isPartnerOnline = selectedChat.isGroupChat ? false : isUserOnline(chatPartner?.id || "");
 
 	return (
 		<div className="flex flex-col h-full bg-white">
@@ -535,9 +605,9 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 				)}
 				<div className="relative">
 					<Avatar className="h-10 w-10">
-						<AvatarImage src={selectedChat.isGroupChat ? "" : chatPartner.avatar || ""} alt={selectedChat.groupName || chatPartner.name} />
+						<AvatarImage src={selectedChat.isGroupChat ? "/group-placeholder.svg" : chatPartner?.avatar || "/placeholder.svg"} alt={selectedChat.groupName || chatPartner?.name || "Chat"} />
 						<AvatarFallback>
-							{(selectedChat.isGroupChat ? selectedChat.groupName : chatPartner.firstName)
+							{(selectedChat.isGroupChat ? selectedChat.groupName : chatPartner?.firstName || "Chat")
 								?.split(" ")
 								.map((n) => n[0])
 								.join("")
@@ -547,14 +617,14 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 					{!selectedChat.isGroupChat && isPartnerOnline && <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"></div>}
 				</div>
 				<div className="ml-3 flex-1">
-					<h2 className="text-sm font-medium text-gray-900">{selectedChat.isGroupChat ? selectedChat.groupName : `${chatPartner.firstName} ${chatPartner.lastName || ""}`}</h2>
+					<h2 className="text-sm font-medium text-gray-900">{selectedChat.isGroupChat ? selectedChat.groupName : `${chatPartner?.firstName || ""} ${chatPartner?.lastName || ""}`}</h2>
 					<p className="text-xs text-gray-500">{selectedChat.isGroupChat ? `${selectedChat.participants.length} members` : isPartnerOnline ? "Online" : "Offline"}</p>
 				</div>
 				<div className="flex items-center space-x-2">
-					<Button variant="ghost" size="sm">
+					<Button variant="ghost" size="sm" disabled={!socket}>
 						<Phone className="h-5 w-5" />
 					</Button>
-					<Button variant="ghost" size="sm">
+					<Button variant="ghost" size="sm" disabled={!socket}>
 						<Video className="h-5 w-5" />
 					</Button>
 					<Button variant="ghost" size="sm">
@@ -573,23 +643,33 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 					</div>
 				) : (
 					userMessages.map((message) => (
-						<MessageBubble key={message.id} chat={selectedChat} message={message} isOwn={message.sender.id === user?.id} isGroupChat={selectedChat.isGroupChat} onDeleteMessage={() => onDeleteMessage(message.id, message.chatId)} />
+						<MessageBubble
+							key={message.id}
+							userId={user?.id!}
+							chatIsActive={selectedChat.id === message.chatId}
+							message={message}
+							socket={socket}
+							isOwn={message.sender.id === user?.id}
+							isGroupChat={selectedChat.isGroupChat}
+							onDeleteMessage={() => onDeleteMessage(message.id, message.chatId)}
+							setMessageRef={(element) => setMessageRef(message.id, element)}
+						/>
 					))
 				)}
 				<div ref={messagesEndRef} />
 			</div>
 			<div className="p-4 border-t border-gray-200 bg-white shrink-0 sticky bottom-0 z-10">
 				<div className="flex items-center space-x-2">
-					<Button variant="ghost" size="sm">
+					<Button variant="ghost" size="sm" disabled={!socket}>
 						<Paperclip className="h-5 w-5" />
 					</Button>
 					<div className="flex-1 relative">
-						<Input placeholder="Type a message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyPress={handleKeyPress} className="pr-10" />
-						<Button variant="ghost" size="sm" className="absolute right-1 top-1/2 transform -translate-y-1/2">
+						<Input placeholder="Type a message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyPress={handleKeyPress} className="pr-10" disabled={!socket} />
+						<Button variant="ghost" size="sm" className="absolute right-1 top-1/2 transform -translate-y-1/2" disabled={!socket}>
 							<Smile className="h-4 w-4" />
 						</Button>
 					</div>
-					<Button onClick={handleSendMessage} disabled={!newMessage.trim()} className="bg-green-600 hover:bg-green-700">
+					<Button onClick={handleSendMessage} disabled={!newMessage.trim() || !socket} className="bg-green-600 hover:bg-green-700">
 						<Send className="h-4 w-4" />
 					</Button>
 				</div>
@@ -599,38 +679,96 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 }
 
 interface MessageBubbleProps {
-	chat: Chat;
+	userId: string;
+	chatIsActive: boolean;
 	message: IReceiveMessage;
 	isOwn: boolean;
 	isGroupChat?: boolean;
+	socket: Socket | null; // Updated to allow null
 	onDeleteMessage: () => void;
+	setMessageRef: (element: HTMLDivElement | null) => void;
 }
 
-export function MessageBubble({ chat, message, isOwn, isGroupChat, onDeleteMessage }: MessageBubbleProps) {
+export function MessageBubble({ userId, chatIsActive, socket, message, isOwn, isGroupChat, onDeleteMessage, setMessageRef }: MessageBubbleProps) {
 	const [isOpen, setIsOpen] = useState(false);
+	const ref = useRef<HTMLDivElement>(null);
 
 	// Determine tick status for messages
 	const getReadStatus = () => {
-		if (!isOwn) return null; // Only show ticks for your own messages
-
-		const readCount = message.readBy.length;
-		const expectedReadCount = isGroupChat ? chat.participants.length : 2;
-
-		// ✅ All participants have read the message
-		if (readCount === expectedReadCount) {
-			return <CheckCheck className="h-4 w-4 text-blue-500" />;
-		}
-
-		// ✅ Message has been sent (even if no one else read it yet)
-		return <CheckCheck className="h-4 w-4 text-gray-300" />;
+		if (!isOwn) return null; // Only show ticks for sender's own messages
+		const isReadByOthers = message.readBy.some((id) => id !== userId);
+		return <CheckCheck className={`h-4 w-4 ${isReadByOthers ? "text-blue-700" : "text-gray-300"}`} />;
 	};
 
+	// Mark messages as read for non-sender messages
+	useEffect(() => {
+		if (!ref.current || !socket || !chatIsActive || document.visibilityState !== "visible" || isOwn || message.readBy.includes(userId)) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const [entry] = entries;
+				if (entry.isIntersecting) {
+					socket.emit("mark-message-as-read", {
+						messageId: message.id,
+						chatId: message.chatId,
+						userId,
+					});
+				}
+			},
+			{ threshold: 1.0 }
+		);
+
+		observer.observe(ref.current);
+
+		return () => {
+			if (ref.current) observer.unobserve(ref.current);
+		};
+	}, [message, userId, socket, chatIsActive, isOwn]);
+
+	// Handle tab visibility change
+	useEffect(() => {
+		if (!socket) return;
+
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === "visible" && ref.current && chatIsActive && !isOwn && !message.readBy.includes(userId)) {
+				const observer = new IntersectionObserver(
+					(entries) => {
+						const [entry] = entries;
+						if (entry.isIntersecting) {
+							socket.emit("mark-message-as-read", {
+								messageId: message.id,
+								chatId: message.chatId,
+								userId,
+							});
+						}
+					},
+					{ threshold: 1.0 }
+				);
+				observer.observe(ref.current);
+				return () => {
+					if (ref.current) observer.unobserve(ref.current);
+				};
+			}
+		};
+
+		document.addEventListener("visibilitychange", handleVisibilityChange);
+		return () => {
+			document.removeEventListener("visibilitychange", handleVisibilityChange);
+		};
+	}, [message, userId, socket, chatIsActive, isOwn]);
+
+	// Set message ref for parent component
+	useEffect(() => {
+		setMessageRef(ref.current);
+	}, [setMessageRef]);
+
 	const handleInfoClick = () => {
-		// toast.info(`Message sent at ${formatTime(message.createdAt)} by ${message.sender.fullName}`);
+		toast.info(`Message sent at ${formatTime(message.createdAt)} by ${message.sender.fullName}`);
 	};
 
 	return (
 		<div
+			ref={ref}
 			className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-4`}
 			onContextMenu={(e) => {
 				e.preventDefault();
@@ -642,8 +780,14 @@ export function MessageBubble({ chat, message, isOwn, isGroupChat, onDeleteMessa
 						{isGroupChat && !isOwn && (
 							<div className="flex items-center mb-1">
 								<Avatar className="h-6 w-6 mr-2">
-									<AvatarImage src={message.sender.avatar || "/placeholder.svg"} alt={`${message.sender.fullName}`} />
-									<AvatarFallback>{`${message.sender.fullName}`.toUpperCase()}</AvatarFallback>
+									<AvatarImage src={message.sender.avatar || "/placeholder.svg"} alt={message.sender.fullName} />
+									<AvatarFallback>
+										{message.sender.fullName
+											?.split(" ")
+											.map((n) => n[0])
+											.join("")
+											.toUpperCase()}
+									</AvatarFallback>
 								</Avatar>
 								<p className="text-xs font-medium text-gray-700">{message.sender.fullName}</p>
 							</div>
@@ -661,8 +805,8 @@ export function MessageBubble({ chat, message, isOwn, isGroupChat, onDeleteMessa
 								</a>
 							)}
 							<div className={`flex items-center justify-end mt-1 space-x-1 ${isOwn ? "text-green-100" : "text-gray-500"}`}>
-								{/* <span className="text-xs">{formatTime(message.createdAt)}</span> */}
-								{/* {getReadStatus()} */}
+								<span className="text-xs">{formatTime(message.createdAt)}</span>
+								{getReadStatus()}
 							</div>
 						</div>
 					</div>
