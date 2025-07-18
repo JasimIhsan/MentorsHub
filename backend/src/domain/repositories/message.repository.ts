@@ -11,4 +11,5 @@ export interface IMessageRepository {
 	findByIds(ids: string[]): Promise<MessageEntity[]>;
 	findLastByChat(chatId: string): Promise<MessageEntity | null>;
 	findUnread(chatId: string, userId: string): Promise<MessageEntity[]>;
+	markAllUnreadByChat(chatId: string, userId: string): Promise<void>
 }

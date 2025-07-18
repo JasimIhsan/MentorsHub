@@ -8,7 +8,6 @@ export class SocketNotificationGateway implements INotificationGateway {
 
 		if (userSocket) {
 			userSocket.emit("notify-user", notification);
-			console.log(`🔔 Sent to ${userId}`);
 		} else {
 			console.log(`⚠️ User ${userId} offline – store in DB or skip.`);
 		}

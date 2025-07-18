@@ -19,7 +19,7 @@ const NotificationSchema: Schema = new Schema(
 		// sender: { type: Schema.Types.ObjectId, ref: "User" },
 		title: { type: String, required: true },
 		message: { type: String, required: true },
-		type: { type: String, enum: ["info", "warning", "success", "error", "reminder", "review", "payment", "task_completed", "welcome", "session"], default: "info" },
+		type: { type: String, enum: ["info", "warning", "success", "error", "reminder", "review", "payment", "task_completed", "welcome", "session", "new_message"], default: "info" },
 		link: { type: String },
 		isRead: { type: Boolean, default: false },
 	},

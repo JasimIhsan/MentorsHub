@@ -3,9 +3,11 @@ import { IMessageRepository } from "../../../domain/repositories/message.reposit
 import { IChatRepository } from "../../../domain/repositories/chat.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { ISendMessageDTO, mapToSendMessageDTO } from "../../dtos/message.dto";
+import { NotificationTypeEnum } from "../../interfaces/enums/notification.type.enum";
+import { INotificationGateway } from "../../interfaces/notification/notification.gatway";
 
 interface SendMessageInput {
-	chatId?: string; // If known
+	chatId?: string;
 	sender: string;
 	receiver: string;
 	content: string;
@@ -14,28 +16,24 @@ interface SendMessageInput {
 }
 
 export class SendMessageUseCase {
-	constructor(private readonly messageRepo: IMessageRepository, private readonly chatRepo: IChatRepository, private readonly userRepo: IUserRepository) {}
+	constructor(private readonly messageRepo: IMessageRepository, private readonly chatRepo: IChatRepository, private readonly userRepo: IUserRepository, private readonly notifier: INotificationGateway) {}
 
 	async execute(data: SendMessageInput): Promise<ISendMessageDTO> {
 		const { chatId, sender, receiver, content, type, fileUrl } = data;
 
-		// Validate sender and receiver
 		const senderUser = await this.userRepo.findUserById(sender);
-		if (!senderUser) throw new Error("User not found");
+		if (!senderUser) throw new Error("Sender not found");
 
 		const receiverUser = await this.userRepo.findUserById(receiver);
 		if (!receiverUser) {
 			await this.chatRepo.findPrivateBetween(sender, receiver);
-		};
+		}
 
-		// Get or create the chat
 		let chat = chatId ? await this.chatRepo.findById(chatId) : await this.chatRepo.findPrivateBetween(sender, receiver);
-
 		if (!chat) {
 			chat = await this.chatRepo.create([sender, receiver], false);
 		}
 
-		// Create message entity
 		const message = new MessageEntity({
 			id: "",
 			chat: chat.id,
@@ -48,13 +46,21 @@ export class SendMessageUseCase {
 			updatedAt: new Date(),
 		});
 
-		// Save message
 		const savedMessage = await this.messageRepo.create(message);
-
-		// Update last message in chat
 		await this.chatRepo.updateLastMessage(chat.id, savedMessage.id);
 
-		// Map to DTO with proper sender
+		// Send real-time notification (no DB storage)
+		await this.notifier.notifyUser(receiver, {
+			id: "",
+			type: NotificationTypeEnum.NEW_MESSAGE,
+			recipientId: receiver,
+			title: "New message from " + senderUser.fullName,
+			message: content,
+			isRead: false,
+			link: `/messages`,
+			createdAt: new Date(),
+		});
+
 		return mapToSendMessageDTO(savedMessage, senderUser);
 	}
 }

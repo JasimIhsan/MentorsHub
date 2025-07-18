@@ -1,9 +1,9 @@
 import { Server as HTTPServer } from "http";
 import { Server } from "socket.io";
 import { authMiddleware } from "./middlewares/auth";
-import { registerCoreConnectionHandlers } from "./handlers/core/core.connection";
-import { registerChatConnectionHandlers } from "./handlers/chat/chat.connection";
-import { registerMessageHandlers } from "./handlers/chat/message.handler";
+import { registerCoreConnectionHandlers } from "../../presentation/socket/core/core.connection.controller";
+import { registerChatConnectionHandlers } from "../../presentation/socket/chat-controllers/chat.connection.controller";
+import { registerMessageHandlers } from "../../presentation/socket/chat-controllers/message.events.controller";
 
 export function createSocketLayer(server: HTTPServer): Server {
 	const io = new Server(server, {

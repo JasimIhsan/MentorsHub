@@ -37,58 +37,6 @@ authRouter.post("/resend-otp", (req, res, next) => sendOtpController.handle(req,
 
 // Test Route
 authRouter.get("/test", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res) => {
-	async function runSessionReminderCheck() {
-		console.log("running remninder check");
-		const now = new Date();
-
-		const sessions = await SessionModel.find({
-			status: SessionStatusEnum.UPCOMING,
-			"participants.paymentStatus": "completed",
-		});
-		console.log("sessions: ", sessions);
-
-		for (const session of sessions) {
-			const sessionDateTime = getFullSessionDate(session.date, session.time);
-			console.log("sessionDateTime: ", sessionDateTime);
-			const diff = differenceInMinutes(sessionDateTime, now);
-			console.log("diff: ", diff);
-
-			if ([60, 10, 0].includes(diff)) {
-				const messageMap: Record<number, string> = {
-					60: "Your session starts in 1 hour!",
-					10: "Only 10 minutes left until your session!",
-					0: "Your session is starting now!",
-				};
-
-				await Promise.all(
-					session.participants.map(async (p) => {
-						const userId = p.userId.toString();
-
-						const alreadySent = await ReminderLogModel.exists({
-							sessionId: session._id,
-							userId,
-							type: diff.toString(),
-						});
-						console.log("alreadySent: ", alreadySent);
-
-						if (!alreadySent) {
-							const notification = await notificationRepository.createNotification(userId, "Session Reminder", messageMap[diff], NotificationTypeEnum.REMINDER, "/sessions");
-							console.log("notification: ", notification);
-
-							notifierGateway.notifyUser(userId, mapToNotificationDTO(notification));
-
-							await ReminderLogModel.create({
-								sessionId: session._id,
-								userId,
-								type: diff.toString(),
-							});
-						}
-					}),
-				);
-			}
-		}
-	}
-	runSessionReminderCheck();
 	res.json({ success: true, message: "Hello, authenticated user!" });
 });
 

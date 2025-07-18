@@ -124,4 +124,14 @@ export class MessageRepositoryImpl implements IMessageRepository {
 			return handleExceptionError(error, "Error finding unread messages");
 		}
 	}
+
+	async markAllUnreadByChat(chatId: string, userId: string): Promise<void> {
+		try {
+			await MessageModel.updateMany({ chatId, readBy: { $ne: userId } }, { $push: { readBy: userId } });
+		} catch (error) {
+			return handleExceptionError(error, "Error marking all messages as read");
+		}
+	}
+
+	
 }

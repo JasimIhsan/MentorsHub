@@ -112,7 +112,6 @@ export class WalletRepositoryImpl implements IWalletRepository {
 				.lean(); // Optional: better performance if you're not mutating the doc
 
 			const data = docs.map((doc) => WalletTransactionEntity.fromDBDocument(doc));
-			console.log("data: ", data);
 
 			return { data, total };
 		} catch (error) {

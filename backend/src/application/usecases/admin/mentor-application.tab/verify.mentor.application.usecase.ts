@@ -30,7 +30,7 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 			isRead: false,
 			recipientId: userId,
 			type: NotificationTypeEnum.SUCCESS,
-			link: "/mentor/da",
+			link: "/mentor/dashboard",
 		});
 
 		console.log("user : ", user);

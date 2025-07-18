@@ -9,4 +9,5 @@ export enum NotificationTypeEnum {
 	REVIEW = "review",
 	WELCOME = "welcome",
 	SESSION = "session",
+	NEW_MESSAGE = "new_message",
 }
