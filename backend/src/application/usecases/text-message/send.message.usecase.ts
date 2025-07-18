@@ -57,7 +57,7 @@ export class SendMessageUseCase {
 			title: "New message from " + senderUser.fullName,
 			message: content,
 			isRead: false,
-			link: `/messages`,
+			link: "/messages",
 			createdAt: new Date(),
 		});
 

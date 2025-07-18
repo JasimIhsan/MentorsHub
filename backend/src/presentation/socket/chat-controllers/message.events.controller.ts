@@ -6,7 +6,6 @@ export function registerMessageHandlers(io: Server, socket: Socket) {
 	// Join user-specific room for targeted notifications
 	socket.on("join-user", ({ userId }) => {
 		socket.join(`user_${userId}`);
-		console.log(`User ${userId} joined room user_${userId}`);
 	});
 
 	// Handle send-message
@@ -110,9 +109,7 @@ export function registerMessageHandlers(io: Server, socket: Socket) {
 				socket.emit("unread-counts-error", { message: "Invalid userId or chatIds" });
 				return;
 			}
-			console.log(`🔄️📖🔄️📖 get-unread-counts: userId=${userId}, chatIds=${chatIds}`);
 			const counts = await getMessageUnreadCountsByUser.execute(userId, chatIds);
-			console.log("counts of unread message of each chats: ", counts);
 			socket.emit("unread-counts-response", counts);
 		} catch (err) {
 			console.error("get-unread-counts error:", err);
@@ -121,6 +118,5 @@ export function registerMessageHandlers(io: Server, socket: Socket) {
 	});
 
 	socket.on("disconnect", () => {
-		console.log("User disconnected:", socket.id);
 	});
 }

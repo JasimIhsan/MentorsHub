@@ -33,8 +33,6 @@ export class VerifyMentorApplicationUseCase implements IVerifyMentorApplicationU
 			link: "/mentor/dashboard",
 		});
 
-		console.log("user : ", user);
-
 		return await this.userRepo.updateUser(userId, user);
 	}
 }

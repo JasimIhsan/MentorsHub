@@ -22,7 +22,7 @@ export function createSocketLayer(server: HTTPServer): Server {
 
 		// Register User on core connection
 		registerCoreConnectionHandlers(io, socket);
-		registerChatConnectionHandlers(io, socket)
+		registerChatConnectionHandlers(io, socket);
 
 		
 		// Placeholder for future feature handlers

@@ -5,7 +5,6 @@ export const registerChatConnectionHandlers = (io: Server, socket: Socket) => {
 	// Join room
 	socket.on("join-chat", async ({ chatId, userId }: { chatId: string; userId: string }) => {
 		socket.join(`chat_${chatId}`);
-		console.log(`👥 Socket ${socket.id} joined room: ${chatId}`);
 
 		// Mark all unread messages in this chat as read for the given user
 		try {
@@ -19,6 +18,5 @@ export const registerChatConnectionHandlers = (io: Server, socket: Socket) => {
 
 	socket.on("leave-chat", (chatId: string) => {
 		socket.leave(`chat_${chatId}`);
-		console.log(`👥 Socket ${socket.id} left room: ${chatId}`);
 	});
 };
