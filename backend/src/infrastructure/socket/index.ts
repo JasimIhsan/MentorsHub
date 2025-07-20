@@ -4,6 +4,7 @@ import { authMiddleware } from "./middlewares/auth";
 import { registerCoreConnectionHandlers } from "../../presentation/socket/core/core.connection.controller";
 import { registerChatConnectionHandlers } from "../../presentation/socket/chat-controllers/chat.connection.controller";
 import { registerMessageHandlers } from "../../presentation/socket/chat-controllers/message.events.controller";
+import { registerVideoCallHandlers } from "../../presentation/socket/video-controllers/video.call.controllers";
 
 export function createSocketLayer(server: HTTPServer): Server {
 	const io = new Server(server, {
@@ -24,10 +25,9 @@ export function createSocketLayer(server: HTTPServer): Server {
 		registerCoreConnectionHandlers(io, socket);
 		registerChatConnectionHandlers(io, socket);
 
-		
 		// Placeholder for future feature handlers
 		registerMessageHandlers(io, socket);
-		// registerVideoSessionHandlers(io, socket, SessionModel);
+		registerVideoCallHandlers(io, socket);
 		// registerNotificationHandlers(io, socket);
 		// etc...
 
