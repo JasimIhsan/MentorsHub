@@ -9,7 +9,7 @@ export const fetchMentors = async (query: { page?: number; limit?: number; searc
 		});
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error from fetchAllMentors API: `, error);
+		 console.error(`Error from fetchAllMentors API: `, error);
 		throw new Error(error.response.data.message);
 	}
 };
@@ -30,7 +30,7 @@ export const fetchAllApprovedMentors = async (userId: string, page: number = 1, 
 		return response.data;
 	} catch (error: any) {
 		// Log and throw error
-		console.log(`Error from fetchMentors API: `, error);
+		 console.error(`Error from fetchMentors API: `, error);
 		throw new Error(error.response?.data?.message || "Failed to fetch mentors");
 	}
 };
@@ -40,7 +40,7 @@ export const fetchMentorAPI = async (mentorId: string) => {
 		const response = await axiosInstance.get(`./user/mentor/${mentorId}`);
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error from fetchMetor api`, error);
+		 console.error(`Error from fetchMetor api`, error);
 		throw new Error(error.response.data.message);
 	}
 };
@@ -80,7 +80,7 @@ export const fetchMentorDashboardData = async (userId: string) => {
 			fetchReviewsByMentor(userId, 1, 3),
 			axiosInstance.get(`/mentor/dashboard/stats/${userId}`),
 		]);
-		console.log(`pendingRes : `, pendingRes);
+		 console.error(`pendingRes : `, pendingRes);
 		return {
 			upcoming: upcomingRes.sessions,
 			requests: pendingRes.requests,

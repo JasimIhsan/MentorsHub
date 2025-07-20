@@ -65,7 +65,6 @@ export function AdminWalletPage() {
 	// Handle withdrawal
 	const handleWithdraw = async () => {
 		const amountNum = parseFloat(withdrawAmount);
-		console.log("withdrawAmount: ", withdrawAmount);
 		if (!withdrawAmount || amountNum <= 0) {
 			setNotification({ type: "error", message: "Please enter a valid amount" });
 			setTimeout(() => setNotification(null), 3000);

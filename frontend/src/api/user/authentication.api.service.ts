@@ -6,7 +6,7 @@ export const loginApi = async (email: string, password: string) => {
 		const response = await axiosInstance.post("/user/login", { email, password });
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error form login api : `, error);
+		 console.error(`Error form login api : `, error);
 		throw new Error(error.response.data.message)
 	}
 };
@@ -16,7 +16,7 @@ export const forgotPassword = async (email: string)=> {
 		const response = await axiosInstance.post("/user/forgot-password", { email });
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error form forgotpassword api : `, error);
+		 console.error(`Error form forgotpassword api : `, error);
 		throw new Error(error.response.data.message);
 	}
 }
@@ -26,7 +26,7 @@ export const verifyResetToken = async (token: string) => {
 		const response = await axiosInstance(`/user/verify-reset-token/${token}`);
 		return response.data;
 	} catch (error) {
-		console.log(`Error form verifyresettoken api : `, error);
+		 console.error(`Error form verifyresettoken api : `, error);
 		if (error instanceof Error) {
 			throw new Error(error.message);
 		}
@@ -47,7 +47,7 @@ export const logoutSession = async () => {
 		const response = await axiosInstance.post(`/user/logout`);
 		return response.data;
 	} catch (error) {
-		console.log(`Error form logoutSession api : `, error);
+		 console.error(`Error form logoutSession api : `, error);
 		if (error instanceof Error) {
 			throw new Error(error.message);
 		}
@@ -59,7 +59,7 @@ export const sendOtp = async (email: string) => {
 		const response = await axiosInstance.post(`/user/send-otp`, { email: email });
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error form sendOtp api : `, error);
+		 console.error(`Error form sendOtp api : `, error);
 		throw new Error(error.response.data.message);
 	}
 };
@@ -69,7 +69,7 @@ export const verifyOtpAndCompleteRegistration = async (otp: string, signupData: 
 		const response = await axiosInstance.post(`/user/register`, { otp, signupData });
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error form verifyOtpAndCompleteRegistration api : `, error);
+		 console.error(`Error form verifyOtpAndCompleteRegistration api : `, error);
 		throw new Error(error.response.data.message);
 	}
 };
@@ -79,7 +79,7 @@ export const resendOTP = async (email: string) => {
 		const response = await axiosInstance.post(`/user/resend-otp`, { email: email });
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error form resendOTP api : `, error);
+		 console.error(`Error form resendOTP api : `, error);
 		throw new Error(error.response.data.message);
 	}
 };
@@ -89,7 +89,7 @@ export const googleAthentication = async (credential: any) => {
 		const response = await axiosInstance.post("/user/auth/google", { credential });
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error from googleAuthentication api : `, error);
+		 console.error(`Error from googleAuthentication api : `, error);
 		throw new Error(error.response.data.message);
 	}
 };

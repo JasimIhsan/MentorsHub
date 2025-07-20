@@ -5,7 +5,7 @@ export const fetchDocumentUrlsAPI = async (userId: string) => {
 		const response = await axiosInstance.get(`/documents/${userId}/documents`);
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error form fetchDocumentUrls api : `, error);
+		 console.error(`Error form fetchDocumentUrls api : `, error);
 		throw new Error(error.response.data.message);
 	}
 };

@@ -26,7 +26,7 @@ export const updateUserApi = async (userId: string, data: UpdateProfileFormData 
 		});
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error from updateUser api: `, error);
+		 console.error(`Error from updateUser api: `, error);
 		throw new Error(error.response.data.message);
 	}
 };
@@ -36,7 +36,7 @@ export const changePasswordApi = async (userId: string, oldPassword: string, new
 		const response = await axiosInstance.put("/user/user-profile/change-password", { userId, oldPassword, newPassword });
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error from changePassword api: `, error);
+		 console.error(`Error from changePassword api: `, error);
 		throw new Error(error.response.data.message);
 	}
 };
@@ -46,7 +46,7 @@ export const getUserProfileApi = async (userId: string) => {
 		const response = await axiosInstance.get(`/user/user-profile/${userId}`);
 		return response.data;
 	} catch (error: any) {
-		console.log(`Error from getUserProfile api: `, error);
+		 console.error(`Error from getUserProfile api: `, error);
 		throw new Error(error.response.data.message);
 	}
 };

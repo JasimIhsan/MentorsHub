@@ -2,10 +2,10 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
-import { Bell, AlertTriangle, CheckCircle, XCircle, Calendar } from "lucide-react";
 import { CustomHeader } from "@/components/custom/header";
 import { INotification } from "@/interfaces/INotification";
 import { formatRelativeTime } from "@/utility/format-relative-time";
+import { Link } from "react-router-dom";
 
 interface NotificationsProps {
 	userId: string;
@@ -16,20 +16,6 @@ interface NotificationsProps {
 }
 
 const Notifications: React.FC<NotificationsProps> = ({ notifications, markAllAsRead, markAsRead, userId, isLoading }) => {
-	const getNotificationStyles = (type: INotification["type"]) => {
-		switch (type) {
-			case "info":
-				return { bg: "bg-blue-100", text: "text-blue-600", icon: <Bell className="h-5 w-5" /> };
-			case "warning":
-				return { bg: "bg-yellow-100", text: "text-yellow-600", icon: <AlertTriangle className="h-5 w-5" /> };
-			case "success":
-				return { bg: "bg-green-100", text: "text-green-600", icon: <CheckCircle className="h-5 w-5" /> };
-			case "error":
-				return { bg: "bg-red-100", text: "text-red-600", icon: <XCircle className="h-5 w-5" /> };
-			case "reminder":
-				return { bg: "bg-purple-100", text: "text-purple-600", icon: <Calendar className="h-5 w-5" /> };
-		}
-	};
 
 	if (isLoading) {
 		return (
@@ -77,18 +63,18 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications, markAllAsR
 			<CardContent>
 				<div className="space-y-3">
 					{notifications.slice(0, 4).map((notification) => {
-						const { bg, text, icon } = getNotificationStyles(notification.type);
+						// const { bg, text, icon } = getNotificationStyles(notification.type);
 						return (
 							<div key={notification.id} className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border p-2 sm:p-4">
-								<div className={`flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full ${bg} ${text}`}>{icon}</div>
+								{/* <div className={`flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full ${bg} ${text}`}>{icon}</div> */}
 								<div className="flex-1 space-y-1">
 									<p className="font-medium text-sm sm:text-base">{notification.title}</p>
 									<p className="text-xs text-muted-foreground hidden sm:block">{notification.message}</p>
 									<p className="text-xs sm:text-sm text-muted-foreground">{formatRelativeTime(notification.createdAt)}</p>
 									{notification.link && (
-										<a href={notification.link} className="text-xs sm:text-sm text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
+										<Link to={notification.link} className="text-xs sm:text-sm text-blue-600 hover:underline">
 											View Details
-										</a>
+										</Link>
 									)}
 								</div>
 								<Button variant="ghost" size="sm" disabled={notification.isRead} onClick={() => markAsRead(notification.id)} className="mt-2 sm:mt-0">

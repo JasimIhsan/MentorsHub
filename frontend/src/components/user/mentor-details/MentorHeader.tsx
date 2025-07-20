@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Flag, MessageSquare, Star } from "lucide-react";
+import { Flag, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { IMentorDTO } from "@/interfaces/IMentorDTO";
@@ -102,10 +102,10 @@ export function MentorHeader({ userId, mentor }: MentorHeaderProps) {
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent className="w-48">
-						<DropdownMenuItem onClick={() => console.log("Message clicked")}>
+						{/* <DropdownMenuItem onClick={() => console.log("Message clicked")}>
 							<MessageSquare className="mr-2 h-4 w-4" />
 							Message
-						</DropdownMenuItem>
+						</DropdownMenuItem> */}
 						<Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
 							<DialogTrigger asChild>
 								<DropdownMenuItem onClick={() => setIsReportOpen(true)} onSelect={(e) => e.preventDefault()} variant="destructive">

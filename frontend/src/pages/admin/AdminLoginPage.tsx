@@ -50,8 +50,7 @@ export default function AdminLoginPage() {
 			}
 		} catch (error) {
 			if (error instanceof Error) {
-				console.log('error: ', error);
-				
+				console.error("error: ", error);
 				toast.error(error.message);
 			}
 		} finally {

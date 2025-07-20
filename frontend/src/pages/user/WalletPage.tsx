@@ -157,7 +157,7 @@ export function WalletPage() {
 				setWithdrawAmount("");
 			}
 		} catch (error) {
-			console.log(`Error: `, error);
+			 console.error(`Error: `, error);
 			if (error instanceof Error) {
 				toast.error(error.message);
 			}

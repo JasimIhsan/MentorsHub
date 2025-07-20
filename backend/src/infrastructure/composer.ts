@@ -38,6 +38,7 @@ import { HashServiceImpl } from "./services/hash-serveice/hash.service";
 import { KmsServiceImpl } from "./services/kms-service/kms.service";
 import { IKmsService } from "../application/interfaces/services/kms.service";
 import { ReportRepositoryImpl } from "./database/implementation/report.repository.impl";
+import { SocketNotificationGateway } from "./socket/handlers/notification/socket.notification.gatway";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -64,6 +65,7 @@ export const cloudinaryService: ICloudinaryService = new CloudinaryService();
 export const tokenService: ITokenService = new TokenServicesImpl(redisService);
 export const s3BucketService: IS3Service = new S3Service();
 export const kmsService: IKmsService = new KmsServiceImpl();
+export const notifierGateway = new SocketNotificationGateway();
 
 // lazy loading services
 export const getPaymentGatewayService = () => new RazorpayGatewayImpl(); // delay loading to load secrets from KMS (lazy loading using getter function)

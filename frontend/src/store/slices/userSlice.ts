@@ -27,8 +27,6 @@ export const fetchUserProfile = createAsyncThunk<UserWithoutPassword, void, { st
 		// Access the current state to get the user ID
 		const state = thunkAPI.getState();
 		const userId = state.userAuth.user?.id;
-		console.log('userId: ', userId);
-		console.log(`name : `, state.userAuth.user?.firstName);
 
 		if (!userId) {
 			return thunkAPI.rejectWithValue("User ID not found");
@@ -46,7 +44,6 @@ const userSlice = createSlice({
 	initialState,
 	reducers: {
 		login(state, action: PayloadAction<Partial<UserWithoutPassword>>) {
-			console.log("Dispatching login action with payload:", action.payload);
 			state.isAuthenticated = true;
 			state.user = action.payload;
 		},

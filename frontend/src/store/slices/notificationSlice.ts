@@ -8,8 +8,6 @@ interface PaginatedResponse {
 	data: {
 		notifications: INotification[];
 		total: number;
-		currentPage: number;
-		totalPages: number;
 	};
 }
 
@@ -85,7 +83,7 @@ const notificationsSlice = createSlice({
 			if (!exists) {
 				state.notifications.unshift(action.payload);
 				if (!action.payload.isRead) {
-					state.unreadCount++;
+					state.unreadCount = state.unreadCount + 1;
 				}
 			}
 		},
@@ -99,7 +97,6 @@ const notificationsSlice = createSlice({
 			.addCase(fetchNotificationsThunk.fulfilled, (state, action: PayloadAction<PaginatedResponse>) => {
 				state.notifications = action.payload.data.notifications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 				state.unreadCount = action.payload.data.notifications.filter((n) => !n.isRead).length;
-				state.totalPages = action.payload.data.totalPages || 1;
 				state.isLoading = false;
 			})
 			.addCase(fetchNotificationsThunk.rejected, (state, action) => {

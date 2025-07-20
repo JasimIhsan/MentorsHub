@@ -33,7 +33,6 @@ export const DashboardPage: React.FC = () => {
 			setLoading(true);
 			try {
 				const data = await fetchDashboardDatas(user?.id!);
-				console.log("data: ", data);
 				if (data) {
 					setUpcomingSessions(data.sessions);
 					setTopRatedMentor(data.mentor);
@@ -57,7 +56,6 @@ export const DashboardPage: React.FC = () => {
 	const test = async () => {
 		try {
 			const response = await axiosInstance.get("/user/test");
-			console.log("test response : ", response);
 			toast.success(response.data.message);
 		} catch (error: any) {
 			toast.error(error.response.data.message);

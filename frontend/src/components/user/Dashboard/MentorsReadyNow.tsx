@@ -14,7 +14,6 @@ interface TopRatedMentorsProps {
 }
 
 const TopRatedMentors: React.FC<TopRatedMentorsProps> = ({ mentors, isLoading }) => {
-	console.log("isLoading: ", isLoading);
 	return (
 		<Card className="w-full max-w-md sm:max-w-full mx-auto">
 			<CardHeader>

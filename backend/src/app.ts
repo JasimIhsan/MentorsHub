@@ -4,7 +4,8 @@ import { errorHandler } from "./presentation/middlewares/error.handler.middlewar
 import connectDB from "./infrastructure/database/models/config/database.config";
 import { registerRoutes } from "./routes";
 import { applyGlobalMiddlewares } from "./middlewares";
-import { startSessionExpiryJob } from "./infrastructure/schdulers/session.expiry.job";
+import { startSessionExpiryJob } from "./infrastructure/schedulers/session.expiry.scheduler";
+import { startSessionReminderJob } from "./infrastructure/schedulers/session.reminder.scheduler";
 
 export const app = express();
 
@@ -13,6 +14,7 @@ connectDB();
 
 // start Schedulers
 startSessionExpiryJob();
+startSessionReminderJob();
 
 // Passport setup
 app.use(passport.initialize());

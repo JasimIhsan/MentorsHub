@@ -1,18 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import Peer, { MediaConnection } from "peerjs";
-import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon, ScreenShareIcon, HandIcon, ListIcon, PhoneOffIcon, UsersIcon, CircleDotIcon } from "lucide-react";
+import { MicIcon, MicOffIcon, HandIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import axiosInstance from "@/api/config/api.config";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter, DrawerClose } from "@/components/ui/drawer";
-import { Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSocket } from "@/context/SocketContext";
+import { ControlBar } from "@/components/user/video-call/ControllBar";
+import { JoinRequestDrawer } from "@/components/user/video-call/JoinRequestModal";
+import { WaitingRoom } from "@/components/user/video-call/WaitingRoom";
 
 export const VideoCallPage = () => {
 	const { sessionId } = useParams<{ sessionId: string }>();
@@ -77,12 +76,14 @@ export const VideoCallPage = () => {
 	}, [isUserWaiting]);
 
 	useEffect(() => {
+		if (!socket) return;
 		if (user) {
 			socket.emit("mute-status", { userId: user.id, isMuted });
 		}
 	}, [isMuted, socket, user]);
 
 	useEffect(() => {
+		if (!socket) return;
 		if (user) {
 			socket.emit("video-status", { userId: user.id, isVideoOn });
 		}
@@ -100,9 +101,7 @@ export const VideoCallPage = () => {
 		const determineRole = async (): Promise<"mentor" | "user" | null> => {
 			try {
 				const response = await axiosInstance.get(`/user/sessions/session/${sessionId}`);
-				console.log('response: ', response);
 				const session = response.data.session;
-				console.log('session: ', session);
 				if (session.mentorId._id === user.id) {
 					setRole("mentor");
 					return "mentor";
@@ -121,7 +120,7 @@ export const VideoCallPage = () => {
 
 		const initializeConnections = async () => {
 			const determinedRole = await determineRole();
-			if (!determinedRole) return;
+			if (!determinedRole || !socket) return;
 
 			newPeer = new Peer({
 				host: "0.peerjs.com",
@@ -182,99 +181,104 @@ export const VideoCallPage = () => {
 			}
 		});
 
-		unsubscribes.push(
-			socket.onVideoCallEvent("user-joined", ({ peerId, name, avatar }: { peerId: string; name: string; avatar?: string }) => {
-				if (peer && localStreamRef.current && role === "mentor") {
-					initiateCall(peerId, 0);
-					setRemoteParticipant({ name, avatar: avatar as string });
-					toast.success(
-						<div className="flex items-center gap-2">
-							<Avatar className="w-6 h-6">{avatar ? <AvatarImage src={avatar} alt={name} /> : <AvatarFallback className="bg-gray-300 text-white text-xs">{name[0]?.toUpperCase() || "U"}</AvatarFallback>}</Avatar>
-							<span>{`${name} has joined the session`}</span>
-						</div>
-					);
-				}
-			})
-		);
+		// Handle user-joined event
+		unsubscribes.push(() => socket.off("user-joined"));
+		socket.on("user-joined", ({ peerId, name, avatar }: { peerId: string; name: string; avatar?: string }) => {
+			if (peer && localStreamRef.current && role === "mentor") {
+				initiateCall(peerId, 0);
+				setRemoteParticipant({ name, avatar: avatar as string });
+				toast.success(
+					<div className="flex items-center gap-2">
+						<Avatar className="w-6 h-6">{avatar ? <AvatarImage src={avatar} alt={name} /> : <AvatarFallback className="bg-gray-300 text-white text-xs">{name[0]?.toUpperCase() || "U"}</AvatarFallback>}</Avatar>
+						<span>{`${name} has joined the session`}</span>
+					</div>
+				);
+			}
+		});
 
-		unsubscribes.push(
-			socket.onVideoCallEvent("join-approved", ({ mentorPeerId }: { mentorPeerId: string | null }) => {
-				setIsUserWaiting(false);
-				setIsRejected(false);
-				toast.success("You have been approved to join the session!");
-				if (role === "user" && peer && localStreamRef.current && mentorPeerId) {
-					initiateCall(mentorPeerId, 0);
-				}
-			})
-		);
+		// Handle join-approved event
+		unsubscribes.push(() => socket.off("join-approved"));
+		socket.on("join-approved", ({ mentorPeerId }: { mentorPeerId: string | null }) => {
+			setIsUserWaiting(false);
+			setIsRejected(false);
+			toast.success("You have been approved to join the session!");
+			if (role === "user" && peer && localStreamRef.current && mentorPeerId) {
+				initiateCall(mentorPeerId, 0);
+			}
+		});
 
-		unsubscribes.push(
-			socket.onVideoCallEvent("join-rejected", ({ message }: { message: string }) => {
-				setIsUserWaiting(true);
-				setHasRequestedJoin(false);
-				setIsRejected(true);
-				setRejectionMessage(message);
-				toast.error(message);
-				setTimeout(() => {
-					navigate("/sessions", { replace: true });
-				}, 5000);
-			})
-		);
+		// Handle join-rejected event
+		unsubscribes.push(() => socket.off("join-rejected"));
+		socket.on("join-rejected", ({ message }: { message: string }) => {
+			setIsUserWaiting(true);
+			setHasRequestedJoin(false);
+			setIsRejected(true);
+			setRejectionMessage(message);
+			toast.error(message);
+			setTimeout(() => {
+				navigate("/sessions", { replace: true });
+			}, 5000);
+		});
 
-		unsubscribes.push(
-			socket.onVideoCallEvent("user-disconnected", ({ userId }: { userId: string }) => {
-				toast.info(`User ${userId} has disconnected`);
-				if (remoteVideoRef.current) {
-					remoteVideoRef.current.srcObject = null;
-				}
-			})
-		);
+		// Handle user-disconnected event
+		unsubscribes.push(() => socket.off("user-disconnected"));
+		socket.on("user-disconnected", ({ name, avatar }: { name: string; avatar?: string }) => {
+			toast.info(
+				<div className="flex items-center gap-2">
+					<Avatar className="w-6 h-6">{avatar ? <AvatarImage src={avatar} alt={name} /> : <AvatarFallback className="bg-gray-300 text-white text-xs">{name[0]?.toUpperCase() || "U"}</AvatarFallback>}</Avatar>
+					<span>{`${name} has left the session`}</span>
+				</div>
+			);
+			if (remoteVideoRef.current) {
+				remoteVideoRef.current.srcObject = null;
+			}
+		});
 
-		unsubscribes.push(
-			socket.onVideoCallEvent("mute-status", ({ isMuted }: { isMuted: boolean }) => {
-				setIsRemoteMuted(isMuted);
-			})
-		);
+		// Handle mute-status event
+		unsubscribes.push(() => socket.off("mute-status"));
+		socket.on("mute-status", ({ isMuted }: { isMuted: boolean }) => {
+			setIsRemoteMuted(isMuted);
+		});
 
-		unsubscribes.push(
-			socket.onVideoCallEvent("video-status", ({ isVideoOn }: { isVideoOn: boolean }) => {
-				setIsRemoteVideoOn(isVideoOn);
-			})
-		);
+		// Handle video-status event
+		unsubscribes.push(() => socket.off("video-status"));
+		socket.on("video-status", ({ isVideoOn }: { isVideoOn: boolean }) => {
+			setIsRemoteVideoOn(isVideoOn);
+		});
 
-		unsubscribes.push(
-			socket.onVideoCallEvent("hand-raise-status", ({ isHandRaised }: { isHandRaised: boolean }) => {
-				setIsRemoteHandRaised(isHandRaised);
-			})
-		);
+		// Handle hand-raise-status event
+		unsubscribes.push(() => socket.off("hand-raise-status"));
+		socket.on("hand-raise-status", ({ isHandRaised }: { isHandRaised: boolean }) => {
+			setIsRemoteHandRaised(isHandRaised);
+		});
 
-		unsubscribes.push(
-			socket.onVideoCallEvent("error", ({ message }: { message: string }) => {
-				toast.error(message);
-				if (role === "user") navigate("/sessions", { replace: true });
-				else navigate("/mentor/upcoming-sessions", { replace: true });
-			})
-		);
+		// Handle error event
+		unsubscribes.push(() => socket.off("error"));
+		socket.on("error", ({ message }: { message: string }) => {
+			toast.error(message);
+			if (role === "user") navigate("/sessions", { replace: true });
+			else navigate("/mentor/upcoming-sessions", { replace: true });
+		});
 
-		unsubscribes.push(
-			socket.onVideoCallEvent("join-request", ({ userId, sessionId: requestSessionId, peerId, name, avatar }: { userId: string; sessionId: string; peerId: string; name: string; avatar?: string }) => {
-				if (role === "mentor" && requestSessionId === sessionId) {
-					setJoinRequests((prev) => {
-						if (prev.some((req) => req.userId === userId)) {
-							return prev;
-						}
-						return [...prev, { userId, sessionId: requestSessionId, peerId, name, avatar }];
-					});
-					setShowJoinRequestDrawer(true);
-				}
-			})
-		);
+		// Handle join-request event
+		unsubscribes.push(() => socket.off("join-request"));
+		socket.on("join-request", ({ userId, sessionId: requestSessionId, peerId, name, avatar }: { userId: string; sessionId: string; peerId: string; name: string; avatar?: string }) => {
+			if (role === "mentor" && requestSessionId === sessionId) {
+				setJoinRequests((prev) => {
+					if (prev.some((req) => req.userId === userId)) {
+						return prev;
+					}
+					return [...prev, { userId, sessionId: requestSessionId, peerId, name, avatar }];
+				});
+				setShowJoinRequestDrawer(true);
+			}
+		});
 
-		unsubscribes.push(
-			socket.onVideoCallEvent("reconnect-success", () => {
-				toast.success("Reconnected to session!");
-			})
-		);
+		// Handle reconnect-success event
+		unsubscribes.push(() => socket.off("reconnect-success"));
+		socket.on("reconnect-success", () => {
+			toast.success("Reconnected to session!");
+		});
 
 		return () => {
 			unsubscribes.forEach((unsubscribe) => unsubscribe());
@@ -310,7 +314,7 @@ export const VideoCallPage = () => {
 	};
 
 	const attemptReconnect = (peer: Peer | null, determinedRole: "mentor" | "user" | null) => {
-		if (!peer || !determinedRole || !user) return;
+		if (!peer || !determinedRole || !socket || !user) return;
 		const reconnectInterval = setInterval(() => {
 			if (isConnected) {
 				clearInterval(reconnectInterval);
@@ -343,6 +347,7 @@ export const VideoCallPage = () => {
 	};
 
 	const toggleRaiseHand = () => {
+		if (!socket || !user) return;
 		setIsHandRaised((prev) => {
 			socket.emit("hand-raise-status", { userId: user?.id, isHandRaised: !prev });
 			return !prev;
@@ -457,20 +462,51 @@ export const VideoCallPage = () => {
 	};
 
 	const endCall = () => {
-		if (call) call.close();
+		// 1. Close the peer-to-peer call
+		if (call) {
+			call.close();
+		}
+
+		// 2. Stop local stream (camera/mic)
 		if (localStreamRef.current) {
 			localStreamRef.current.getTracks().forEach((track) => track.stop());
 			localStreamRef.current = null;
 		}
+
+		// 3. Stop recording if ongoing
 		if (screenRecorderRef.current && screenRecorderRef.current.state === "recording") {
 			screenRecorderRef.current.stop();
 		}
-		if (peer) peer.destroy();
-		if (role === "user") navigate("/sessions", { replace: true });
-		else navigate("/mentor/upcoming-sessions", { replace: true });
+
+		// 4. Destroy peer connection
+		if (peer) {
+			peer.destroy();
+		}
+
+		// 5. Emit `leave-session` to server
+		if (socket) {
+			socket.emit("leave-session");
+		}
+
+		// 6. Clear remote video/audio if you're managing them
+		if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+		if (waitingVideoRef.current) waitingVideoRef.current.srcObject = null;
+		if (localVideoRef.current) localVideoRef.current.srcObject = null;
+		if (localStreamRef.current) localStreamRef.current = null;
+
+		setIsScreenSharing(false);
+		setIsScreenRecording(false);
+
+		// 7. Navigate based on role
+		if (role === "user") {
+			navigate("/sessions", { replace: true });
+		} else {
+			navigate("/mentor/upcoming-sessions", { replace: true });
+		}
 	};
 
-	const handleJoinRequest = (request: { userId: string; sessionId: string; peerId: string }, approve: boolean) => {
+	const handleJoinRequest = (request: { userId: string; sessionId: string; peerId: string; name: string; avatar?: string }, approve: boolean) => {
+		if (!socket) return;
 		socket.emit("approve-join", {
 			userId: request.userId,
 			sessionId: request.sessionId,
@@ -484,10 +520,24 @@ export const VideoCallPage = () => {
 			}
 			return newRequests;
 		});
-		toast.info(approve ? `Approved join request for user ${request.userId}` : `Rejected join request for user ${request.userId}`);
+		toast.info(
+			approve ? (
+				<div className="flex items-center gap-2">
+					<Avatar className="w-6 h-6">{request.avatar ? <AvatarImage src={request.avatar} alt={request.name} /> : <AvatarFallback className="bg-gray-300 text-white text-xs">{request.name[0]?.toUpperCase() || "U"}</AvatarFallback>}</Avatar>
+					<span>{`Approved join request for ${request.name}`}</span>
+				</div>
+			) : (
+				<div className="flex items-center gap-2">
+					<Avatar className="w-6 h-6">{request.avatar ? <AvatarImage src={request.avatar} alt={request.name} /> : <AvatarFallback className="bg-gray-300 text-white text-xs">{request.name[0]?.toUpperCase() || "U"}</AvatarFallback>}</Avatar>
+					<span>{`Rejected join request for ${request.name}`}</span>
+				</div>
+			)
+		);
 	};
 
 	const handleAskToJoin = () => {
+		if (!socket) return;
+
 		if (hasRequestedJoin) {
 			toast.info("Join request already sent");
 			return;
@@ -607,273 +657,6 @@ export const VideoCallPage = () => {
 						onReject={(request) => handleJoinRequest(request, false)}
 					/>
 				)}
-			</div>
-		</div>
-	);
-};
-
-interface WaitingRoomProps {
-	isRejected: boolean;
-	rejectionMessage: string | null;
-	videoRef: React.RefObject<HTMLVideoElement | null>;
-	isMuted: boolean;
-	isVideoOn: boolean;
-	hasRequestedJoin: boolean;
-	onToggleMute: () => void;
-	onToggleVideo: () => void;
-	onAskToJoin: () => void;
-}
-
-const WaitingRoom = ({ isRejected, rejectionMessage, videoRef, isMuted, isVideoOn, hasRequestedJoin, onToggleMute, onToggleVideo, onAskToJoin }: WaitingRoomProps) => {
-	return (
-		<div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-			<div className="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full">
-				{isRejected ? (
-					<div className="text-center">
-						<h2 className="text-3xl font-bold text-red-600 mb-4">Join Request Rejected</h2>
-						<p className="text-gray-700 mb-4">{rejectionMessage || "The mentor has rejected your join request."}</p>
-						<p className="text-gray-500">You will be redirected to the sessions page.</p>
-					</div>
-				) : (
-					<>
-						<h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Prepare to Join the Call</h2>
-						<div className="relative mb-6 rounded-2xl overflow-hidden shadow-inner aspect-video">
-							{isVideoOn ? (
-								<video ref={videoRef} autoPlay muted className="w-full h-full object-cover" />
-							) : (
-								<div className="absolute inset-0 flex items-center justify-center bg-gray-300 rounded-2xl">
-									<div className="w-20 h-20 rounded-full bg-gray-400 flex items-center justify-center text-white text-3xl font-semibold">U</div>
-								</div>
-							)}
-							<span className="absolute bottom-2 left-2 text-white bg-black/60 px-2 py-1 rounded text-sm flex items-center gap-2">
-								You
-								{isMuted ? <MicOffIcon className="h-4 w-4" /> : <MicIcon className="h-4 w-4" />}
-							</span>
-						</div>
-						<div className="flex justify-center gap-4 mb-6">
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button variant={isMuted ? "destructive" : "secondary"} size="icon" onClick={onToggleMute} className="rounded-full h-12 w-12">
-											{isMuted ? <MicOffIcon /> : <MicIcon />}
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>{isMuted ? "Unmute" : "Mute"}</p>
-									</TooltipContent>
-								</Tooltip>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button variant={isVideoOn ? "secondary" : "destructive"} size="icon" onClick={onToggleVideo} className="rounded-full h-12 w-12">
-											{isVideoOn ? <VideoIcon /> : <VideoOffIcon />}
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>{isVideoOn ? "Turn off" : "Turn on"} camera</p>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-						</div>
-						{hasRequestedJoin ? (
-							<div className="text-center">
-								<Loader2 className="h-10 w-10 animate-spin text-blue-600 mx-auto mb-2" />
-								<p className="text-gray-600 text">Waiting for mentor approval...</p>
-							</div>
-						) : (
-							<Button onClick={onAskToJoin} className="w-full py-2 rounded-lg" disabled={hasRequestedJoin}>
-								Ask to Join
-							</Button>
-						)}
-					</>
-				)}
-			</div>
-		</div>
-	);
-};
-
-interface JoinRequestDrawerProps {
-	isOpen: boolean;
-	onClose: () => void;
-	joinRequests: { userId: string; sessionId: string; peerId: string; name: string; avatar?: string }[];
-	onApprove: (request: { userId: string; sessionId: string; peerId: string }) => void;
-	onReject: (request: { userId: string; sessionId: string; peerId: string }) => void;
-}
-
-const JoinRequestDrawer = ({ isOpen, onClose, joinRequests, onApprove, onReject }: JoinRequestDrawerProps) => {
-	return (
-		<Drawer open={isOpen} onClose={onClose} direction="right">
-			<DrawerContent className="w-[400px] h-full fixed right-0 top-0">
-				<DrawerHeader>
-					<DrawerTitle>Join Requests</DrawerTitle>
-				</DrawerHeader>
-				<div className="p-4 space-y-4 overflow-auto flex-1">
-					{joinRequests.length === 0 ? (
-						<p className="text-center text-sm text-gray-400">No pending requests.</p>
-					) : (
-						joinRequests.map((request) => (
-							<div key={request.userId} className="flex items-center justify-between p-2 border-b">
-								<div className="flex items-center gap-2">
-									<Avatar className="h-8 w-8">
-										<AvatarImage src={request.avatar} />
-										<AvatarFallback>{request.name[0]}</AvatarFallback>
-									</Avatar>
-									<p className="text-sm font-medium">{request.name}</p>
-								</div>
-								<div className="flex gap-2">
-									<Button size="sm" onClick={() => onApprove(request)}>
-										Approve
-									</Button>
-									<Button size="sm" variant="destructive" onClick={() => onReject(request)}>
-										Reject
-									</Button>
-								</div>
-							</div>
-						))
-					)}
-				</div>
-				<DrawerFooter>
-					<DrawerClose asChild>
-						<Button variant="outline" onClick={onClose}>
-							Close
-						</Button>
-					</DrawerClose>
-				</DrawerFooter>
-			</DrawerContent>
-		</Drawer>
-	);
-};
-
-interface ControlBarProps {
-	isMuted?: boolean;
-	isVideoOn?: boolean;
-	isScreenSharing?: boolean;
-	isSidebarOpen?: boolean;
-	isHandRaised?: boolean;
-	isScreenRecording?: boolean;
-	role?: "mentor" | "user" | null;
-	joinRequestsCount?: number;
-	onToggleMute?: () => void;
-	onToggleVideo?: () => void;
-	onToggleScreenShare?: () => void;
-	onToggleSidebar?: () => void;
-	onToggleRaiseHand?: () => void;
-	onToggleScreenRecording?: () => void;
-	onEndCall?: () => void;
-	onOpenJoinRequests?: () => void;
-}
-
-const ControlBar = ({
-	isMuted,
-	isVideoOn,
-	isScreenSharing,
-	isSidebarOpen,
-	isHandRaised,
-	isScreenRecording,
-	role,
-	joinRequestsCount = 0,
-	onToggleMute,
-	onToggleVideo,
-	onToggleScreenShare,
-	onToggleSidebar,
-	onToggleRaiseHand,
-	onToggleScreenRecording,
-	onEndCall,
-	onOpenJoinRequests,
-}: ControlBarProps) => {
-	return (
-		<div className="fixed bottom-0 left-0 right-0 flex justify-center p-10 z-10">
-			<div className="bg-white/95 rounded-full shadow-lg px-4 py-2 border border-gray-200 flex items-center gap-2">
-				<TooltipProvider>
-					<div className="flex items-center gap-2">
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button variant={isMuted ? "destructive" : "secondary"} size="icon" onClick={onToggleMute} className="rounded-full h-12 w-12">
-									{isMuted ? <MicOffIcon /> : <MicIcon />}
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>
-								<p>{isMuted ? "Unmute" : "Mute"}</p>
-							</TooltipContent>
-						</Tooltip>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button variant={isVideoOn ? "secondary" : "destructive"} size="icon" onClick={onToggleVideo} className="rounded-full h-12 w-12">
-									{isVideoOn ? <VideoIcon /> : <VideoOffIcon />}
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>
-								<p>{isVideoOn ? "Turn off" : "Turn on"} camera</p>
-							</TooltipContent>
-						</Tooltip>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button variant={isScreenSharing ? "destructive" : "secondary"} size="icon" onClick={onToggleScreenShare} className="rounded-full h-12 w-12">
-									<ScreenShareIcon />
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>
-								<p>{isScreenSharing ? "Stop sharing" : "Share screen"}</p>
-							</TooltipContent>
-						</Tooltip>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button variant={isScreenRecording ? "destructive" : "secondary"} size="icon" onClick={onToggleScreenRecording} className="rounded-full h-12 w-12">
-									<CircleDotIcon />
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>
-								<p>{isScreenRecording ? "Stop screen recording" : "Start screen recording"}</p>
-							</TooltipContent>
-						</Tooltip>
-					</div>
-					<div className="h-8 w-px bg-gray-200 mx-2"></div>
-					<div className="flex items-center gap-2">
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button variant={isHandRaised ? "default" : "secondary"} size="icon" onClick={onToggleRaiseHand} className="rounded-full h-12 w-12">
-									<HandIcon className={cn("h-5 w-5", isHandRaised && "text-white")} />
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>
-								<p>{isHandRaised ? "Lower hand" : "Raise hand"}</p>
-							</TooltipContent>
-						</Tooltip>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button variant={isSidebarOpen ? "default" : "secondary"} size="icon" onClick={onToggleSidebar} className="rounded-full h-12 w-12">
-									<ListIcon className={cn("h-5 w-5", isSidebarOpen && "text-white")} />
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>
-								<p>{isSidebarOpen ? "Hide sidebar" : "Show sidebar"}</p>
-							</TooltipContent>
-						</Tooltip>
-						{role === "mentor" && (
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button variant={joinRequestsCount > 0 ? "default" : "secondary"} size="icon" onClick={onOpenJoinRequests} className="rounded-full relative h-12 w-12">
-										<UsersIcon className={cn("h-5 w-5", joinRequestsCount > 0 && "text-white")} />
-										{joinRequestsCount > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{joinRequestsCount}</span>}
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>View join requests</p>
-								</TooltipContent>
-							</Tooltip>
-						)}
-					</div>
-					<div className="h-8 w-px bg-gray-200 mx-2"></div>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button variant="destructive" size="icon" onClick={onEndCall} className="rounded-full h-12 w-12">
-								<PhoneOffIcon />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>
-							<p>End call</p>
-						</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
 			</div>
 		</div>
 	);

@@ -1,16 +1,17 @@
-// application/use‑cases/session/request-session.usecase.ts
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { IMentorProfileRepository } from "../../../../domain/repositories/mentor.details.repository";
-import { SessionEntity, SessionParticipantEntity, PricingType } from "../../../../domain/entities/session.entity"; // <- now imported from Entity
+import { SessionEntity, SessionParticipantEntity, PricingType } from "../../../../domain/entities/session.entity";
 import { IGetAvailabilityUseCase } from "../../../interfaces/mentors/mentors.interface";
 import { ISessionUserDTO, mapToUserSessionDTO } from "../../../dtos/session.dto";
 import { IRequestSessionUseCase } from "../../../interfaces/session";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
 import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
+import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
+import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 
 export interface SessionRequestInput {
-	mentorId: string; // who you’re booking
-	userId: string; // current logged‑in user
+	mentorId: string;
+	userId: string;
 	topic: string;
 	sessionFormat: "one-on-one" | "group";
 	date: Date;
@@ -22,33 +23,27 @@ export interface SessionRequestInput {
 }
 
 export class RequestSessionUseCase implements IRequestSessionUseCase {
-	constructor(private readonly sessionRepo: ISessionRepository, private readonly mentorRepo: IMentorProfileRepository, private readonly getAvailability: IGetAvailabilityUseCase) {}
+	constructor(private readonly sessionRepo: ISessionRepository, private readonly mentorRepo: IMentorProfileRepository, private readonly getAvailability: IGetAvailabilityUseCase, private readonly notifyUserUseCase: INotifyUserUseCase) {}
 
 	async execute(dto: SessionRequestInput): Promise<ISessionUserDTO> {
-		/* Make sure the mentor exists */
 		const mentorProfile = await this.mentorRepo.findMentorByUserId(dto.mentorId);
 		if (!mentorProfile) {
 			throw new Error("Mentor not found");
 		}
 
-		/* Check slot availability */
-		const slots = await this.getAvailability.execute(dto.mentorId, dto.date); // e.g. ["10:00", "14:30"]
+		const slots = await this.getAvailability.execute(dto.mentorId, dto.date);
 		if (!slots.includes(dto.time)) {
 			throw new Error("The requested slot is already booked or unavailable.");
 		}
 
-		/* Build participants array with the *new* shape */
-		// const participantPayment: SessionPaymentStatusEnum = dto.pricing === "free" ? SessionPaymentStatusEnum.COMPLETED : SessionPaymentStatusEnum.PENDING;
-
 		const participants: SessionParticipantEntity[] = [
 			{
-				user: { id: dto.userId }, // PersonEntity with just an id for now
+				user: { id: dto.userId },
 				paymentStatus: SessionPaymentStatusEnum.PENDING,
 				paymentId: undefined,
 			},
 		];
 
-		/* Create the SessionEntity */
 		const session = new SessionEntity({
 			id: "",
 			mentor: { id: dto.mentorId },
@@ -66,8 +61,17 @@ export class RequestSessionUseCase implements IRequestSessionUseCase {
 			rejectReason: undefined,
 		});
 
-		/* Persist through the repository */
 		const saved = await this.sessionRepo.create(session);
-		return mapToUserSessionDTO(saved, dto.userId); // entity goes back to controller
+
+		await this.notifyUserUseCase.execute({
+			title: "📥 New Session Request",
+			message: `You received a session request for "${session.topic}".`,
+			isRead: false,
+			recipientId: dto.mentorId,
+			type: NotificationTypeEnum.SESSION,
+			link: "/mentor/requests",
+		});
+
+		return mapToUserSessionDTO(saved, dto.userId);
 	}
 }

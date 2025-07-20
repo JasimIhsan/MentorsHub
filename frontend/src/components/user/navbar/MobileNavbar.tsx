@@ -4,26 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
 import { logoutSession } from "@/api/user/authentication.api.service";
 import { logout } from "@/store/slices/userSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
-import { socketService } from "@/services/socket.service";
+import { useSocket } from "@/context/SocketContext";
+// import { socketService } from "@/services/socket.service";
 
 export function MobileNav() {
 	const [open, setOpen] = useState(false);
 	const location = useLocation();
 	const pathname = location.pathname;
 	const dispatch = useDispatch();
+	const { disconnectSocket, isConnected } = useSocket();
 
 	const handleLogout = async () => {
 		try {
-			console.log(`Login out...`);
-			console.log(`isConnected : `, socketService.isConnected());
-			if (socketService.isConnected()) {
-				console.log(`Disconnecting socket...`);
-				socketService.disconnect();
+			if (isConnected) {
+				disconnectSocket();
 			}
 			const response = await logoutSession();
 			if (response.success) {

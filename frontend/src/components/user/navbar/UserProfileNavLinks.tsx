@@ -10,7 +10,8 @@ import { toast } from "sonner";
 import { Alert } from "@/components/custom/alert";
 import { NotificationDropdown } from "@/components/custom/NotificationDropdown";
 import { useDispatch } from "react-redux";
-import { socketService } from "@/services/socket.service";
+import { useSocket } from "@/context/SocketContext";
+// import { socketService } from "@/services/socket.service";
 
 interface UserProfileNavLinksProps {
 	user: UserInterface;
@@ -18,14 +19,12 @@ interface UserProfileNavLinksProps {
 
 export function UserProfileNavLinks({ user }: UserProfileNavLinksProps) {
 	const dispatch = useDispatch();
+	const { disconnectSocket, isConnected } = useSocket();
 
 	const handleLogout = async () => {
 		try {
-			console.log(`Login out...`);
-			console.log(`isConnected : `, socketService.isConnected());
-			if (socketService.isConnected()) {
-				console.log(`Disconnecting socket...`);
-				socketService.disconnect();
+			if (isConnected) {
+				disconnectSocket();
 			}
 			const response = await logoutSession();
 			if (response.success) {

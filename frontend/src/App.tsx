@@ -13,12 +13,11 @@ import { SocketProvider } from "./context/SocketContext";
 
 function App() {
 	const userId = useSelector((state: RootState) => state.userAuth.user?.id);
-	console.log('userId: ', userId);
 	const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 	return (
 		<GoogleOAuthProvider clientId={googleClientId}>
-			<SocketProvider userId={userId as string}>
-				<BrowserRouter>
+			<BrowserRouter>
+				<SocketProvider userId={userId as string}>
 					<Routes>
 						<Route path="/*" element={<UserRoutes />} />
 						<Route path="/admin/*" element={<AdminRoutes />} />
@@ -26,8 +25,8 @@ function App() {
 						<Route path="/video-call/:sessionId" element={<VideoCallPage />} />
 						{/* <Route path="*" element={<PageNotFound />} /> */}
 					</Routes>
-				</BrowserRouter>
-			</SocketProvider>
+				</SocketProvider>
+			</BrowserRouter>
 		</GoogleOAuthProvider>
 	);
 }

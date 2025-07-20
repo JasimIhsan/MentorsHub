@@ -16,12 +16,10 @@ export const createNotificationAPI = async (userId: string, title: string, messa
 	}
 };
 
-export const getUserNotificationsAPI = async ({ userId, page = 1, limit = 10, search = "", isRead }: { userId: string; page?: number; limit?: number; search?: string; isRead?: boolean }) => {
+export const getUserNotificationsAPI = async ({ userId, search = "", isRead }: { userId: string; search?: string; isRead?: boolean }) => {
 	try {
 		const res = await axiosInstance.get(`/notifications/${userId}`, {
 			params: {
-				page,
-				limit,
 				search,
 				isRead,
 			},

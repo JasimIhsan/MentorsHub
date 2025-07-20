@@ -59,10 +59,9 @@ export const createRazorpayOrderAPI = async (sessionId: string, userId: string) 
 			sessionId,
 			userId,
 		});
-		console.log(`response : `, res);
 		return res.data.order;
 	} catch (error: any) {
-		console.log(`Error from createRazorpayOrderAPI : `, error);
+		console.error(`Error from createRazorpayOrderAPI : `, error);
 		throw new Error(error.response?.data?.message || "Failed to create Razorpay order.");
 	}
 };

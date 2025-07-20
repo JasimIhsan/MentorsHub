@@ -5,10 +5,17 @@ import { IUserProgressRepository } from "../../../domain/repositories/gamificati
 import { IUpdateUserTaskProgressUseCase } from "../../interfaces/gamification";
 import { UserProgressEntity } from "../../../domain/entities/gamification/user.progress.entity";
 import { UserTaskProgressEntity } from "../../../domain/entities/gamification/user.task.progress.entity";
-import { ActionTypeEnum } from "aws-sdk/clients/elbv2";
+import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
+import { NotificationTypeEnum } from "../../interfaces/enums/notification.type.enum";
+import { ActionTypeEnum } from "aws-sdk/clients/elbv2"; // Replace if you have your own ActionTypeEnum
 
 export class UpdateUserTaskProgressUseCase implements IUpdateUserTaskProgressUseCase {
-	constructor(private taskRepo: IGamificationTaskRepository, private taskProgressRepo: IUserTaskProgressRepository, private userProgressRepo: IUserProgressRepository) {}
+	constructor(
+		private taskRepo: IGamificationTaskRepository,
+		private taskProgressRepo: IUserTaskProgressRepository,
+		private userProgressRepo: IUserProgressRepository,
+		private notifyUserUseCase: INotifyUserUseCase, // ✅ Injected here
+	) {}
 
 	async execute(userId: string, actionType: ActionTypeEnum): Promise<void> {
 		const tasks = await this.taskRepo.findByActionType(actionType);
@@ -17,7 +24,6 @@ export class UpdateUserTaskProgressUseCase implements IUpdateUserTaskProgressUse
 			if (!task.id) continue;
 
 			const progress = await this.taskProgressRepo.findByUserAndTask(userId, task.id);
-
 			if (progress && progress.isCompleted) continue;
 
 			const currentCount = progress?.currentCount ?? 0;
@@ -25,10 +31,8 @@ export class UpdateUserTaskProgressUseCase implements IUpdateUserTaskProgressUse
 			const isCompleted = newCount >= task.targetCount;
 
 			const progressEntity = new UserTaskProgressEntity(userId, task.id, newCount, isCompleted, isCompleted ? new Date() : undefined);
-			// Update or create progress record
 			await this.taskProgressRepo.save(progressEntity);
 
-			// If task is completed now, update user progress (XP, level, etc.)
 			if (isCompleted) {
 				let userProgress = await this.userProgressRepo.findByUserId(userId);
 				if (!userProgress) {
@@ -36,6 +40,16 @@ export class UpdateUserTaskProgressUseCase implements IUpdateUserTaskProgressUse
 				}
 				userProgress.awardXP(task.xpReward);
 				await this.userProgressRepo.save(userProgress);
+
+				// Send notification on task completion
+				await this.notifyUserUseCase.execute({
+					title: "🎯 Task Completed!",
+					message: `You've completed the task "${task.title}" and earned ${task.xpReward} XP.`,
+					isRead: false,
+					recipientId: userId,
+					type: NotificationTypeEnum.TASK_COMPLETED,
+					link: "/gamification",
+				});
 			}
 		}
 	}

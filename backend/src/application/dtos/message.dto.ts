@@ -6,14 +6,13 @@ export interface ISendMessageDTO {
 	chatId: string;
 	sender: {
 		id: string;
-		firstName: string;
-		lastName: string;
+		fullName: string;
 		avatar?: string;
 	};
 	content: string;
 	type: "text" | "image" | "file" | "video";
 	fileUrl?: string;
-	readBy: string[]; // array of user IDs who have read this message
+	readBy: string[];
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -24,8 +23,7 @@ export function mapToSendMessageDTO(message: MessageEntity, sender: UserEntity):
 		chatId: message.chatId,
 		sender: {
 			id: sender.id!,
-			firstName: sender.firstName,
-			lastName: sender.lastName,
+			fullName: `${sender.firstName} ${sender.lastName}`,
 			avatar: sender.avatar || undefined,
 		},
 		content: message.content,

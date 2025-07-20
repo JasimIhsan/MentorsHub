@@ -33,7 +33,6 @@ export function CheckoutPage() {
 
 	// Access requestData and pricing from location.state
 	const { requestData } = (location.state || {}) as { requestData?: RequestData };
-	console.log("requestData: ", requestData);
 	const { mentor, loading, error } = useMentor(mentorId as string);
 
 	if (error) {

@@ -1,37 +1,36 @@
-// domain/entities/notification.entity.ts
-
 import { NotificationTypeEnum } from "../../application/interfaces/enums/notification.type.enum";
+import { INotificationDocument } from "../../infrastructure/database/models/notification/notification.model";
 
-export interface INotificationEntity {
+export interface NotificationEntityProps {
+	id?: string;
 	recipientId: string;
 	title: string;
 	message: string;
-	type?: NotificationTypeEnum;
+	type: NotificationTypeEnum;
 	link?: string;
 	isRead: boolean;
 	createdAt?: Date;
-	id?: string;
 }
 
 export class NotificationEntity {
 	private _id?: string;
-	private recipientId: string;
-	private title: string;
-	private message: string;
-	private type: NotificationTypeEnum;
-	private link?: string;
-	private isRead: boolean;
-	private createdAt: Date;
+	private _recipientId: string;
+	private _title: string;
+	private _message: string;
+	private _type: NotificationTypeEnum;
+	private _link?: string;
+	private _isRead: boolean;
+	private _createdAt: Date;
 
-	constructor(data: INotificationEntity) {
+	constructor(data: NotificationEntityProps) {
 		this._id = data.id;
-		this.recipientId = data.recipientId;
-		this.title = data.title;
-		this.message = data.message;
-		this.type = data.type ?? NotificationTypeEnum.INFO;
-		this.link = data.link;
-		this.isRead = data.isRead ?? false;
-		this.createdAt = data.createdAt ?? new Date();
+		this._recipientId = data.recipientId;
+		this._title = data.title;
+		this._message = data.message;
+		this._type = data.type ?? NotificationTypeEnum.INFO;
+		this._link = data.link;
+		this._isRead = data.isRead ?? false;
+		this._createdAt = data.createdAt ?? new Date();
 	}
 
 	// --- GETTERS ---
@@ -40,55 +39,82 @@ export class NotificationEntity {
 		return this._id;
 	}
 
-	getRecipientId(): string {
-		return this.recipientId;
+	get recipientId(): string {
+		return this._recipientId;
 	}
 
-	getTitle(): string {
-		return this.title;
+	get title(): string {
+		return this._title;
 	}
 
-	getMessage(): string {
-		return this.message;
+	get message(): string {
+		return this._message;
 	}
 
-	getType(): NotificationTypeEnum {
-		return this.type;
+	get type(): NotificationTypeEnum {
+		return this._type;
 	}
 
-	getLink(): string | undefined {
-		return this.link;
+	get link(): string | undefined {
+		return this._link;
 	}
 
-	getIsRead(): boolean {
-		return this.isRead;
+	get isRead(): boolean {
+		return this._isRead;
 	}
 
-	getCreatedAt(): Date {
-		return this.createdAt;
+	get createdAt(): Date {
+		return this._createdAt;
+	}
+
+	// --- SETTERS ---
+
+	set title(newTitle: string) {
+		this._title = newTitle;
+	}
+
+	set message(newMessage: string) {
+		this._message = newMessage;
+	}
+
+	set isRead(value: boolean) {
+		this._isRead = value;
 	}
 
 	// --- METHODS ---
 
-	markAsRead() {
-		this.isRead = true;
+	markAsRead(): void {
+		this._isRead = true;
 	}
 
-	updateMessage(title: string, message: string) {
-		this.title = title;
-		this.message = message;
+	updateMessage(title: string, message: string): void {
+		this._title = title;
+		this._message = message;
 	}
 
-	toObject(): INotificationEntity {
+	toObject() {
 		return {
 			id: this._id,
-			recipientId: this.recipientId,
-			title: this.title,
-			message: this.message,
-			type: this.type,
-			link: this.link,
-			isRead: this.isRead,
-			createdAt: this.createdAt,
+			recipientId: this._recipientId,
+			title: this._title,
+			message: this._message,
+			type: this._type,
+			link: this._link,
+			isRead: this._isRead,
+			createdAt: this._createdAt,
 		};
+	}
+
+	static fromDBDocument(doc: INotificationDocument) {
+		return new NotificationEntity({
+			id: doc._id.toString(),
+			recipientId: doc.recipientId.toString(),
+			title: doc.title,
+			message: doc.message,
+			type: doc.type,
+			link: doc.link,
+			isRead: doc.isRead,
+			createdAt: doc.createdAt,
+		});
 	}
 }

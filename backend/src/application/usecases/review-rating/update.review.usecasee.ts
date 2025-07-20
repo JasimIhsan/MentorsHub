@@ -2,9 +2,15 @@ import { IReviewRepository } from "../../../domain/repositories/review.repositor
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { IUpdateReviewUseCase } from "../../interfaces/review";
 import { mapToReviewDTO, ReviewDTO } from "../../dtos/review.dtos";
+import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
+import { NotificationTypeEnum } from "../../interfaces/enums/notification.type.enum";
 
 export class UpdateReviewUseCase implements IUpdateReviewUseCase {
-	constructor(private reviewRepo: IReviewRepository, private userRepo: IUserRepository) {}
+	constructor(
+		private reviewRepo: IReviewRepository,
+		private userRepo: IUserRepository,
+		private notifyUserUseCase: INotifyUserUseCase, // ✅ Injected here
+	) {}
 
 	async execute(
 		reviewId: string,
@@ -36,13 +42,21 @@ export class UpdateReviewUseCase implements IUpdateReviewUseCase {
 			averageRating: average,
 			totalReviews: total,
 		});
-
 		await this.userRepo.updateUser(data.mentorId, mentor);
 
-		// 4. Optionally fetch and attach reviewer info again (if frontend needs updated reviewer data)
+		// 4. Get reviewer info
 		const reviewer = await this.userRepo.findUserById(data.reviewerId);
 		if (!reviewer) throw new Error("Reviewer not found");
 
+		// 5. ✅ Notify mentor about the review update
+		await this.notifyUserUseCase.execute({
+			title: "⭐ Review Updated",
+			message: `${reviewer.fullName} updated their review to ${data.rating}-star.`,
+			isRead: false,
+			recipientId: data.mentorId,
+			type: NotificationTypeEnum.REVIEW,
+			link: "/mentor/reviews",
+		});
 
 		return mapToReviewDTO(updatedReview, reviewer);
 	}
