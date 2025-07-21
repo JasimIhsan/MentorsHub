@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import {Alert} from "@/components/custom/alert";
+import { Alert } from "@/components/custom/alert";
 import { useDispatch } from "react-redux";
 import { logoutSession } from "@/api/user/authentication.api.service";
 import { toast } from "sonner";
@@ -17,7 +17,7 @@ import { adminLogout } from "@/store/slices/adminSlice";
 export function AdminHeader() {
 	const admin = useSelector((state: RootState) => state.adminAuth.admin);
 	const dispatch = useDispatch();
-	const navigate = useNavigate()
+	const navigate = useNavigate();
 
 	const handleLogout = async () => {
 		try {
@@ -25,7 +25,7 @@ export function AdminHeader() {
 			if (response.success) {
 				localStorage.removeItem("persist:root");
 				dispatch(adminLogout());
-				navigate('/admin/login')
+				navigate("/admin/login");
 				toast.success(response.message);
 			}
 		} catch (error) {
@@ -37,7 +37,7 @@ export function AdminHeader() {
 		<header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6 justify-end lg:justify-between">
 			<Link to="/admin/dashboard" className="hidden lg:flex items-center gap-2 font-semibold">
 				<span className="text-primary text-2xl">MentorsHub</span>
-				<span className="text-xs font-normal text-muted-foreground">{admin?.isSuperAdmin ? "Super Admin" : "Admin"}</span>
+				<span className="text-xs font-normal text-muted-foreground">Admin Dashboard</span>
 			</Link>
 
 			{/* <div className="relative ml-auto flex-1 max-w-md">

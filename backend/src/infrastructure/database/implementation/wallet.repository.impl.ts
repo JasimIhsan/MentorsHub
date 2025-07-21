@@ -33,7 +33,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 
 	async platformWallet(): Promise<WalletEntity> {
 		try {
-			const admin = await AdminModel.findOne({ role: RoleEnum.SUPER_ADMIN });
+			const admin = await AdminModel.findOne({ role: RoleEnum.ADMIN });
 			const adminWallet = await WalletModel.findOne({ userId: admin?._id, role: RoleEnum.ADMIN });
 			if (!adminWallet) throw new Error("Admin wallet not found");
 			return WalletEntity.fromDBDocument(adminWallet);

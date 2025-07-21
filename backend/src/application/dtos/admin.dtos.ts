@@ -6,7 +6,6 @@ export interface IAdminDTO {
 	avatar: string;
 	username: string;
 	password: string;
-	isSuperAdmin: boolean;
 }
 
 export function mapToAdminDTO(entity: AdminEntity): IAdminDTO {
@@ -16,6 +15,5 @@ export function mapToAdminDTO(entity: AdminEntity): IAdminDTO {
 		avatar: entity.avatar || "",
 		username: entity.username,
 		password: entity.password,
-		isSuperAdmin: entity.isSuperAdmin,
 	};
 }

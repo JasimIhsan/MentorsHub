@@ -25,6 +25,15 @@ export class AdminRepositoryImpl implements IAdminRepository {
 		}
 	}
 
+	async findByIds(ids: string[]): Promise<AdminEntity[]> {
+		try {
+			const admins = await AdminModel.find({ _id: { $in: ids } });
+			return admins.map((admin) => new AdminEntity(admin));
+		} catch (error) {
+			return handleExceptionError(error, "Error finding admin by IDs");
+		}
+	}
+
 	async findAdminByUsername(username: string): Promise<AdminEntity | null> {
 		try {
 			const adminModel = await AdminModel.findOne({ username });

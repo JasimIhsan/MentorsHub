@@ -18,7 +18,7 @@ export class GetDocumentsUseCase implements IGetDocumentsUseCase {
 		const mentor = await this.mentorRepo.findMentorByUserId(mentorId);
 		if (!mentor) throw new Error("Mentor not found");
 
-		const isAdmin = user.role === RoleEnum.ADMIN ? true : user.role === RoleEnum.SUPER_ADMIN ? true : false;
+		const isAdmin = user.role === RoleEnum.ADMIN ? true : false;
 		const isOwner = mentor.userId.toString() === user.id;
 
 		if (!isOwner && !isAdmin) throw new Error("Access denied");

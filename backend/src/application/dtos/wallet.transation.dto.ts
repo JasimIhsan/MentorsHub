@@ -33,8 +33,8 @@ export interface IWalletTransactionDTO {
 export function mapToTransactionDTO(transaction: WalletTransactionEntity, fromUser: UserEntity | null, toUser: UserEntity | null, session: SessionEntity | null): IWalletTransactionDTO {
 	return {
 		_id: transaction.id!,
-		fromUserId: fromUser ? { id: fromUser.id!, name: fromUser.firstName, avatar: fromUser.avatar || "" } : null,
-		toUserId: toUser ? { id: toUser.id!, name: toUser.firstName, avatar: toUser.avatar || "" } : null,
+		fromUserId: fromUser ? { id: fromUser.id!, name: fromUser.fullName, avatar: fromUser.avatar || "" } : null,
+		toUserId: toUser ? { id: toUser.id!, name: toUser.fullName, avatar: toUser.avatar || "" } : null,
 		fromRole: transaction.fromRoleEnum as RoleEnum,
 		toRole: transaction.toRoleEnum as RoleEnum,
 		amount: transaction.transactionAmount,
