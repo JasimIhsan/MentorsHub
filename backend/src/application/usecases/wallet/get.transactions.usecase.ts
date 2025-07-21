@@ -11,7 +11,7 @@ export class GetTransactionsUseCase implements IGetTransactionsUsecase {
 		private walletRepo: IWalletRepository, //
 		private userRepo: IUserRepository,
 		private sessionRepo: ISessionRepository,
-		private adminRepo: IAdminRepository
+		private adminRepo: IAdminRepository,
 	) {}
 
 	async execute(userId: string, role: string, page: number, limit: number, filter: Record<string, any> = {}): Promise<{ data: IWalletTransactionDTO[]; total: number }> {

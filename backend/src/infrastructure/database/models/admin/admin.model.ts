@@ -17,7 +17,7 @@ const AdminSchema: Schema = new Schema(
 		role: { type: String, enum: ["admin"], required: true, default: RoleEnum.ADMIN },
 		avatar: { type: String },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const AdminModel = mongoose.model<IAdmin>("admins", AdminSchema);
