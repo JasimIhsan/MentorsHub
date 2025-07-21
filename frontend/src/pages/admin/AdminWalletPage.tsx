@@ -5,43 +5,16 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Filter, CalendarIcon, Wallet, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { Filter, Wallet, ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { format } from "date-fns";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { formatDate } from "@/utility/time-data-formatter";
 import { fetchPlatformTransactionsAPI, fetchPlatformWalletDataAPI, withdrawPlatformWalletAPI } from "@/api/wallet.api.service";
-
-// Define admin transaction interface
-export interface IWalletTransaction {
-	_id: string;
-	fromUserId: {
-		id: string;
-		name: string;
-		avatar: string;
-	};
-	toUserId: {
-		id: string;
-		name: string;
-		avatar: string;
-	};
-	fromRole: "user" | "mentor" | "admin";
-	toRole: "user" | "mentor" | "admin";
-	amount: number;
-	type: "credit" | "debit";
-	purpose: "session_fee" | "platform_fee" | "refund" | "withdrawal" | "wallet_topup";
-	description?: string;
-	sessionId?: {
-		id: string;
-		topic: string;
-	} | null;
-	createdAt: Date;
-}
+import { Skeleton } from "@/components/ui/skeleton";
+import { IWalletTransaction } from "@/interfaces/transaction.dto";
 
 export function AdminWalletPage() {
 	const [walletBalance, setWalletBalance] = useState<number | null>(null);
@@ -115,33 +88,34 @@ export function AdminWalletPage() {
 	}, [user?.id]);
 
 	// Fetch admin transactions
-	useEffect(() => {
-		const fetchTransactions = async () => {
-			try {
-				setIsLoadingTransactions(true);
-				const response = await fetchPlatformTransactionsAPI(
-					user?.id as string,
-					currentPage,
-					transactionsPerPage,
-					transactionType,
-					dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "",
-					dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : ""
-				);
-				if (response.success) {
-					setTransactions(response.transactions);
-					setTotalPages(Math.ceil(response.total / transactionsPerPage));
-				}
-			} catch (error: any) {
-				setNotification({ type: "error", message: error.message || "Failed to fetch transactions" });
-				setTimeout(() => setNotification(null), 3000);
-			} finally {
-				setIsLoadingTransactions(false);
+	const fetchTransactions = async () => {
+		try {
+			setIsLoadingTransactions(true);
+			const response = await fetchPlatformTransactionsAPI(user?.id as string, currentPage, transactionsPerPage, transactionType, dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "", dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "");
+			if (response.success) {
+				setTransactions(response.transactions);
+				setTotalPages(Math.ceil(response.total / transactionsPerPage));
 			}
-		};
+		} catch (error: any) {
+			setNotification({ type: "error", message: error.message || "Failed to fetch transactions" });
+			setTimeout(() => setNotification(null), 3000);
+		} finally {
+			setIsLoadingTransactions(false);
+		}
+	};
+
+	// Initial fetch on component mount
+	useEffect(() => {
 		if (user?.id) {
 			fetchTransactions();
 		}
-	}, [currentPage, transactionType, dateRange, user?.id]);
+	}, [user?.id]);
+
+	// Handle apply filters
+	const handleApplyFilters = () => {
+		setCurrentPage(1); // Reset to first page on filter apply
+		fetchTransactions();
+	};
 
 	const getStatusBadge = (type: string) => {
 		const variants = {
@@ -158,6 +132,7 @@ export function AdminWalletPage() {
 			refund: "Refund",
 			withdrawal: "Withdrawal",
 			wallet_topup: "Wallet Topup",
+			platform_commission: "Platform Commission",
 		};
 		return labels[purpose as keyof typeof labels] || purpose;
 	};
@@ -165,6 +140,7 @@ export function AdminWalletPage() {
 	const handlePageChange = (newPage: number) => {
 		if (newPage >= 1 && newPage <= totalPages) {
 			setCurrentPage(newPage);
+			fetchTransactions(); // Fetch transactions for the new page
 		}
 	};
 
@@ -172,6 +148,19 @@ export function AdminWalletPage() {
 		setDateRange({ from: undefined, to: undefined });
 		setTransactionType("all");
 		setCurrentPage(1);
+		fetchTransactions(); // Fetch transactions after clearing filters
+	};
+
+	// Handle date input changes
+	const handleDateChange = (field: "from" | "to", value: string) => {
+		if (!value) {
+			setDateRange((prev) => ({ ...prev, [field]: undefined }));
+			return;
+		}
+		const date = new Date(value);
+		if (!isNaN(date.getTime())) {
+			setDateRange((prev) => ({ ...prev, [field]: date }));
+		}
 	};
 
 	// Skeleton for Wallet Balance Card
@@ -241,13 +230,13 @@ export function AdminWalletPage() {
 								<div className="flex items-center gap-4">
 									<div className="bg-white/20 p-4 rounded-full">
 										<Wallet className="h-8 w-8" />
-									</div>{" "}
+									</div>
 									<div>
 										<p className="text-blue-100 font-medium">Platform Balance</p>
 										<p className="text-4xl font-extrabold text-white-800">{walletBalance !== null ? `₹${walletBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "Loading..."}</p>
 									</div>
 								</div>
-								<Button onClick={() => user?.isSuperAdmin && setIsWithdrawModalOpen(true)} disabled={!user?.isSuperAdmin} variant="outline" className={`${user?.isSuperAdmin ? "" : "cursor-not-allowed"} text-primary  font-bold px-6 py-3 `}>
+								<Button onClick={() => setIsWithdrawModalOpen(true)} variant="outline" className={` text-primary  font-bold px-6 py-3 `}>
 									Withdraw
 								</Button>
 							</div>
@@ -276,7 +265,7 @@ export function AdminWalletPage() {
 								}}>
 								Cancel
 							</Button>
-							<Button onClick={handleWithdraw} disabled={!user?.isSuperAdmin || !withdrawAmount || parseFloat(withdrawAmount) <= 0}>
+							<Button onClick={handleWithdraw} disabled={!withdrawAmount || parseFloat(withdrawAmount) <= 0}>
 								Confirm Withdrawal
 							</Button>
 						</DialogFooter>
@@ -297,28 +286,12 @@ export function AdminWalletPage() {
 						<div className="flex justify-between">
 							<div className="flex space-x-4">
 								<div className="space-y-2">
-									<Label htmlFor="date-range">Date Range</Label>
-									<Popover>
-										<PopoverTrigger asChild>
-											<Button id="date-range" variant="outline" className="w-full justify-start text-left font-normal">
-												<CalendarIcon className="mr-2 h-4 w-4" />
-												{dateRange.from ? (
-													dateRange.to ? (
-														<>
-															{formatDate(dateRange.from.toString())} - {formatDate(dateRange.to.toString())}
-														</>
-													) : (
-														formatDate(dateRange.from.toString())
-													)
-												) : (
-													<span>Pick a date range</span>
-												)}
-											</Button>
-										</PopoverTrigger>
-										<PopoverContent className="w-auto p-0" align="start">
-											<Calendar initialFocus mode="range" defaultMonth={dateRange.from} selected={{ from: dateRange.from, to: dateRange.to }} onSelect={(range) => setDateRange({ from: range?.from, to: range?.to })} numberOfMonths={2} />
-										</PopoverContent>
-									</Popover>
+									<Label htmlFor="from-date">From Date</Label>
+									<Input id="from-date" type="date" value={dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : ""} onChange={(e) => handleDateChange("from", e.target.value)} placeholder="YYYY-MM-DD" />
+								</div>
+								<div className="space-y-2">
+									<Label htmlFor="to-date">To Date</Label>
+									<Input id="to-date" type="date" value={dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : ""} onChange={(e) => handleDateChange("to", e.target.value)} placeholder="YYYY-MM-DD" />
 								</div>
 								<div className="space-y-2">
 									<Label htmlFor="transaction-type">Transaction Type</Label>
@@ -334,8 +307,11 @@ export function AdminWalletPage() {
 									</Select>
 								</div>
 							</div>
-							<div className="flex items-end">
-								<Button onClick={handleClearFilters}>Clear Filters</Button>
+							<div className="flex items-end space-x-2">
+								<Button onClick={handleApplyFilters}>Apply Filters</Button>
+								<Button onClick={handleClearFilters} variant="outline">
+									Clear Filters
+								</Button>
 							</div>
 						</div>
 
@@ -344,7 +320,7 @@ export function AdminWalletPage() {
 							<h3 className="text-lg font-semibold">Recent Transactions</h3>
 							{isLoadingTransactions ? (
 								<div className="space-y-3">
-									{[...Array(3)].map((_, index) => (
+									{[...Array(5)].map((_, index) => (
 										<TransactionSkeleton key={index} />
 									))}
 								</div>

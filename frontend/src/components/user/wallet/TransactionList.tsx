@@ -33,7 +33,7 @@ export function TransactionList({ transactions, isLoading, currentPage, totalPag
 			<h3 className="text-lg font-semibold">Recent Transactions</h3>
 			{isLoading ? (
 				<div className="space-y-3">
-					{[...Array(3)].map((_, index) => (
+					{[...Array(5)].map((_, index) => (
 						<TransactionSkeleton key={index} />
 					))}
 				</div>

@@ -96,26 +96,28 @@ export function WalletPage() {
 	}, [user?.id]);
 
 	// Fetch transactions
-	useEffect(() => {
-		const fetchTransactions = async () => {
-			try {
-				setIsLoadingTransactions(true);
-				const response = await fetchTransactionsAPI(user?.id as string, currentPage, transactionsPerPage, transactionType, dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "", dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "");
-				if (response.success) {
-					setTransactions(response.transactions);
-					setTotalPages(Math.ceil(response.total / transactionsPerPage));
-				}
-			} catch (error: any) {
-				setNotification({ type: "error", message: error.message || "Failed to fetch transactions" });
-				setTimeout(() => setNotification(null), 3000);
-			} finally {
-				setIsLoadingTransactions(false);
+	const fetchTransactions = async () => {
+		try {
+			setIsLoadingTransactions(true);
+			const response = await fetchTransactionsAPI(user?.id as string, currentPage, transactionsPerPage, transactionType, dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "", dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "");
+			if (response.success) {
+				setTransactions(response.transactions);
+				setTotalPages(Math.ceil(response.total / transactionsPerPage));
 			}
-		};
+		} catch (error: any) {
+			setNotification({ type: "error", message: error.message || "Failed to fetch transactions" });
+			setTimeout(() => setNotification(null), 3000);
+		} finally {
+			setIsLoadingTransactions(false);
+		}
+	};
+
+	// Initial fetch on wallet creation
+	useEffect(() => {
 		if (isWalletCreated && user?.id) {
 			fetchTransactions();
 		}
-	}, [isWalletCreated, currentPage, transactionType, dateRange, user?.id]);
+	}, [isWalletCreated, user?.id]);
 
 	// Handle wallet creation
 	const handleCreateWallet = async () => {
@@ -127,7 +129,7 @@ export function WalletPage() {
 				setWalletBalance(response.wallet.balance);
 			}
 		} catch (error: any) {
-			setNotification({ type: "error", message: error.message || "Failed to create wallet" });
+			setNotification({ type: "error", message: error.message || "Failed to fetch wallet data" });
 			setTimeout(() => setNotification(null), 3000);
 		} finally {
 			setIsLoadingWallet(false);
@@ -157,7 +159,7 @@ export function WalletPage() {
 				setWithdrawAmount("");
 			}
 		} catch (error) {
-			 console.error(`Error: `, error);
+			console.error(`Error: `, error);
 			if (error instanceof Error) {
 				toast.error(error.message);
 			}
@@ -228,7 +230,7 @@ export function WalletPage() {
 
 	return (
 		<div className="flex flex-col items-center w-full py-8">
-			<div className="flex flex-col gap-4 px-10 md:px-20 xl:px-25  w-full min-h-screen">
+			<div className="flex flex-col gap-4 px-10 md:px-20 xl:px-25 w-full min-h-screen">
 				<div className="mb-8">
 					<h1 className="text-3xl font-bold tracking-tight">My Wallet</h1>
 					<p className="text-muted-foreground">Manage your money with ease</p>
@@ -263,6 +265,7 @@ export function WalletPage() {
 							currentPage={currentPage}
 							setCurrentPage={setCurrentPage}
 							totalPages={totalPages}
+							fetchTransactions={fetchTransactions}
 						/>
 					</>
 				)}

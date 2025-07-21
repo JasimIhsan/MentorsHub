@@ -1,14 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import { IWalletTransaction } from "@/pages/user/WalletPage";
-import { Popover, PopoverTrigger, PopoverContent } from "@radix-ui/react-popover";
-import { SelectTrigger, SelectValue, SelectContent, SelectItem } from "@radix-ui/react-select";
-import { formatDate } from "date-fns";
-import { Filter, CalendarIcon } from "lucide-react";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Filter } from "lucide-react";
+import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
 import { TransactionList } from "./TransactionList";
+import { IWalletTransaction } from "@/pages/user/WalletPage";
 
 interface TransactionHistoryProps {
 	transactions: IWalletTransaction[];
@@ -16,28 +14,58 @@ interface TransactionHistoryProps {
 	transactionType: string;
 	setTransactionType: (value: string) => void;
 	dateRange: { from: Date | undefined; to: Date | undefined };
-	setDateRange: (range: { from: Date | undefined; to: Date | undefined }) => void;
+	setDateRange: React.Dispatch<React.SetStateAction<{ from: Date | undefined; to: Date | undefined }>>;
 	currentPage: number;
 	setCurrentPage: (page: number) => void;
 	totalPages: number;
+	fetchTransactions: () => Promise<void>;
 }
 
 // Component for displaying transaction history with filters
-export function TransactionHistory({ transactions, isLoading, transactionType, setTransactionType, dateRange, setDateRange, currentPage, setCurrentPage, totalPages }: TransactionHistoryProps) {
+export function TransactionHistory({ transactions, isLoading, transactionType, setTransactionType, dateRange, setDateRange, currentPage, setCurrentPage, totalPages, fetchTransactions }: TransactionHistoryProps) {
+	// Handle date input changes
+	const handleDateChange = (field: "from" | "to", value: string) => {
+		if (!value) {
+			setDateRange((prev: { from: Date | undefined; to: Date | undefined }) => ({
+				...prev,
+				[field]: undefined,
+			}));
+			return;
+		}
+		const date = new Date(value);
+		if (!isNaN(date.getTime())) {
+			setDateRange((prev: { from: Date | undefined; to: Date | undefined }) => ({
+				...prev,
+				[field]: date,
+			}));
+		}
+	};
+
+	// Handle apply filters
+	const handleApplyFilters = () => {
+		setCurrentPage(1); // Reset to first page on filter apply
+		fetchTransactions();
+	};
+
+	// Handle clear filters
 	const handleClearFilters = () => {
 		setDateRange({ from: undefined, to: undefined });
 		setTransactionType("all");
-		setCurrentPage(1); // Reset page to 1 on filter clear
+		setCurrentPage(1);
+		fetchTransactions();
 	};
 
+	// Handle transaction type change
 	const handleTransactionTypeChange = (value: string) => {
 		setTransactionType(value);
 		setCurrentPage(1); // Reset page to 1 on transaction type change
 	};
 
+	// Handle page change
 	const handlePageChange = (newPage: number) => {
 		if (newPage >= 1 && newPage <= totalPages) {
 			setCurrentPage(newPage);
+			fetchTransactions();
 		}
 	};
 
@@ -54,28 +82,12 @@ export function TransactionHistory({ transactions, isLoading, transactionType, s
 				<div className="flex flex-col sm:flex-row justify-between gap-4">
 					<div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
 						<div className="space-y-2 flex-1">
-							<Label htmlFor="date-range">Date Range</Label>
-							<Popover>
-								<PopoverTrigger asChild>
-									<Button id="date-range" variant="outline" className="w-full justify-start text-left font-normal border-gray-300">
-										<CalendarIcon className="mr-2 h-4 w-4" />
-										{dateRange.from ? (
-											dateRange.to ? (
-												<>
-													{formatDate(dateRange.from.toString(), "yyyy-MM-dd")} - {formatDate(dateRange.to.toString(), "yyyy-MM-dd")}
-												</>
-											) : (
-												formatDate(dateRange.from.toString(), "yyyy-MM-dd")
-											)
-										) : (
-											<span>Pick a date range</span>
-										)}
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar initialFocus mode="range" defaultMonth={dateRange.from} selected={{ from: dateRange.from, to: dateRange.to }} onSelect={(range) => setDateRange({ from: range?.from, to: range?.to })} numberOfMonths={2} />
-								</PopoverContent>
-							</Popover>
+							<Label htmlFor="from-date">From Date</Label>
+							<Input id="from-date" type="date" value={dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : ""} onChange={(e) => handleDateChange("from", e.target.value)} placeholder="YYYY-MM-DD" />
+						</div>
+						<div className="space-y-2 flex-1">
+							<Label htmlFor="to-date">To Date</Label>
+							<Input id="to-date" type="date" value={dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : ""} onChange={(e) => handleDateChange("to", e.target.value)} placeholder="YYYY-MM-DD" />
 						</div>
 						<div className="space-y-2 flex-1">
 							<Label htmlFor="transaction-type">Transaction Type</Label>
@@ -92,7 +104,8 @@ export function TransactionHistory({ transactions, isLoading, transactionType, s
 							</Select>
 						</div>
 					</div>
-					<div className="flex items-end">
+					<div className="flex items-end space-x-2">
+						<Button onClick={handleApplyFilters}>Apply Filters</Button>
 						<Button onClick={handleClearFilters} variant="outline" className="border-gray-300 hover:bg-gray-100">
 							Clear Filters
 						</Button>

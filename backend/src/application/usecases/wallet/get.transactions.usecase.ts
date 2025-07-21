@@ -1,39 +1,64 @@
+import { IAdminRepository } from "../../../domain/repositories/admin.repository";
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletTransactionDTO, mapToTransactionDTO } from "../../dtos/wallet.transation.dto";
+import { RoleEnum } from "../../interfaces/enums/role.enum";
 import { IGetTransactionsUsecase } from "../../interfaces/wallet";
 
 export class GetTransactionsUseCase implements IGetTransactionsUsecase {
-	constructor(private walletRepo: IWalletRepository, private userRepo: IUserRepository, private sessionRepo: ISessionRepository) {}
+	constructor(
+		private walletRepo: IWalletRepository, //
+		private userRepo: IUserRepository,
+		private sessionRepo: ISessionRepository,
+		private adminRepo: IAdminRepository,
+	) {}
 
 	async execute(userId: string, role: string, page: number, limit: number, filter: Record<string, any> = {}): Promise<{ data: IWalletTransactionDTO[]; total: number }> {
-		// 1️⃣ fetch transactions (entities only)
 		const { data: transactions, total } = await this.walletRepo.getTransactionsByUser(userId, page, limit, filter);
 
-		// 2️⃣ collect all distinct IDs we’ll need
-		const userIdSet = new Set<string>();
-		const sessionIdSet = new Set<string>();
+		const userIds: Set<string> = new Set();
+		const adminIds: Set<string> = new Set();
+		const sessionIds: Set<string> = new Set();
 
+		// Identify unique user/admin/session IDs involved in the transactions
 		transactions.forEach((tx) => {
-			if (tx.fromUserId) userIdSet.add(tx.fromUserId.toString());
-			userIdSet.add(tx.toUserId.toString());
-			if (tx.sessionId) sessionIdSet.add(tx.sessionId.toString());
+			// From
+			if ((tx.fromRoleEnum === RoleEnum.USER || tx.fromRoleEnum === RoleEnum.MENTOR) && tx.fromUserId) {
+				userIds.add(tx.fromUserId);
+			} else if (tx.fromRoleEnum === RoleEnum.ADMIN && tx.fromUserId) {
+				adminIds.add(tx.fromUserId);
+			}
+
+			// To
+			if ((tx.toRoleEnum === RoleEnum.USER || tx.toRoleEnum === RoleEnum.MENTOR) && tx.toUserId) {
+				userIds.add(tx.toUserId);
+			} else if (tx.toRoleEnum === RoleEnum.ADMIN && tx.toUserId) {
+				adminIds.add(tx.toUserId);
+			}
+
+			// Session
+			if (tx.sessionId) {
+				sessionIds.add(tx.sessionId.toString());
+			}
 		});
 
-		// 3️⃣ batch‑load users & sessions
-		const [users, sessions] = await Promise.all([this.userRepo.findUsersByIds([...userIdSet]), this.sessionRepo.findByIds([...sessionIdSet])]);
+		// Fetch required users, admins, and sessions
+		const [users, admins, sessions] = await Promise.all([this.userRepo.findUsersByIds([...userIds]), this.adminRepo.findByIds([...adminIds]), this.sessionRepo.findByIds([...sessionIds])]);
 
-		// 4️⃣ index them for O(1) lookup
-		const userMap = new Map(users.map((u) => [u.id!, u]));
+		// Create ID-based lookup maps
+		const allUserMap = new Map<string, any>();
+		users.forEach((u) => allUserMap.set(u.id!, u));
+		admins.forEach((a) => allUserMap.set(a.id!, a));
+
 		const sessionMap = new Map(sessions.map((s) => [s.id, s]));
 
-		// 5️⃣ build DTOs in a single synchronous pass
+		// Convert transactions to DTOs
 		const dtos = transactions.flatMap((tx) => {
-			const toUser = userMap.get(tx.toUserId.toString());
-			if (!toUser) return []; // graceful skip
+			const toUser = allUserMap.get(tx.toUserId.toString());
+			if (!toUser) return [];
 
-			const fromUser = tx.fromUserId ? userMap.get(tx.fromUserId.toString()) : null;
+			const fromUser = tx.fromUserId ? allUserMap.get(tx.fromUserId.toString()) : null;
 			const session = tx.sessionId ? sessionMap.get(tx.sessionId.toString()) : null;
 
 			return [mapToTransactionDTO(tx, fromUser ?? null, toUser, session ?? null)];
