@@ -6,13 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { BriefcaseBusiness, Calendar, Check, Download, Eye, GraduationCap, X } from "lucide-react";
-import { toast } from "sonner";
+import { BriefcaseBusiness, Calendar, Check, Eye, GraduationCap, X } from "lucide-react";
 import { Alert } from "@/components/custom/alert";
 import StatusBadge from "./StatusBadge";
 import { extractDocumentName } from "@/utility/extractDocumentName";
 import { getUniqueKey, renderItem } from "@/utility/uniqueKey";
-import { downloadFromS3Key } from "@/utility/download.s3.documents";
+import { fetchDocumentUrlByKeyAPI } from "@/api/admin/common/fetchDocuments";
 
 interface ApplicationCardProps {
 	application: IMentorDTO;
@@ -24,32 +23,23 @@ export default function ApplicationCard({ application, updateMentorStatus, onVie
 	const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
 	const [isDocumentsDialogOpen, setIsDocumentsDialogOpen] = useState(false);
 	const [rejectionReason, setRejectionReason] = useState("");
-	// const [documentUrls, setDocumentUrls] = useState<string[]>([]);
-	// const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
+	const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
+	const [docUrl, setDocUrl] = useState<string | null>(null);
 
-	// const fetchDocumentUrls = async () => {
-	// 	setIsLoadingDocuments(true);
-	// 	try {
-	// 		const response = await fetchDocumentUrlsAPI(application.userId);
-	// 		if (response.success) {
-	// 			setDocumentUrls(response.documents);
-	// 			toast.success("Documents fetched successfully!");
-	// 		}
-	// 	} catch (error) {
-	// 		console.error("Error fetching document URLs:", error);
-	// 		if (error instanceof Error) toast.error(error.message);
-	// 	} finally {
-	// 		setIsLoadingDocuments(false);
-	// 	}
-	// };
-
-	const handleDownload = async (key: string) => {
+	const handleViewDocument = async (key: string, userId: string) => {
+		setIsLoadingDocuments(true);
 		try {
-			await downloadFromS3Key(key);
-		} catch (error) {
-			console.error("Download failed:", error);
-			toast.error("Unable to download the document.");
+			const response = await fetchDocumentUrlByKeyAPI(userId, key);
+			if (response.success) {
+				setDocUrl(response.document); // Set the signed URL
+			}
+		} finally {
+			setIsLoadingDocuments(false);
 		}
+	};
+
+	const handleClosePreview = () => {
+		setDocUrl(null); // Clear the preview
 	};
 
 	const handleApprove = () => {
@@ -62,17 +52,13 @@ export default function ApplicationCard({ application, updateMentorStatus, onVie
 		setRejectionReason("");
 	};
 
-	// useEffect(() => {
-	// 	if (isDocumentsDialogOpen) fetchDocumentUrls();
-	// }, [isDocumentsDialogOpen]);
-
 	return (
 		<Card className="overflow-hidden">
 			<CardContent className="p-0">
 				<div className="flex flex-col md:flex-row">
 					<div className="px-6 flex-1">
 						<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-							{/* ── Mentor info ─────────────────────── */}
+							{/* Mentor info */}
 							<div className="flex items-start gap-4">
 								<Avatar className="h-12 w-12">
 									<AvatarImage src={application.avatar || undefined} />
@@ -113,7 +99,7 @@ export default function ApplicationCard({ application, updateMentorStatus, onVie
 								</div>
 							</div>
 
-							{/* ── Actions & Status ────────────────── */}
+							{/* Actions & Status */}
 							<div className="flex flex-col gap-2">
 								<StatusBadge status={application.mentorRequestStatus} />
 								<div className="flex gap-2">
@@ -127,35 +113,60 @@ export default function ApplicationCard({ application, updateMentorStatus, onVie
 									<Dialog open={isDocumentsDialogOpen} onOpenChange={setIsDocumentsDialogOpen}>
 										<DialogTrigger asChild>
 											<Button variant="outline" size="sm">
-												<Download className="mr-2 h-4 w-4" />
-												Documents
+												<Eye className="mr-2 h-4 w-4" />
+												View Documents
 											</Button>
 										</DialogTrigger>
-										<DialogContent>
-											<DialogHeader>
+										<DialogContent className="sm:max-w-lg md:max-w-4xl max-h-[90vh] overflow-y-auto">
+											<DialogHeader className="pb-4">
 												<DialogTitle>Application Documents</DialogTitle>
 												<DialogDescription>
 													Documents submitted by {application.firstName} {application.lastName}
 												</DialogDescription>
 											</DialogHeader>
 
-											<div className="grid gap-4">
-												{application.documents.length > 0 ? (
-													application.documents.map((url, i) => (
-														<div key={getUniqueKey(url, i)} className="flex items-center justify-between">
-															<p className="text-sm">{extractDocumentName(url)}</p>
-															<Button variant="outline" size="sm" onClick={() => handleDownload(url)}>
-																<Download className="mr-2 h-4 w-4" />
-																Download
+											<div className="grid grid-cols-1 md:grid-cols-[40%_60%] gap-6 p-4">
+												{/* Document List */}
+												<div className="space-y-4 bg-muted/20 p-4 rounded-lg">
+													<h3 className="text-sm font-medium text-foreground">Available Documents</h3>
+													{isLoadingDocuments ? (
+														<p className="text-sm text-muted-foreground">Loading documents...</p>
+													) : application.documents.length > 0 ? (
+														application.documents.map((key, i) => (
+															<div key={getUniqueKey(key, i)} className="flex items-center justify-between p-2 bg-background rounded-md border border-muted">
+																<p className="text-sm truncate">{extractDocumentName(key)}</p>
+																<Button variant="outline" size="sm" onClick={() => handleViewDocument(key, application.userId)}>
+																	<Eye className="mr-2 h-4 w-4" />
+																	View
+																</Button>
+															</div>
+														))
+													) : (
+														<p className="text-sm text-muted-foreground italic">No documents available</p>
+													)}
+												</div>
+
+												{/* Document Preview */}
+												<div className="relative bg-muted/10 p-4 rounded-lg">
+													{docUrl ? (
+														<div className="space-y-2">
+															<Button variant="outline" size="sm" onClick={handleClosePreview} className="absolute top-2 right-2">
+																<X className="h-4 w-4" />
+																Close Preview
 															</Button>
+															<iframe src={docUrl} title="Document Viewer" width="100%" height="700px" style={{ border: "1px solid #ccc", borderRadius: "8px" }} />
 														</div>
-													))
-												) : (
-													<p className="text-sm text-muted-foreground">No documents available</p>
-												)}
+													) : (
+														<div className="flex flex-col items-center justify-center h-full p-6 bg-background rounded-lg border border-muted text-center">
+															<Eye className="h-8 w-8 text-muted-foreground mb-4" />
+															<p className="text-sm text-muted-foreground font-medium">No document selected</p>
+															<p className="text-xs text-muted-foreground mt-1">Click "View" on a document to preview it here.</p>
+														</div>
+													)}
+												</div>
 											</div>
 
-											<DialogFooter>
+											<DialogFooter className="pt-4">
 												<Button variant="outline" onClick={() => setIsDocumentsDialogOpen(false)}>
 													Close
 												</Button>
@@ -193,7 +204,7 @@ export default function ApplicationCard({ application, updateMentorStatus, onVie
 														<DialogTitle>Reject Mentor Application</DialogTitle>
 														<DialogDescription>
 															Please provide a reason for rejecting {application.firstName} {application.lastName}
-															&apos;s application (optional).
+															's application (optional).
 														</DialogDescription>
 													</DialogHeader>
 

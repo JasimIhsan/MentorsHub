@@ -15,3 +15,7 @@ export interface IUploadMentorDocuments {
 export interface IGetDocumentsUseCase {
 	execute({ mentorId, user }: { mentorId: string; user: UserEntity | AdminEntity }): Promise<string[]>;
 }
+
+export interface IGetDocumentByKeyUseCase {
+	execute({ mentorId, documentKey, user }: { mentorId: string; documentKey: string; user: UserEntity | AdminEntity }): Promise<string>;
+}

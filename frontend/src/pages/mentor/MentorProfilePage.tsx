@@ -10,49 +10,53 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Plus, X, Camera, GraduationCap, BookOpen, Download } from "lucide-react";
+import { Plus, X, Camera, GraduationCap, BookOpen, Eye, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useMentor } from "@/hooks/useMentor";
 import { toast } from "sonner";
 import { extractDocumentName } from "@/utility/extractDocumentName";
-import { downloadFromS3Key } from "@/utility/download.s3.documents";
+import { fetchDocumentUrlsAPI } from "@/api/admin/common/fetchDocuments";
+import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from "@/components/ui/dialog";
 
 export function MentorProfilePage() {
 	const [isEditing, setIsEditing] = useState(false);
 	const [newSkill, setNewSkill] = useState("");
+	const [_isDocumentsDialogOpen, setIsDocumentsDialogOpen] = useState(false);
+	const [selectedDocUrl, setSelectedDocUrl] = useState<string | null>(null);
 	const user = useSelector((state: RootState) => state.userAuth.user);
 	const { error, loading, mentor } = useMentor(user?.id as string);
-	// const [documentUrls, setDocumentUrls] = useState<string[]>([]);
+	const [documentUrls, setDocumentUrls] = useState<string[]>([]);
 
 	const handleAddSkill = () => {};
 
 	const handleRemoveSkill = (_skill: string) => {};
 
-	// useEffect(() => {
-	// 	if (!user?.id) return;
-	// 	const fetchDocumentUrls = async () => {
-	// 		try {
-	// 			const response = await fetchDocumentUrlsAPI(user?.id as string);
-	// 			if (response.success) {
-	// 				setDocumentUrls(response.documents);
-	// 			}
-	// 		} catch (error) {
-	// 			console.error("Error fetching document URLs:", error);
-	// 			if (error instanceof Error) toast.error(error.message);
-	// 		}
-	// 	};
-	// 	fetchDocumentUrls();
-	// }, [user?.id]);
+	useEffect(() => {
+		if (!user?.id) return;
+		const fetchDocumentUrls = async () => {
+			try {
+				const response = await fetchDocumentUrlsAPI(user?.id as string);
+				if (response.success) {
+					setDocumentUrls(response.documents);
+				}
+			} catch (error) {
+				console.error("Error fetching document URLs:", error);
+				if (error instanceof Error) toast.error(error.message);
+			}
+		};
+		fetchDocumentUrls();
+	}, [user?.id]);
 
-	const handleDownload = async (key: string) => {
-		try {
-			await downloadFromS3Key(key);
-		} catch (error) {
-			console.error("Download failed:", error);
-			toast.error("Unable to download the document.");
-		}
+	const handleViewDocument = (url: string) => {
+		setSelectedDocUrl(url);
+		setIsDocumentsDialogOpen(true);
+	};
+
+	const handleClosePreview = () => {
+		setSelectedDocUrl(null);
+		setIsDocumentsDialogOpen(false);
 	};
 
 	useEffect(() => {
@@ -142,8 +146,6 @@ export function MentorProfilePage() {
 											</SelectContent>
 										</Select>
 									) : (
-										// ) : mentor.availability > 0 ? (
-										// 	"Available for Sessions"
 										"Currently Busy"
 									)}
 								</Badge>
@@ -163,7 +165,6 @@ export function MentorProfilePage() {
 						<TabsTrigger value="settings">Settings</TabsTrigger>
 						<TabsTrigger value="reviews">Reviews</TabsTrigger>
 					</TabsList>
-
 					{/* About Tab */}
 					<TabsContent value="about" className="mt-6">
 						<Card>
@@ -284,7 +285,6 @@ export function MentorProfilePage() {
 							)}
 						</Card>
 					</TabsContent>
-
 					{/* Experience Tab */}
 					<TabsContent value="experience" className="mt-6">
 						<Card>
@@ -319,7 +319,7 @@ export function MentorProfilePage() {
 															<Input id={`company-${index}`} defaultValue={work.company} />
 														</div>
 														<div className="space-y-2">
-															<Label htmlFor={`period-${index}`}>Period</Label>
+															<Label htmlFor={`period-${index}`}>Periodmarch</Label>
 															<Input id={`period-${index}`} defaultValue={`${work.startDate} - ${work.endDate || "Present"}`} />
 														</div>
 														<div className="space-y-2">
@@ -378,7 +378,7 @@ export function MentorProfilePage() {
 															<Input id={`degree-${index}`} defaultValue={edu.degree} />
 														</div>
 														<div className="space-y-2">
-															<Label htmlFor={`institution-${index}`}>Institution</Label>
+															<Label htmlFor={`institution少なく</institution-${index}`}>Institution</Label>
 															<Input id={`institution-${index}`} defaultValue={edu.institution} />
 														</div>
 														<div className="space-y-2">
@@ -468,7 +468,7 @@ export function MentorProfilePage() {
 							</CardContent>
 						</Card>
 
-						{/* documents */}
+						{/* Documents */}
 						<Card className="mt-6">
 							<CardHeader>
 								<div className="flex items-center justify-between">
@@ -485,38 +485,53 @@ export function MentorProfilePage() {
 								</div>
 							</CardHeader>
 							<CardContent>
-								{/* <div className="space-y-6">
-									{mentor.documents.map((url, index) => (
-										<div key={index} className="flex items-start gap-4">
-											<div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-												<FileText className="h-5 w-5 text-primary" />
-											</div>
-											<div className="flex-1">
-												<h3 className="font-medium">{extractDocumentName(url)}</h3>
-											</div>
+								<div className="space-y-4">
+									{documentUrls.length > 0 ? (
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+											{documentUrls.map((url, index) => (
+												<div key={index} className="flex items-center justify-between p-4 bg-background rounded-md border border-muted">
+													<div className="flex items-center">
+														<div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+															<FileText className="h-5 w-5 text-primary" />
+														</div>
+														<div className="flex-1 truncate ml-3">{extractDocumentName(url)}</div>
+													</div>
+													<Dialog>
+														<DialogTrigger asChild>
+															<Button variant="outline" size="sm" onClick={() => handleViewDocument(url)}>
+																<Eye className="mr-2 h-4 w-4" />
+																View
+															</Button>
+														</DialogTrigger>
+														<DialogContent className="sm:max-w-lg md:max-w-4xl max-h-[90vh] overflow-y-auto p-6 bg-background rounded-lg border">
+															<DialogHeader className="pb-4">
+																<DialogTitle>{extractDocumentName(url)}</DialogTitle>
+																<DialogDescription>Preview the selected document</DialogDescription>
+															</DialogHeader>
+															<div className="relative bg-muted/10 p-4 rounded-lg">
+																<Button variant="outline" size="sm" onClick={handleClosePreview} className="absolute top-2 right-2">
+																	<X className="h-4 w-4" />
+																	Close Preview
+																</Button>
+																<iframe src={selectedDocUrl || ""} title="Document Viewer" width="100%" height="700px" style={{ border: "1px solid #ccc", borderRadius: "8px" }} />
+															</div>
+															<DialogFooter className="pt-4">
+																<Button variant="outline" onClick={handleClosePreview}>
+																	Close
+																</Button>
+															</DialogFooter>
+														</DialogContent>
+													</Dialog>
+												</div>
+											))}
 										</div>
-									))}
-								</div> */}
-
-								<div className="grid gap-4">
-									{mentor.documents.length > 0 ? (
-										mentor.documents.map((url, i) => (
-											<div key={i} className="flex items-center justify-between">
-												<p className="text-sm">{extractDocumentName(url)}</p>
-												<Button variant="outline" size="sm" onClick={() => handleDownload(url)}>
-													<Download className="mr-2 h-4 w-4" />
-													Download
-												</Button>
-											</div>
-										))
 									) : (
-										<p className="text-sm text-muted-foreground">No documents available</p>
+										<p className="text-sm text-muted-foreground italic">No documents available</p>
 									)}
 								</div>
 							</CardContent>
 						</Card>
 					</TabsContent>
-
 					{/* Settings Tab */}
 					<TabsContent value="settings" className="mt-6">
 						<Card>
@@ -568,7 +583,7 @@ export function MentorProfilePage() {
 												<Label htmlFor="availability-visibility">Show Availability</Label>
 												<p className="text-sm text-muted-foreground">Display your available time slots on your profile</p>
 											</div>
-											{/* <Switch id="availability-visibility" defaultChecked={mentor.availability.length > 0} /> */}
+											<Switch id="availability-visibility" defaultChecked />
 										</div>
 									</div>
 								</div>
@@ -578,7 +593,6 @@ export function MentorProfilePage() {
 							</CardFooter>
 						</Card>
 					</TabsContent>
-
 					{/* Reviews Tab */}
 					<TabsContent value="reviews" className="mt-6">
 						<Card>
@@ -636,7 +650,7 @@ export function MentorProfilePage() {
 }
 
 // Icons
-function DollarSign({ className }: { className?: string }) {
+function DollarSign({ className }: { className: string }) {
 	return (
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
 			<line x1="12" x2="12" y1="2" y2="22"></line>
@@ -645,7 +659,7 @@ function DollarSign({ className }: { className?: string }) {
 	);
 }
 
-function Star({ className }: { className?: string }) {
+function Star({ className }: { className: string }) {
 	return (
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
 			<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
