@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { IGetDocumentByKeyUseCase } from "../../../application/interfaces/documents";
 import { AdminEntity } from "../../../domain/entities/admin.entity";
 import { UserEntity } from "../../../domain/entities/user.entity";
-import { string } from "zod";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 
 export interface CustomRequest extends Request {
@@ -12,7 +11,7 @@ export interface CustomRequest extends Request {
 export class GetDocumentByKeyController {
 	constructor(private readonly _useCase: IGetDocumentByKeyUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
-		console.log(`contoller invoke`);
+		console.log("contoller invoke");
 		try {
 			const customReq = req as CustomRequest;
 			const mentorId = req.params.id;
