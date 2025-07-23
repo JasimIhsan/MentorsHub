@@ -1,103 +1,104 @@
-import axios from "axios";
+import axios, { AxiosError, AxiosInstance } from "axios";
 
-// base URL for your API
-const baseURL = "http://localhost:5858/api";
+// ============ CONFIG ============
 
-//create axios instance
-const axiosInstance = axios.create({
-	baseURL: baseURL,
+const baseURL = import.meta.env.VITE_SERVER_URL as string;
+
+// ============ TOKEN STORAGE (IN-MEMORY) ============
+let currentAccessToken: string | null = null;
+
+// ✅ Export this to manually update access token after login
+export const setAccessToken = (token: string) => {
+	currentAccessToken = token;
+};
+
+// ============ REFRESH CLIENT (NO INTERCEPTORS) ============
+
+const tokenClient: AxiosInstance = axios.create({
+	baseURL,
 	withCredentials: true,
 });
 
-//Function to refresh the access token
-const refreshAccessToken = async () => {
-	try {
-		// axiosInstance inside its own response interceptor, which triggers the interceptor again, creating a loop.
-		const response = await axios.post(`${baseURL}/user/refresh-token`, null, {
-			withCredentials: true, // include cookies in the request
-		});
+// ============ MAIN AXIOS INSTANCE ============
 
+const axiosInstance: AxiosInstance = axios.create({
+	baseURL,
+	withCredentials: true, // ⬅️ Very important for refresh cookies
+});
+
+// ============ REFRESH ACCESS TOKEN FUNCTION ============
+
+const refreshAccessToken = async (): Promise<string> => {
+	try {
+		const response = await tokenClient.post("/user/refresh-token", null); // ✅ No interceptors here
 		const { accessToken } = response.data;
 
-		if (!accessToken) {
-			throw new Error("Access token missing from refresh response");
-		}
-		// Set the new access token in the cookie (should be secure and same-site)
+		if (!accessToken) throw new Error("No access token received");
+
+		// ✅ Update in-memory access token
+		currentAccessToken = accessToken;
+
+		// ✅ Set for future axiosInstance requests
 		axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+
 		return accessToken;
 	} catch (error) {
-		if (axios.isAxiosError(error) && error.response?.status === 401) {
-			localStorage.removeItem("persist:root");
-			window.location.href = "/authenticate";
-			return;
-		}
+		console.error("❌ Failed to refresh token", error);
+		localStorage.removeItem("persist:root");
+		window.location.href = "/authenticate";
 		throw error;
 	}
 };
 
-// Request interseptor to add access token from the cookies to the request headers before the request is sent
-axiosInstance.interceptors.request.use(
-	async (config) => {
-		// extract the access token from cookies
-		const accessToken = document.cookie
-			.split("; ")
-			.find((row) => row.startsWith("access_token="))
-			?.split("=")[1];
+// ============ REQUEST INTERCEPTOR ============
 
-		// if the access token exist , set it in the request headers
-		if (accessToken) {
-			config.headers.Authorization = `Bearer ${accessToken}`;
+axiosInstance.interceptors.request.use(
+	(config) => {
+		if (currentAccessToken) {
+			config.headers.Authorization = `Bearer ${currentAccessToken}`;
 		}
 		return config;
 	},
-	(error) => {
-		return Promise.reject(error); // handle request errors
-	}
+	(error) => Promise.reject(error)
 );
 
-// Response interceptor hadles the response and errors
-axiosInstance.interceptors.response.use(
-	(response) => {
-		return response; // return the response if there is no error
-	},
-	// may be the response has an error because of the access token expiration or something, so refresh it
-	async (error) => {
+// ============ RESPONSE INTERCEPTOR ============
 
-		// originalRequest._retry: A custom flag to ensure the original request is retried only once.
-		const originalRequest = error.config;
-		// if the response status is 401 (unauthorized) and the request hasn't been retried
-		if (error.response.status === 401 && !originalRequest._retry) {
+axiosInstance.interceptors.response.use(
+	(response) => response,
+	async (error: AxiosError) => {
+		const originalRequest: any = error.config;
+
+		// ✅ Handle 401 – try refresh once
+		if (error.response?.status === 401 && !originalRequest._retry) {
 			originalRequest._retry = true;
 			try {
-				// refresh the access token
-				const newAccessToken = await refreshAccessToken();
-				// update the default authorization header with the new access token
-				axios.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
-				// resend the original request with the new access token
-				return axiosInstance(originalRequest);
+				const newToken = await refreshAccessToken();
+				originalRequest.headers.Authorization = `Bearer ${newToken}`;
+				return axiosInstance(originalRequest); // ⬅️ Retry the original request
 			} catch (refreshError) {
-				localStorage.removeItem("persist:root");
-				window.location.href = "/authenticate";
-				return Promise.reject(refreshError); // handle the token refresh error
-			}
-		} else if (error.response.status === 403) {
-			localStorage.removeItem("persist:root");
-
-			if (error.response.data.blocked) {
-				setTimeout(() => {
-					window.location.href = "/authenticate";
-				}, 3000);
-
-				return Promise.reject(error); // Don't propagate the 403 error further
-			} else {
-				window.location.href = "/authenticate";
-				return Promise.reject(error); // Handle non-blocked 403 as well
+				return Promise.reject(refreshError);
 			}
 		}
 
-		// If error status isn't 401 or 403, propagate the error
+		// ✅ Handle 403 – blocked user or session expired
+		if (error.response?.status === 403) {
+			localStorage.removeItem("persist:root");
+
+			if ((error.response.data as any)?.blocked) {
+				setTimeout(() => {
+					window.location.href = "/authenticate";
+				}, 3000);
+			} else {
+				window.location.href = "/authenticate";
+			}
+			return Promise.reject(error);
+		}
+
 		return Promise.reject(error);
 	}
 );
+
+// ============ EXPORT ============
 
 export default axiosInstance;

@@ -102,7 +102,7 @@ export default function Home() {
 			</header>
 			<main className="flex-1">
 				{/* Hero Section */}
-				<section className="relative overflow-hidden mt-10 px-10 md:px-20 xl:px-25 flex justify-center">
+				<section className="relative overflow-hidden mt-10 px-10 md:px-20 xl:px-25 flex justify-center h-[80vh]">
 					<div className="container relative z-10 grid gap-8 md:grid-cols-2 md:items-center items-center">
 						{/* Image Section - Use responsive height instead of fixed */}
 						<div className="relative min-h-[300px] w-full flex justify-center items-center order-first md:order-last">
@@ -458,7 +458,7 @@ export default function Home() {
 									Become a Mentor
 								</Button>
 							</div>
-							<div className="mt-12 flex items-center justify-center gap-8">
+							<div className="mt-12 flex items-center justify-center gap-8 bg-yellow-800">
 								<div className="flex flex-col items-center">
 									<span className="text-3xl font-bold">10,000+</span>
 									<span className="text-sm opacity-90">Active Mentors</span>
