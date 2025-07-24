@@ -6,7 +6,7 @@ import { ReportFilters } from "@/components/admin/Report/ReportFilters";
 import { ReportTable } from "@/components/admin/Report/ReportTable";
 import { useReportsData } from "@/hooks/useReportData";
 import { ReportReasonDialog } from "@/components/admin/Report/ReportReasonDialog";
-import { Header } from "@/components/custom/Header";
+import { Header } from "@/components/custom/header";
 
 // Main component for reports management page
 export function AdminReportsPage() {
