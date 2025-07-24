@@ -26,7 +26,7 @@ function useMentor(mentorId: string) {
 		if (mentorId) fetchMentor();
 	}, [mentorId]);
 
-	return { mentor, loading, error };
+	return { mentor, loading, error, refetchMentor: fetchMentorAPI };
 }
 
 export { useMentor };

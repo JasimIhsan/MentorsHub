@@ -30,9 +30,9 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 		}
 	}
 
-	async updateMentorProfile(userId: string, updatedData: Partial<MentorProfileEntity>): Promise<MentorProfileEntity> {
+	async updateMentorProfile(userId: string, updatedData: MentorProfileEntity): Promise<MentorProfileEntity> {
 		try {
-			const updated = await MentorProfileModel.findOneAndUpdate({ userId }, updatedData, { new: true });
+			const updated = await MentorProfileModel.findOneAndUpdate({ userId }, MentorProfileEntity.toObject(updatedData), { new: true });
 			if (!updated) throw new Error("Mentor profile not found");
 			return MentorProfileEntity.fromDBDocument(updated);
 		} catch (error) {
@@ -96,7 +96,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			priceMax?: number;
 			interests?: string[];
 		},
-		browserId: string,
+		browserId: string
 	): Promise<{ mentors: MentorEntity[]; total: number }> {
 		try {
 			const page = params.page ?? 1;
@@ -216,7 +216,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 						certifications: doc.certifications,
 						sessionFormat: doc.sessionFormat,
 						hourlyRate: doc.hourlyRate,
-					}),
+					})
 			);
 
 			return { mentors, total };

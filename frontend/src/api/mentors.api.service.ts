@@ -9,7 +9,7 @@ export const fetchMentors = async (query: { page?: number; limit?: number; searc
 		});
 		return response.data;
 	} catch (error: any) {
-		 console.error(`Error from fetchAllMentors API: `, error);
+		console.error(`Error from fetchAllMentors API: `, error);
 		throw new Error(error.response.data.message);
 	}
 };
@@ -30,7 +30,7 @@ export const fetchAllApprovedMentors = async (userId: string, page: number = 1, 
 		return response.data;
 	} catch (error: any) {
 		// Log and throw error
-		 console.error(`Error from fetchMentors API: `, error);
+		console.error(`Error from fetchMentors API: `, error);
 		throw new Error(error.response?.data?.message || "Failed to fetch mentors");
 	}
 };
@@ -40,7 +40,7 @@ export const fetchMentorAPI = async (mentorId: string) => {
 		const response = await axiosInstance.get(`./user/mentor/${mentorId}`);
 		return response.data;
 	} catch (error: any) {
-		 console.error(`Error from fetchMetor api`, error);
+		console.error(`Error from fetchMetor api`, error);
 		throw new Error(error.response.data.message);
 	}
 };
@@ -80,7 +80,7 @@ export const fetchMentorDashboardData = async (userId: string) => {
 			fetchReviewsByMentor(userId, 1, 3),
 			axiosInstance.get(`/mentor/dashboard/stats/${userId}`),
 		]);
-		 console.error(`pendingRes : `, pendingRes);
+		console.error(`pendingRes : `, pendingRes);
 		return {
 			upcoming: upcomingRes.sessions,
 			requests: pendingRes.requests,
@@ -109,6 +109,16 @@ export const fetchMentorWeeklyRatingChartData = async (userId: string, period: s
 		return response.data;
 	} catch (error: any) {
 		console.error("Error fetching mentor dashboard data:", error);
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const updateMentorProfileAPI = async (userId: string, data: any) => {
+	try {
+		const response = await axiosInstance.put(`/user/mentor/${userId}`, data);
+		return response.data;
+	} catch (error: any) {
+		console.error("Error updating mentor profile:", error);
 		throw new Error(error.response.data.message);
 	}
 };
