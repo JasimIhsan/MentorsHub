@@ -86,14 +86,14 @@ const UserRoutes = () => {
 					}
 				/>
 
-				<Route
+				{/* <Route
 					path="/checkout"
 					element={
 						<ProtectedRoute>
 							<CheckoutPage />
 						</ProtectedRoute>
 					}
-				/>
+				/> */}
 
 				<Route
 					path="/request-confirmation"
