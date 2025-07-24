@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
-import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import { IMentorDTO } from "@/interfaces/mentor.interface";
 import { fetchMentors } from "@/api/mentors.api.service";
 import { updateRole } from "@/store/slices/userSlice";
 

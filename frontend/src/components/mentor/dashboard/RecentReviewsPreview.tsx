@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { StarRating } from "@/components/custom/StarRating";
-import { IReviewDTO } from "@/interfaces/review.dto";
+import { IReviewDTO } from "@/interfaces/review.interface";
 import { formatDate } from "@/utility/time-data-formatter";
 import { Skeleton } from "@/components/ui/skeleton";
 

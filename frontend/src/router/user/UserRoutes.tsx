@@ -12,7 +12,6 @@ import BrowseMentorsPage from "@/pages/user/BrowseMentorsPage";
 import { BecomeMentorPage } from "@/pages/user/BecomeMentorPage";
 import { MentorDetailsPage } from "@/pages/user/MentorDetailsPage";
 import { RequestSessionPage } from "@/pages/user/RequestSessionPage";
-import { CheckoutPage } from "@/pages/user/CheckoutPage";
 import { RequestConfirmationPage } from "@/pages/user/RequestConfirmationPage";
 import { SessionsPage } from "@/pages/user/SessionsPage";
 import { WalletPage } from "@/pages/user/WalletPage";
@@ -86,14 +85,14 @@ const UserRoutes = () => {
 					}
 				/>
 
-				<Route
+				{/* <Route
 					path="/checkout"
 					element={
 						<ProtectedRoute>
 							<CheckoutPage />
 						</ProtectedRoute>
 					}
-				/>
+				/> */}
 
 				<Route
 					path="/request-confirmation"

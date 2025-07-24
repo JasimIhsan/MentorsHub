@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Clock, Video, Users, IndianRupee, FileText } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { formatTime } from "@/utility/time-data-formatter";
 
 interface SessionCardProps {

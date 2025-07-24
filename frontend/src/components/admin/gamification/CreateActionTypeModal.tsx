@@ -1,97 +1,94 @@
+import { Button } from "@/components/ui/button";
+import { DialogHeader } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { CreateActionTypeData, ActionTypeFormData } from "@/interfaces/gamification.interface";
+import { createActionTypeSchema } from "@/schema/gamification.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Dialog, DialogContent, DialogTitle, DialogClose } from "@radix-ui/react-dialog";
+import { X } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
-import type React from "react"
-
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { CreateActionTypeData } from "@/interfaces/gamification"
-
-interface CreateActionTypeModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (data: CreateActionTypeData) => Promise<void>
-  loading: boolean
+// Create Action Type Dialog Component
+interface CreateActionTypeDialogProps {
+	isOpen: boolean;
+	onClose: () => void;
+	onSubmit: (data: CreateActionTypeData) => void;
 }
 
-export const CreateActionTypeModal = ({ isOpen, onClose, onSubmit, loading }: CreateActionTypeModalProps) => {
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-    reset,
-  } = useForm<{ label: string }>()
-  const [generatedId, setGeneratedId] = useState("")
+export const CreateActionTypeDialog = ({ isOpen, onClose, onSubmit }: CreateActionTypeDialogProps) => {
+	const {
+		register,
+		handleSubmit,
+		watch,
+		setValue,
+		formState: { errors },
+		reset,
+	} = useForm<ActionTypeFormData>({
+		resolver: zodResolver(createActionTypeSchema),
+	});
+	const [generatedId, setGeneratedId] = useState("");
+	const labelValue = watch("label", "");
 
-  const labelValue = watch("label", "")
+	// Auto-generate ID when label changes
+	const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const label = e.target.value;
+		const id = label.toUpperCase().replace(/\s+/g, "_");
+		setGeneratedId(id);
+		setValue("label", label);
+	};
 
-  // Auto-generate ID when label changes
-  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const label = e.target.value
-    const id = label.toUpperCase().replace(/\s+/g, "_")
-    setGeneratedId(id)
-    setValue("label", label)
-  }
+	const handleFormSubmit = async (data: ActionTypeFormData) => {
+		try {
+			await onSubmit({
+				label: data.label,
+				id: generatedId,
+			});
+			reset();
+			setGeneratedId("");
+			onClose();
+		} catch (err: any) {
+			toast.error(err.message || "Failed to create action type.");
+		}
+	};
 
-  const handleFormSubmit = async (data: { label: string }) => {
-    await onSubmit({
-      label: data.label,
-      id: generatedId,
-    })
-    reset()
-    setGeneratedId("")
-    onClose()
-  }
-
-  if (!isOpen) return null
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Create New Action Type</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-          <div>
-            <Label htmlFor="label">Label</Label>
-            <Input
-              id="label"
-              placeholder="e.g., Watch a video"
-              {...register("label", { required: "Label is required" })}
-              onChange={handleLabelChange}
-            />
-            {errors.label && <p className="text-red-500 text-sm mt-1">{errors.label.message}</p>}
-          </div>
-
-          <div>
-            <Label htmlFor="generatedId">Generated ID</Label>
-            <Input
-              id="generatedId"
-              value={generatedId}
-              readOnly
-              className="bg-gray-50"
-              placeholder="Auto-generated from label"
-            />
-          </div>
-
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading || !labelValue.trim()}>
-              {loading ? "Creating..." : "Create Action Type"}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
+	return (
+		<Dialog open={isOpen} onOpenChange={onClose}>
+			<DialogContent className="sm:max-w-lg w-full p-6 rounded-2xl bg-white shadow-2xl border border-gray-100">
+				<DialogHeader>
+					<DialogTitle className="text-2xl font-bold text-gray-800">Create New Action Type</DialogTitle>
+					<DialogClose asChild>
+						<Button variant="ghost" size="icon" className="absolute right-4 top-4 hover:bg-gray-100 rounded-full">
+							<X className="h-5 w-5 text-gray-600" />
+						</Button>
+					</DialogClose>
+				</DialogHeader>
+				<form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+					<div>
+						<Label htmlFor="label" className="text-sm font-medium text-gray-700">
+							Action Label
+						</Label>
+						<Input id="label" placeholder="e.g., Watch a video" className="mt-1 rounded-lg" {...register("label")} onChange={handleLabelChange} />
+						{errors.label && <p className="text-red-500 text-sm mt-2">{errors.label.message}</p>}
+					</div>
+					<div>
+						<Label htmlFor="generatedId" className="text-sm font-medium text-gray-700">
+							Generated ID
+						</Label>
+						<Input id="generatedId" value={generatedId} readOnly className="mt-1 bg-gray-50 rounded-lg border-gray-200" placeholder="Auto-generated from label" />
+					</div>
+					<div className="flex justify-end space-x-3 pt-4">
+						<Button type="button" variant="outline" onClick={onClose} className="rounded-lg border-gray-300 hover:bg-gray-50">
+							Cancel
+						</Button>
+						<Button type="submit" disabled={!labelValue.trim()}>
+							Create Action Type
+						</Button>
+					</div>
+				</form>
+			</DialogContent>
+		</Dialog>
+	);
+};

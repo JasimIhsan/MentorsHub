@@ -1,4 +1,4 @@
-import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import { IMentorDTO } from "@/interfaces/mentor.interface";
 import ApplicationCard from "./ApplicationCard";
 import { memo } from "react";
 

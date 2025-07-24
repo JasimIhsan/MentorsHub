@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import { Alert } from "@/components/custom/alert";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
 
 interface SessionActionsProps {
 	session: ISessionMentorDTO;

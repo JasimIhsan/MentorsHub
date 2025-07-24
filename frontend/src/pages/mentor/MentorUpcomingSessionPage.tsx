@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
 import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { fetchUpcomingSessionsByMentorAPI, updateSessionStatatusAPI } from "@/api/session.api.service";
 import { SessionList } from "@/components/mentor/upcoming-sessions/SessionList";
 import { SessionFilter } from "@/components/mentor/upcoming-sessions/SessionFilter";

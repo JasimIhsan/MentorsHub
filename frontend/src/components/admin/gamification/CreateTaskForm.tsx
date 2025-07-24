@@ -1,159 +1,165 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { getActionTypesAdminAPI, createGamificationTaskAdminAPI, createActionTypeAdminAPI } from "@/api/gamification.api.service";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { CreateTaskData, CreateActionTypeData } from "@/interfaces/gamification.interface";
+import { taskSchema } from "@/schema/gamification.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { SelectTrigger, SelectValue, SelectContent, SelectItem, Select } from "@/components/ui/select";
+import { Minus, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { toast } from "sonner";
+import { CreateActionTypeDialog } from "./CreateActionTypeModal";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreateActionTypeModal } from "./CreateActionTypeModal";
-import { useGamificationAPI } from "@/hooks/useGamification";
-import { ActionType, CreateTaskData } from "@/interfaces/gamification";
 
-interface CreateTaskFormProps {
-	onTaskCreated: () => void;
-}
-
-export const CreateTaskForm = ({ onTaskCreated }: CreateTaskFormProps) => {
-	const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [selectedActionType, setSelectedActionType] = useState<string>("");
-
+// Create Task Form Component
+export const CreateTaskForm = ({ onTaskCreated }: { onTaskCreated: () => void }) => {
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
 		reset,
-		setValue,
-	} = useForm<CreateTaskData>();
-	const { loading, error, fetchActionTypes, createTask, createActionType } = useGamificationAPI();
+		control,
+		formState: { errors },
+	} = useForm<CreateTaskData>({
+		resolver: zodResolver(taskSchema),
+		defaultValues: {
+			xpReward: 0,
+			targetCount: 0,
+		},
+	});
+	const [isActionTypeDialogOpen, setIsActionTypeDialogOpen] = useState(false);
+	const [actionTypes, setActionTypes] = useState<CreateActionTypeData[]>([]);
+	const [isFormOpen, setIsFormOpen] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
+	const [actionTypeRefreshTrigger, setActionTypeRefreshTrigger] = useState(0);
 
+	// Fetch action types on mount and when actionTypeRefreshTrigger changes
 	useEffect(() => {
-		loadActionTypes();
-	}, []);
-
-	const loadActionTypes = async () => {
-		const types = await fetchActionTypes();
-		if (types) {
-			setActionTypes(types);
-		}
-	};
-
-	const handleCreateActionType = async (data: { label: string; id: string }) => {
-		const newActionType = await createActionType(data);
-		if (newActionType) {
-			await loadActionTypes();
-			setSelectedActionType(newActionType.id);
-			setValue("actionType", newActionType.id);
-		}
-	};
-
-	const handleFormSubmit = async (data: CreateTaskData) => {
-		const taskData = {
-			...data,
-			actionType: selectedActionType,
+		const fetchActionTypes = async () => {
+			try {
+				setIsLoading(true);
+				const types = await getActionTypesAdminAPI();
+				setActionTypes(types);
+			} catch (err: any) {
+				toast.error(err.message || "Failed to load action types.");
+			} finally {
+				setIsLoading(false);
+			}
 		};
+		fetchActionTypes();
+	}, [actionTypeRefreshTrigger]);
 
-		const newTask = await createTask(taskData);
-		if (newTask) {
+	const handleCreateTask = async (data: CreateTaskData) => {
+		try {
+			await createGamificationTaskAdminAPI({
+				title: data.title,
+				xpReward: Number(data.xpReward),
+				targetCount: Number(data.targetCount),
+				actionType: data.actionType,
+			});
 			reset();
-			setSelectedActionType("");
 			onTaskCreated();
+			setIsFormOpen(false);
+			toast.success("Task created successfully!");
+		} catch (err: any) {
+			toast.error(err.message || "Failed to create task.");
 		}
 	};
 
-	const handleActionTypeChange = (value: string) => {
-		if (value === "ADD_NEW") {
-			setIsModalOpen(true);
-		} else {
-			setSelectedActionType(value);
-			setValue("actionType", value);
+	const handleCreateActionType = async (data: CreateActionTypeData) => {
+		try {
+			const type = await createActionTypeAdminAPI(data);
+			setActionTypes((prev) => [...prev, type]);
+			setActionTypeRefreshTrigger((prev) => prev + 1);
+			toast.success("Action type created successfully!");
+		} catch (err: any) {
+			toast.error(err.message || "Failed to create action type.");
 		}
 	};
+
+	if (isLoading) {
+		return <div className="text-center py-4">Loading action types...</div>;
+	}
 
 	return (
-		<>
-			<Card>
-				<CardHeader>
-					<CardTitle>Create New Gamification Task</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+		<div className="space-y-4">
+			<div className="flex justify-between items-center">
+				<h2 className="text-2xl font-bold text-gray-800">Create New Task</h2>
+				<Button onClick={() => setIsFormOpen(!isFormOpen)} className="flex items-center rounded-lg">
+					{isFormOpen ? <Minus className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+					{isFormOpen ? "Hide Form" : "Create Task"}
+				</Button>
+			</div>
+			<div className={`overflow-hidden transition-all duration-500 ease-in-out ${isFormOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
+				<Card className="mt-4">
+					<CardContent className="pt-6">
+						<form onSubmit={handleSubmit(handleCreateTask)} className="space-y-6">
 							<div>
-								<Label htmlFor="title">Title</Label>
-								<Input id="title" placeholder="Enter task title" {...register("title", { required: "Title is required" })} />
-								{errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
+								<Label htmlFor="title" className="text-sm font-medium text-gray-700">
+									Task Title
+								</Label>
+								<Input id="title" placeholder="e.g., Complete profile" className="mt-1 rounded-lg" {...register("title")} />
+								{errors.title && <p className="text-red-500 text-sm mt-2">{errors.title.message}</p>}
 							</div>
-
+							<div className="grid grid-cols-2 gap-4">
+								<div>
+									<Label htmlFor="xpReward" className="text-sm font-medium text-gray-700">
+										XP Reward
+									</Label>
+									<Input id="xpReward" type="number" placeholder="e.g., 100" className="mt-1 rounded-lg" {...register("xpReward", { valueAsNumber: true })} />
+									{errors.xpReward && <p className="text-red-500 text-sm mt-2">{errors.xpReward.message}</p>}
+								</div>
+								<div>
+									<Label htmlFor="targetCount" className="text-sm font-medium text-gray-700">
+										地上1 Target Count
+									</Label>
+									<Input id="targetCount" type="number" placeholder="e.g., 1" className="mt-1 rounded-lg" {...register("targetCount", { valueAsNumber: true })} />
+									{errors.targetCount && <p className="text-red-500 text-sm mt-2">{errors.targetCount.message}</p>}
+								</div>
+							</div>
 							<div>
-								<Label htmlFor="xpReward">XP Reward</Label>
-								<Input
-									id="xpReward"
-									type="number"
-									min="1"
-									placeholder="Enter XP reward"
-									{...register("xpReward", {
-										required: "XP Reward is required",
-										min: { value: 1, message: "XP Reward must be at least 1" },
-									})}
-								/>
-								{errors.xpReward && <p className="text-red-500 text-sm mt-1">{errors.xpReward.message}</p>}
+								<Label htmlFor="actionType" className="text-sm font-medium text-gray-700">
+									Action Type
+								</Label>
+								<div className="flex space-x-3 mt-1">
+									<Controller
+										name="actionType"
+										control={control}
+										render={({ field }) => (
+											<Select onValueChange={field.onChange} value={field.value}>
+												<SelectTrigger className="flex-1 rounded-lg px-3 py-2 text-gray-700">
+													<SelectValue placeholder="Select an action type" />
+												</SelectTrigger>
+												<SelectContent>
+													{actionTypes.length === 0 ? (
+														<div className="text-gray-500 p-2">No action types available</div>
+													) : (
+														actionTypes.map((type) => (
+															<SelectItem key={type.id} value={type.id || "default"}>
+																{type.label}
+															</SelectItem>
+														))
+													)}
+												</SelectContent>
+											</Select>
+										)}
+									/>
+									{/* <Button type="button" variant="outline" onClick={() => setIsActionTypeDialogOpen(true)} className="rounded-lg border-gray-300 hover:bg-gray-50">
+										<Plus className="h-4 w-4 mr-2" />
+										Add New
+									</Button> */}
+								</div>
+								{errors.actionType && <p className="text-red-500 text-sm mt-2">{errors.actionType.message}</p>}
 							</div>
-
-							<div>
-								<Label htmlFor="targetCount">Target Count</Label>
-								<Input
-									id="targetCount"
-									type="number"
-									min="1"
-									placeholder="Enter target count"
-									{...register("targetCount", {
-										required: "Target Count is required",
-										min: { value: 1, message: "Target Count must be at least 1" },
-									})}
-								/>
-								{errors.targetCount && <p className="text-red-500 text-sm mt-1">{errors.targetCount.message}</p>}
+							<div className="flex justify-end">
+								<Button type="submit">Create Task</Button>
 							</div>
-
-							<div>
-								<Label htmlFor="actionType">Action Type</Label>
-								<Select value={selectedActionType} onValueChange={handleActionTypeChange}>
-									<SelectTrigger>
-										<SelectValue placeholder="Select action type" />
-									</SelectTrigger>
-									<SelectContent>
-										{actionTypes.map((type) => (
-											<SelectItem key={type.id} value={type.id}>
-												{type.label}
-											</SelectItem>
-										))}
-										<SelectItem value="ADD_NEW" className="text-blue-600 font-medium">
-											<div className="flex items-center">
-												<Plus className="h-4 w-4 mr-2" />
-												Add new action type…
-											</div>
-										</SelectItem>
-									</SelectContent>
-								</Select>
-								{!selectedActionType && <p className="text-red-500 text-sm mt-1">Action Type is required</p>}
-							</div>
-						</div>
-
-						{error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{error}</div>}
-
-						<div className="flex justify-end">
-							<Button type="submit" disabled={loading || !selectedActionType}>
-								{loading ? "Creating..." : "Create Task"}
-							</Button>
-						</div>
-					</form>
-				</CardContent>
-			</Card>
-
-			<CreateActionTypeModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleCreateActionType} loading={loading} />
-		</>
+						</form>
+						<CreateActionTypeDialog isOpen={isActionTypeDialogOpen} onClose={() => setIsActionTypeDialogOpen(false)} onSubmit={handleCreateActionType} />
+					</CardContent>
+				</Card>
+			</div>
+		</div>
 	);
 };

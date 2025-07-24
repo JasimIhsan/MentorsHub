@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import { IMentorDTO } from "@/interfaces/mentor.interface";
 import { fetchMentorAPI } from "@/api/mentors.api.service";
 
 function useMentor(mentorId: string) {

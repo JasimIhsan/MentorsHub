@@ -34,14 +34,6 @@ export interface Session {
 	isPaid: boolean;
 }
 
-export interface Notification {
-	id: number;
-	type: "reminder" | "availability" | "achievement" | "system";
-	message: string;
-	time: string;
-	action: string;
-}
-
 export interface Mentor {
 	id: number;
 	name: string;

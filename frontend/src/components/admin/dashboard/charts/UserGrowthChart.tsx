@@ -1,42 +1,19 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const data = [
-	{
-		name: "Jan",
-		users: 120,
-		mentors: 15,
-	},
-	{
-		name: "Feb",
-		users: 180,
-		mentors: 22,
-	},
-	{
-		name: "Mar",
-		users: 250,
-		mentors: 28,
-	},
-	{
-		name: "Apr",
-		users: 310,
-		mentors: 35,
-	},
-	{
-		name: "May",
-		users: 420,
-		mentors: 48,
-	},
-	{
-		name: "Jun",
-		users: 520,
-		mentors: 62,
-	},
-];
-
-export function UserGrowthChart() {
+// UserGrowthChart component
+export function UserGrowthChart({ userGrowthData, isLoading }: { userGrowthData: { name: string; users: number; mentors: number }[]; isLoading: boolean }) {
+	if (isLoading) {
+		return (
+			<div className="space-y-4">
+				<Skeleton className="h-6 w-32 bg-gray-200" />
+				<Skeleton className="h-64 w-full bg-gray-200" />
+			</div>
+		);
+	}
 	return (
 		<ResponsiveContainer width="100%" height={300}>
-			<LineChart data={data}>
+			<LineChart data={userGrowthData}>
 				<XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
 				<YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
 				<Tooltip />

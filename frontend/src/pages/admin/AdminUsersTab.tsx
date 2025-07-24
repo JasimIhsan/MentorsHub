@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { deleteUserApi, fetchAllUsers, updateUserStatusApi } from "@/api/admin/user.tab";
 import { toast } from "sonner";
-import { IUserDTO } from "@/interfaces/IUserDTO";
+import { IUserDTO } from "@/interfaces/user.interface";
 import { UserFilter } from "@/components/admin/user-tab/UserFilters";
 import { UserTable } from "@/components/admin/user-tab/UserTable";
 import { UserPagination } from "@/components/admin/layouts/pagination";

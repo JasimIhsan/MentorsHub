@@ -4,12 +4,12 @@ import { SessionRequestsPreview } from "@/components/mentor/dashboard/SessionReq
 import { UpcomingSessionsList } from "@/components/mentor/dashboard/UpcomingSessionList";
 import { RecentReviewsPreview } from "@/components/mentor/dashboard/RecentReviewsPreview";
 import { useEffect, useState, useMemo } from "react";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
 import { fetchMentorDashboardData, fetchMentorWeeklyRatingChartData } from "@/api/mentors.api.service";
-import { IReviewDTO } from "@/interfaces/review.dto";
+import { IReviewDTO } from "@/interfaces/review.interface";
 import { MentorReviewRatingChart } from "@/components/mentor/dashboard/AverageRatingChart";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { MentorReportDocument } from "@/components/mentor/dashboard/MentorReportDocument";

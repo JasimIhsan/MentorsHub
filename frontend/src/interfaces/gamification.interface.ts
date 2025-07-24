@@ -5,6 +5,7 @@ export interface GamificationTask {
 	targetCount: number;
 	actionType: string;
 	createdAt: string;
+	isListed: boolean;
 }
 
 export interface ActionType {
@@ -30,4 +31,8 @@ export interface PaginatedResponse<T> {
 	page: number;
 	limit: number;
 	totalPages: number;
+}
+
+export interface ActionTypeFormData {
+	label: string;
 }

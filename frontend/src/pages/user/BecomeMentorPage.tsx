@@ -19,7 +19,7 @@ import { MentoringPreferencesStep } from "@/components/user/become-mentor/Mentor
 import { PersonalInfoStep } from "@/components/user/become-mentor/PersonalInfoStep";
 import { SubmissionSuccess } from "@/components/user/become-mentor/SubmissionSuccess";
 import { ValidationErrorModal } from "@/components/user/become-mentor/ValidationErrorModal";
-import { WeekDay } from "@/interfaces/IMentorDTO";
+import { WeekDay } from "@/interfaces/mentor.interface";
 import { AxiosError } from "axios";
 import { validateFormData } from "@/schema/mentor.application.form";
 

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { INotification } from "@/interfaces/INotification";
+import { INotification } from "@/interfaces/notification.interface";
 import { getUserNotificationsAPI, markNotificationAsReadAPI, markAllNotificationsAsReadAPI } from "@/api/notification.api.service";
 
 // Interface for backend response

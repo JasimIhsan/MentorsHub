@@ -1,41 +1,24 @@
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const data = [
-	{
-		name: "Jan",
-		total: 4200,
-	},
-	{
-		name: "Feb",
-		total: 5100,
-	},
-	{
-		name: "Mar",
-		total: 4800,
-	},
-	{
-		name: "Apr",
-		total: 6300,
-	},
-	{
-		name: "May",
-		total: 7200,
-	},
-	{
-		name: "Jun",
-		total: 8100,
-	},
-];
-
-export function RevenueChart() {
+// RevenueChart component
+export function RevenueChart({ data, isLoading }: { data: { name: string; total: number }[]; isLoading: boolean }) {
+	if (isLoading) {
+		return (
+			<div className="space-y-4">
+				<Skeleton className="h-6 w-32 bg-gray-200" />
+				<Skeleton className="h-64 w-full bg-gray-200" />
+			</div>
+		);
+	}
 	return (
 		<ResponsiveContainer width="100%" height={300}>
-			<BarChart data={data}>
+			<LineChart data={data}>
 				<XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-				<YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
-				<Tooltip formatter={(value: number) => [`$${value}`, "Revenue"]} cursor={{ fill: "rgba(0, 0, 0, 0.05)" }} />
-				<Bar dataKey="total" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
-			</BarChart>
+				<YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} />
+				<Tooltip formatter={(value: number) => [`₹${value}`, "Revenue"]} cursor={{ fill: "rgba(0, 0, 0, 0.05)" }} />
+				<Line type="monotone" dataKey="total" stroke="currentColor" strokeWidth={2} className="text-primary" dot={false} activeDot={{ r: 6 }} />
+			</LineChart>
 		</ResponsiveContainer>
 	);
 }

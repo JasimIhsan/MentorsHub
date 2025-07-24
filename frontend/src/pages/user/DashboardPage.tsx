@@ -12,8 +12,8 @@ import { fetchDashboardDatas } from "@/api/user/dashboard.api.service";
 import { toast } from "sonner";
 import { fetchUserProfile } from "@/store/slices/userSlice";
 import { markAllNotificationsAsReadThunk, markNotificationAsReadThunk } from "@/store/slices/notificationSlice";
-import { ISessionUserDTO } from "@/interfaces/ISessionDTO";
-import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import { ISessionUserDTO } from "@/interfaces/session.interface";
+import { IMentorDTO } from "@/interfaces/mentor.interface";
 import TopRatedMentors from "@/components/user/Dashboard/MentorsReadyNow";
 
 export const DashboardPage: React.FC = () => {

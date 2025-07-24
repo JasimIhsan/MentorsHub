@@ -1,6 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -8,7 +7,8 @@ import { RootState } from "@/store/store";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { fetchReviewsByMentor } from "@/api/review.api.service";
-import { IReviewDTO } from "@/interfaces/review.dto";
+import { IReviewDTO } from "@/interfaces/review.interface";
+import { PaginationControls } from "@/components/custom/PaginationControls";
 
 export function MentorReviewsPage() {
 	const [reviews, setReviews] = useState<IReviewDTO[]>([]);
@@ -165,21 +165,7 @@ export function MentorReviewsPage() {
 									<p className="text-muted-foreground">No reviews available at this time.</p>
 								</div>
 							)}
-
-							{/* Pagination Controls */}
-							{totalPages > 1 && (
-								<div className="mt-6 flex justify-center gap-2">
-									<Button variant="outline" disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>
-										Previous
-									</Button>
-									<span className="flex items-center">
-										Page {currentPage} of {totalPages}
-									</span>
-									<Button variant="outline" disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)}>
-										Next
-									</Button>
-								</div>
-							)}
+							<PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
 						</>
 					)}
 				</CardContent>

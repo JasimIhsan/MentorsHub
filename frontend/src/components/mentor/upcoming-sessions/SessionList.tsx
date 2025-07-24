@@ -1,6 +1,6 @@
 // components/sessions/SessionList.tsx
 import { Card, CardContent } from "@/components/ui/card";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { SessionCard } from "./SessionCard";
 
 interface SessionListProps {

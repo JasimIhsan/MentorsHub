@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useSearchParams } from "react-router-dom";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { fetchAllApprovedMentors } from "@/api/mentors.api.service";
-import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import { IMentorDTO } from "@/interfaces/mentor.interface";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";

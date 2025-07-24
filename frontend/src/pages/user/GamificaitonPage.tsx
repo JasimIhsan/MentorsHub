@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { fetchListedGamificationTasks, fetchUserProgressAPI } from "@/api/gamification.api.service";
 import { useDebounce } from "@/hooks/useDebounce";
+import { PaginationControls } from "@/components/custom/PaginationControls";
 
 // Define TaskWithProgress interface
 export interface TaskWithProgress {
@@ -83,7 +84,6 @@ interface UserStatsProps {
 }
 
 function UserStats({ stats }: UserStatsProps) {
-
 	const levelProgress = ((stats.totalXP % stats.xpToNextLevel) / stats.xpToNextLevel) * 100;
 
 	return (
@@ -295,26 +295,9 @@ export default function GamificationPage() {
 					</motion.div>
 				)}
 
-				{totalPages > 1 && (
-					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-center mt-8">
-						<div className="text-sm text-gray-600">
-							Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, tasks.length)} of {tasks.length} tasks
-						</div>
-						<div className="flex gap-2">
-							<Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} aria-label="Previous page">
-								Previous
-							</Button>
-							{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-								<Button key={page} variant={currentPage === page ? "default" : "outline"} size="sm" onClick={() => handlePageChange(page)} aria-label={`Go to page ${page}`}>
-									{page}
-								</Button>
-							))}
-							<Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} aria-label="Next page">
-								Next
-							</Button>
-						</div>
-					</motion.div>
-				)}
+				<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-center mt-8">
+					<PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+				</motion.div>
 			</div>
 		</div>
 	);

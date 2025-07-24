@@ -1,6 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Image, Font } from "@react-pdf/renderer";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
-import { IReviewDTO } from "@/interfaces/review.dto";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
+import { IReviewDTO } from "@/interfaces/review.interface";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
 
 // Import the logo image

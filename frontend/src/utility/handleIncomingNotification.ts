@@ -1,4 +1,4 @@
-import { INotification } from "@/interfaces/INotification";
+import { INotification } from "@/interfaces/notification.interface";
 import { addNotification } from "@/store/slices/notificationSlice";
 import { toast } from "sonner";
 import { NavigateFunction } from "react-router-dom";

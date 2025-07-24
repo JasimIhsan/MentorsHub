@@ -1,4 +1,4 @@
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { SessionCard } from "./SessionCard";
 import { SessionCardSkeleton } from "./SessionSkeleton";
 

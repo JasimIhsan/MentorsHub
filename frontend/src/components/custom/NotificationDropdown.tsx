@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useNotifications } from "@/hooks/useNotification";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { INotification } from "@/interfaces/INotification";
+import { INotification } from "@/interfaces/notification.interface";
 import { formatRelativeTime } from "@/utility/format-relative-time";
 
 // Define the NotificationItem component with type-based background colors for unread only

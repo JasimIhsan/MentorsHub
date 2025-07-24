@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { createUserApi } from "@/api/admin/user.tab";
 import { useState } from "react";
 
-import { IUserDTO } from "@/interfaces/IUserDTO";
+import { IUserDTO } from "@/interfaces/user.interface";
 
 const formSchema = z.object({
 	firstName: z.string().min(1, "First name is required").max(50, "First name must be 50 characters or less"),
