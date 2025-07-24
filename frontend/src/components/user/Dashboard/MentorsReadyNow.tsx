@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 import { Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import { IMentorDTO } from "@/interfaces/mentor.interface";
 
 interface TopRatedMentorsProps {
 	mentors: IMentorDTO[];

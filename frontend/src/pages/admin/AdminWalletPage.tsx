@@ -14,7 +14,7 @@ import { RootState } from "@/store/store";
 import { formatDate } from "@/utility/time-data-formatter";
 import { fetchPlatformTransactionsAPI, fetchPlatformWalletDataAPI, withdrawPlatformWalletAPI } from "@/api/wallet.api.service";
 import { Skeleton } from "@/components/ui/skeleton";
-import { IWalletTransaction } from "@/interfaces/transaction.dto";
+import { IWalletTransaction } from "@/interfaces/transaction.interface";
 
 export function AdminWalletPage() {
 	const [walletBalance, setWalletBalance] = useState<number | null>(null);

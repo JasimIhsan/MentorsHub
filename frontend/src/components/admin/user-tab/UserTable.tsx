@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { RoleBadge, StatusBadge } from "./UserBadges";
-import { IUserDTO } from "@/interfaces/IUserDTO";
+import { IUserDTO } from "@/interfaces/user.interface";
 import { useState, useEffect } from "react";
 import {Alert} from "@/components/custom/alert";
 import { EditUserForm } from "./EditUserForm";

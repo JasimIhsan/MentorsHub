@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Clock } from "lucide-react";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { formatDate } from "@/utility/time-data-formatter";
 import { Link } from "react-router-dom";
 

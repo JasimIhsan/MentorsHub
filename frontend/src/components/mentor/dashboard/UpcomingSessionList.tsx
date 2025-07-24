@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarDays, Clock, Video } from "lucide-react";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
 import { Link, useNavigate } from "react-router-dom";
 import { useCallback } from "react";

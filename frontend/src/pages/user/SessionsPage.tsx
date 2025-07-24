@@ -13,7 +13,7 @@ import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { ISessionUserDTO } from "@/interfaces/ISessionDTO";
+import { ISessionUserDTO } from "@/interfaces/session.interface";
 import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
 import { isSessionExpired } from "@/utility/is-session-expired";

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { INTEREST_OPTIONS } from "@/constants/interest.option";
-import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import { IMentorDTO } from "@/interfaces/mentor.interface";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
 import { Link } from "react-router-dom";

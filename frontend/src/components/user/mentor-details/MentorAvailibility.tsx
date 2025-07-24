@@ -3,7 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { Link } from "react-router-dom";
-import { IMentorDTO, WeekDay } from "@/interfaces/IMentorDTO";
+import { IMentorDTO, WeekDay } from "@/interfaces/mentor.interface";
 import { formatTime } from "@/utility/time-data-formatter";
 
 interface MentorAvailabilityProps {

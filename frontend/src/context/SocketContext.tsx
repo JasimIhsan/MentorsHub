@@ -1,4 +1,4 @@
-import { INotification } from "@/interfaces/INotification";
+import { INotification } from "@/interfaces/notification.interface";
 import { handleIncomingNotification } from "@/utility/handleIncomingNotification";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";

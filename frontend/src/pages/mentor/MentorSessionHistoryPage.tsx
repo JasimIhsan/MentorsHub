@@ -8,7 +8,7 @@ import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
 import { PaginationControls } from "@/components/custom/PaginationControls";
 import { FilterDropdown } from "@/components/mentor/session-history/FilterDropdown";
 import { SessionList } from "@/components/mentor/session-history/SessionList";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { fetchSessionHistoryAPI } from "@/api/session.api.service";
 
 export function MentorSessionHistoryPage() {

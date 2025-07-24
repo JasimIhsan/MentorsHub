@@ -1,5 +1,5 @@
 import { useSocket } from "@/context/SocketContext";
-import { INotification } from "@/interfaces/INotification";
+import { INotification } from "@/interfaces/notification.interface";
 import { addNotification, fetchNotificationsThunk, markNotificationAsReadThunk, markAllNotificationsAsReadThunk } from "@/store/slices/notificationSlice";
 import { AppDispatch, RootState } from "@/store/store";
 import { useEffect } from "react";

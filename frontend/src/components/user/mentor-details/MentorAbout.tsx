@@ -2,7 +2,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Award, Briefcase, GraduationCap, Clock, Heart, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import { IMentorDTO } from "@/interfaces/mentor.interface";
 
 interface MentorAboutProps {
 	mentor: IMentorDTO;

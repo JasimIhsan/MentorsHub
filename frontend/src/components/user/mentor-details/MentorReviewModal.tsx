@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
-import { IReviewDTO } from "@/interfaces/review.dto";
+import { IReviewDTO } from "@/interfaces/review.interface";
 
 // Define interface for modal props
 interface MentorReviewModalProps {

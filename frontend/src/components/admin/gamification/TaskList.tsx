@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useGamificationAPI } from "@/hooks/useGamification";
-import { GamificationTask } from "@/interfaces/gamification";
+import { GamificationTask } from "@/interfaces/gamification.interface";
 
 interface TaskListProps {
 	refreshTrigger: number;

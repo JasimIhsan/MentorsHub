@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 import { CalendarDays, Clock, User, Users2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CustomCardHeader } from "@/components/custom/CustomCardHeader";
-import { ISessionUserDTO } from "@/interfaces/ISessionDTO";
+import { ISessionUserDTO } from "@/interfaces/session.interface";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
 
 interface UpcomingSessionsProps {

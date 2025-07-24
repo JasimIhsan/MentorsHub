@@ -8,7 +8,7 @@ import { useSocket } from "@/context/SocketContext";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useDebounce } from "@/hooks/useDebounce";
-import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import { IMentorDTO } from "@/interfaces/mentor.interface";
 import { fetchAllApprovedMentors } from "@/api/mentors.api.service";
 import axiosInstance from "@/api/config/api.config";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";

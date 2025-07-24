@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import { IMentorDTO } from "@/interfaces/mentor.interface";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

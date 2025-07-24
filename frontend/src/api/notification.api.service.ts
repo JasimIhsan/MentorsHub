@@ -1,4 +1,4 @@
-import { NotificationType } from "@/interfaces/INotification";
+import { NotificationType } from "@/interfaces/notification.interface";
 import axiosInstance from "./config/api.config";
 
 export const createNotificationAPI = async (userId: string, title: string, message: string, type: NotificationType) => {

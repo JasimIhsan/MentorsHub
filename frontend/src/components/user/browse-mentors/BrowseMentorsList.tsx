@@ -1,5 +1,5 @@
 import { PaginationControls } from "@/components/custom/PaginationControls";
-import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import { IMentorDTO } from "@/interfaces/mentor.interface";
 import { Search } from "lucide-react";
 import { BrowseMentorsMentorCardSkeleton } from "./BrowseMentorsSkeleton";
 import { BrowseMentorsCard } from "./BrowseMentorsCard";

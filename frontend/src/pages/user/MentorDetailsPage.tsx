@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "@/components/ui/button";
 import { MoreVertical } from "lucide-react";
 import { useMentor } from "@/hooks/useMentor";
-import { WeekDay } from "@/interfaces/IMentorDTO";
+import { WeekDay } from "@/interfaces/mentor.interface";
 import { MentorAbout } from "@/components/user/mentor-details/MentorAbout";
 import { MentorAvailability } from "@/components/user/mentor-details/MentorAvailibility";
 import { MentorExperience } from "@/components/user/mentor-details/MentorExperience";
@@ -13,7 +13,7 @@ import { MentorReviews } from "@/components/user/mentor-details/MentorReviews";
 import { MentorReviewModal } from "@/components/user/mentor-details/MentorReviewModal";
 import { MentorDetailsSkeleton } from "@/components/user/mentor-details/MentorDetailsSkeleton";
 import { MentorHeader } from "@/components/user/mentor-details/MentorHeader";
-import { IReviewDTO } from "@/interfaces/review.dto";
+import { IReviewDTO } from "@/interfaces/review.interface";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 

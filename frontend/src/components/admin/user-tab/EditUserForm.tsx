@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { updateUserApi } from "@/api/admin/user.tab";
-import { IUserDTO } from "@/interfaces/IUserDTO";
+import { IUserDTO } from "@/interfaces/user.interface";
 
 const formSchema = z.object({
 	firstName: z.string().min(1, "First name is required").max(50, "First name must be 50 characters or less"),

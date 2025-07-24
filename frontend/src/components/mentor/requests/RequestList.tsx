@@ -4,7 +4,7 @@ import { RequestCard } from "./RequestCard";
 import { RequestDetailsDialog } from "./RequestDetailsDailog"; // Fixed typo
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import { toast } from "sonner";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { updateSessionStatatusAPI } from "@/api/session.api.service";
 import { RequestCardSkeleton } from "./RequestListSkeleton";
 

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateActionTypeModal } from "./CreateActionTypeModal";
 import { useGamificationAPI } from "@/hooks/useGamification";
-import { ActionType, CreateTaskData } from "@/interfaces/gamification";
+import { ActionType, CreateTaskData } from "@/interfaces/gamification.interface";
 
 interface CreateTaskFormProps {
 	onTaskCreated: () => void;

@@ -1,4 +1,4 @@
-import { IUserDTO } from "@/interfaces/IUserDTO";
+import { IUserDTO } from "@/interfaces/user.interface";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 import { CustomCardHeader } from "@/components/custom/CustomCardHeader";
-import { INotification } from "@/interfaces/INotification";
+import { INotification } from "@/interfaces/notification.interface";
 import { formatRelativeTime } from "@/utility/format-relative-time";
 import { Link } from "react-router-dom";
 

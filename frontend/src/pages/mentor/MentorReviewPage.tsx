@@ -8,7 +8,7 @@ import { RootState } from "@/store/store";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { fetchReviewsByMentor } from "@/api/review.api.service";
-import { IReviewDTO } from "@/interfaces/review.dto";
+import { IReviewDTO } from "@/interfaces/review.interface";
 
 export function MentorReviewsPage() {
 	const [reviews, setReviews] = useState<IReviewDTO[]>([]);

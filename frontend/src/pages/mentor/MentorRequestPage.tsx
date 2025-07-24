@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { Filters } from "@/components/mentor/requests/Filters";
 import { RequestList } from "@/components/mentor/requests/RequestList";
 import { useSearchParams } from "react-router-dom";

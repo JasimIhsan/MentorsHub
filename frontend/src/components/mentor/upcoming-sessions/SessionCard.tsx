@@ -2,7 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Clock, Video, IndianRupee } from "lucide-react";
-import { ISessionMentorDTO } from "@/interfaces/ISessionDTO";
+import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import SessionParticipants from "./SessionParticipants";
 import SessionActions from "./SessionActions";
 

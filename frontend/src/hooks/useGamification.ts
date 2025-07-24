@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import axios from "axios";
-import type { GamificationTask, ActionType, CreateTaskData, CreateActionTypeData, PaginatedResponse } from "../interfaces/gamification";
+import type { GamificationTask, ActionType, CreateTaskData, CreateActionTypeData, PaginatedResponse } from "../interfaces/gamification.interface";
 
 const api = axios.create({
 	baseURL: "/admin/gamification-task",

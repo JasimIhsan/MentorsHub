@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, MoreVertical } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { IMentorDTO } from "@/interfaces/IMentorDTO";
+import { IMentorDTO } from "@/interfaces/mentor.interface";
 import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { ReviewsSkeleton } from "./ReviewSkeleton";
-import { IReviewDTO } from "@/interfaces/review.dto";
+import { IReviewDTO } from "@/interfaces/review.interface";
 
 interface MentorReviewsProps {
 	mentorId: string;
