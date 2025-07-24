@@ -6,8 +6,8 @@ import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { Filters } from "@/components/mentor/requests/Filters";
 import { RequestList } from "@/components/mentor/requests/RequestList";
 import { useSearchParams } from "react-router-dom";
-import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext } from "@/components/ui/pagination";
 import { fetchSessionsByMentor } from "@/api/session.api.service";
+import { PaginationControls } from "@/components/custom/PaginationControls";
 
 export function MentorRequestsPage() {
 	const user = useSelector((state: RootState) => state.userAuth.user);
@@ -104,28 +104,7 @@ export function MentorRequestsPage() {
 					<RequestList requests={requests} isLoading={isLoading} status={activeTab} confirmationDialog={confirmationDialog} setConfirmationDialog={setConfirmationDialog} setRequests={setRequests} />
 				</TabsContent>
 			</Tabs>
-
-			{requests.length > 0 && (
-				<Pagination className="mt-6">
-					<PaginationContent>
-						<PaginationItem>
-							<PaginationPrevious onClick={() => handlePageChange(page - 1)} className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} />
-						</PaginationItem>
-
-						{Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
-							<PaginationItem key={pageNumber}>
-								<PaginationLink onClick={() => handlePageChange(pageNumber)} isActive={pageNumber === page} className={pageNumber === page ? "bg-primary text-white hover:bg-primary" : "cursor-pointer"}>
-									{pageNumber}
-								</PaginationLink>
-							</PaginationItem>
-						))}
-
-						<PaginationItem>
-							<PaginationNext onClick={() => handlePageChange(page + 1)} className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} />
-						</PaginationItem>
-					</PaginationContent>
-				</Pagination>
-			)}
+			<PaginationControls currentPage={page} totalPages={totalPages} onPageChange={handlePageChange} />
 		</div>
 	);
 }
