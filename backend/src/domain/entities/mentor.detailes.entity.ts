@@ -211,7 +211,7 @@ export class MentorProfileEntity {
 		if (pricing === "free" && hourlyRate !== 0) {
 			throw new Error("hourlyRate must be 0 when pricing is 'free'");
 		}
-		if (pricing === "paid" || hourlyRate < 0) {
+		if (pricing === "paid" && hourlyRate < 0) {
 			throw new Error("hourlyRate must be a positive number when pricing is 'paid'");
 		}
 		this._pricing = pricing;

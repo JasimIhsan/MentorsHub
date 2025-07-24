@@ -22,6 +22,7 @@ import { mentorDashboardRoutes } from "./presentation/routes/mentors/mentor.dash
 import { adminDashboardRouter } from "./presentation/routes/admin/admin.dashboard.routes";
 import { userReportRouter } from "./presentation/routes/user/report.routes";
 import { adminReportRouter } from "./presentation/routes/admin/admin.reports.routes";
+import { mentorProfileRouter } from "./presentation/routes/mentors/mentor.profile.routes";
 
 export function registerRoutes(app: Express) {
 	app.use("/api/user", authRouter);
@@ -46,6 +47,7 @@ export function registerRoutes(app: Express) {
 	app.use("/api/mentor", mentorRouter);
 	app.use("/api/mentor/sessions", mentorSessionRouter);
 	app.use("/api/mentor/dashboard", mentorDashboardRoutes);
+	app.use("/api/mentor/profile", mentorProfileRouter);
 
 	app.use("/api/documents", documentsRouter);
 	app.use("/api/notifications", notificationRouter);
