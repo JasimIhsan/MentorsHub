@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 import { CalendarDays, Clock, User, Users2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { CustomHeader } from "@/components/custom/header";
+import { CustomCardHeader } from "@/components/custom/CustomCardHeader";
 import { ISessionUserDTO } from "@/interfaces/ISessionDTO";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
 
@@ -21,7 +21,7 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, isLoading
 			<Card>
 				<CardHeader>
 					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-						<CustomHeader head="Upcoming Sessions" description="Your scheduled mentorship sessions" />
+						<CustomCardHeader head="Upcoming Sessions" description="Your scheduled mentorship sessions" />
 						<Skeleton className="bg-gray-200 h-8 w-full sm:w-24" /> {/* Skeleton for View All button */}
 					</div>
 				</CardHeader>
@@ -58,7 +58,7 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, isLoading
 		<Card>
 			<CardHeader>
 				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-					<CustomHeader head="Upcoming Sessions" description="Your scheduled mentorship sessions" />
+					<CustomCardHeader head="Upcoming Sessions" description="Your scheduled mentorship sessions" />
 					<Button variant="ghost" size="sm" asChild className="w-full sm:w-auto">
 						<Link to="/sessions">View All</Link>
 					</Button>

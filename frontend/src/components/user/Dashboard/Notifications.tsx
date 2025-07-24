@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
-import { CustomHeader } from "@/components/custom/header";
+import { CustomCardHeader } from "@/components/custom/CustomCardHeader";
 import { INotification } from "@/interfaces/INotification";
 import { formatRelativeTime } from "@/utility/format-relative-time";
 import { Link } from "react-router-dom";
@@ -23,7 +23,7 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications, markAllAsR
 				<CardHeader>
 					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 						<div>
-							<CustomHeader head="Notifications" description="Stay updated with your mentorship activities" />
+							<CustomCardHeader head="Notifications" description="Stay updated with your mentorship activities" />
 						</div>
 						<Skeleton className="bg-gray-200 h-8 w-full sm:w-32" /> {/* Skeleton for Mark All as Read button */}
 					</div>
@@ -53,7 +53,7 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications, markAllAsR
 			<CardHeader>
 				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 					<div>
-						<CustomHeader head="Notifications" description="Stay updated with your mentorship activities" />
+						<CustomCardHeader head="Notifications" description="Stay updated with your mentorship activities" />
 					</div>
 					<Button variant="ghost" size="sm" onClick={() => markAllAsRead(userId)} className="w-full sm:w-auto">
 						Mark All as Read

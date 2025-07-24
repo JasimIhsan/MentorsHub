@@ -2,13 +2,13 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { CustomHeader } from "@/components/custom/header";
+import { CustomCardHeader } from "@/components/custom/CustomCardHeader";
 
 const QuickLinks: React.FC = () => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CustomHeader head="Quick Links" description="Frequently used actions" />
+        <CustomCardHeader head="Quick Links" description="Frequently used actions" />
       </CardHeader>
       <CardContent className="grid gap-4 sm:grid-cols-2">
         <Button variant="outline" className="h-auto py-4 justify-start text-left min-w-[200px]" asChild>
