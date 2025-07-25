@@ -1,9 +1,9 @@
 export interface IUserDTO {
 	id?: string;
 	email: string;
+	fullName: string;
 	firstName: string;
 	lastName: string;
-	fullName: string;
 	role: "user" | "mentor";
 	avatar?: string | null;
 	status: "blocked" | "unblocked";
@@ -11,8 +11,10 @@ export interface IUserDTO {
 	interests?: string[] | null;
 	skills?: string[] | null;
 	badges?: string[] | null;
+	averageRating: number | null;
+	totalReviews: number | null;
 	sessionCompleted?: number;
-	mentorDetailsId?: string | null;
+	mentorRequestStatus?: "pending" | "approved" | "rejected" | "not-requested";
 	createdAt: Date;
 	updatedAt?: Date | null;
 }

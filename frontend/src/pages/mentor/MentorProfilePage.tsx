@@ -30,7 +30,7 @@ import { useNavigate } from "react-router-dom";
 // Updated schema to match BecomeMentorPage and add stricter validation
 const mentorProfileSchema = z.object({
 	firstName: z.string().min(2, "First name must be at least 2 characters").max(50, "First name is too long"),
-	lastName: z.string().min(2, "Last name must be at least 2 characters").max(50, "Last name is too long"),
+	lastName: z.string().max(50, "Last name is too long").optional(),
 	professionalTitle: z.string().min(2, "Professional title must be at least 2 characters").max(100, "Professional title is too long"),
 	bio: z.string().min(10, "Bio must be at least 10 characters").max(1000, "Bio is too long"),
 	skills: z.array(z.string().min(1)).min(1, "At least one skill is required").max(20, "Maximum 20 skills allowed"),
@@ -43,7 +43,7 @@ const mentorProfileSchema = z.object({
 	pricing: z.enum(["free", "paid"], {
 		errorMap: () => ({ message: "Invalid pricing option" }),
 	}),
-	yearsExperience: z.string().regex(/^\d+$/, "Years of experience must be a number").min(1, "Years of experience is required"),
+	yearsExperience: z.string().min(1, "Years of experience is required"),
 	workExperiences: z
 		.array(
 			z.object({
@@ -93,6 +93,7 @@ export function MentorProfilePage() {
 	const { error, loading, mentor, refetchMentor } = useMentor(user?.id as string); // Added refetchMentor
 	const navigate = useNavigate();
 
+	console.log("formErrors: ", formErrors);
 	// Initialize form data
 	const [formData, setFormData] = useState<FormData>({
 		firstName: "",
@@ -105,7 +106,7 @@ export function MentorProfilePage() {
 		languages: [],
 		hourlyRate: 0,
 		pricing: "free",
-		yearsExperience: "",
+		yearsExperience: "1-2",
 		workExperiences: [{ jobTitle: "", company: "", startDate: "", endDate: null, currentJob: false, description: "" }],
 		educations: [{ degree: "", institution: "", startYear: "", endYear: "" }],
 		certifications: [],
@@ -408,7 +409,7 @@ export function MentorProfilePage() {
 			const submissionData = new FormData();
 			submissionData.append("userId", userId);
 			submissionData.append("firstName", formData.firstName);
-			submissionData.append("lastName", formData.lastName);
+			submissionData.append("lastName", formData.lastName ?? "");
 			submissionData.append("bio", formData.bio);
 			submissionData.append("professionalTitle", formData.professionalTitle);
 			submissionData.append("primaryExpertise", formData.primaryExpertise);
@@ -506,7 +507,7 @@ export function MentorProfilePage() {
 									<AvatarImage src={formData.avatar ? URL.createObjectURL(formData.avatar) : mentor.avatar || "/placeholder.svg"} alt={`${formData.firstName} ${formData.lastName}`} />
 									<AvatarFallback>
 										{formData.firstName.charAt(0)}
-										{formData.lastName.charAt(0)}
+										{formData.lastName?.charAt(0)}
 									</AvatarFallback>
 								</Avatar>
 								{isEditing && (
@@ -634,6 +635,20 @@ export function MentorProfilePage() {
 											<p className="text-xs text-gray-500">Add specific skills like 'JavaScript', 'React', 'Data Analysis', etc.</p>
 										</div>
 									)}
+									<div className="space-y-2">
+										<Label htmlFor="years-experience">Years of Experience</Label>
+										<Select value={formData.yearsExperience} onValueChange={(value) => handleInputChange("yearsExperience", value)}>
+											<SelectTrigger>
+												<SelectValue placeholder="Select years of experience" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="1-2">1-2 years</SelectItem>
+												<SelectItem value="3-5">3-5 years</SelectItem>
+												<SelectItem value="6-10">6-10 years</SelectItem>
+												<SelectItem value="10+">10+ years</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
 								</div>
 							</CardContent>
 						</Card>
@@ -666,6 +681,7 @@ export function MentorProfilePage() {
 												<Input id="primary-expertise" value={formData.primaryExpertise} onChange={(e) => handleInputChange("primaryExpertise", e.target.value)} disabled={isLoading} />
 												{formErrors.primaryExpertise && <p className="text-sm text-red-500">{formErrors.primaryExpertise}</p>}
 											</div>
+
 											<div className="space-y-2">
 												<Label>Languages Spoken</Label>
 												<div className="flex flex-wrap gap-4">

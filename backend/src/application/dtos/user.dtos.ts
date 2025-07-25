@@ -1,4 +1,5 @@
 import { UserEntity } from "../../domain/entities/user.entity";
+import { MentorRequestStatusEnum } from "../interfaces/enums/mentor.request.status.enum";
 import { RoleEnum } from "../interfaces/enums/role.enum";
 import { UserStatusEnums } from "../interfaces/enums/user.status.enums";
 
@@ -18,6 +19,7 @@ export interface IUserDTO {
 	averageRating: number | null;
 	totalReviews: number | null;
 	sessionCompleted?: number;
+	mentorRequestStatus?: MentorRequestStatusEnum;
 	createdAt: Date;
 	updatedAt?: Date | null;
 }
@@ -38,6 +40,7 @@ export function mapToUserDTO(entity: UserEntity): IUserDTO {
 		badges: entity.badges,
 		averageRating: entity.averageRating,
 		totalReviews: entity.totalReviews,
+		mentorRequestStatus: entity.mentorRequestStatus,
 		sessionCompleted: entity.sessionCompleted,
 		createdAt: entity.createdAt,
 		updatedAt: entity.updatedAt,

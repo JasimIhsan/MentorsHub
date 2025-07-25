@@ -7,16 +7,33 @@ import { ActionTypeEnum } from "../../interfaces/enums/gamification.action.type.
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
 import { SessionStatusNotificationMap } from "../../constants/session.notification.messages";
+import { IGetAvailabilityUseCase } from "../../interfaces/mentors/mentors.interface";
 
 export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
-	constructor(private readonly sessionRepo: ISessionRepository, private readonly updateUserProgress: IUpdateUserTaskProgressUseCase, private readonly userRepo: IUserRepository, private readonly notifyUserUseCase: INotifyUserUseCase) {}
+	constructor(
+		private readonly sessionRepo: ISessionRepository, //
+		private readonly updateUserProgress: IUpdateUserTaskProgressUseCase,
+		private readonly userRepo: IUserRepository,
+		private readonly notifyUserUseCase: INotifyUserUseCase,
+		private readonly getAvailabilityUseCase: IGetAvailabilityUseCase
+	) {}
 
 	async execute(sessionId: string, status: SessionStatusEnum, rejectReason?: string): Promise<void> {
+		const session = await this.sessionRepo.findById(sessionId);
+		if (!session) throw new Error("Session not found");
+
+		// ✅ Check using existing availability logic
+		if (status === SessionStatusEnum.APPROVED) {
+			const availableSlots = await this.getAvailabilityUseCase.execute(session.mentor.id, session.date);
+			if (!availableSlots.includes(session.time)) {
+				throw new Error("Slot is already booked by another session");
+			}
+		}
+
 		const updatedSession = await this.sessionRepo.updateStatus(sessionId, status, rejectReason);
 		const allParticipants = updatedSession.participants;
 		const paidParticipants = allParticipants.filter((p) => p.paymentStatus === SessionPaymentStatusEnum.COMPLETED);
 
-		// Handle XP & progress for COMPLETED status
 		if (status === SessionStatusEnum.COMPLETED) {
 			for (const p of paidParticipants) {
 				const user = await this.userRepo.findUserById(p.user.id);
@@ -28,7 +45,6 @@ export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 			}
 		}
 
-		// Send notifications to ALL participants
 		const { title, msg, type } = SessionStatusNotificationMap[status];
 
 		for (const p of allParticipants) {
