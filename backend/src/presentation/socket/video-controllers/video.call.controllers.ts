@@ -15,10 +15,32 @@ export const registerVideoCallHandlers = (io: Server, socket: Socket) => {
 				return socket.emit("error", { message: CommonStringMessage.SESSION_NOT_FOUND });
 			}
 
+			// ✅ Validate session status
 			if (![SessionStatusEnum.UPCOMING, SessionStatusEnum.ONGOING].includes(session.status)) {
 				return socket.emit("error", { message: "Session is not available or not paid" });
 			}
 
+			// ✅ Combine session.date and session.time to get start datetime in IST
+			const sessionDate = new Date(session.date); // example: 2025-07-28T00:00:00.000Z
+			const [hours, minutes] = session.time.split(":").map(Number);
+
+			// Important: this sets time in **local time** (assumed to be IST)
+			const sessionStartTime = new Date(sessionDate);
+			sessionStartTime.setHours(hours, minutes, 0, 0); // Use setHours, not setUTCHours
+
+			// Optional: allow joining 5 mins before start
+			const earlyJoinBufferMinutes = 5;
+			const joinAllowedTime = new Date(sessionStartTime.getTime() - earlyJoinBufferMinutes * 60 * 1000);
+
+			const now = new Date();
+
+			if (now < joinAllowedTime) {
+				return socket.emit("error", {
+					message: `You can join the session 5 minutes before it starts.`,
+				});
+			}
+
+			// ✅ Setup participant data
 			const participants = videoRooms.get(sessionId) || [];
 			const existingIndex = participants.findIndex((p) => p.userId === userId);
 
@@ -32,12 +54,17 @@ export const registerVideoCallHandlers = (io: Server, socket: Socket) => {
 				isApproved: role === RoleEnum.MENTOR,
 			};
 
+			// ✅ Mentor logic
 			if (role === RoleEnum.MENTOR) {
-				if (session.mentor.id.toString() !== userId) {
+				if (session.mentor.id !== userId) {
 					return socket.emit("error", { message: "Not authorized as mentor" });
 				}
-				if (existingIndex !== -1) participants[existingIndex] = participantData;
-				else participants.push(participantData);
+
+				if (existingIndex !== -1) {
+					participants[existingIndex] = participantData;
+				} else {
+					participants.push(participantData);
+				}
 
 				videoRooms.set(sessionId, participants);
 				socket.join(`video_${sessionId}`);
@@ -47,15 +74,26 @@ export const registerVideoCallHandlers = (io: Server, socket: Socket) => {
 				return;
 			}
 
-			if (existingIndex !== -1) participants[existingIndex] = participantData;
-			else participants.push(participantData);
+			// ✅ Participant logic
+			if (existingIndex !== -1) {
+				participants[existingIndex] = participantData;
+			} else {
+				participants.push(participantData);
+			}
 
 			videoRooms.set(sessionId, participants);
 			Object.assign(socket.data, { sessionId, userId, role });
 
 			const mentor = participants.find((p) => p.role === RoleEnum.MENTOR);
+
 			if (mentor) {
-				io.to(mentor.socketId).emit("join-request", { userId, sessionId, peerId, name, avatar });
+				io.to(mentor.socketId).emit("join-request", {
+					userId,
+					sessionId,
+					peerId,
+					name,
+					avatar,
+				});
 				console.log(`🧑 User requested to join: ${userId}`);
 			} else {
 				socket.emit("error", { message: "Mentor not available" });
