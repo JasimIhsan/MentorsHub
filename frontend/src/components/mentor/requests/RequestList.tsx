@@ -60,9 +60,9 @@ export const RequestList: React.FC<RequestListProps> = ({ requests, isLoading, s
 					setRequests((prev) => prev.filter((r) => r.id !== requestId));
 				}
 				setConfirmationDialog({ isOpen: false, type: null, requestId: null, rejectReason: "" });
-			} catch (error: any) {
-				console.error(`Failed to ${type} request:`, error.response?.data || error.message);
-				toast.error(`Failed to ${type} request: ${error.response?.data?.message || "Unknown error"}`);
+			} catch (error) {
+				if(error instanceof Error) toast.error(error.message);
+				
 			}
 		},
 		[setRequests, setConfirmationDialog]

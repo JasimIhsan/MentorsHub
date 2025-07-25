@@ -1,14 +1,11 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { UserInterface } from "@/interfaces/interfaces";
 import { RootState } from "../store";
 import { getUserProfileApi } from "@/api/user/user.profile.api.service";
-
-// Type without password
-type UserWithoutPassword = Omit<UserInterface, "password">;
+import { IUserDTO } from "@/interfaces/user.interface";
 
 interface AuthState {
 	isAuthenticated: boolean;
-	user: Partial<UserWithoutPassword> | null;
+	user: Partial<IUserDTO> | null;
 	loading: boolean;
 	error: string | null;
 }
@@ -22,7 +19,7 @@ const initialState: AuthState = {
 };
 
 // ✅ Async thunk to fetch user profile
-export const fetchUserProfile = createAsyncThunk<UserWithoutPassword, void, { state: RootState; rejectValue: string }>("auth/fetchUserProfile", async (_, thunkAPI) => {
+export const fetchUserProfile = createAsyncThunk<IUserDTO, void, { state: RootState; rejectValue: string }>("auth/fetchUserProfile", async (_, thunkAPI) => {
 	try {
 		// Access the current state to get the user ID
 		const state = thunkAPI.getState();
@@ -33,6 +30,7 @@ export const fetchUserProfile = createAsyncThunk<UserWithoutPassword, void, { st
 		}
 
 		const response = await getUserProfileApi(userId);
+		console.log("response: ", response);
 		return response.user;
 	} catch (error) {
 		return thunkAPI.rejectWithValue("Failed to fetch user profile");
@@ -43,7 +41,7 @@ const userSlice = createSlice({
 	name: "auth",
 	initialState,
 	reducers: {
-		login(state, action: PayloadAction<Partial<UserWithoutPassword>>) {
+		login(state, action: PayloadAction<Partial<IUserDTO>>) {
 			state.isAuthenticated = true;
 			state.user = action.payload;
 		},
@@ -51,7 +49,7 @@ const userSlice = createSlice({
 			state.isAuthenticated = false;
 			state.user = null;
 		},
-		updateUser(state, action: PayloadAction<Partial<UserWithoutPassword>>) {
+		updateUser(state, action: PayloadAction<Partial<IUserDTO>>) {
 			if (state.user) {
 				state.user = { ...state.user, ...action.payload };
 			}
