@@ -176,7 +176,7 @@ export function SessionCard({ session, isRazorpayLoaded, setSelectedSession, set
 											Canceled
 										</Badge>
 										<Button variant="outline" asChild>
-											<Link to="/browse">Rebook Now</Link>
+											<Link to={`/browse/mentor-profile/${session.mentor._id}`}>Rebook Now</Link>
 										</Button>
 									</>
 								)}
@@ -195,7 +195,7 @@ export function SessionCard({ session, isRazorpayLoaded, setSelectedSession, set
 											</DropdownMenuContent>
 										</DropdownMenu>
 										<Button variant="outline" asChild>
-											<Link to="/browse">Rebook</Link>
+											<Link to={`/browse/mentor-profile/${session.mentor._id}`}>Rebook</Link>
 										</Button>
 									</>
 								)}
@@ -205,7 +205,7 @@ export function SessionCard({ session, isRazorpayLoaded, setSelectedSession, set
 											Expired
 										</Badge>
 										<Button variant="outline" asChild>
-											<Link to="/browse">Rebook Now</Link>
+											<Link to={`/browse/mentor-profile/${session.mentor._id}`}>Rebook Now</Link>
 										</Button>
 										<Button variant="ghost" size="icon" onClick={() => setSelectedSession(session)}>
 											<FileText className="h-4 w-4" />

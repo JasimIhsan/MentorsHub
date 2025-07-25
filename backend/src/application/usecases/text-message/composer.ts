@@ -1,4 +1,5 @@
 import { chatRepository, messageRepository, notifierGateway, userRepository } from "../../../infrastructure/composer";
+import { CreateChatUseCase } from "./create.chat.usecase";
 import { DeleteMessageUseCase } from "./delete.message.usecase";
 import { GetUserChatsUseCase } from "./get.chats.usecase";
 import { GetMessagesByChatUseCase } from "./get.message.by.chat.usecase";
@@ -16,3 +17,4 @@ export const deleteMessageUseCase = new DeleteMessageUseCase(messageRepository, 
 export const getMessageUnreadCountsByUser = new GetMessageUnreadCountUseCase(messageRepository);
 export const markMessageAsReadUseCase = new MarkMessageAsReadUseCase(messageRepository);
 export const updateUnreadCountsForChatUseCase = new UpdateUnreadCountsForChatUseCase(chatRepository);
+export const createChatUseCase = new CreateChatUseCase(chatRepository);

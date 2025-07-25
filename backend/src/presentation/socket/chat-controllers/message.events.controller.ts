@@ -1,6 +1,8 @@
 // File: infrastructure/socket/registerMessageHandlers.ts
 import { Server, Socket } from "socket.io";
-import { deleteMessageUseCase, getMessageUnreadCountsByUser, markMessageAsReadUseCase, sendMessageUsecase, updateUnreadCountsForChatUseCase } from "../../../application/usecases/text-message/composer";
+import { createChatUseCase, deleteMessageUseCase, getMessageUnreadCountsByUser, markMessageAsReadUseCase, sendMessageUsecase, updateUnreadCountsForChatUseCase } from "../../../application/usecases/text-message/composer";
+import { chatRepository, userRepository } from "../../../infrastructure/composer";
+import { mapToChatDTO } from "../../../application/dtos/chats.dto";
 
 export function registerMessageHandlers(io: Server, socket: Socket) {
 	// Join user-specific room for targeted notifications
@@ -10,17 +12,37 @@ export function registerMessageHandlers(io: Server, socket: Socket) {
 
 	// Handle send-message
 	socket.on("send-message", async (messageData) => {
-		const { chatId, senderId, receiverId, content, type = "text", fileUrl } = messageData;
+		const { chatId, senderId, receiverId, content, type = "text", fileUrl, isGroupChat } = messageData;
 
 		try {
-			if (!chatId || !senderId || (!receiverId && !messageData.isGroupChat)) {
+			if (!senderId || (!receiverId && !isGroupChat)) {
 				socket.emit("error", { message: "Invalid message data" });
 				return;
 			}
 
-			// Call use case to handle message logic
+			let finalChatId = chatId;
+			let newChatEntity = null;
+
+			// ✅ Step 1: Handle new 1-to-1 chat creation if needed
+			if (!finalChatId && !isGroupChat) {
+				newChatEntity = await createChatUseCase.execute(senderId, receiverId);
+				finalChatId = newChatEntity.id;
+
+				// ✅ Fetch users to build full IChatDTO
+				const participants = await userRepository.findUsersByIds(newChatEntity.participants); // returns UserEntity[]
+				const adminUser = newChatEntity.groupAdmin ? await userRepository.findUserById(newChatEntity.groupAdmin) : undefined;
+
+				// ✅ Map to DTO
+				const chatDTO = mapToChatDTO(newChatEntity, participants, undefined, adminUser);
+
+				// ✅ Emit to both users
+				io.to(`user_${senderId}`).emit("new-chat", chatDTO);
+				io.to(`user_${receiverId}`).emit("new-chat", chatDTO);
+			}
+
+			// ✅ Step 2: Send the message
 			const message = await sendMessageUsecase.execute({
-				chatId,
+				chatId: finalChatId,
 				sender: senderId,
 				receiver: receiverId,
 				content,
@@ -28,11 +50,15 @@ export function registerMessageHandlers(io: Server, socket: Socket) {
 				fileUrl,
 			});
 
-			// Emit the message to all users in the chat room
-			io.to(`chat_${chatId}`).emit("receive-message", message);
+			// ✅ Step 3: Emit the message to the chat room
+			io.to(`chat_${finalChatId}`).emit("receive-message", message);
 
-			// Update unread counts for all participants except the sender
-			await updateUnreadCountsForChatUseCase.execute({ chatId, io, excludeUserId: senderId });
+			// ✅ Step 4: Update unread counts for others
+			await updateUnreadCountsForChatUseCase.execute({
+				chatId: finalChatId,
+				io,
+				excludeUserId: senderId,
+			});
 		} catch (err) {
 			console.error("send-message error:", err);
 			socket.emit("error", { message: "Failed to send message" });
@@ -117,6 +143,5 @@ export function registerMessageHandlers(io: Server, socket: Socket) {
 		}
 	});
 
-	socket.on("disconnect", () => {
-	});
+	socket.on("disconnect", () => {});
 }

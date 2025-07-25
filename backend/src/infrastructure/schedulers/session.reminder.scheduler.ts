@@ -50,7 +50,7 @@ export function startSessionReminderJob() {
 						});
 
 						if (!alreadySent) {
-							const notification = await notificationRepository.createNotification(userId, "Session Reminder", message, NotificationTypeEnum.REMINDER, "/sessions");
+							const notification = await notificationRepository.createNotification(userId, "🔔 Session Reminder", message, NotificationTypeEnum.REMINDER, "/sessions");
 
 							notifierGateway.notifyUser(userId, mapToNotificationDTO(notification));
 

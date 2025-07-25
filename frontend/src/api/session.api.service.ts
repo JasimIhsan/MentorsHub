@@ -18,6 +18,7 @@ export const fetchSessionsByMentor = async (userId: string, filterOption: string
 };
 
 export const updateSessionStatatusAPI = async (sessionId: string, status: string, reason?: string) => {
+	console.log('reason: ', reason);
 	try {
 		const response = await axiosInstance.put(`/mentor/sessions/${sessionId}/status`, { status, reason });
 		return response.data;

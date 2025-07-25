@@ -43,7 +43,7 @@ export const mapToMessageSummaryDTO = (message: MessageEntity, sender: UserEntit
 	createdAt: message.createdAt,
 });
 
-export const mapToChatDTO = (chat: ChatEntity, users: UserEntity[], lastMessage?: MessageEntity, adminUser?: UserEntity): IChatDTO => {
+export const mapToChatDTO = (chat: ChatEntity, users: UserEntity[], lastMessage?: MessageEntity, adminUser?: UserEntity | null): IChatDTO => {
 	const userMap = new Map(users.map((u) => [u.id, u]));
 
 	return {

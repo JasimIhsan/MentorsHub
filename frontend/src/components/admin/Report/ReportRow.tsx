@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { IReportDTO } from "@/interfaces/report.interface";
+import { Alert } from "@/components/custom/alert";
 
 interface ReportRowProps {
 	report: IReportDTO;
@@ -78,12 +79,28 @@ export function ReportRow({ report, handleBlockUser, handleOpenDismissDialog, ha
 			<TableCell>
 				{report.status === "pending" && (
 					<div className="flex gap-2">
-						<Button variant="destructive" size="sm" onClick={() => handleBlockUser(report.id)}>
-							Block
-						</Button>
-						<Button variant="outline" size="sm" onClick={() => handleOpenDismissDialog(report.id)}>
-							Dismiss
-						</Button>
+						<Alert
+							triggerElement={
+								<Button variant="destructive" size="sm">
+									Block
+								</Button>
+							}
+							contentTitle="Confirm Block"
+							contentDescription="Are you sure you want to block this user? This action cannot be undone."
+							actionText="Confirm"
+							onConfirm={() => handleBlockUser(report.id)}
+						/>
+						<Alert
+							triggerElement={
+								<Button variant="outline" size="sm">
+									Dismiss
+								</Button>
+							}
+							contentTitle="Confirm Dismiss"
+							contentDescription="Are you sure you want to dismiss this report? This action cannot be undone."
+							actionText="Confirm"
+							onConfirm={() => handleOpenDismissDialog(report.id)}
+						/>
 					</div>
 				)}
 			</TableCell>

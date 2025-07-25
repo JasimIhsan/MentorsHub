@@ -8,8 +8,9 @@ export class UpdateSessionStatusController {
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { requestId } = req.params;
-			const { status, rejectReason } = req.body;
-			await this.updateSessionStatusUsecase.execute(requestId, status, rejectReason);
+			const { status, reason } = req.body;
+			console.log('reason: ', reason);
+			await this.updateSessionStatusUsecase.execute(requestId, status, reason);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Request updated successfully" });
 		} catch (error) {
 			logger.error(`❌ Error in UpdateSessionStatusController: ${error}`);

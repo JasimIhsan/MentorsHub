@@ -220,9 +220,12 @@ export function MessagePage() {
 			}
 		};
 
+		const handleNewChat = (chat: Chat) => setChats((prevChats) => [chat, ...prevChats]);
+
 		socket.on("receive-message", handleReceiveMessage);
 		socket.on("messages-read", handleMessagesRead);
 		socket.on("message-deleted", handleMessageDeleted);
+		socket.on("new-chat", handleNewChat);
 		socket.on("unread-counts-response", handleUnreadCounts);
 		socket.on("unread-counts-error", handleUnreadCountsError);
 		socket.on("error", ({ message }) => {
@@ -234,6 +237,7 @@ export function MessagePage() {
 			socket.off("receive-message", handleReceiveMessage);
 			socket.off("messages-read", handleMessagesRead);
 			socket.off("message-deleted", handleMessageDeleted);
+			socket.off("new-chat", handleNewChat);
 			socket.off("unread-counts-response", handleUnreadCounts);
 			socket.off("unread-counts-error", handleUnreadCountsError);
 			socket.off("error");
