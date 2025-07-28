@@ -11,6 +11,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { BrowseMentorsControlBar } from "@/components/user/browse-mentors/BrowseMentorsControlBar";
 import { BrowseMentorsFilterContent } from "@/components/user/browse-mentors/BrowseMentorsFilterContent";
 import { BrowseMentorsMentorList } from "@/components/user/browse-mentors/BrowseMentorsList";
+import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 export default function BrowseMentorsPage() {
 	// Manage URL query parameters
@@ -22,8 +23,8 @@ export default function BrowseMentorsPage() {
 	const [tempPriceRange, setTempPriceRange] = useState([parseFloat(searchParams.get("priceMin") || "0"), parseFloat(searchParams.get("priceMax") || "200")]);
 	const [priceRange, setPriceRange] = useState(tempPriceRange);
 	const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "recommended");
-	const [tempSelectedInterests, setTempSelectedInterests] = useState<string[]>(searchParams.get("interests")?.split(",").filter(Boolean) || []);
-	const [selectedInterests, setSelectedInterests] = useState<string[]>(tempSelectedInterests);
+	const [tempSelectedSkills, setTempSelectedSkills] = useState<string[]>(searchParams.get("Skills")?.split(",").filter(Boolean) || []);
+	const [selectedSkills, setSelectedSkills] = useState<string[]>(tempSelectedSkills);
 	const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page") || "1"));
 	const [mentors, setMentors] = useState<IMentorDTO[]>([]);
 	const [total, setTotal] = useState(0);
@@ -40,17 +41,17 @@ export default function BrowseMentorsPage() {
 		if (sortBy) params.set("sortBy", sortBy);
 		if (priceRange[0] !== 0) params.set("priceMin", priceRange[0].toString());
 		if (priceRange[1] !== 200) params.set("priceMax", priceRange[1].toString());
-		if (selectedInterests.length > 0) params.set("interests", selectedInterests.join(","));
+		if (selectedSkills.length > 0) params.set("skills", selectedSkills.join(","));
 		if (currentPage !== 1) params.set("page", currentPage.toString());
 		setSearchParams(params, { replace: true });
-	}, [debouncedSearchTerm, sortBy, priceRange, selectedInterests, currentPage, setSearchParams]);
+	}, [debouncedSearchTerm, sortBy, priceRange, selectedSkills, currentPage, setSearchParams]);
 
 	// Fetch mentors when filters or page change
 	useEffect(() => {
 		const fetchMentors = async () => {
 			setIsFetching(true);
 			try {
-				const response = await fetchAllApprovedMentors(user?.id || "", currentPage, mentorsPerPage, debouncedSearchTerm, sortBy, priceRange[0], priceRange[1], selectedInterests);
+				const response = await fetchAllApprovedMentors(user?.id || "", currentPage, mentorsPerPage, debouncedSearchTerm, sortBy, priceRange[0], priceRange[1], selectedSkills);
 				if (response.success) {
 					const fetchedMentors: IMentorDTO[] = response.mentors.filter((mentor: IMentorDTO) => mentor.userId !== user?.id);
 					const adjustedTotal = response.total - (response.mentors.length - fetchedMentors.length);
@@ -65,7 +66,7 @@ export default function BrowseMentorsPage() {
 			}
 		};
 		fetchMentors();
-	}, [currentPage, debouncedSearchTerm, sortBy, priceRange, selectedInterests, user?.id]);
+	}, [currentPage, debouncedSearchTerm, sortBy, priceRange, selectedSkills, user?.id]);
 
 	// Handle page change
 	const handlePageChange = (page: number) => {
@@ -76,7 +77,7 @@ export default function BrowseMentorsPage() {
 	// Apply filters
 	const applyFilters = () => {
 		setPriceRange(tempPriceRange);
-		setSelectedInterests(tempSelectedInterests);
+		setSelectedSkills(tempSelectedSkills);
 		setCurrentPage(1);
 		setDrawerOpen(false);
 	};
@@ -96,16 +97,20 @@ export default function BrowseMentorsPage() {
 					<BrowseMentorsControlBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} sortBy={sortBy} setSortBy={setSortBy} setCurrentPage={setCurrentPage} setDrawerOpen={setDrawerOpen} />
 					<SheetContent side="right" className="w-[300px] bg-white p-0 sm:w-[400px] [&>button.absolute]:hidden">
 						<div className="flex items-center justify-between border-b p-6">
-							<h2 className="text-xl font-semibold text-gray-900">Filters</h2>
-							<Button variant="ghost" size="sm" onClick={() => setDrawerOpen(false)} className="text-indigo-600">
+							<div className="space-y-1">
+								<DialogTitle>Mentor Filters</DialogTitle>
+								<DialogDescription>Filter mentors by price range and Skills.</DialogDescription>
+							</div>
+							{/* <h2 className="text-xl font-semibold text-gray-900">Filters</h2> */}
+							<Button variant="ghost" size="sm" onClick={() => setDrawerOpen(false)}>
 								Close
 							</Button>
 						</div>
 						<BrowseMentorsFilterContent
 							tempPriceRange={tempPriceRange}
 							setTempPriceRange={setTempPriceRange}
-							tempSelectedInterests={tempSelectedInterests}
-							setTempSelectedInterests={setTempSelectedInterests}
+							tempSelectedSkills={tempSelectedSkills}
+							setTempSelectedSkills={setTempSelectedSkills}
 							dropdownOpen={dropdownOpen}
 							setDropdownOpen={setDropdownOpen}
 							applyFilters={applyFilters}

@@ -1,84 +1,88 @@
 import { Button } from "@/components/ui/button";
-import { INTEREST_OPTIONS } from "@/constants/interest.option";
-import { Popover, PopoverTrigger, PopoverContent } from "@radix-ui/react-popover";
-import { Slider } from "@radix-ui/react-slider";
-import { CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "cmdk";
-import { ChevronDown, Command, Check, X } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
+import { ChevronDown, Check, X } from "lucide-react";
+import { SKILL_OPTIONS } from "@/constants/skill.option";
 
 interface BrowseMentorsFilterContentProps {
 	tempPriceRange: number[];
 	setTempPriceRange: (value: number[]) => void;
-	tempSelectedInterests: string[];
-	setTempSelectedInterests: (value: string[] | ((prev: string[]) => string[])) => void;
+	tempSelectedSkills: string[];
+	setTempSelectedSkills: (value: string[] | ((prev: string[]) => string[])) => void;
 	dropdownOpen: boolean;
 	setDropdownOpen: (value: boolean) => void;
 	applyFilters: () => void;
 }
 
-export const BrowseMentorsFilterContent = ({ tempPriceRange, setTempPriceRange, tempSelectedInterests, setTempSelectedInterests, dropdownOpen, setDropdownOpen, applyFilters }: BrowseMentorsFilterContentProps) => {
+export const BrowseMentorsFilterContent = ({ tempPriceRange, setTempPriceRange, tempSelectedSkills, setTempSelectedSkills, dropdownOpen, setDropdownOpen, applyFilters }: BrowseMentorsFilterContentProps) => {
+	// Toggle interest selection
 	const handleInterestToggle = (value: string) => {
-		setTempSelectedInterests((prev) => (prev.includes(value) ? prev.filter((i) => i !== value) : [...prev, value]));
+		setTempSelectedSkills((prev) => (prev.includes(value) ? prev.filter((i) => i !== value) : [...prev, value]));
 	};
 
+	// Remove selected interest
 	const removeInterest = (value: string) => {
-		setTempSelectedInterests((prev) => prev.filter((i) => i !== value));
+		setTempSelectedSkills((prev) => prev.filter((i) => i !== value));
 	};
 
 	return (
-		<div className="space-y-8 p-6 flex flex-col h-full justify-between">
-			<div>
-				<div>
-					<h3 className="mb-4 text-lg font-semibold text-gray-900">Price Range</h3>
-					<Slider defaultValue={[0, 200]} max={300} step={5} value={tempPriceRange} onValueChange={setTempPriceRange} className="w-full" />
-					<div className="mt-3 flex justify-between text-sm text-gray-600">
-						<span>₹{tempPriceRange[0]}</span>
-						<span>₹{tempPriceRange[1]}</span>
-					</div>
-				</div>
-				<div>
-					<h3 className="mb-4 text-lg font-semibold text-gray-900">Interests</h3>
-					<Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
-						<PopoverTrigger asChild>
-							<Button variant="outline" className="w-full justify-between rounded-lg border-indigo-200 bg-white text-sm">
-								{tempSelectedInterests.length > 0 ? `${tempSelectedInterests.length} interest${tempSelectedInterests.length > 1 ? "s" : ""} selected` : "Select interests"}
-								<ChevronDown className="ml-2 h-4 w-4" />
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-[300px] p-0" align="start">
-							<Command>
-								<CommandInput placeholder="Search interests..." className="h-10" />
-								<CommandList className="max-h-[200px] overflow-y-auto">
-									<CommandEmpty>No interests found.</CommandEmpty>
-									<CommandGroup>
-										{INTEREST_OPTIONS.map((interest) => (
-											<CommandItem key={interest.value} value={interest.value} onSelect={() => handleInterestToggle(interest.value)} className="flex items-center gap-2 rounded-md hover:bg-indigo-50 cursor-pointer">
-												<Check className={`h-4 w-4 text-primary ${tempSelectedInterests.includes(interest.value) ? "opacity-100" : "opacity-0"}`} />
-												{interest.label}
-											</CommandItem>
-										))}
-									</CommandGroup>
-								</CommandList>
-							</Command>
-						</PopoverContent>
-					</Popover>
-					{tempSelectedInterests.length > 0 && (
-						<div className="mt-4 flex flex-wrap gap-2">
-							{tempSelectedInterests.map((interest) => (
-								<Badge key={interest} variant="default" className="flex items-center gap-1 rounded-full px-3 py-1 text-xs">
-									{INTEREST_OPTIONS.find((opt) => opt.value === interest)?.label || interest}
-									<button onClick={() => removeInterest(interest)} className="ml-1 text-white hover:cursor-pointer">
-										<X className="h-4 w-4" />
-									</button>
-								</Badge>
-							))}
-						</div>
-					)}
+		<div className="flex flex-col h-full p-6">
+			{/* Price Range Section */}
+			<div className="mb-8">
+				<h3 className="text-base font-semibold text-gray-900 mb-3">Price Range</h3>
+				<Slider defaultValue={[0, 200]} max={300} step={5} value={tempPriceRange} onValueChange={setTempPriceRange} className="w-full" />
+				<div className="mt-4 flex justify-between items-center text-sm text-gray-600">
+					<span className="font-medium bg-gray-100 px-3 py-1 rounded-full">₹{tempPriceRange[0]}</span>
+					<span className="font-medium bg-gray-100 px-3 py-1 rounded-full">₹{tempPriceRange[1]}</span>
 				</div>
 			</div>
-			<Button onClick={applyFilters} className="w-full bg-indigo-600 hover:bg-indigo-700">
-				Apply Filters
-			</Button>
+
+			{/* Skills Section */}
+			<div className="mb-8">
+				<h3 className="text-base font-semibold text-gray-900 mb-3">Expertise Skills</h3>
+				<DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+					<DropdownMenuTrigger asChild>
+						<Button variant="outline" className="w-full justify-between rounded-lg border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+							{tempSelectedSkills.length > 0 ? `${tempSelectedSkills.length} interest${tempSelectedSkills.length > 1 ? "s" : ""} selected` : "Select Skills"}
+							<ChevronDown className="ml-2 h-4 w-4 text-gray-500" />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent className="w-full p-0 bg-white rounded-lg shadow-lg border border-gray-100">
+						<DropdownMenuLabel className="px-4 py-2 text-sm font-semibold text-gray-900">Skills</DropdownMenuLabel>
+						<DropdownMenuSeparator className="bg-gray-100" />
+						<DropdownMenuGroup className="max-h-[200px] overflow-y-auto" >
+							{SKILL_OPTIONS.map((interest) => (
+								<DropdownMenuItem key={interest.value} onSelect={() => handleInterestToggle(interest.label)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover: cursor-pointer transition-colors">
+									<Check className={`h-4 w-4 ${tempSelectedSkills.includes(interest.label) ? "opacity-100" : "opacity-0"}`} />
+									{interest.label}
+								</DropdownMenuItem>
+							))}
+						</DropdownMenuGroup>
+					</DropdownMenuContent>
+				</DropdownMenu>
+
+				{/* Selected Skills */}
+				{tempSelectedSkills.length > 0 && (
+					<div className="mt-4 flex flex-wrap gap-2">
+						{tempSelectedSkills.map((interest) => (
+							<Badge key={interest} variant="default" className="flex items-center gap-1 rounded-full px-3 py-1 text-xs bg-indigo-100 text-indigo-800 hover:bg-indigo-200 transition-colors">
+								{SKILL_OPTIONS.find((opt) => opt.value === interest)?.label || interest}
+								<button onClick={() => removeInterest(interest)} className="ml-1 text-indigo-800 hover:text-indigo-900 hover:cursor-pointer transition-colors">
+									<X className="h-3 w-3" />
+								</button>
+							</Badge>
+						))}
+					</div>
+				)}
+			</div>
+
+			{/* Apply Button */}
+			<div className="mt-auto">
+				<Button onClick={applyFilters} className="w-full text-white font-semibold py-2 rounded-lg transition-colors">
+					Apply Filters
+				</Button>
+			</div>
 		</div>
 	);
 };

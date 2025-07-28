@@ -14,7 +14,7 @@ export const fetchMentors = async (query: { page?: number; limit?: number; searc
 	}
 };
 
-export const fetchAllApprovedMentors = async (userId: string, page: number = 1, limit: number = 6, search: string = "", sortBy: string = "recommended", priceMin?: number, priceMax?: number, interests?: string[]) => {
+export const fetchAllApprovedMentors = async (userId: string, page: number = 1, limit: number = 6, search: string = "", sortBy: string = "recommended", priceMin?: number, priceMax?: number, skills?: string[]) => {
 	try {
 		const response = await axiosInstance.get(`/user/mentor/approved/${userId}`, {
 			params: {
@@ -24,7 +24,7 @@ export const fetchAllApprovedMentors = async (userId: string, page: number = 1, 
 				sortBy: sortBy,
 				priceMin: priceMin,
 				priceMax: priceMax,
-				interests: interests,
+				skills: skills,
 			},
 		});
 		return response.data;
