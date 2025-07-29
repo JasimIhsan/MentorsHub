@@ -94,7 +94,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			sortBy?: string;
 			priceMin?: number;
 			priceMax?: number;
-			interests?: string[];
+			skills?: string[];
 		},
 		browserId: string
 	): Promise<{ mentors: MentorEntity[]; total: number }> {
@@ -154,20 +154,24 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			}
 
 			// Filter by interests
-			if (params.interests?.length) {
+			if (params.skills?.length) {
 				pipeline.push({
-					$match: { "user.interests": { $in: params.interests } },
+					$match: { "user.skills": { $in: params.skills } },
 				});
 			}
 
 			// Sorting
 			const sortMap: Record<string, any> = {
-				recommended: { "user.averageRating": -1 },
-				priceLowToHigh: { hourlyRate: 1 },
-				priceHighToLow: { hourlyRate: -1 },
-				experience: { yearsExperience: -1 },
+				recommended: { "user.averageRating": -1 }, // Default
+				rating: { "user.averageRating": -1 }, // Highest rated
+				reviews: { "user.totalReviews": -1 }, // Most reviewed
+				newest: { "user.createdAt": -1 }, // Newly joined mentors
+				"price-low": { hourlyRate: 1 },
+				"price-high": { hourlyRate: -1 },
 			};
-			pipeline.push({ $sort: sortMap[params.sortBy ?? "recommended"] });
+
+			const sortKey = sortMap[params.sortBy ?? "recommended"] || sortMap["recommended"];
+			pipeline.push({ $sort: sortKey });
 
 			// Facet
 			pipeline.push({

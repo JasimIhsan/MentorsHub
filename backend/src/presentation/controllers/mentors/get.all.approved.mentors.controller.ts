@@ -9,7 +9,7 @@ export class GetAllApprovedMentorsController {
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const browserId = req.params.userId;
-			const { page, limit, search, sortBy, priceMin, priceMax, interests } = req.query;
+			const { page, limit, search, sortBy, priceMin, priceMax, skills } = req.query;
 
 			// Parse filters
 			const parsedPage = page ? parseInt(page as string, 10) : 1;
@@ -17,13 +17,13 @@ export class GetAllApprovedMentorsController {
 			const parsedPriceMin = priceMin ? parseInt(priceMin as string, 10) : undefined;
 			const parsedPriceMax = priceMax ? parseInt(priceMax as string, 10) : undefined;
 
-			// Parse interests from query string:
-			// - ?interests=React,Node or ?interests[]=React&interests[]=Node
-			let parsedInterests: string[] | undefined;
-			if (Array.isArray(interests)) {
-				parsedInterests = interests as string[];
-			} else if (typeof interests === "string") {
-				parsedInterests = interests.split(",").map((i) => i.trim());
+			// Parse skills from query string:
+			// - ?skills=React,Node or ?skills[]=React&skills[]=Node
+			let parsedSkills: string[] | undefined;
+			if (Array.isArray(skills)) {
+				parsedSkills = skills as string[];
+			} else if (typeof skills === "string") {
+				parsedSkills = skills.split(",").map((i) => i.trim());
 			}
 
 			const user = req.user;
@@ -37,7 +37,7 @@ export class GetAllApprovedMentorsController {
 					sortBy: sortBy as string,
 					priceMin: parsedPriceMin,
 					priceMax: parsedPriceMax,
-					interests: parsedInterests,
+					skills: parsedSkills,
 				},
 				browserId,
 			);

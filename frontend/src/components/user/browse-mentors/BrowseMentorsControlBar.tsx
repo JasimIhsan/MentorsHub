@@ -38,7 +38,7 @@ export const BrowseMentorsControlBar = ({ searchQuery, setSearchQuery, sortBy, s
 			</SelectContent>
 		</Select>
 		<SheetTrigger asChild>
-			<Button variant="outline" size="lg" className="h-10 rounded-lg border-indigo-200 bg-white hover:bg-indigo-50" onClick={() => setDrawerOpen(true)}>
+			<Button variant="outline" size="lg" className="h-10 rounded-lg" onClick={() => setDrawerOpen(true)}>
 				<Filter className="mr-2 h-4 w-4" />
 				Filters
 			</Button>
