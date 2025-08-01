@@ -19,7 +19,6 @@ export default function UserProfilePage() {
 	const [isEditing, setIsEditing] = useState(false);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 	const user = useSelector((state: RootState) => state.userAuth.user as UserInterface);
-	console.log('user: ', user);
 	const fullName = useSelector(getFullName);
 	const navigate = useNavigate();
 	const dispatch = useDispatch<AppDispatch>();
@@ -194,7 +193,7 @@ export default function UserProfilePage() {
 						handleCancel={handleCancel}
 						onAvatarChange={handleAvatarChange}
 					/>
-					{user.mentorRequestStatus === "rejected" && (
+					{!isEditing && user.mentorRequestStatus === "rejected" && (
 						<div className="bg-red-100 text-red-700 p-4 rounded-md flex justify-between items-center">
 							<div>
 								<p className="font-semibold">Your request to become a mentor has been rejected.</p>
