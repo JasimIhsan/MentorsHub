@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { IUpdateWeeklySlotUseCase } from "../../../../application/interfaces/mentors/mentor.availability.interfaces";
-import { logger } from "../../../../infrastructure/utils/logger";
-import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
+import { IUpdateWeeklySlotUseCase } from "../../../../../application/interfaces/mentors/mentor.availability.interfaces";
+import { logger } from "../../../../../infrastructure/utils/logger";
+import { HttpStatusCode } from "../../../../../shared/constants/http.status.codes";
 
 export class UpdateWeeklySlotController {
 	constructor(private readonly _useCase: IUpdateWeeklySlotUseCase) {}

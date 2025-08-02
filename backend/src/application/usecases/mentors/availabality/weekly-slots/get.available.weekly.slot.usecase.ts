@@ -1,6 +1,6 @@
-import { IWeeklyAvailabilityRepository } from "../../../../domain/repositories/availability/weekly.availability.repository";
-import { IWeeklyAvailabilityDTO, mapToWeeklyAvailabilityDTO } from "../../../dtos/availability.dto";
-import { IGetAllWeeklyAvailabilityUseCase } from "../../../interfaces/mentors/mentor.availability.interfaces";
+import { IWeeklyAvailabilityRepository } from "../../../../../domain/repositories/availability/weekly.availability.repository";
+import { IWeeklyAvailabilityDTO, mapToWeeklyAvailabilityDTO } from "../../../../dtos/availability.dto";
+import { IGetAllWeeklyAvailabilityUseCase } from "../../../../interfaces/mentors/mentor.availability.interfaces";
 
 export class GetAllWeeklyAvailabilityUseCase implements IGetAllWeeklyAvailabilityUseCase {
 	constructor(private readonly _weekRepo: IWeeklyAvailabilityRepository) {}

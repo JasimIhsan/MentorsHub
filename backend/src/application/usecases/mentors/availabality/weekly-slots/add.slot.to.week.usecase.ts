@@ -1,7 +1,7 @@
-import { WeeklyAvailabilityEntity } from "../../../../domain/entities/availability/weekly.availability.entity";
-import { IWeeklyAvailabilityRepository } from "../../../../domain/repositories/availability/weekly.availability.repository";
-import { IWeeklyAvailabilityDTO, mapToWeeklyAvailabilityDTO } from "../../../dtos/availability.dto";
-import { IAddSlotAvailabilityToWeekUseCase } from "../../../interfaces/mentors/mentor.availability.interfaces";
+import { WeeklyAvailabilityEntity } from "../../../../../domain/entities/availability/weekly.availability.entity";
+import { IWeeklyAvailabilityRepository } from "../../../../../domain/repositories/availability/weekly.availability.repository";
+import { IWeeklyAvailabilityDTO, mapToWeeklyAvailabilityDTO } from "../../../../dtos/availability.dto";
+import { IAddSlotAvailabilityToWeekUseCase } from "../../../../interfaces/mentors/mentor.availability.interfaces";
 
 export class AddSlotAvailabilityToWeekUseCase implements IAddSlotAvailabilityToWeekUseCase {
 	constructor(private readonly _weekRepo: IWeeklyAvailabilityRepository) {}

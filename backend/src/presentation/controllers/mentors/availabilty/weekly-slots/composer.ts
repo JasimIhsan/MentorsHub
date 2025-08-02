@@ -5,7 +5,7 @@ import {
 	toggleActiveWeeklyAvailabilityUseCase,
 	toggleAvailabilityByWeekDayUseCase,
 	updateWeeklyAvailabilityUseCase,
-} from "../../../../application/usecases/mentors/availabality/composer";
+} from "../../../../../application/usecases/mentors/availabality/weekly-slots/composer";
 import { AddWeeklySlotController } from "./add.weekly.slot.controller";
 import { DeleteWeeklySlotController } from "./delete.weekly.slot.controller";
 import { GetAllWeeklyAvailabilityController } from "./get.all.weekly.slots.controller";

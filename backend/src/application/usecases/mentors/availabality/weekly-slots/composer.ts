@@ -1,4 +1,4 @@
-import { sessionRepository, weeklyAvailabilityRepository } from "../../../../infrastructure/composer";
+import { sessionRepository, weeklyAvailabilityRepository } from "../../../../../infrastructure/composer";
 import { AddSlotAvailabilityToWeekUseCase } from "./add.slot.to.week.usecase";
 import { DeleteWeeklySlotUsecase } from "./delete.weekly.slot.usecase";
 import { GetAllWeeklyAvailabilityUseCase } from "./get.available.weekly.slot.usecase";

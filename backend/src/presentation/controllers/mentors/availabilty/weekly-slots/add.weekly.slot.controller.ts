@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { IAddSlotAvailabilityToWeekUseCase } from "../../../../application/interfaces/mentors/mentor.availability.interfaces";
-import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
-import { logger } from "../../../../infrastructure/utils/logger";
+import { IAddSlotAvailabilityToWeekUseCase } from "../../../../../application/interfaces/mentors/mentor.availability.interfaces";
+import { HttpStatusCode } from "../../../../../shared/constants/http.status.codes";
+import { logger } from "../../../../../infrastructure/utils/logger";
 import { parse } from "path";
 
 export class AddWeeklySlotController {

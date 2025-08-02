@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { IToggleAvailabilityWeeklySlotUseCase } from "../../../../application/interfaces/mentors/mentor.availability.interfaces";
-import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
-import { logger } from "../../../../infrastructure/utils/logger";
+import { IToggleAvailabilityWeeklySlotUseCase } from "../../../../../application/interfaces/mentors/mentor.availability.interfaces";
+import { HttpStatusCode } from "../../../../../shared/constants/http.status.codes";
+import { logger } from "../../../../../infrastructure/utils/logger";
 
 export class ToggleActiveWeeklyAvailabilityController {
 	constructor(private readonly _useCase: IToggleAvailabilityWeeklySlotUseCase) {}

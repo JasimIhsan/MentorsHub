@@ -6,7 +6,7 @@ import {
 	toggleActiveWeeklyAvailabilityController,
 	toggleAvailabilityByWeekDayController,
 	updateWeeklySlotController,
-} from "../../controllers/mentors/availabilty/composer";
+} from "../../controllers/mentors/availabilty/weekly-slots/composer";
 
 export const mentorAvailabilityRouter = Router();
 

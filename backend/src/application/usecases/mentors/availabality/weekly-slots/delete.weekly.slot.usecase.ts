@@ -1,5 +1,5 @@
-import { IWeeklyAvailabilityRepository } from "../../../../domain/repositories/availability/weekly.availability.repository";
-import { IDeleteWeeklySlotUsecase } from "../../../interfaces/mentors/mentor.availability.interfaces";
+import { IWeeklyAvailabilityRepository } from "../../../../../domain/repositories/availability/weekly.availability.repository";
+import { IDeleteWeeklySlotUsecase } from "../../../../interfaces/mentors/mentor.availability.interfaces";
 
 export class DeleteWeeklySlotUsecase implements IDeleteWeeklySlotUsecase {
 	constructor(private readonly _weekRepo: IWeeklyAvailabilityRepository) {}
