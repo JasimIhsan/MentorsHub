@@ -15,3 +15,7 @@ export interface IDeleteWeeklySlotUsecase {
 export interface IUpdateWeeklySlotUseCase {
 	execute(id: string, mentorId: string, startTime: string, endTime: string): Promise<void>;
 }
+
+export interface IToggleActiveWeeklySlotUseCase {
+	execute(id: string, mentorId: string): Promise<void>;
+}

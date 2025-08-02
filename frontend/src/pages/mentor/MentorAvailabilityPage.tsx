@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import axiosInstance from "@/api/config/api.config";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { addWeeklySlotAPI, deleteWeeklySlotAPI, updateWeeklySlotAPI } from "@/api/mentor.availability.api.service";
+import { addWeeklySlotAPI, deleteWeeklySlotAPI, toggleWeeklySlotActiveAPI, updateWeeklySlotAPI } from "@/api/mentor.availability.api.service";
 import { toast } from "sonner";
 
 // Interfaces
@@ -213,6 +213,28 @@ export function MentorAvailabilityPage() {
 		}
 	};
 
+	// Toggle isActive for a weekly slot
+	const handleToggleWeeklySlotActive = async (day: string, slotId: string, isActive: boolean) => {
+		try {
+			// Update the slot's isActive field in the API
+			const response = await toggleWeeklySlotActiveAPI(user?.id as string, slotId);
+			if (response.success) {
+				// Update local state
+				setWeeklySlots((prev) => ({
+					...prev,
+					[day]: {
+						...prev[day],
+						slots: prev[day].slots.map((slot) => (slot.id === slotId ? { ...slot, isActive } : slot)),
+					},
+				}));
+				toast.success(`Slot ${isActive ? "activated" : "deactivated"} successfully.`);
+			}
+		} catch (error) {
+			console.error("Error toggling weekly slot active status:", error);
+			if (error instanceof Error) toast.error(error.message);
+		}
+	};
+
 	const handleAddDateSlot = async (e: React.FormEvent) => {
 		e.preventDefault();
 		const slot = {
@@ -398,19 +420,7 @@ export function MentorAvailabilityPage() {
 																	<Button variant="ghost" className="hover:bg-red-100 rounded-full" size="sm" onClick={() => handleRemoveSlot(index.toString(), slot.id, true)}>
 																		<Trash2 className="h-4 w-4 text-red-600" />
 																	</Button>
-																	<Switch
-																		className="ml-2"
-																		checked={slot.isActive}
-																		onCheckedChange={(checked) =>
-																			setWeeklySlots((prev) => ({
-																				...prev,
-																				[index.toString()]: {
-																					...prev[index.toString()],
-																					slots: prev[index.toString()].slots.map((s) => (s.id === slot.id ? { ...s, isActive: checked } : s)),
-																				},
-																			}))
-																		}
-																	/>
+																	<Switch className="ml-2" checked={slot.isActive} onCheckedChange={(checked) => handleToggleWeeklySlotActive(index.toString(), slot.id, checked)} />{" "}
 																</div>
 															</div>
 														)}

@@ -30,3 +30,12 @@ export const updateWeeklySlotAPI = async (mentorId: string, slotId: string, star
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const toggleWeeklySlotActiveAPI = async (mentorId: string, slotId: string) => {
+	try {
+		const response = await axiosInstance.patch(`/mentor/availability/toggle-active/${mentorId}/${slotId}`);
+		return response.data;
+	} catch (error: any) {
+		throw new Error(error.response.data.message);
+	}
+};
