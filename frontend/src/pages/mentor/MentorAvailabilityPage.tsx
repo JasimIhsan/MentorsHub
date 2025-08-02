@@ -98,6 +98,11 @@ const sortSlotsByStartTime = (slots: Slot[]): Slot[] => {
 	});
 };
 
+// Determine if a day is available based on active slots
+const isDayAvailable = (slots: Slot[]): boolean => {
+	return slots.some((slot) => slot.isActive);
+};
+
 export function MentorAvailabilityPage() {
 	const [weeklySlots, setWeeklySlots] = useState<Record<string, DayAvailability>>(initializeWeeklySlots());
 	const [dateSlots, setDateSlots] = useState<DateSlots>({});
@@ -118,18 +123,14 @@ export function MentorAvailabilityPage() {
 				const newSlots = initializeWeeklySlots();
 				response.slots.forEach((slot: IWeeklyAvailability) => {
 					const day = slot.dayOfWeek.toString();
-					newSlots[day] = {
-						unavailable: false, // Assume slots imply availability, will be updated by API
-						slots: [
-							...(newSlots[day]?.slots || []),
-							{
-								id: slot.id,
-								startTime: slot.startTime,
-								endTime: slot.endTime,
-								isActive: slot.isActive,
-							},
-						],
-					};
+					newSlots[day].slots.push({
+						id: slot.id,
+						startTime: slot.startTime,
+						endTime: slot.endTime,
+						isActive: slot.isActive,
+					});
+					// Set unavailable based on whether there are any active slots
+					newSlots[day].unavailable = !isDayAvailable(newSlots[day].slots);
 				});
 				setWeeklySlots(newSlots);
 			}
@@ -143,27 +144,32 @@ export function MentorAvailabilityPage() {
 	}, [fetchWeeklySlots]);
 
 	// Toggle day availability and update all slots' isActive via API
-	const handleToggleAvailability = async (day: string) => {
+	const handleToggleAvailability = async (day: string, checked: boolean) => {
 		if (!user?.id) return;
 
-		const isNowUnavailable = !weeklySlots[day].unavailable; // Invert to reflect new state after toggle
+		// If toggling to available but no slots exist, prompt to add a slot
+		if (checked && weeklySlots[day].slots.length === 0) {
+			toast.error(`Cannot activate ${days[parseInt(day)]}. Please add at least one slot first.`);
+			return;
+		}
+
 		try {
-			// Call API to toggle all slots for the day, passing true if available, false if unavailable
-			const response = await toggleWeeklySlotByWeekDayAPI(user.id, parseInt(day), !isNowUnavailable);
+			// Call API to toggle all slots for the day, passing true to activate, false to deactivate
+			const response = await toggleWeeklySlotByWeekDayAPI(user.id, parseInt(day), checked);
 			if (response.success) {
 				// Update local state
 				setWeeklySlots((prev) => ({
 					...prev,
 					[day]: {
 						...prev[day],
-						unavailable: isNowUnavailable,
+						unavailable: !checked,
 						slots: prev[day].slots.map((slot) => ({
 							...slot,
-							isActive: !isNowUnavailable, // Set isActive to true if available, false if unavailable
+							isActive: checked, // Set isActive to true if activating, false if deactivating
 						})),
 					},
 				}));
-				toast.success(`Day ${days[parseInt(day)]} set to ${isNowUnavailable ? "unavailable" : "available"}.`);
+				toast.success(`Day ${days[parseInt(day)]} set to ${checked ? "available" : "unavailable"}.`);
 			}
 		} catch (error) {
 			console.error("Error toggling day availability:", error);
@@ -214,13 +220,20 @@ export function MentorAvailabilityPage() {
 		try {
 			const response = await addWeeklySlotAPI(user.id, slot);
 			if (response.success) {
-				setWeeklySlots((prev) => ({
-					...prev,
-					[newWeeklySlot.day]: {
-						unavailable: false,
-						slots: [...prev[newWeeklySlot.day].slots, response.slot],
-					},
-				}));
+				console.log('response: ', response);
+				
+				setWeeklySlots((prev) => {
+					const updatedSlots = {
+						...prev,
+						[newWeeklySlot.day]: {
+							unavailable: false, // Adding a slot makes the day available
+							slots: [...prev[newWeeklySlot.day].slots, { ...response.slot, isActive: true }],
+						},
+					};
+
+					console.log(`Updated slots : `, updatedSlots);
+					return updatedSlots;
+				});
 				setIsWeeklyModalOpen(false);
 				setNewWeeklySlot({ day: "", startTime: "09:00", endTime: "10:00" });
 				toast.success("Weekly slot added successfully.");
@@ -238,13 +251,17 @@ export function MentorAvailabilityPage() {
 		try {
 			const response = await toggleWeeklySlotActiveAPI(user?.id as string, slotId);
 			if (response.success) {
-				setWeeklySlots((prev) => ({
-					...prev,
-					[day]: {
-						...prev[day],
-						slots: prev[day].slots.map((slot) => (slot.id === slotId ? { ...slot, isActive } : slot)),
-					},
-				}));
+				setWeeklySlots((prev) => {
+					const updatedSlots = {
+						...prev,
+						[day]: {
+							...prev[day],
+							slots: prev[day].slots.map((slot) => (slot.id === slotId ? { ...slot, isActive } : slot)),
+							unavailable: !prev[day].slots.some((slot) => (slot.id === slotId ? isActive : slot.isActive)), // Update unavailable based on active slots
+						},
+					};
+					return updatedSlots;
+				});
 				toast.success(`Slot ${isActive ? "activated" : "deactivated"} successfully.`);
 			}
 		} catch (error) {
@@ -294,13 +311,17 @@ export function MentorAvailabilityPage() {
 			if (isWeekly) {
 				const response = await deleteWeeklySlotAPI(user?.id as string, slotId);
 				if (response.success) {
-					setWeeklySlots((prev) => ({
-						...prev,
-						[key]: {
-							...prev[key],
-							slots: prev[key].slots.filter((slot) => slot.id !== slotId),
-						},
-					}));
+					setWeeklySlots((prev) => {
+						const updatedSlots = {
+							...prev,
+							[key]: {
+								...prev[key],
+								slots: prev[key].slots.filter((slot) => slot.id !== slotId),
+								unavailable: !prev[key].slots.filter((slot) => slot.id !== slotId).some((slot) => slot.isActive), // Update unavailable
+							},
+						};
+						return updatedSlots;
+					});
 					toast.success("Slot removed successfully.");
 				}
 			} else {
@@ -335,13 +356,17 @@ export function MentorAvailabilityPage() {
 			try {
 				const response = await updateWeeklySlotAPI(user?.id as string, editSlot.slotId, updatedSlot.startTime, updatedSlot.endTime);
 				if (response.success) {
-					setWeeklySlots((prev) => ({
-						...prev,
-						[editSlot.day]: {
-							...prev[editSlot.day],
-							slots: prev[editSlot.day].slots.map((slot) => (slot.id === editSlot.slotId ? { ...slot, ...updatedSlot } : slot)),
-						},
-					}));
+					setWeeklySlots((prev) => {
+						const updatedSlots = {
+							...prev,
+							[editSlot.day]: {
+								...prev[editSlot.day],
+								slots: prev[editSlot.day].slots.map((slot) => (slot.id === editSlot.slotId ? { ...slot, ...updatedSlot } : slot)),
+								unavailable: !prev[editSlot.day].slots.some((slot) => (slot.id === editSlot.slotId ? true : slot.isActive)), // Update unavailable
+							},
+						};
+						return updatedSlots;
+					});
 					setEditSlot(null);
 					toast.success("Slot updated successfully.");
 				}
@@ -403,49 +428,45 @@ export function MentorAvailabilityPage() {
 										<div className="bg-primary w-8 h-8 flex items-center justify-center rounded-full">
 											<Label className="text-white text-sm">{day.slice(0, 1)}</Label>
 										</div>
-										<Switch checked={!weeklySlots[index.toString()].unavailable} onCheckedChange={() => handleToggleAvailability(index.toString())} className="mr-2" />
+										<Switch checked={isDayAvailable(weeklySlots[index.toString()].slots)} onCheckedChange={(checked) => handleToggleAvailability(index.toString(), checked)} className="mr-2" />
 									</div>
 									<div className="flex flex-col">
-										{weeklySlots[index.toString()].unavailable ? (
-											<span className="text-sm text-muted-foreground">Unavailable</span>
-										) : (
-											<div className="space-y-2">
-												{sortSlotsByStartTime(weeklySlots[index.toString()].slots).map((slot) => (
-													<div key={slot.id} className="flex items-center gap-2 bg-white p-2 rounded-md shadow-sm">
-														{editSlot?.slotId === slot.id ? (
-															<form onSubmit={handleSaveEdit} className="flex items-center gap-2 w-full">
-																<Input type="time" value={editSlot.startTime} onChange={(e) => handleInputChange("startTime", e.target.value)} className="w-3/4" />
-																<span>to</span>
-																<Input type="time" value={editSlot.endTime} readOnly className="w-3/4 bg-gray-100" />
-																<div className="flex">
-																	<Button type="submit" variant="ghost" className="rounded-full" size="sm">
-																		<Save className="h-4 w-4" />
-																	</Button>
-																	<Button type="button" variant="ghost" className="rounded-full" size="sm" onClick={() => setEditSlot(null)}>
-																		<X className="h-4 w-4" />
-																	</Button>
-																</div>
-															</form>
-														) : (
-															<div className="flex items-center justify-between gap-2 w-full">
-																<span className="text-sm">
-																	{formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-																</span>
-																<div>
-																	<Button variant="ghost" className="rounded-full" size="sm" onClick={() => handleEditSlot(index.toString(), slot.id, slot.startTime, slot.endTime, true)}>
-																		<Edit className="h-4 w-4" />
-																	</Button>
-																	<Button variant="ghost" className="hover:bg-red-100 rounded-full" size="sm" onClick={() => handleRemoveSlot(index.toString(), slot.id, true)}>
-																		<Trash2 className="h-4 w-4 text-red-600" />
-																	</Button>
-																	<Switch className="ml-2" checked={slot.isActive} onCheckedChange={(checked) => handleToggleWeeklySlotActive(index.toString(), slot.id, checked)} />
-																</div>
+										<div className="space-y-2">
+											{sortSlotsByStartTime(weeklySlots[index.toString()].slots).map((slot) => (
+												<div key={slot.id} className="flex items-center gap-2 bg-white p-2 rounded-md shadow-sm">
+													{editSlot?.slotId === slot.id ? (
+														<form onSubmit={handleSaveEdit} className="flex items-center gap-2 w-full">
+															<Input type="time" value={editSlot.startTime} onChange={(e) => handleInputChange("startTime", e.target.value)} className="w-3/4" />
+															<span>to</span>
+															<Input type="time" value={editSlot.endTime} readOnly className="w-3/4 bg-gray-100" />
+															<div className="flex">
+																<Button type="submit" variant="ghost" className="rounded-full" size="sm">
+																	<Save className="h-4 w-4" />
+																</Button>
+																<Button type="button" variant="ghost" className="rounded-full" size="sm" onClick={() => setEditSlot(null)}>
+																	<X className="h-4 w-4" />
+																</Button>
 															</div>
-														)}
-													</div>
-												))}
-											</div>
-										)}
+														</form>
+													) : (
+														<div className="flex items-center justify-between gap-2 w-full">
+															<span className="text-sm">
+																{formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+															</span>
+															<div>
+																<Button variant="ghost" className="rounded-full" size="sm" onClick={() => handleEditSlot(index.toString(), slot.id, slot.startTime, slot.endTime, true)}>
+																	<Edit className="h-4 w-4" />
+																</Button>
+																<Button variant="ghost" className="hover:bg-red-100 rounded-full" size="sm" onClick={() => handleRemoveSlot(index.toString(), slot.id, true)}>
+																	<Trash2 className="h-4 w-4 text-red-600" />
+																</Button>
+																<Switch className="ml-2" checked={slot.isActive} onCheckedChange={(checked) => handleToggleWeeklySlotActive(index.toString(), slot.id, checked)} />
+															</div>
+														</div>
+													)}
+												</div>
+											))}
+										</div>
 										<Button variant="outline" size="sm" onClick={() => handleAddWeeklySlotModal(index.toString())} className="mt-2">
 											<Plus className="h-4 w-4 mr-2" /> Add Slot
 										</Button>
@@ -561,15 +582,15 @@ export function MentorAvailabilityPage() {
 						<DialogTitle>Add Date-Specific Slot</DialogTitle>
 					</DialogHeader>
 					<form onSubmit={handleAddDateSlot} className="space-y-4">
-						<div>
+						<div className="space-y-2">
 							<Label>Date</Label>
 							<Input type="date" value={newDateSlot.date} onChange={(e) => setNewDateSlot({ ...newDateSlot, date: e.target.value })} required min={new Date().toISOString().split("T")[0]} />
 						</div>
-						<div>
+						<div className="space-y-2">
 							<Label>Start Time</Label>
 							<Input type="time" value={newDateSlot.startTime} onChange={(e) => handleDateStartTimeChange(e.target.value)} required />
 						</div>
-						<div>
+						<div className="space-y-2">
 							<Label>End Time</Label>
 							<Input type="time" value={newDateSlot.endTime} readOnly className="bg-gray-100" />
 						</div>

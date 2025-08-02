@@ -1,4 +1,4 @@
-import { IWeeklyAvailabilityRepository } from "../../../../domain/repositories/availability.repository";
+import { IWeeklyAvailabilityRepository } from "../../../../domain/repositories/availability/weekly.availability.repository";
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { IUpdateWeeklySlotUseCase } from "../../../interfaces/mentors/mentor.availability.interfaces";
 

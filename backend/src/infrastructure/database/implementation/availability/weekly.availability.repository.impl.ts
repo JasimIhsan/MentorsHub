@@ -1,14 +1,15 @@
 import { WeeklyAvailabilityEntity } from "../../../../domain/entities/availability/weekly.availability.entity";
-import { IWeeklyAvailabilityRepository } from "../../../../domain/repositories/availability.repository";
+import { IWeeklyAvailabilityRepository } from "../../../../domain/repositories/availability/weekly.availability.repository";
 import { handleExceptionError } from "../../../utils/handle.exception.error";
 import { WeeklyAvailabilityModel } from "../../models/availability/weekly.availability.model";
 
 export class WeeklyAvailabilityRepositoryImpl implements IWeeklyAvailabilityRepository {
-	async create(entity: WeeklyAvailabilityEntity): Promise<void> {
+	async create(entity: WeeklyAvailabilityEntity): Promise<WeeklyAvailabilityEntity> {
 		try {
-			await WeeklyAvailabilityModel.create(WeeklyAvailabilityEntity.toObject(entity));
+			const slot = await WeeklyAvailabilityModel.create(WeeklyAvailabilityEntity.toObject(entity));
+			return WeeklyAvailabilityEntity.fromDbDocument(slot);
 		} catch (error) {
-			handleExceptionError(error, "Error adding availability slot");
+			return handleExceptionError(error, "Error adding availability slot");
 		}
 	}
 

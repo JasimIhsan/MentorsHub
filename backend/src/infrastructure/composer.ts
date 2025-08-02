@@ -40,7 +40,8 @@ import { IKmsService } from "../application/interfaces/services/kms.service";
 import { ReportRepositoryImpl } from "./database/implementation/report.repository.impl";
 import { SocketNotificationGateway } from "./socket/handlers/notification/socket.notification.gatway";
 import { WeeklyAvailabilityRepositoryImpl } from "./database/implementation/availability/weekly.availability.repository.impl";
-import { IWeeklyAvailabilityRepository } from "../domain/repositories/availability.repository";
+import { IWeeklyAvailabilityRepository } from "../domain/repositories/availability/weekly.availability.repository";
+import { SpecialAvailabilityRepositoryImpl } from "./database/implementation/availability/special.availability.repository";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -59,6 +60,7 @@ export const actionTypeRepository = new ActionTypeRepositoryImpl();
 export const userProgressRepository = new UserProgressRepositoryImpl();
 export const reportRepository = new ReportRepositoryImpl();
 export const weeklyAvailabilityRepository: IWeeklyAvailabilityRepository = new WeeklyAvailabilityRepositoryImpl();
+export const specialAvailabilityRepository = new SpecialAvailabilityRepositoryImpl();
 
 // Initialize services implementation
 export const hashService: IHashService = new HashServiceImpl();

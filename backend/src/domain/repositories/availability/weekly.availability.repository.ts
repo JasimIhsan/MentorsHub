@@ -1,7 +1,7 @@
-import { WeeklyAvailabilityEntity } from "../entities/availability/weekly.availability.entity";
+import { WeeklyAvailabilityEntity } from "../../entities/availability/weekly.availability.entity";
 
 export interface IWeeklyAvailabilityRepository {
-	create(entity: WeeklyAvailabilityEntity): Promise<void>;
+	create(entity: WeeklyAvailabilityEntity): Promise<WeeklyAvailabilityEntity>;
 	delete(id: string): Promise<void>;
 	update(entity: WeeklyAvailabilityEntity): Promise<void>;
 	findById(id: string): Promise<WeeklyAvailabilityEntity | null>;

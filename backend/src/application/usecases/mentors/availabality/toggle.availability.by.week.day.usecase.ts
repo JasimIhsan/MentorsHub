@@ -1,4 +1,4 @@
-import { IWeeklyAvailabilityRepository } from "../../../../domain/repositories/availability.repository";
+import { IWeeklyAvailabilityRepository } from "../../../../domain/repositories/availability/weekly.availability.repository";
 import { IToggleAvailabilityByWeekDayUseCase } from "../../../interfaces/mentors/mentor.availability.interfaces";
 
 export class ToggleAvailabilityByWeekDayUseCase implements IToggleAvailabilityByWeekDayUseCase {

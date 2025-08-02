@@ -1,5 +1,5 @@
 import { WeeklyAvailabilityEntity } from "../../../../domain/entities/availability/weekly.availability.entity";
-import { IWeeklyAvailabilityRepository } from "../../../../domain/repositories/availability.repository";
+import { IWeeklyAvailabilityRepository } from "../../../../domain/repositories/availability/weekly.availability.repository";
 import { IWeeklyAvailabilityDTO, mapToWeeklyAvailabilityDTO } from "../../../dtos/availability.dto";
 import { IAddSlotAvailabilityToWeekUseCase } from "../../../interfaces/mentors/mentor.availability.interfaces";
 
@@ -21,8 +21,8 @@ export class AddSlotAvailabilityToWeekUseCase implements IAddSlotAvailabilityToW
 			updatedAt: new Date(),
 		});
 
-		await this._weekRepo.create(entity);
+		const newSlot = await this._weekRepo.create(entity);
 
-		return mapToWeeklyAvailabilityDTO(entity)
+		return mapToWeeklyAvailabilityDTO(newSlot);
 	}
 }
