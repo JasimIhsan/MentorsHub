@@ -58,7 +58,7 @@ export const userTaskprogressRepository = new UserTaskProgressRepositoryImpl();
 export const actionTypeRepository = new ActionTypeRepositoryImpl();
 export const userProgressRepository = new UserProgressRepositoryImpl();
 export const reportRepository = new ReportRepositoryImpl();
-export const WeeklyAvailabilityRepository: IWeeklyAvailabilityRepository = new WeeklyAvailabilityRepositoryImpl();
+export const weeklyAvailabilityRepository: IWeeklyAvailabilityRepository = new WeeklyAvailabilityRepositoryImpl();
 
 // Initialize services implementation
 export const hashService: IHashService = new HashServiceImpl();

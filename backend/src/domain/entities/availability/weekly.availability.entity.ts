@@ -49,10 +49,34 @@ export class WeeklyAvailabilityEntity {
 		return this.props.updatedAt;
 	}
 
-	isActiveForDay(day: number): boolean {
-		return this.isActive && this.dayOfWeek === day;
+	set mentorId(mentorId: string) {
+		this.props.mentorId = mentorId;
+		this.touch();
 	}
 
+	set dayOfWeek(dayOfWeek: number) {
+		this.props.dayOfWeek = dayOfWeek;
+		this.touch();
+	}
+
+	set startTime(startTime: string) {
+		this.props.startTime = startTime;
+		this.touch();
+	}
+
+	set endTime(endTime: string) {
+		this.props.endTime = endTime;
+		this.touch();
+	}
+
+	set isActive(isActive: boolean) {
+		this.props.isActive = isActive;
+		this.touch();
+	}
+
+	private touch() {
+		this.props.updatedAt = new Date();
+	}
 	static fromDbDocument(doc: IWeeklyAvailabilityDocument) {
 		return new WeeklyAvailabilityEntity({
 			id: doc.id.toString(),
