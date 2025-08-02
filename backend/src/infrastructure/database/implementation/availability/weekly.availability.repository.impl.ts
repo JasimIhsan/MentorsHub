@@ -75,4 +75,12 @@ export class WeeklyAvailabilityRepositoryImpl implements IWeeklyAvailabilityRepo
 			return handleExceptionError(error, "Error finding availability slots by mentor ID");
 		}
 	}
+
+	async toggleAvailabilityByWeekDay(mentorId: string, dayOfWeek: number, status: boolean): Promise<void> {
+		try {
+			await WeeklyAvailabilityModel.updateMany({ mentorId, dayOfWeek }, { $set: { isActive: status } });
+		} catch (error) {
+			handleExceptionError(error, "Error toggling availability by week day");
+		}
+	}
 }

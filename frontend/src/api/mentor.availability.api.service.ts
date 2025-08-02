@@ -1,5 +1,14 @@
 import axiosInstance from "./config/api.config";
 
+export const fetchWeeklySlotsAPI = async (mentorId: string) => {
+	try {
+		const response = await axiosInstance.get(`/mentor/availability/weekly/${mentorId}`);
+		return response.data;
+	} catch (error: any) {
+		throw new Error(error.response.data.message);
+	}
+}
+
 export const addWeeklySlotAPI = async (mentorId: string, slot: { day: string; startTime: string; endTime: string }) => {
 	try {
 		const response = await axiosInstance.post(`/mentor/availability/create/${mentorId}`, {
@@ -34,6 +43,18 @@ export const updateWeeklySlotAPI = async (mentorId: string, slotId: string, star
 export const toggleWeeklySlotActiveAPI = async (mentorId: string, slotId: string) => {
 	try {
 		const response = await axiosInstance.patch(`/mentor/availability/toggle-active/${mentorId}/${slotId}`);
+		return response.data;
+	} catch (error: any) {
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const toggleWeeklySlotByWeekDayAPI = async (mentorId: string, day: number, status: boolean) => {
+	try {
+		const response = await axiosInstance.patch(`/mentor/availability/toggle-weekday/${mentorId}`, {
+			dayOfWeek: day,
+			status,
+		});
 		return response.data;
 	} catch (error: any) {
 		throw new Error(error.response.data.message);

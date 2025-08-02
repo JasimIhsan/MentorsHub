@@ -16,6 +16,11 @@ export interface IUpdateWeeklySlotUseCase {
 	execute(id: string, mentorId: string, startTime: string, endTime: string): Promise<void>;
 }
 
-export interface IToggleActiveWeeklySlotUseCase {
+export interface IToggleAvailabilityWeeklySlotUseCase {
 	execute(id: string, mentorId: string): Promise<void>;
+}
+
+
+export interface IToggleAvailabilityByWeekDayUseCase {
+	execute(mentorId: string, dayOfWeek: number, status: boolean): Promise<void>;
 }

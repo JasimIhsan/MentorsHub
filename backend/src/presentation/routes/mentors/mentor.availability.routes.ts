@@ -1,6 +1,12 @@
-import {Router} from "express";
-import { addWeeklySlotController, deleteWeeklySlotController, getAllWeeklyAvailabilityController, toggleActiveWeeklyAvailabilityController, updateWeeklySlotController } from "../../controllers/mentors/availabilty/composer";
-
+import { Router } from "express";
+import {
+	addWeeklySlotController,
+	deleteWeeklySlotController,
+	getAllWeeklyAvailabilityController,
+	toggleActiveWeeklyAvailabilityController,
+	toggleAvailabilityByWeekDayController,
+	updateWeeklySlotController,
+} from "../../controllers/mentors/availabilty/composer";
 
 export const mentorAvailabilityRouter = Router();
 
@@ -13,3 +19,5 @@ mentorAvailabilityRouter.delete("/:mentorId/:slotId", (req, res, next) => delete
 mentorAvailabilityRouter.put("/update/:mentorId/:slotId", (req, res, next) => updateWeeklySlotController.handle(req, res, next));
 
 mentorAvailabilityRouter.patch("/toggle-active/:mentorId/:slotId", (req, res, next) => toggleActiveWeeklyAvailabilityController.handle(req, res, next));
+
+mentorAvailabilityRouter.patch("/toggle-weekday/:mentorId", (req, res, next) => toggleAvailabilityByWeekDayController.handle(req, res, next));

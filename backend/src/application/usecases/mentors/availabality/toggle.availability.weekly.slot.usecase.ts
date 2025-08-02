@@ -1,7 +1,7 @@
 import { IWeeklyAvailabilityRepository } from "../../../../domain/repositories/availability.repository";
-import { IToggleActiveWeeklySlotUseCase } from "../../../interfaces/mentors/mentor.availability.interfaces";
+import { IToggleAvailabilityWeeklySlotUseCase } from "../../../interfaces/mentors/mentor.availability.interfaces";
 
-export class ToggleActiveWeeklySlotUseCase implements IToggleActiveWeeklySlotUseCase {
+export class ToggleAvailabilityWeeklySlotUseCase implements IToggleAvailabilityWeeklySlotUseCase {
 	constructor(private readonly _weekRepo: IWeeklyAvailabilityRepository) {}
 
 	async execute(id: string, mentorId: string): Promise<void> {

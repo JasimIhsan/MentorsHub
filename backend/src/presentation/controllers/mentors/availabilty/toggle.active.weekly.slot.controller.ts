@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { IToggleActiveWeeklySlotUseCase } from "../../../../application/interfaces/mentors/mentor.availability.interfaces";
+import { IToggleAvailabilityWeeklySlotUseCase } from "../../../../application/interfaces/mentors/mentor.availability.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 
 export class ToggleActiveWeeklyAvailabilityController {
-	constructor(private readonly _useCase: IToggleActiveWeeklySlotUseCase) {}
+	constructor(private readonly _useCase: IToggleAvailabilityWeeklySlotUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { mentorId, slotId } = req.params;

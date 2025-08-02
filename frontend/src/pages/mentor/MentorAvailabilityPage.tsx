@@ -7,10 +7,9 @@ import { Switch } from "@/components/ui/switch";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
 import { Edit, Plus, Save, Trash, Trash2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import axiosInstance from "@/api/config/api.config";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { addWeeklySlotAPI, deleteWeeklySlotAPI, toggleWeeklySlotActiveAPI, updateWeeklySlotAPI } from "@/api/mentor.availability.api.service";
+import { addWeeklySlotAPI, deleteWeeklySlotAPI, toggleWeeklySlotActiveAPI, updateWeeklySlotAPI, toggleWeeklySlotByWeekDayAPI, fetchWeeklySlotsAPI } from "@/api/mentor.availability.api.service";
 import { toast } from "sonner";
 
 // Interfaces
@@ -114,13 +113,13 @@ export function MentorAvailabilityPage() {
 		if (!user?.id) return;
 
 		try {
-			const response = await axiosInstance.get(`/mentor/availability/weekly/${user.id}`);
-			if (response.data.success) {
+			const response = await fetchWeeklySlotsAPI(user.id);
+			if (response.success) {
 				const newSlots = initializeWeeklySlots();
-				response.data.slots.forEach((slot: IWeeklyAvailability) => {
+				response.slots.forEach((slot: IWeeklyAvailability) => {
 					const day = slot.dayOfWeek.toString();
 					newSlots[day] = {
-						unavailable: false,
+						unavailable: false, // Assume slots imply availability, will be updated by API
 						slots: [
 							...(newSlots[day]?.slots || []),
 							{
@@ -143,12 +142,33 @@ export function MentorAvailabilityPage() {
 		fetchWeeklySlots();
 	}, [fetchWeeklySlots]);
 
-	// Handlers
-	const handleToggleAvailability = (day: string) => {
-		setWeeklySlots((prev) => ({
-			...prev,
-			[day]: { ...prev[day], unavailable: !prev[day].unavailable },
-		}));
+	// Toggle day availability and update all slots' isActive via API
+	const handleToggleAvailability = async (day: string) => {
+		if (!user?.id) return;
+
+		const isNowUnavailable = !weeklySlots[day].unavailable; // Invert to reflect new state after toggle
+		try {
+			// Call API to toggle all slots for the day, passing true if available, false if unavailable
+			const response = await toggleWeeklySlotByWeekDayAPI(user.id, parseInt(day), !isNowUnavailable);
+			if (response.success) {
+				// Update local state
+				setWeeklySlots((prev) => ({
+					...prev,
+					[day]: {
+						...prev[day],
+						unavailable: isNowUnavailable,
+						slots: prev[day].slots.map((slot) => ({
+							...slot,
+							isActive: !isNowUnavailable, // Set isActive to true if available, false if unavailable
+						})),
+					},
+				}));
+				toast.success(`Day ${days[parseInt(day)]} set to ${isNowUnavailable ? "unavailable" : "available"}.`);
+			}
+		} catch (error) {
+			console.error("Error toggling day availability:", error);
+			if (error instanceof Error) toast.error(error.message);
+		}
 	};
 
 	const handleAddWeeklySlotModal = (day: string) => {
@@ -216,10 +236,8 @@ export function MentorAvailabilityPage() {
 	// Toggle isActive for a weekly slot
 	const handleToggleWeeklySlotActive = async (day: string, slotId: string, isActive: boolean) => {
 		try {
-			// Update the slot's isActive field in the API
 			const response = await toggleWeeklySlotActiveAPI(user?.id as string, slotId);
 			if (response.success) {
-				// Update local state
 				setWeeklySlots((prev) => ({
 					...prev,
 					[day]: {
@@ -420,7 +438,7 @@ export function MentorAvailabilityPage() {
 																	<Button variant="ghost" className="hover:bg-red-100 rounded-full" size="sm" onClick={() => handleRemoveSlot(index.toString(), slot.id, true)}>
 																		<Trash2 className="h-4 w-4 text-red-600" />
 																	</Button>
-																	<Switch className="ml-2" checked={slot.isActive} onCheckedChange={(checked) => handleToggleWeeklySlotActive(index.toString(), slot.id, checked)} />{" "}
+																	<Switch className="ml-2" checked={slot.isActive} onCheckedChange={(checked) => handleToggleWeeklySlotActive(index.toString(), slot.id, checked)} />
 																</div>
 															</div>
 														)}
