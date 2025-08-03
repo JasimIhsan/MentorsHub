@@ -19,7 +19,7 @@ const WeeklyAvailabilitySchema = new mongoose.Schema(
 		endTime: { type: String, required: true }, // "15:00"
 		isActive: { type: Boolean, default: true }, // soft disable any slot
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const WeeklyAvailabilityModel = mongoose.model<IWeeklyAvailabilityDocument>("Weekly-Availability", WeeklyAvailabilitySchema);

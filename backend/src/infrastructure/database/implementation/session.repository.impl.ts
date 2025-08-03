@@ -169,7 +169,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 	}
 
 	async updateStatus(sessionId: string, status: SessionStatusEnum, reason?: string): Promise<SessionEntity> {
-		console.log('reason: ', reason);
+		console.log("reason: ", reason);
 		try {
 			const updated = await SessionModel.findByIdAndUpdate(sessionId, { status, rejectReason: reason }, { new: true }).populate("mentorId", "firstName lastName avatar").populate("participants.userId", "firstName lastName avatar");
 

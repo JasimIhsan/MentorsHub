@@ -44,7 +44,7 @@ export class GetAvailabilityUseCase implements IGetAvailabilityUseCase {
 
 		// Step 7: Filter out booked slots from available slots
 		const availableSlots = slotsInDate.filter((slot) => !bookedTimeSet.has(slot));
-		console.log('availableSlots: ', availableSlots);
+		console.log("availableSlots: ", availableSlots);
 
 		return availableSlots;
 	}

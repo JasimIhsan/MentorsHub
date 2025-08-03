@@ -1,4 +1,4 @@
-import { MentorProfileProps, MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
+import { MentorProfileProps } from "../../../domain/entities/mentor.detailes.entity";
 import { UserEntity, UserEntityProps } from "../../../domain/entities/user.entity";
 import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
@@ -17,7 +17,7 @@ export class UpdateMentorProfileUseCase implements IUpdateMentorProfileUseCase {
 		private userRepo: IUserRepository,
 		private uploadDocumentUseCase: IUploadMentorDocuments,
 		private notifyUserUseCase: INotifyUserUseCase,
-		private uploadAvatarUseCase: ICloudinaryService
+		private uploadAvatarUseCase: ICloudinaryService,
 	) {}
 
 	async execute(userId: string, mentorData: Partial<MentorProfileProps>, userData: Partial<UserEntityProps>, newDocuments?: Express.Multer.File[], newAvatar?: Express.Multer.File): Promise<IMentorDTO> {
@@ -44,8 +44,8 @@ export class UpdateMentorProfileUseCase implements IUpdateMentorProfileUseCase {
 						fileName: file.originalname,
 						mimeType: file.mimetype,
 						mentorId: userId,
-					})
-				)
+					}),
+				),
 			);
 			// Merge existing documents with new ones
 			const existingDocuments = existingProfile.documents; 
@@ -57,8 +57,8 @@ export class UpdateMentorProfileUseCase implements IUpdateMentorProfileUseCase {
 			userData.avatar = avatarUrl;
 		}
 
-		console.log(`mentorData : `, mentorData);
-		console.log(`userData : `, userData);
+		console.log("mentorData : ", mentorData);
+		console.log("userData : ", userData);
 
 		userEntity.updateUserDetails(userData);
 		await this.userRepo.updateUser(userEntity.id!, userEntity);

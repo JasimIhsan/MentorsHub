@@ -96,7 +96,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			priceMax?: number;
 			skills?: string[];
 		},
-		browserId: string
+		browserId: string,
 	): Promise<{ mentors: MentorEntity[]; total: number }> {
 		try {
 			const page = params.page ?? 1;
@@ -220,7 +220,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 						certifications: doc.certifications,
 						sessionFormat: doc.sessionFormat,
 						hourlyRate: doc.hourlyRate,
-					})
+					}),
 			);
 
 			return { mentors, total };

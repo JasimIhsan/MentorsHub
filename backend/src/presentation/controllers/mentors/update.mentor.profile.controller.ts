@@ -71,7 +71,7 @@ export class UpdateMentorProfileController {
 					skills: parsedData.skills,
 				},
 				documents,
-				avatar
+				avatar,
 			);
 
 			res.status(200).json({
@@ -81,7 +81,7 @@ export class UpdateMentorProfileController {
 			});
 		} catch (err) {
 			logger.error(`❌ Error in UpdateMentorProfileController: ${err}`);
-			console.error(`❌ Error in UpdateMentorProfileController:`, err);
+			console.error("❌ Error in UpdateMentorProfileController:", err);
 			next(err);
 		}
 	}

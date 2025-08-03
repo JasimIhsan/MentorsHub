@@ -36,7 +36,7 @@ export const registerVideoCallHandlers = (io: Server, socket: Socket) => {
 
 			if (now < joinAllowedTime) {
 				return socket.emit("error", {
-					message: `You can join the session 5 minutes before it starts.`,
+					message: "You can join the session 5 minutes before it starts.",
 				});
 			}
 

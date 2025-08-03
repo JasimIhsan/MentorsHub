@@ -15,7 +15,7 @@ export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 		private readonly updateUserProgress: IUpdateUserTaskProgressUseCase,
 		private readonly userRepo: IUserRepository,
 		private readonly notifyUserUseCase: INotifyUserUseCase,
-		private readonly getAvailabilityUseCase: IGetAvailabilityUseCase
+		private readonly getAvailabilityUseCase: IGetAvailabilityUseCase,
 	) {}
 
 	async execute(sessionId: string, status: SessionStatusEnum, rejectReason?: string): Promise<void> {

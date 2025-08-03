@@ -17,7 +17,7 @@ const SpecialAvailabilitySchema = new mongoose.Schema(
 		startTime: { type: String, required: true }, // "17:00"
 		endTime: { type: String, required: true }, // "18:00"
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const SpecialAvailabilityModel = mongoose.model("Special-Availability", SpecialAvailabilitySchema);

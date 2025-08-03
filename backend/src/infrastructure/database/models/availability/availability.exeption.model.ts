@@ -27,7 +27,7 @@ const AvailabilityExceptionSchema = new mongoose.Schema(
 		],
 		reason: { type: String }, // optional
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const AvailabilityExceptionModel = mongoose.model<IAvailabilityExceptionDocument>("Availability-Exception", AvailabilityExceptionSchema);

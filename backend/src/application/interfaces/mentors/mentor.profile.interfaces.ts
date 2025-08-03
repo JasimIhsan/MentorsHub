@@ -1,4 +1,4 @@
-import { MentorProfileEntity, MentorProfileProps } from "../../../domain/entities/mentor.detailes.entity";
+import { MentorProfileProps } from "../../../domain/entities/mentor.detailes.entity";
 import { UserEntityProps } from "../../../domain/entities/user.entity";
 import { IMentorDTO } from "../../dtos/mentor.dtos";
 
