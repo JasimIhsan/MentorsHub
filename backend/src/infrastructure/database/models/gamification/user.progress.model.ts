@@ -12,7 +12,7 @@ export interface IUserProgressDocument extends Document {
 
 const UserProgressSchema = new Schema(
 	{
-		userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
+		userId: { type: mongoose.Schema.Types.ObjectId, ref: "Users", required: true, unique: true },
 		totalXP: { type: Number, default: 0 },
 		level: { type: Number, default: 1 },
 		tasksCompleted: { type: Number, default: 0 },

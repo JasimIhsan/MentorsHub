@@ -1,6 +1,6 @@
 import { WeeklyAvailabilityEntity } from "../../../../../domain/entities/availability/weekly.availability.entity";
 import { IWeeklyAvailabilityRepository } from "../../../../../domain/repositories/availability/weekly.availability.repository";
-import { IWeeklyAvailabilityDTO, mapToWeeklyAvailabilityDTO } from "../../../../dtos/availability.dto";
+import { IWeeklyAvailabilityDTO, mapToWeeklyAvailabilityDTO } from "../../../../dtos/availability/weekly.availability.dto";
 import { IAddSlotAvailabilityToWeekUseCase } from "../../../../interfaces/mentors/mentor.availability.interfaces";
 
 export class AddSlotAvailabilityToWeekUseCase implements IAddSlotAvailabilityToWeekUseCase {

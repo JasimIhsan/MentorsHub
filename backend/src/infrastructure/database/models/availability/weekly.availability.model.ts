@@ -13,7 +13,7 @@ export interface IWeeklyAvailabilityDocument extends Document {
 
 const WeeklyAvailabilitySchema = new mongoose.Schema(
 	{
-		mentorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+		mentorId: { type: mongoose.Schema.Types.ObjectId, ref: "Users", required: true },
 		dayOfWeek: { type: Number, required: true }, // 0 = Sunday ... 6 = Saturday
 		startTime: { type: String, required: true }, // "14:00"
 		endTime: { type: String, required: true }, // "15:00"

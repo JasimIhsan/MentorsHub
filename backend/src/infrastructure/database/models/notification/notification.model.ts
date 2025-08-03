@@ -15,8 +15,8 @@ export interface INotificationDocument extends Document {
 
 const NotificationSchema: Schema = new Schema(
 	{
-		recipientId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-		// sender: { type: Schema.Types.ObjectId, ref: "User" },
+		recipientId: { type: Schema.Types.ObjectId, ref: "Users", required: true },
+		// sender: { type: Schema.Types.ObjectId, ref: "Users" },
 		title: { type: String, required: true },
 		message: { type: String, required: true },
 		type: { type: String, enum: ["info", "warning", "success", "error", "reminder", "review", "payment", "task_completed", "welcome", "session", "new_message"], default: "info" },

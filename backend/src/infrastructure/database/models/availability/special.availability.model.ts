@@ -12,7 +12,7 @@ export interface ISpecialAvailabilityDocument extends Document {
 
 const SpecialAvailabilitySchema = new mongoose.Schema(
 	{
-		mentorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+		mentorId: { type: mongoose.Schema.Types.ObjectId, ref: "Users", required: true },
 		date: { type: Date, required: true },
 		startTime: { type: String, required: true }, // "17:00"
 		endTime: { type: String, required: true }, // "18:00"
@@ -20,4 +20,4 @@ const SpecialAvailabilitySchema = new mongoose.Schema(
 	{ timestamps: true }
 );
 
-export const SpecialAvailabilityModel = mongoose.model("SpecialAvailability", SpecialAvailabilitySchema);
+export const SpecialAvailabilityModel = mongoose.model("Special-Availability", SpecialAvailabilitySchema);

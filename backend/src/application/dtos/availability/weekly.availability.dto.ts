@@ -1,5 +1,5 @@
-import { WeeklyAvailabilityEntity } from "../../domain/entities/availability/weekly.availability.entity";
-import { Availability } from "../../domain/entities/mentor.detailes.entity";
+import { WeeklyAvailabilityEntity } from "../../../domain/entities/availability/weekly.availability.entity";
+import { Availability } from "../../../domain/entities/mentor.detailes.entity";
 
 export interface IAvailabilityDTO {
 	userId: string;

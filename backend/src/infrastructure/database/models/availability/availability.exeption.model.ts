@@ -16,7 +16,7 @@ export interface IAvailabilityExceptionDocument extends Document {
 
 const AvailabilityExceptionSchema = new mongoose.Schema(
 	{
-		mentorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+		mentorId: { type: mongoose.Schema.Types.ObjectId, ref: "Users", required: true },
 		date: { type: Date, required: true },
 		blockType: { type: String, enum: ["full", "partial"], required: true },
 		partialBlocks: [

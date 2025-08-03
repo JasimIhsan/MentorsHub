@@ -1,5 +1,5 @@
 import { IWeeklyAvailabilityRepository } from "../../../../../domain/repositories/availability/weekly.availability.repository";
-import { IWeeklyAvailabilityDTO, mapToWeeklyAvailabilityDTO } from "../../../../dtos/availability.dto";
+import { IWeeklyAvailabilityDTO, mapToWeeklyAvailabilityDTO } from "../../../../dtos/availability/weekly.availability.dto";
 import { IGetAllWeeklyAvailabilityUseCase } from "../../../../interfaces/mentors/mentor.availability.interfaces";
 
 export class GetAllWeeklyAvailabilityUseCase implements IGetAllWeeklyAvailabilityUseCase {

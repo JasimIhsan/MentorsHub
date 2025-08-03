@@ -5,28 +5,46 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
-import { Edit, Plus, Save, Trash, Trash2, X } from "lucide-react";
+import { Edit, Plus, Save, Trash2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { addWeeklySlotAPI, deleteWeeklySlotAPI, toggleWeeklySlotActiveAPI, updateWeeklySlotAPI, toggleWeeklySlotByWeekDayAPI, fetchWeeklySlotsAPI } from "@/api/mentor.availability.api.service";
+import {
+	addWeeklySlotAPI,
+	deleteWeeklySlotAPI,
+	toggleWeeklySlotActiveAPI,
+	updateWeeklySlotAPI,
+	toggleWeeklySlotByWeekDayAPI,
+	fetchWeeklySlotsAPI,
+	addDateSlotAPI,
+	fetchDateSlotsAPI,
+	updateDateSlotAPI,
+	deleteDateSlotAPI,
+} from "@/api/mentor.availability.api.service";
 import { toast } from "sonner";
 
 // Interfaces
-interface Slot {
+interface IWeeklyAvailability {
 	id: string;
 	startTime: string;
 	endTime: string;
 	isActive: boolean;
 }
-
-interface DayAvailability {
-	unavailable: boolean;
-	slots: Slot[];
+interface IDateSlot {
+	id: string;
+	mentorId: string;
+	date: string;
+	startTime: string;
+	endTime: string;
 }
 
-interface DateSlots {
-	[date: string]: { slots: Slot[] };
+interface IDayAvailability {
+	unavailable: boolean;
+	slots: IWeeklyAvailability[];
+}
+
+interface IDateAvailability {
+	[date: string]: { slots: IDateSlot[] };
 }
 
 interface IWeeklyAvailability {
@@ -61,7 +79,7 @@ const days: Record<number, string> = {
 };
 
 // Utility Functions
-const initializeWeeklySlots = (): Record<string, DayAvailability> => ({
+const initializeWeeklySlots = (): Record<string, IDayAvailability> => ({
 	"0": { unavailable: true, slots: [] },
 	"1": { unavailable: false, slots: [] },
 	"2": { unavailable: false, slots: [] },
@@ -78,7 +96,7 @@ const calculateEndTime = (startTime: string): string => {
 	return `${newHours.toString().padStart(2, "0")}:${minutes}`;
 };
 
-const doSlotsOverlap = (newSlot: { startTime: string; endTime: string }, existingSlot: Slot): boolean => {
+const doSlotsOverlap = (newSlot: { startTime: string; endTime: string }, existingSlot: IWeeklyAvailability | IDateSlot): boolean => {
 	const newStart = new Date(`2000-01-01T${newSlot.startTime}:00`);
 	const newEnd = new Date(`2000-01-01T${newSlot.endTime}:00`);
 	const existingStart = new Date(`2000-01-01T${existingSlot.startTime}:00`);
@@ -88,7 +106,17 @@ const doSlotsOverlap = (newSlot: { startTime: string; endTime: string }, existin
 };
 
 // Sort slots by startTime
-const sortSlotsByStartTime = (slots: Slot[]): Slot[] => {
+const sortWeeklySlotsByStartTime = (slots: IWeeklyAvailability[]): IWeeklyAvailability[] => {
+	return [...slots].sort((a, b) => {
+		const [aHours, aMinutes] = a.startTime.split(":").map(Number);
+		const [bHours, bMinutes] = b.startTime.split(":").map(Number);
+		const aTotalMinutes = aHours * 60 + aMinutes;
+		const bTotalMinutes = bHours * 60 + bMinutes;
+		return aTotalMinutes - bTotalMinutes;
+	});
+};
+
+const sortDateSlotsByStartTime = (slots: IDateSlot[]): IDateSlot[] => {
 	return [...slots].sort((a, b) => {
 		const [aHours, aMinutes] = a.startTime.split(":").map(Number);
 		const [bHours, bMinutes] = b.startTime.split(":").map(Number);
@@ -99,13 +127,13 @@ const sortSlotsByStartTime = (slots: Slot[]): Slot[] => {
 };
 
 // Determine if a day is available based on active slots
-const isDayAvailable = (slots: Slot[]): boolean => {
+const isDayAvailable = (slots: IWeeklyAvailability[]): boolean => {
 	return slots.some((slot) => slot.isActive);
 };
 
 export function MentorAvailabilityPage() {
-	const [weeklySlots, setWeeklySlots] = useState<Record<string, DayAvailability>>(initializeWeeklySlots());
-	const [dateSlots, setDateSlots] = useState<DateSlots>({});
+	const [weeklySlots, setWeeklySlots] = useState<Record<string, IDayAvailability>>(initializeWeeklySlots());
+	const [dateSlots, setDateSlots] = useState<IDateAvailability>({});
 	const [editSlot, setEditSlot] = useState<EditSlot | null>(null);
 	const [isWeeklyModalOpen, setIsWeeklyModalOpen] = useState(false);
 	const [isDateModalOpen, setIsDateModalOpen] = useState(false);
@@ -123,13 +151,7 @@ export function MentorAvailabilityPage() {
 				const newSlots = initializeWeeklySlots();
 				response.slots.forEach((slot: IWeeklyAvailability) => {
 					const day = slot.dayOfWeek.toString();
-					newSlots[day].slots.push({
-						id: slot.id,
-						startTime: slot.startTime,
-						endTime: slot.endTime,
-						isActive: slot.isActive,
-					});
-					// Set unavailable based on whether there are any active slots
+					newSlots[day].slots.push(slot);
 					newSlots[day].unavailable = !isDayAvailable(newSlots[day].slots);
 				});
 				setWeeklySlots(newSlots);
@@ -139,25 +161,52 @@ export function MentorAvailabilityPage() {
 		}
 	}, [user?.id]);
 
+	// Fetch date-specific slots
+	const fetchDateSlots = useCallback(async () => {
+		if (!user?.id) return;
+
+		try {
+			const response = await fetchDateSlotsAPI(user.id);
+			if (response.success) {
+				const newDateSlots: IDateAvailability = {};
+				response.slots.forEach((slot: IDateSlot) => {
+					const date = slot.date;
+					if (!newDateSlots[date]) {
+						newDateSlots[date] = { slots: [] };
+					}
+					newDateSlots[date].slots.push({
+						id: slot.id,
+						mentorId: slot.mentorId,
+						date: slot.date,
+						startTime: slot.startTime,
+						endTime: slot.endTime,
+					});
+				});
+				setDateSlots(newDateSlots);
+			}
+		} catch (error) {
+			console.error("Error fetching date slots:", error);
+			toast.error("Failed to fetch date-specific slots.");
+		}
+	}, [user?.id]);
+
 	useEffect(() => {
 		fetchWeeklySlots();
-	}, [fetchWeeklySlots]);
+		fetchDateSlots();
+	}, [fetchWeeklySlots, fetchDateSlots]);
 
 	// Toggle day availability and update all slots' isActive via API
 	const handleToggleAvailability = async (day: string, checked: boolean) => {
 		if (!user?.id) return;
 
-		// If toggling to available but no slots exist, prompt to add a slot
 		if (checked && weeklySlots[day].slots.length === 0) {
 			toast.error(`Cannot activate ${days[parseInt(day)]}. Please add at least one slot first.`);
 			return;
 		}
 
 		try {
-			// Call API to toggle all slots for the day, passing true to activate, false to deactivate
 			const response = await toggleWeeklySlotByWeekDayAPI(user.id, parseInt(day), checked);
 			if (response.success) {
-				// Update local state
 				setWeeklySlots((prev) => ({
 					...prev,
 					[day]: {
@@ -165,7 +214,7 @@ export function MentorAvailabilityPage() {
 						unavailable: !checked,
 						slots: prev[day].slots.map((slot) => ({
 							...slot,
-							isActive: checked, // Set isActive to true if activating, false if deactivating
+							isActive: checked,
 						})),
 					},
 				}));
@@ -208,7 +257,6 @@ export function MentorAvailabilityPage() {
 			endTime: newWeeklySlot.endTime,
 		};
 
-		// Check for overlaps
 		const existingSlots = weeklySlots[newWeeklySlot.day].slots;
 		const hasOverlap = existingSlots.some((existingSlot) => doSlotsOverlap(slot, existingSlot));
 
@@ -220,18 +268,14 @@ export function MentorAvailabilityPage() {
 		try {
 			const response = await addWeeklySlotAPI(user.id, slot);
 			if (response.success) {
-				console.log('response: ', response);
-				
 				setWeeklySlots((prev) => {
 					const updatedSlots = {
 						...prev,
 						[newWeeklySlot.day]: {
-							unavailable: false, // Adding a slot makes the day available
+							unavailable: false,
 							slots: [...prev[newWeeklySlot.day].slots, { ...response.slot, isActive: true }],
 						},
 					};
-
-					console.log(`Updated slots : `, updatedSlots);
 					return updatedSlots;
 				});
 				setIsWeeklyModalOpen(false);
@@ -257,7 +301,7 @@ export function MentorAvailabilityPage() {
 						[day]: {
 							...prev[day],
 							slots: prev[day].slots.map((slot) => (slot.id === slotId ? { ...slot, isActive } : slot)),
-							unavailable: !prev[day].slots.some((slot) => (slot.id === slotId ? isActive : slot.isActive)), // Update unavailable based on active slots
+							unavailable: !prev[day].slots.some((slot) => (slot.id === slotId ? isActive : slot.isActive)),
 						},
 					};
 					return updatedSlots;
@@ -272,30 +316,45 @@ export function MentorAvailabilityPage() {
 
 	const handleAddDateSlot = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (!user?.id) return;
+
 		const slot = {
-			day: newDateSlot.date,
+			date: newDateSlot.date,
 			startTime: newDateSlot.startTime,
 			endTime: newDateSlot.endTime,
-			isActive: true,
 		};
 
 		try {
-			const response = await saveDateSlotToDatabase(slot);
+			const response = await addDateSlotAPI(user.id, slot);
 			if (response.success) {
-				setDateSlots((prev) => ({
-					...prev,
-					[newDateSlot.date]: {
-						slots: [
-							...(prev[newDateSlot.date]?.slots || []),
-							{
-								id: response.id,
-								startTime: response.startTime,
-								endTime: response.endTime,
-								isActive: response.isActive,
-							},
-						],
-					},
-				}));
+				const newSlot = response.slot;
+				setDateSlots((prev) => {
+					const updatedSlots = { ...prev };
+					// Append to existing date if it exists, otherwise create new
+					if (!updatedSlots[newDateSlot.date]) {
+						updatedSlots[newDateSlot.date] = { slots: [] };
+					}
+					updatedSlots[newDateSlot.date].slots = [
+						...updatedSlots[newDateSlot.date].slots,
+						{
+							id: newSlot.id,
+							mentorId: newSlot.mentorId,
+							startTime: newSlot.startTime,
+							endTime: newSlot.endTime,
+							date: newSlot.date,
+						},
+					];
+					// Sort slots for the date
+					updatedSlots[newDateSlot.date].slots = sortDateSlotsByStartTime(updatedSlots[newDateSlot.date].slots);
+					// Sort the entire dateSlots object by date
+					const sortedDateSlots: IDateAvailability = {};
+					Object.keys(updatedSlots)
+						.sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+						.forEach((date) => {
+							sortedDateSlots[date] = updatedSlots[date];
+						});
+					return sortedDateSlots;
+				});
 				setIsDateModalOpen(false);
 				setNewDateSlot({ date: "", startTime: "09:00", endTime: "10:00" });
 				toast.success("Date-specific slot added successfully.");
@@ -307,8 +366,8 @@ export function MentorAvailabilityPage() {
 	};
 
 	const handleRemoveSlot = async (key: string, slotId: string, isWeekly: boolean) => {
-		try {
-			if (isWeekly) {
+		if (isWeekly) {
+			try {
 				const response = await deleteWeeklySlotAPI(user?.id as string, slotId);
 				if (response.success) {
 					setWeeklySlots((prev) => {
@@ -317,25 +376,46 @@ export function MentorAvailabilityPage() {
 							[key]: {
 								...prev[key],
 								slots: prev[key].slots.filter((slot) => slot.id !== slotId),
-								unavailable: !prev[key].slots.filter((slot) => slot.id !== slotId).some((slot) => slot.isActive), // Update unavailable
+								unavailable: !prev[key].slots.filter((slot) => slot.id !== slotId).some((slot) => slot.isActive),
 							},
 						};
 						return updatedSlots;
 					});
 					toast.success("Slot removed successfully.");
 				}
-			} else {
-				setDateSlots((prev) => ({
-					...prev,
-					[key]: {
-						...prev[key],
-						slots: prev[key].slots.filter((slot) => slot.id !== slotId),
-					},
-				}));
+			} catch (error) {
+				if (error instanceof Error) toast.error(error.message);
 			}
-		} catch (error) {
-			console.error("Error removing slot:", error);
-			if (error instanceof Error) toast.error(error.message);
+		} else {
+			try {
+				const response = await deleteDateSlotAPI(user?.id as string, slotId);
+				if (response.success) {
+					setDateSlots((prev) => {
+						const updatedSlots = {
+							...prev,
+							[key]: {
+								...prev[key],
+								slots: prev[key].slots.filter((slot) => slot.id !== slotId),
+							},
+						};
+						// Remove date entry if no slots remain
+						if (updatedSlots[key].slots.length === 0) {
+							delete updatedSlots[key];
+						}
+						// Sort the updatedSlots by date
+						const sortedDateSlots: IDateAvailability = {};
+						Object.keys(updatedSlots)
+							.sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+							.forEach((date) => {
+								sortedDateSlots[date] = updatedSlots[date];
+							});
+						return sortedDateSlots;
+					});
+					toast.success("Slot removed successfully.");
+				}
+			} catch (error) {
+				if (error instanceof Error) toast.error(error.message);
+			}
 		}
 	};
 
@@ -352,7 +432,15 @@ export function MentorAvailabilityPage() {
 			endTime: calculateEndTime(editSlot.startTime),
 		};
 
+		// Check for overlaps when editing
 		if (editSlot.isWeekly) {
+			const existingSlots = weeklySlots[editSlot.day].slots.filter((slot) => slot.id !== editSlot.slotId);
+			const hasOverlap = existingSlots.some((slot) => doSlotsOverlap(updatedSlot, slot));
+			if (hasOverlap) {
+				toast.error("The edited slot overlaps with an existing weekly slot.");
+				return;
+			}
+
 			try {
 				const response = await updateWeeklySlotAPI(user?.id as string, editSlot.slotId, updatedSlot.startTime, updatedSlot.endTime);
 				if (response.success) {
@@ -362,7 +450,7 @@ export function MentorAvailabilityPage() {
 							[editSlot.day]: {
 								...prev[editSlot.day],
 								slots: prev[editSlot.day].slots.map((slot) => (slot.id === editSlot.slotId ? { ...slot, ...updatedSlot } : slot)),
-								unavailable: !prev[editSlot.day].slots.some((slot) => (slot.id === editSlot.slotId ? true : slot.isActive)), // Update unavailable
+								unavailable: !prev[editSlot.day].slots.some((slot) => (slot.id === editSlot.slotId ? true : slot.isActive)),
 							},
 						};
 						return updatedSlots;
@@ -374,13 +462,40 @@ export function MentorAvailabilityPage() {
 				if (error instanceof Error) toast.error(error.message);
 			}
 		} else {
-			setDateSlots((prev) => ({
-				...prev,
-				[editSlot.day]: {
-					...prev[editSlot.day],
-					slots: prev[editSlot.day].slots.map((slot) => (slot.id === editSlot.slotId ? { ...slot, ...updatedSlot } : slot)),
-				},
-			}));
+
+			const existingDateSlots = dateSlots[editSlot.day]?.slots.filter((slot) => slot.id !== editSlot.slotId) || [];
+			const hasOverlap = existingDateSlots.some((slot) => doSlotsOverlap(updatedSlot, slot));
+			if (hasOverlap) {
+				toast.error("The edited slot overlaps with an existing date-specific slot.");
+				return;
+			}
+
+			try {
+				const response = await updateDateSlotAPI(user?.id as string, editSlot.slotId, updatedSlot.startTime, updatedSlot.endTime);
+				if (response.success) {
+					setDateSlots((prev) => {
+						const updatedSlots = {
+							...prev,
+							[editSlot.day]: {
+								...prev[editSlot.day],
+								slots: prev[editSlot.day].slots.map((slot) => (slot.id === editSlot.slotId ? { ...slot, ...updatedSlot } : slot)),
+							},
+						};
+						// Sort the updatedSlots by date
+						const sortedDateSlots: IDateAvailability = {};
+						Object.keys(updatedSlots)
+							.sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+							.forEach((date) => {
+								sortedDateSlots[date] = updatedSlots[date];
+							});
+						return sortedDateSlots;
+					});
+					setEditSlot(null);
+					toast.success("Slot updated successfully.");
+				}
+			} catch (error) {
+				if (error instanceof Error) toast.error(error.message);
+			}
 		}
 	};
 
@@ -394,17 +509,6 @@ export function MentorAvailabilityPage() {
 				  }
 				: prev
 		);
-	};
-
-	const saveDateSlotToDatabase = async (slot: { day: string; startTime: string; endTime: string; isActive: boolean }) => {
-		console.log("Saving date-specific slot to database:", slot);
-		return {
-			success: true,
-			id: `slot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-			startTime: slot.startTime,
-			endTime: slot.endTime,
-			isActive: slot.isActive,
-		};
 	};
 
 	return (
@@ -432,7 +536,7 @@ export function MentorAvailabilityPage() {
 									</div>
 									<div className="flex flex-col">
 										<div className="space-y-2">
-											{sortSlotsByStartTime(weeklySlots[index.toString()].slots).map((slot) => (
+											{sortWeeklySlotsByStartTime(weeklySlots[index.toString()].slots).map((slot) => (
 												<div key={slot.id} className="flex items-center gap-2 bg-white p-2 rounded-md shadow-sm">
 													{editSlot?.slotId === slot.id ? (
 														<form onSubmit={handleSaveEdit} className="flex items-center gap-2 w-full">
@@ -486,60 +590,56 @@ export function MentorAvailabilityPage() {
 							<Button variant="outline" onClick={() => setIsDateModalOpen(true)}>
 								<Plus className="h-4 w-4 mr-2" /> Add Date-Specific Slot
 							</Button>
-							{Object.entries(dateSlots)
-								.sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
-								.map(([date, { slots }]) => (
-									<div key={date} className="p-3 bg-muted rounded-md">
-										<div className="flex justify-between items-center mb-2">
-											<span className="font-medium">{formatDate(date)}</span>
-										</div>
-										<div className="space-y-2">
-											{sortSlotsByStartTime(slots || [])
-												.filter((slot): slot is Slot => slot != null && slot.startTime != null)
-												.map((slot) => (
-													<div key={slot.id} className="flex items-center gap-2 bg-white p-2 rounded-md shadow-sm">
-														{editSlot?.slotId === slot.id && !editSlot.isWeekly ? (
-															<form onSubmit={handleSaveEdit} className="flex items-center gap-2 w-full">
-																<Input type="time" value={editSlot.startTime} onChange={(e) => handleInputChange("startTime", e.target.value)} className="w-24" />
+							{
+								// Sort date slots by date
+								Object.entries(dateSlots)
+									.sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+									.map(([date, { slots }]) =>
+										// Sort slots within each date by start time
+										sortDateSlotsByStartTime(slots || [])
+											.filter((slot): slot is IDateSlot => slot != null && slot.startTime != null)
+											.map((slot) => (
+												// Display each slot with its date
+												<div key={slot.id} className="flex items-center gap-2 bg-white p-2 rounded-md shadow-sm">
+													{editSlot?.slotId === slot.id && !editSlot.isWeekly ? (
+														<form onSubmit={handleSaveEdit} className="flex items-center justify-evenly gap-2 w-full">
+															<div>{formatDate(date)}</div>
+															<div className="flex items-center gap-2">
+																<Input type="time" value={editSlot.startTime} onChange={(e) => handleInputChange("startTime", e.target.value)} className="w-30" />
 																<span>to</span>
-																<Input type="time" value={editSlot.endTime} readOnly className="w-24 bg-gray-100" />
-																<Button type="submit" variant="outline" size="sm">
-																	Save
+																<Input type="time" value={editSlot.endTime} readOnly className="w-30 bg-gray-100" />
+															</div>
+															<div className="flex">
+																<Button type="submit" variant="ghost" className="rounded-full" size="sm">
+																	<Save className="h-4 w-4" />
 																</Button>
-																<Button type="button" variant="ghost" size="sm" onClick={() => setEditSlot(null)}>
-																	<Trash className="h-4 w-4" />
+																<Button type="button" variant="ghost" className="rounded-full" size="sm" onClick={() => setEditSlot(null)}>
+																	<X className="h-4 w-4" />
 																</Button>
-															</form>
-														) : (
-															<>
+															</div>
+														</form>
+													) : (
+														<div className="flex items-center justify-evenly gap-2 w-full">
+															<div>{formatDate(date)}</div>
+															<div className="flex items-center gap-2">
 																<span className="text-sm">
 																	{formatTime(slot.startTime)} - {formatTime(slot.endTime)}
 																</span>
+															</div>
+															<div>
 																<Button variant="ghost" className="rounded-full" size="sm" onClick={() => handleEditSlot(date, slot.id, slot.startTime, slot.endTime, false)}>
 																	<Edit className="h-4 w-4" />
 																</Button>
 																<Button variant="ghost" className="hover:bg-red-100 rounded-full" size="sm" onClick={() => handleRemoveSlot(date, slot.id, false)}>
 																	<Trash2 className="h-4 w-4 text-red-600" />
 																</Button>
-																<Switch
-																	checked={slot.isActive}
-																	onCheckedChange={(checked) =>
-																		setDateSlots((prev) => ({
-																			...prev,
-																			[date]: {
-																				...prev[date],
-																				slots: prev[date].slots.map((s) => (s.id === slot.id ? { ...s, isActive: checked } : s)),
-																			},
-																		}))
-																	}
-																/>
-															</>
-														)}
-													</div>
-												))}
-										</div>
-									</div>
-								))}
+															</div>
+														</div>
+													)}
+												</div>
+											))
+									)
+							}
 						</CardContent>
 					</Card>
 				</div>

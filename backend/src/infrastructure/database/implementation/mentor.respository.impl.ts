@@ -2,7 +2,7 @@ import { IMentorProfileRepository } from "../../../domain/repositories/mentor.de
 import { MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
 import { IMentorProfileModel, MentorProfileModel } from "../models/user/mentor.details.model";
 import { IUsersDocument, UserModel } from "../models/user/user.model";
-import { IAvailabilityDTO } from "../../../application/dtos/availability.dto";
+import { IAvailabilityDTO } from "../../../application/dtos/availability/weekly.availability.dto";
 import { MentorEntity } from "../../../domain/entities/mentor.entity";
 import mongoose from "mongoose";
 import { RoleEnum } from "../../../application/interfaces/enums/role.enum";

@@ -13,7 +13,7 @@ export interface IUserTaskProgressDocument extends Document {
 
 const UserTaskProgressSchema = new Schema(
 	{
-		userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+		userId: { type: mongoose.Schema.Types.ObjectId, ref: "Users", required: true },
 		taskId: { type: mongoose.Schema.Types.ObjectId, ref: "GamificationTask", required: true },
 		currentCount: { type: Number, default: 0 },
 		completed: { type: Boolean, default: false },

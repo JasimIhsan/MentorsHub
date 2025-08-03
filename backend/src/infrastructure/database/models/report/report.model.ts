@@ -14,8 +14,8 @@ export interface IReportDocument extends Document {
 
 const ReportSchema = new mongoose.Schema(
 	{
-		reporterId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-		reportedId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+		reporterId: { type: mongoose.Schema.Types.ObjectId, ref: "Users", required: true },
+		reportedId: { type: mongoose.Schema.Types.ObjectId, ref: "Users", required: true },
 		reason: { type: String, required: true },
 		status: {
 			type: String,

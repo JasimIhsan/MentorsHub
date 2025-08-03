@@ -4,11 +4,12 @@ import { handleExceptionError } from "../../../utils/handle.exception.error";
 import { SpecialAvailabilityModel } from "../../models/availability/special.availability.model";
 
 export class SpecialAvailabilityRepositoryImpl implements ISpecialAvailabilityRepository {
-	async create(entity: SpecialAvailabilityEntity): Promise<void> {
+	async create(entity: SpecialAvailabilityEntity): Promise<SpecialAvailabilityEntity> {
 		try {
-			await SpecialAvailabilityModel.create(SpecialAvailabilityEntity.toObject(entity));
+			const slot = await SpecialAvailabilityModel.create(SpecialAvailabilityEntity.toObject(entity));
+			return SpecialAvailabilityEntity.fromDbDocument(slot);
 		} catch (error) {
-			handleExceptionError(error, "Error adding availability slot");
+			return handleExceptionError(error, "Error adding availability slot");
 		}
 	}
 
@@ -18,6 +19,15 @@ export class SpecialAvailabilityRepositoryImpl implements ISpecialAvailabilityRe
 			return doc ? SpecialAvailabilityEntity.fromDbDocument(doc) : null;
 		} catch (error) {
 			return handleExceptionError(error, "Error finding availability slot by ID");
+		}
+	}
+
+	async findByMentorId(mentorId: string): Promise<SpecialAvailabilityEntity[]> {
+		try {
+			const docs = await SpecialAvailabilityModel.find({ mentorId });
+			return docs.map(SpecialAvailabilityEntity.fromDbDocument);
+		} catch (error) {
+			return handleExceptionError(error, "Error finding availability slots by mentor ID");
 		}
 	}
 
@@ -34,6 +44,16 @@ export class SpecialAvailabilityRepositoryImpl implements ISpecialAvailabilityRe
 			await SpecialAvailabilityModel.findByIdAndUpdate(entity.id, SpecialAvailabilityEntity.toObject(entity));
 		} catch (error) {
 			handleExceptionError(error, "Error updating availability slot");
+		}
+	}
+
+	async isExists(mentorId: string, date: Date, startTime: string, endTime: string): Promise<boolean> {
+		try {
+			const exists = await SpecialAvailabilityModel.exists({ mentorId, date, $or: [{ startTime }, { endTime }] });
+			return !!exists;
+		} catch (error) {
+			handleExceptionError(error, "Error checking overlapping availability slots");
+			return false;
 		}
 	}
 }

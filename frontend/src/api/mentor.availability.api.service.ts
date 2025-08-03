@@ -7,7 +7,7 @@ export const fetchWeeklySlotsAPI = async (mentorId: string) => {
 	} catch (error: any) {
 		throw new Error(error.response.data.message);
 	}
-}
+};
 
 export const addWeeklySlotAPI = async (mentorId: string, slot: { day: string; startTime: string; endTime: string }) => {
 	try {
@@ -55,6 +55,44 @@ export const toggleWeeklySlotByWeekDayAPI = async (mentorId: string, day: number
 			dayOfWeek: day,
 			status,
 		});
+		return response.data;
+	} catch (error: any) {
+		throw new Error(error.response.data.message);
+	}
+};
+
+//========================== DATE-SPECIFIC SLOTS ==========================
+
+export const fetchDateSlotsAPI = async (mentorId: string) => {
+	try {
+		const response = await axiosInstance.get(`/mentor/availability/special/${mentorId}`);
+		return response.data;
+	} catch (error: any) {
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const addDateSlotAPI = async (mentorId: string, slot: { date: string; startTime: string; endTime: string;}) => {
+	try {
+		const response = await axiosInstance.post(`/mentor/availability/special/create/${mentorId}`, slot);
+		return response.data;
+	} catch (error: any) {
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const deleteDateSlotAPI = async (mentorId: string, slotId: string) => {
+	try {
+		const response = await axiosInstance.delete(`/mentor/availability/special/${mentorId}/${slotId}`);
+		return response.data;
+	} catch (error: any) {
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const updateDateSlotAPI = async (mentorId: string, slotId: string, startTime: string, endTime: string) => {
+	try {
+		const response = await axiosInstance.put(`/mentor/availability/special/update/${mentorId}/${slotId}`, { startTime, endTime });
 		return response.data;
 	} catch (error: any) {
 		throw new Error(error.response.data.message);
