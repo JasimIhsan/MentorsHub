@@ -24,8 +24,8 @@ export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 
 		// ✅ Check using existing availability logic
 		if (status === SessionStatusEnum.APPROVED) {
-			const availableSlots = await this.getAvailabilityUseCase.execute(session.mentor.id, session.date);
-			if (!availableSlots.includes(session.time)) {
+			const availableSlots = await this.getAvailabilityUseCase.execute(session.mentor.id, session.date, session.hours);
+			if (!availableSlots.includes(session.startTime)) {
 				throw new Error("Slot is already booked by another session");
 			}
 		}

@@ -7,4 +7,5 @@ export interface ISpecialAvailabilityRepository {
 	findById(id: string): Promise<SpecialAvailabilityEntity | null>;
 	findByMentorId(mentorId: string): Promise<SpecialAvailabilityEntity[]>;
 	isExists(mentorId: string, date: Date, startTime: string, endTime: string): Promise<boolean>;
+	findAvailableSlot(mentorId: string, date: Date, durationInHours: number): Promise<string[] | null>;
 }

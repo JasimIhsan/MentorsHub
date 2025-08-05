@@ -586,7 +586,7 @@ export function MentorAvailabilityPage() {
 							<CardTitle>Date-Specific Slots</CardTitle>
 							<p className="text-muted-foreground">Set availability for specific dates</p>
 						</CardHeader>
-						<CardContent className="space-y-4">
+						<CardContent className="space-y-3">
 							<Button variant="outline" onClick={() => setIsDateModalOpen(true)}>
 								<Plus className="h-4 w-4 mr-2" /> Add Date-Specific Slot
 							</Button>

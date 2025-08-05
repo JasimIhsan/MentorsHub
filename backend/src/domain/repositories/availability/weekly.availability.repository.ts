@@ -8,4 +8,5 @@ export interface IWeeklyAvailabilityRepository {
 	isExists(mentorId: string, dayOfWeek: number, startTime: string, endTime: string): Promise<boolean>;
 	findAllByMentorId(mentorId: string): Promise<WeeklyAvailabilityEntity[]>;
 	toggleAvailabilityByWeekDay(mentorId: string, dayOfWeek: number, status: boolean): Promise<void>;
+	findAvailableSlots(mentorId: string, date: Date, durationInHours: number): Promise<string[] | null>;
 }

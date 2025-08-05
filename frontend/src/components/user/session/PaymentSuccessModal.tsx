@@ -38,7 +38,7 @@ export function PaymentSuccessModal({ isOpen, onClose, session }: { isOpen: bool
 									</div>
 									<div>
 										<p className="text-sm text-muted-foreground">Time</p>
-										<p className="font-medium">{formatTime(session.time)}</p>
+										<p className="font-medium">{`${formatTime(session.startTime)} - ${formatTime(session.endTime)}`}</p>
 									</div>
 								</div>
 								<div className="flex items-center gap-3">

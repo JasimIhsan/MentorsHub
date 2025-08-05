@@ -41,7 +41,7 @@ import { ReportRepositoryImpl } from "./database/implementation/report.repositor
 import { SocketNotificationGateway } from "./socket/handlers/notification/socket.notification.gatway";
 import { WeeklyAvailabilityRepositoryImpl } from "./database/implementation/availability/weekly.availability.repository.impl";
 import { IWeeklyAvailabilityRepository } from "../domain/repositories/availability/weekly.availability.repository";
-import { SpecialAvailabilityRepositoryImpl } from "./database/implementation/availability/special.availability.repository";
+import { SpecialAvailabilityRepositoryImpl } from "./database/implementation/availability/special.availability.repository.impl";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();

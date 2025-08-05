@@ -22,7 +22,8 @@ export class SessionRepositoryImpl implements ISessionRepository {
 				topic: obj.topic,
 				sessionFormat: obj.sessionFormat,
 				date: obj.date,
-				time: obj.time,
+				startTime: obj.startTime,
+				endTime: obj.endTime,
 				hours: obj.hours,
 				message: obj.message,
 				status: obj.status,
@@ -64,7 +65,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			limit?: number;
 			search?: string;
 			status?: string;
-		},
+		}
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const { page = 1, limit = 10, search = "", status = "" } = options || {};
@@ -107,7 +108,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			filter?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
-		},
+		}
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const query: any = { mentorId };
@@ -190,7 +191,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 						"participants.$.paymentId": paymentId,
 						status: newStatus,
 					},
-				},
+				}
 			);
 		} catch (error) {
 			return handleExceptionError(error, "Error updating session payment");
@@ -214,13 +215,13 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}).lean();
 
 		const expirable = sessions.filter((session) => {
-			const [hours, minutes] = session.time.split(":").map(Number);
-			const sessionStart = new Date(session.date);
-			sessionStart.setHours(hours);
-			sessionStart.setMinutes(minutes);
-			sessionStart.setSeconds(0);
+			const [hours, minutes] = session.endTime.split(":").map(Number);
+			const sessionEnd = new Date(session.date);
+			sessionEnd.setHours(hours);
+			sessionEnd.setMinutes(minutes);
+			sessionEnd.setSeconds(0);
 
-			const sessionEnd = new Date(sessionStart.getTime() + session.hours * 60 * 60 * 1000);
+			// const sessionEnd = new Date(sessionStart.getTime() + session.hours * 60 * 60 * 1000);
 			return sessionEnd < now;
 		});
 

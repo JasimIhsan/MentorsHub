@@ -55,7 +55,7 @@ export function ReviewModal({ isOpen, onClose, session }: { isOpen: boolean; onC
 				<DialogHeader>
 					<DialogTitle>Leave a Review</DialogTitle>
 					<DialogDescription>
-						Share feedback for your session with {session.mentor.firstName} {session.mentor.lastName} on {formatDate(session.date)} at {formatTime(session.time)}.
+						Share feedback for your session with {session.mentor.firstName} {session.mentor.lastName} on {formatDate(session.date)} at `${formatTime(session.startTime)} - ${formatTime(session.endTime)}`.
 					</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4">

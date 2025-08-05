@@ -29,7 +29,7 @@ export function SessionCard({ session, isRazorpayLoaded, setSelectedSession, set
 	const [isReasonOpen, setIsReasonOpen] = useState(false);
 
 	// Check if session is expired
-	const isExpired = session.status === "upcoming" && isSessionExpired(session.date, session.time);
+	const isExpired = session.status === "upcoming" && isSessionExpired(session.date, session.endTime);
 	const type = isExpired ? "expired" : session.status;
 
 	// Initiate payment
@@ -64,7 +64,7 @@ export function SessionCard({ session, isRazorpayLoaded, setSelectedSession, set
 									</div>
 									<div className="flex items-center gap-1">
 										<Clock className="h-4 w-4 text-muted-foreground" />
-										<span className="text-sm">{formatTime(session.time)}</span>
+										<span className="text-sm">{`${formatTime(session.startTime)} - ${formatTime(session.endTime)}`}</span>
 									</div>
 									<div className="flex items-center gap-1">
 										<MessageSquare className="h-4 w-4 text-muted-foreground" />

@@ -8,14 +8,39 @@ export class GetMentorAvailabilityController {
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { mentorId } = req.params;
-			const { dateString } = req.query;
-			const date = new Date(dateString as string);
-			if (!date) {
-				res.status(HttpStatusCode.BAD_REQUEST).json({ success: false, message: "Date is required" });
+			const { date, hours } = req.query;
+			console.log('date: ', date);
+
+			if (!date || !hours) {
+				res.status(HttpStatusCode.BAD_REQUEST).json({
+					success: false,
+					message: "Both date and hours are required",
+				});
 				return;
 			}
 
-			const availability = await this.getAvailabilityUsecase.execute(mentorId, date);
+			// Safely parse date
+			const parsedDate = new Date(date as string);
+			console.log('parsedDate: ', parsedDate);
+			const parsedHours = parseInt(hours as string, 10);
+
+			if (isNaN(parsedDate.getTime())) {
+				res.status(HttpStatusCode.BAD_REQUEST).json({
+					success: false,
+					message: "Invalid date format",
+				});
+				return;
+			}
+
+			if (isNaN(parsedHours) || parsedHours <= 0) {
+				res.status(HttpStatusCode.BAD_REQUEST).json({
+					success: false,
+					message: "Invalid duration in hours",
+				});
+				return;
+			}
+
+			const availability = await this.getAvailabilityUsecase.execute(mentorId, new Date(date as string), parseInt(hours as string));
 
 			const isExist = availability.length > 0 ? true : false;
 

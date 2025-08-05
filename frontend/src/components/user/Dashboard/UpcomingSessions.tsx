@@ -86,7 +86,7 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({ sessions, isLoading
 										</div>
 										<div className="flex items-center gap-1">
 											<Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-											<span>{formatTime(session.time)}</span>
+											<span>{`${formatTime(session.startTime)} - ${formatTime(session.endTime)}`}</span>
 										</div>
 										<div className="flex items-center gap-1">
 											{session.sessionFormat === "one-on-one" ? <User className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" /> : <Users2 className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />}

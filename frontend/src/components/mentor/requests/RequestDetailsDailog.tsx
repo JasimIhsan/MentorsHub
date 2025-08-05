@@ -50,7 +50,9 @@ export const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({ sele
 								<div className="grid grid-cols-2 gap-4">
 									<div>
 										<span className="text-sm font-medium text-muted-foreground">Date & Time</span>
-										<p className="text-sm">{formatDate(selectedRequest.date)} - {formatTime(selectedRequest.time)}</p>
+										<p className="text-sm">
+											{formatDate(selectedRequest.date)} - {`${formatTime(selectedRequest.startTime)} - ${formatTime(selectedRequest.endTime)}`}
+										</p>
 									</div>
 									<div>
 										<span className="text-sm font-medium text-muted-foreground">Duration</span>

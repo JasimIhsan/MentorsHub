@@ -83,7 +83,7 @@ export function UpcomingSessionsList({ sessions, isLoading }: UpcomingSessionsLi
 									</span>
 									<span className="text-xs text-muted-foreground flex gap-1 items-center">
 										<Clock className="h-3 w-3 text-muted-foreground" />
-										{formatTime(session.time)}
+										{`${formatTime(session.startTime)} - ${formatTime(session.endTime)}`}
 									</span>
 									<span className="text-xs text-muted-foreground flex gap-1 items-center">({session.hours}h)</span>
 									{session.sessionFormat === "video" && (

@@ -84,4 +84,60 @@ export class WeeklyAvailabilityRepositoryImpl implements IWeeklyAvailabilityRepo
 			handleExceptionError(error, "Error toggling availability by week day");
 		}
 	}
+
+	async findAvailableSlots(mentorId: string, date: Date, durationInHours: number): Promise<string[] | null> {
+		console.log('📅 date in impl: ', date);
+		try {
+			const targetDay = new Date(date).getDay(); // 0 = Sunday, 6 = Saturday
+
+			// Fetch all active weekly slots for that day
+			const slots = await WeeklyAvailabilityModel.find({
+				mentorId,
+				dayOfWeek: targetDay,
+				isActive: true,
+			}).sort({ startTime: 1 });
+
+			if (!slots.length) return null;
+
+			const timeToMinutes = (timeStr: string) => {
+				const [h, m] = timeStr.split(":").map(Number);
+				return h * 60 + m;
+			};
+
+			const minutesToTime = (minutes: number) => {
+				const h = Math.floor(minutes / 60);
+				const m = minutes % 60;
+				return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+			};
+
+			const availableSlots: string[] = [];
+
+			for (let i = 0; i <= slots.length - durationInHours; i++) {
+				let isConsecutive = true;
+				let expectedStart = timeToMinutes(slots[i].startTime);
+
+				for (let j = 0; j < durationInHours; j++) {
+					const slot = slots[i + j];
+					const slotStart = timeToMinutes(slot.startTime);
+					const slotEnd = timeToMinutes(slot.endTime);
+
+					if (slotStart !== expectedStart || slotEnd - slotStart !== 60) {
+						isConsecutive = false;
+						break;
+					}
+
+					expectedStart += 60;
+				}
+
+				if (isConsecutive) {
+					availableSlots.push(slots[i].startTime);
+				}
+			}
+
+			return availableSlots.length ? availableSlots : null;
+		} catch (error) {
+			handleExceptionError(error, "Error finding available weekly slots");
+			return null;
+		}
+	}
 }

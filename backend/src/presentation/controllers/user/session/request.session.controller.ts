@@ -7,9 +7,9 @@ export class RequestSessionController {
 	constructor(private requestSessionUsecase: IRequestSessionUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
-			const requestData = req.body;
+			const { mentorId, userId, topic, sessionFormat, date, startTime, endTime, hours, message, pricing, totalAmount } = req.body;
 
-			const session = await this.requestSessionUsecase.execute(requestData);
+			const session = await this.requestSessionUsecase.execute({ mentorId, userId, topic, sessionFormat, date, startTime, endTime, hours, message, pricing, totalAmount });
 			res.status(HttpStatusCode.OK).json({ success: true, session, message: "Session requested successfully" });
 		} catch (error) {
 			logger.error(`❌ Error in RequestSessionController: ${error}`);

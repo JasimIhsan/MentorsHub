@@ -22,7 +22,7 @@ export const registerVideoCallHandlers = (io: Server, socket: Socket) => {
 
 			// ✅ Combine session.date and session.time to get start datetime in IST
 			const sessionDate = new Date(session.date); // example: 2025-07-28T00:00:00.000Z
-			const [hours, minutes] = session.time.split(":").map(Number);
+			const [hours, minutes] = session.startTime.split(":").map(Number);
 
 			// Important: this sets time in **local time** (assumed to be IST)
 			const sessionStartTime = new Date(sessionDate);
