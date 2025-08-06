@@ -132,6 +132,4 @@ export class MessageRepositoryImpl implements IMessageRepository {
 			return handleExceptionError(error, "Error marking all messages as read");
 		}
 	}
-
-	
 }

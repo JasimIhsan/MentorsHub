@@ -17,7 +17,7 @@ export function CancelSessionDialog({ isOpen, onClose, session, onConfirm }: Can
 				<DialogHeader>
 					<DialogTitle>Cancel Session</DialogTitle>
 					<DialogDescription>
-						Are you sure you want to cancel your session with {session ? `${session.mentor.firstName} ${session.mentor.lastName}` : "this mentor"} on {session ? formatDate(session.date) : ""} at {session ? formatTime(session.time) : ""}?
+						Are you sure you want to cancel your session with {session ? `${session.mentor.firstName} ${session.mentor.lastName}` : "this mentor"} on {session ? formatDate(session.date) : ""} at {session ? `${formatTime(session.startTime)} - ${formatTime(session.endTime)}` : ""}?
 					</DialogDescription>
 				</DialogHeader>
 				<DialogFooter>

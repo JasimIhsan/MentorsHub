@@ -20,13 +20,16 @@ import { RootState } from "@/store/store";
 import { Loading } from "@/components/custom/Loading";
 import { fetchMentorAvailabilityAPI } from "@/api/mentors.api.service";
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
+import { formatTime } from "@/utility/time-data-formatter";
+import { motion } from "framer-motion";
 
 export interface SessionData {
 	mentorId: string;
 	userId: string;
 	topic: string;
 	date: Date;
-	time: string;
+	startTime: string;
+	endTime: string;
 	hours: number;
 	message: string;
 	totalAmount: number;
@@ -50,9 +53,15 @@ export function RequestSessionPage() {
 
 	useEffect(() => {
 		const fetchAvailability = async () => {
-			if (!date) return;
+			if (!date || !mentorId || !hours) {
+				toast.error("Please select a date and time.");
+				return;
+			}
+			console.log(`date in page : `, date);
+			// const localDateString = getLocalDateString(date);
+
 			try {
-				const response = await fetchMentorAvailabilityAPI(mentorId as string, date);
+				const response = await fetchMentorAvailabilityAPI(mentorId as string, date, hours);
 				if (response.success && response.isExist) {
 					setAvailability(response.availability);
 					setTime("");
@@ -70,7 +79,7 @@ export function RequestSessionPage() {
 			}
 		};
 		fetchAvailability();
-	}, [date, mentorId]);
+	}, [date, mentorId, hours]);
 
 	if (loading) {
 		return <Loading appName="Request Session" loadingMessage="Loading Mentor Preferences" />;
@@ -129,12 +138,30 @@ export function RequestSessionPage() {
 		}
 	};
 
+	const calculateEndTime = (startTime: string): string => {
+		const [hour, minute] = startTime.split(":").map(Number);
+
+		const startDate = new Date();
+		startDate.setHours(hour);
+		startDate.setMinutes(minute);
+		startDate.setSeconds(0);
+
+		startDate.setHours(startDate.getHours() + hours);
+
+		const endHour = String(startDate.getHours()).padStart(2, "0");
+		const endMinute = String(startDate.getMinutes()).padStart(2, "0");
+		const endTime = `${endHour}:${endMinute}`;
+
+		return endTime;
+	};
+
 	const requestData: SessionData = {
 		mentorId: mentorId,
 		userId: user?.id as string,
 		topic: topic,
 		date: (date ? new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())) : date) as Date,
-		time: time,
+		startTime: time,
+		endTime: calculateEndTime(time),
 		hours: hours,
 		message: message,
 		totalAmount: calculateTotal(),
@@ -168,7 +195,7 @@ export function RequestSessionPage() {
 	};
 
 	return (
-		<div className="container py-8">
+		<div className="flex justify-center w-full py-8 px-10 md:px-20 xl:px-25">
 			<div className="mx-auto max-w-5xl">
 				<div className="mb-8">
 					<h1 className="text-3xl font-bold tracking-tight">Request a Session</h1>
@@ -177,7 +204,7 @@ export function RequestSessionPage() {
 					</p>
 				</div>
 
-				<div className="grid gap-4 md:grid-cols-[1fr_380px] lg:grid-cols-[1fr_300px]">
+				<div className="grid gap-4 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_380px]">
 					{/* Main Content */}
 					<div className="space-y-6">
 						<Card>
@@ -194,59 +221,6 @@ export function RequestSessionPage() {
 								</div>
 
 								<div>
-									<Label htmlFor="date" className="mb-2 block">
-										Preferred Date
-									</Label>
-									<CustomCalendar selectedDate={date} setSelectedDate={setDate} />
-								</div>
-
-								<div>
-									<Label htmlFor="time" className="mb-2 block">
-										Available Time Slots
-									</Label>
-									<Select value={time} onValueChange={handleTimeChange}>
-										<SelectTrigger id="time" className="w-full">
-											<SelectValue placeholder={availability.length ? "Select a time slot" : "No slots available"} />
-										</SelectTrigger>
-										<SelectContent>
-											{availability.length ? (
-												availability.map((slot, index) => {
-													const dateTime = new Date(`2025-05-05T${slot}:00`); // Use a fixed date or dynamically generate
-													return (
-														<SelectItem key={index} value={slot}>
-															{format(dateTime, "h:mm a")} {/* e.g., "10:00 AM" */}
-														</SelectItem>
-													);
-												})
-											) : (
-												<SelectItem value="none" disabled>
-													No slots available
-												</SelectItem>
-											)}
-										</SelectContent>
-									</Select>
-									{!isSlotValid && time && <p className="mt-2 text-sm text-red-500">The selected time and duration are not available. Please choose another slot or adjust the duration.</p>}
-								</div>
-
-								<div>
-									<Label htmlFor="hours" className="mb-2 block">
-										Duration (Hours)
-									</Label>
-									<Select value={hours.toString()} onValueChange={handleHoursChange}>
-										<SelectTrigger id="hours" className="w-full">
-											<SelectValue placeholder="Select hours" />
-										</SelectTrigger>
-										<SelectContent>
-											{[1, 2, 3, 4].map((hour) => (
-												<SelectItem key={hour} value={hour.toString()}>
-													{hour} {hour === 1 ? "hour" : "hours"}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-								</div>
-
-								<div>
 									<Label htmlFor="message" className="mb-2 block">
 										Message to Mentor
 									</Label>
@@ -258,6 +232,74 @@ export function RequestSessionPage() {
 										value={message}
 										onChange={(e) => setMessage(e.target.value)}
 									/>
+								</div>
+
+								<div>
+									<Label htmlFor="hours" className="mb-2 block">
+										Duration (Hours)
+									</Label>
+									<Select value={hours.toString()} onValueChange={handleHoursChange}>
+										<SelectTrigger id="hours" className="w-full">
+											<SelectValue placeholder="Select hours" />
+										</SelectTrigger>
+										<SelectContent>
+											{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((hour) => (
+												<SelectItem key={hour} value={hour.toString()}>
+													{hour} {hour === 1 ? "hour" : "hours"}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</div>
+
+								<div>
+									<Label htmlFor="date" className="mb-2 block">
+										Preferred Date
+									</Label>
+									<CustomCalendar selectedDate={date} setSelectedDate={setDate} />
+								</div>
+
+								<div>
+									<Label htmlFor="time" className="mb-2 block">
+										Available Time Slots
+									</Label>
+									<div className="p-4 bg-white rounded-md border">
+										{availability.length > 0 ? (
+											<div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+												{availability.map((slot) => (
+													<motion.div key={slot} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+														<Button variant={time === slot ? "default" : "outline"} size="sm" className={`w-full py-8 relative ${time === slot ? "ring-2 ring-blue-500 ring-offset-1" : ""}`} onClick={() => handleTimeChange(slot)}>
+															{`${formatTime(slot)} - ${formatTime(calculateEndTime(slot))}`}
+														</Button>
+													</motion.div>
+												))}
+											</div>
+										) : (
+											<p className="text-gray-500 text-sm">No slots available in this period</p>
+										)}
+									</div>
+									{/* <Select value={time} onValueChange={handleTimeChange}>
+										<SelectTrigger id="time" className="w-full">
+											<SelectValue placeholder={availability.length ? "Select a time slot" : "No slots available"} />
+										</SelectTrigger>
+										<SelectContent>
+											{availability.length ? (
+												availability.map((slot, index) => {
+													const dateTime = new Date(`2025-05-05T${slot}:00`); // Use a fixed date or dynamically generate
+													return (
+														<SelectItem key={index} value={slot}>
+															{format(dateTime, "h:mm a")} 
+														</SelectItem>
+													);
+												})
+											) : (
+												<SelectItem value="none" disabled>
+													No slots available
+												</SelectItem>
+											)}
+										</SelectContent>
+									</Select> */}
+									{!isSlotValid && time && <p className="mt-2 text-sm text-red-500">The selected time and duration are not available. Please choose another slot or adjust the duration.</p>}
 								</div>
 							</CardContent>
 							<CardFooter className="flex justify-end">
@@ -326,7 +368,7 @@ export function RequestSessionPage() {
 										</div>
 										<div className="flex items-center gap-2">
 											<Clock className="h-4 w-4 text-muted-foreground" />
-											<span className="text-sm">{requestData.time || "Not selected"}</span>
+											<span className="text-sm">{requestData.startTime && requestData.endTime ? `${formatTime(requestData.startTime)} - ${formatTime(requestData.endTime)}` : "Not selected"}</span>
 										</div>
 										<div className="flex items-center gap-2">
 											<Clock className="h-4 w-4 text-muted-foreground" />

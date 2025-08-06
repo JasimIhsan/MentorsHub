@@ -64,7 +64,8 @@ export function MentorHeader() {
 				<div className="ml-auto flex items-center gap-4">
 					<Button variant="secondary" size="default" onClick={() => navigate("/dashboard")}>
 						<ArrowRightLeft className="h-5 w-5" />
-						<span>Switch to User Dashboard</span>
+						<span className="hidden sm:block">Switch to User Dashboard</span>
+						<span className="sm:hidden">Switch</span>
 					</Button>
 
 					<Button variant="outline" size="icon">

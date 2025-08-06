@@ -18,7 +18,8 @@ export interface ISessionDocument extends Document {
 	topic: string;
 	sessionFormat: SessionFormat;
 	date: Date;
-	time: string;
+	startTime: string;
+	endTime: string;
 	hours: number;
 	message: string;
 	status: SessionStatusEnum;
@@ -39,7 +40,7 @@ const ParticipantSchema = new Schema(
 		},
 		paymentId: { type: String },
 	},
-	{ _id: false },
+	{ _id: false }
 );
 
 const SessionSchema = new Schema(
@@ -54,7 +55,8 @@ const SessionSchema = new Schema(
 			default: "one-on-one",
 		},
 		date: { type: Date, required: true },
-		time: { type: String, required: true },
+		startTime: { type: String, required: true },
+		endTime: { type: String, required: true },
 		hours: { type: Number, required: true },
 		message: { type: String, required: true },
 		status: {
@@ -70,7 +72,7 @@ const SessionSchema = new Schema(
 		totalAmount: { type: Number },
 		rejectReason: { type: String },
 	},
-	{ timestamps: true },
+	{ timestamps: true }
 );
 
 export const SessionModel = mongoose.model<ISessionDocument>("Sessions", SessionSchema);

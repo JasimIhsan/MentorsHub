@@ -9,4 +9,4 @@ export const mentorRouter = Router();
 
 mentorRouter.get("/:mentorId", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => getMentorController.handle(req, res, next));
 
-mentorRouter.get("/availability/:mentorId", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => getAvailabilityController.handle(req, res, next));
+mentorRouter.get("/availability/:mentorId", (req, res, next) => getAvailabilityController.handle(req, res, next));

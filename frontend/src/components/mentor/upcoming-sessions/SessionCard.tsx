@@ -39,7 +39,7 @@ export function SessionCard({ session, onStartSession, setSelectedSession, handl
 							<div className="flex items-center gap-2">
 								<Clock className="h-4 w-4 text-muted-foreground" />
 								<span className="text-sm">
-									{formatTime(session.time)} ({session.hours} hours)
+									{`${formatTime(session.startTime)} - ${formatTime(session.endTime)}`} ({session.hours} hours)
 								</span>
 							</div>
 							<div className="flex items-center gap-2">

@@ -1,50 +1,52 @@
-import dayjs from "dayjs";
-import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { IGetAvailabilityUseCase } from "../../interfaces/mentors/mentors.interface";
-import { WeekDay } from "../../../domain/entities/mentor.detailes.entity";
-import customParseFormat from "dayjs/plugin/customParseFormat";
 import { SessionStatusEnum } from "../../interfaces/enums/session.status.enums";
-
-dayjs.extend(customParseFormat);
+import { IWeeklyAvailabilityRepository } from "../../../domain/repositories/availability/weekly.availability.repository";
+import { ISpecialAvailabilityRepository } from "../../../domain/repositories/availability/special.availabiltity.repository";
+import dayjs from "dayjs";
 
 export class GetAvailabilityUseCase implements IGetAvailabilityUseCase {
-	constructor(private mentorRepo: IMentorProfileRepository, private sessionRepo: ISessionRepository) {}
+	constructor(private readonly _sessionRepo: ISessionRepository, private readonly _weekAvailabilityRepo: IWeeklyAvailabilityRepository, private readonly _specialAvailabilityRepo: ISpecialAvailabilityRepository) {}
 
-	async execute(userId: string, date: Date): Promise<string[]> {
-		// Step 1: Get the weekday name (e.g., "Monday")
-		const dayName = dayjs(date).format("dddd") as WeekDay;
+	async execute(userId: string, date: Date, hours: number): Promise<string[]> {
+		console.log("📅 Requested date:", date);
 
-		// Step 2: Fetch mentor's weekly availability
-		const allSlots = await this.mentorRepo.getAvailability(userId);
-		if (!allSlots) return [];
+		// 1. Fetch special availability
+		const specialSlots = await this._specialAvailabilityRepo.findAvailableSlot(userId, date, hours);
+		console.log("🎯 Special slots:", specialSlots);
 
-		// Step 3: Get available slots for the requested day
-		const slotsInDate = allSlots.availability[dayName];
-		if (!slotsInDate) return [];
+		// 2. Fetch weekly availability
+		const weekSlots = await this._weekAvailabilityRepo.findAvailableSlots(userId, date, hours);
+		console.log("🗓️ Weekly slots:", weekSlots);
 
-		// Step 4: Get sessions on that day
-		const sessions = await this.sessionRepo.findByDate(userId, date);
+		// 3. Merge and sort
+		const slotsInDate: string[] = [...(specialSlots || []), ...(weekSlots || [])];
+		slotsInDate.sort((a, b) => a.localeCompare(b));
+		if (slotsInDate.length === 0) return [];
 
-		// Step 5: Filter only sessions that are really booked
-		const bookedSessions = sessions?.filter((s) => s.status === SessionStatusEnum.APPROVED || s.status === SessionStatusEnum.UPCOMING);
+		// 4. Get all sessions for the day
+		const sessions = await this._sessionRepo.findByDate(userId, date);
+		console.log("sessions: ", sessions);
 
-		// Step 6: Create a set of booked time slots
-		const bookedTimeSet = new Set<string>();
+		// 5. Filter active sessions only
+		const activeSessions = sessions?.filter((s) => [SessionStatusEnum.APPROVED, SessionStatusEnum.UPCOMING, SessionStatusEnum.ONGOING].includes(s.status));
+		console.log("activeSessions: ", activeSessions);
 
-		bookedSessions?.forEach((s) => {
-			const sessionStartTime = s.time;
-			const sessionHours = s.hours;
+		// 6. Mark booked slots
+		const bookedSlotSet = new Set<string>();
+		activeSessions?.forEach((session) => {
+			const sessionStart = dayjs(`${dayjs(session.date).format("YYYY-MM-DD")}T${session.startTime}`);
 
-			for (let i = 0; i < sessionHours; i++) {
-				const slotTime = dayjs(sessionStartTime, "HH:mm").add(i, "hour").format("HH:mm");
-				bookedTimeSet.add(slotTime);
+			for (let i = 0; i < session.hours; i++) {
+				const slot = sessionStart.add(i, "hour").format("HH:mm");
+				bookedSlotSet.add(slot);
 			}
 		});
+		console.log("⛔ Booked slots: ", Array.from(bookedSlotSet));
 
-		// Step 7: Filter out booked slots from available slots
-		const availableSlots = slotsInDate.filter((slot) => !bookedTimeSet.has(slot));
-		console.log('availableSlots: ', availableSlots);
+		// 7. Remove booked slots from available ones
+		const availableSlots = slotsInDate.filter((slot) => !bookedSlotSet.has(slot));
+		console.log("✅ Final Available Slots:", availableSlots);
 
 		return availableSlots;
 	}

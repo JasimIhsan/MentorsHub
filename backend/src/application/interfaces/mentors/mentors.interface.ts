@@ -55,5 +55,5 @@ export interface IGetSessionHistoryUsecase {
 }
 
 export interface IGetAvailabilityUseCase {
-	execute(userId: string, dateStr: Date): Promise<string[]>;
+	execute(userId: string, dateStr: Date, hours: number): Promise<string[]>;
 }

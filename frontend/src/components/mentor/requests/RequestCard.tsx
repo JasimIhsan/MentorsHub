@@ -50,7 +50,7 @@ export const RequestCard: React.FC<RequestCardProps> = memo(({ request, status, 
 						<span className="text-sm font-medium text-muted-foreground">Date & Time</span>
 						<div className="flex items-center gap-1 text-sm">
 							<Clock className="h-4 w-4 text-muted-foreground" />
-							<span className="text-muted-foreground">{formatTime(request.time)}</span>
+							<span className="text-muted-foreground">{`${formatTime(request.startTime)} - ${formatTime(request.endTime)}`}</span>
 						</div>
 					</div>
 				</div>

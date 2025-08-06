@@ -249,7 +249,7 @@ export const MentorReportDocument = ({ stats, sessions, requests, reviews, ratin
 							) : (
 								sessions.map((s, idx) => (
 									<Text key={idx} style={styles.text}>
-										• {s.topic} on {formatTime(s.time)} in {formatDate(s.date)}
+										• {s.topic} on `${formatTime(s.startTime)} to ${formatTime(s.endTime)}` in {formatDate(s.date)}
 									</Text>
 								))
 							)}

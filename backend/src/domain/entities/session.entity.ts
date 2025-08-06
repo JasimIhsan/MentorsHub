@@ -24,7 +24,8 @@ export interface SessionProps {
 	topic: string;
 	sessionFormat: SessionFormat;
 	date: Date;
-	time: string;
+	startTime: string;
+	endTime: string;
 	hours: number;
 	message: string;
 	status: SessionStatusEnum;
@@ -56,8 +57,11 @@ export class SessionEntity {
 	get date() {
 		return this.props.date;
 	}
-	get time() {
-		return this.props.time;
+	get startTime() {
+		return this.props.startTime;
+	}
+	get endTime() {
+		return this.props.endTime;
 	}
 	get hours() {
 		return this.props.hours;
@@ -121,7 +125,8 @@ export class SessionEntity {
 			topic: doc.topic,
 			sessionFormat: doc.sessionFormat,
 			date: doc.date,
-			time: doc.time,
+			startTime: doc.startTime,
+			endTime: doc.endTime,
 			hours: doc.hours,
 			message: doc.message,
 			status: doc.status,
@@ -130,5 +135,25 @@ export class SessionEntity {
 			rejectReason: doc.rejectReason,
 			createdAt: doc.createdAt,
 		});
+	}
+
+	static toObject(session: SessionEntity) {
+		return {
+			id: session.id,
+			mentor: session.mentor,
+			participants: session.participants,
+			topic: session.topic,
+			sessionFormat: session.sessionFormat,
+			date: session.date,
+			startTime: session.startTime,
+			endTime: session.endTime,
+			hours: session.hours,
+			message: session.message,
+			status: session.status,
+			pricing: session.pricing,
+			totalAmount: session.totalAmount,
+			rejectReason: session.rejectReason,
+			createdAt: session.createdAt,
+		};
 	}
 }

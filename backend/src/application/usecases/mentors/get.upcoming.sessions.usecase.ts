@@ -20,7 +20,7 @@ export class GetUpcomingSessionMentorUsecase implements IGetUpcomingSessionMento
 		const upcoming = sessions.sessions
 			.filter((session) => {
 				const sessionDate = new Date(session.date);
-				const [hours, minutes] = session.time.split(":").map(Number);
+				const [hours, minutes] = session.startTime.split(":").map(Number);
 				sessionDate.setHours(hours, minutes, 0, 0);
 				return session.status === SessionStatusEnum.UPCOMING && sessionDate > now;
 			})

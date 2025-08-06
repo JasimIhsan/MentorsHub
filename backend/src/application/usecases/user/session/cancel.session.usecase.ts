@@ -22,7 +22,7 @@ export class CancelSessionUseCase implements ICancelSessionUseCase {
 			throw new Error("Only upcoming or approved sessions can be canceled");
 		}
 
-		if (isSessionExpired(session.date, session.time)) {
+		if (isSessionExpired(session.date, session.startTime)) {
 			throw new Error("Cannot cancel an expired session");
 		}
 
@@ -35,7 +35,7 @@ export class CancelSessionUseCase implements ICancelSessionUseCase {
 
 		await this.notifyUserUseCase.execute({
 			title: "📅 Session Canceled",
-			message: `A participant has canceled the session scheduled on ${session.date} at ${session.time}.`,
+			message: `A participant has canceled the session scheduled on ${session.date} at ${session.startTime} to ${session.endTime}.`,
 			isRead: false,
 			recipientId: session.mentor.id,
 			type: NotificationTypeEnum.ERROR,

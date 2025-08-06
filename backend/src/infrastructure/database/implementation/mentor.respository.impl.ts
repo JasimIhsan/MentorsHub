@@ -2,7 +2,7 @@ import { IMentorProfileRepository } from "../../../domain/repositories/mentor.de
 import { MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
 import { IMentorProfileModel, MentorProfileModel } from "../models/user/mentor.details.model";
 import { IUsersDocument, UserModel } from "../models/user/user.model";
-import { IAvailabilityDTO } from "../../../application/dtos/availability.dto";
+import { IAvailabilityDTO } from "../../../application/dtos/availability/weekly.availability.dto";
 import { MentorEntity } from "../../../domain/entities/mentor.entity";
 import mongoose from "mongoose";
 import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
@@ -96,7 +96,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 			priceMax?: number;
 			skills?: string[];
 		},
-		browserId: string
+		browserId: string,
 	): Promise<{ mentors: MentorEntity[]; total: number }> {
 		try {
 			const page = params.page ?? 1;
@@ -220,7 +220,7 @@ export class MentorDetailsRepositoryImpl implements IMentorProfileRepository {
 						certifications: doc.certifications,
 						sessionFormat: doc.sessionFormat,
 						hourlyRate: doc.hourlyRate,
-					})
+					}),
 			);
 
 			return { mentors, total };

@@ -15,7 +15,8 @@ export interface SessionRequestInput {
 	topic: string;
 	sessionFormat: "one-on-one" | "group";
 	date: Date;
-	time: string;
+	startTime: string; // e.g., "13:00"
+	endTime: string; // e.g., "14:00"
 	hours: number;
 	message: string;
 	pricing: PricingType;
@@ -25,20 +26,21 @@ export interface SessionRequestInput {
 export class RequestSessionUseCase implements IRequestSessionUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly mentorRepo: IMentorProfileRepository, private readonly getAvailability: IGetAvailabilityUseCase, private readonly notifyUserUseCase: INotifyUserUseCase) {}
 
-	async execute(dto: SessionRequestInput): Promise<ISessionUserDTO> {
-		const mentorProfile = await this.mentorRepo.findMentorByUserId(dto.mentorId);
-		if (!mentorProfile) {
-			throw new Error("Mentor not found");
-		}
+	async execute(input: SessionRequestInput): Promise<ISessionUserDTO> {
+		const mentorProfile = await this.mentorRepo.findMentorByUserId(input.mentorId);
+		if (!mentorProfile) throw new Error("Mentor not found");
 
-		const slots = await this.getAvailability.execute(dto.mentorId, dto.date);
-		if (!slots.includes(dto.time)) {
+		console.log(`input : `, input);
+
+		const availableSlots = await this.getAvailability.execute(input.mentorId, input.date, input.hours);
+		console.log("availableSlots in request: ", availableSlots);
+		if (!availableSlots.includes(input.startTime)) {
 			throw new Error("The requested slot is already booked or unavailable.");
 		}
 
 		const participants: SessionParticipantEntity[] = [
 			{
-				user: { id: dto.userId },
+				user: { id: input.userId },
 				paymentStatus: SessionPaymentStatusEnum.PENDING,
 				paymentId: undefined,
 			},
@@ -46,17 +48,18 @@ export class RequestSessionUseCase implements IRequestSessionUseCase {
 
 		const session = new SessionEntity({
 			id: "",
-			mentor: { id: dto.mentorId },
+			mentor: { id: input.mentorId },
 			participants,
-			topic: dto.topic,
-			sessionFormat: dto.sessionFormat,
-			date: dto.date,
-			time: dto.time,
-			hours: dto.hours,
-			message: dto.message,
+			topic: input.topic,
+			sessionFormat: input.sessionFormat,
+			date: input.date,
+			startTime: input.startTime,
+			endTime: input.endTime,
+			hours: input.hours,
+			message: input.message,
 			status: SessionStatusEnum.PENDING,
-			pricing: dto.pricing,
-			totalAmount: dto.totalAmount,
+			pricing: input.pricing,
+			totalAmount: input.totalAmount,
 			createdAt: new Date(),
 			rejectReason: undefined,
 		});
@@ -67,11 +70,11 @@ export class RequestSessionUseCase implements IRequestSessionUseCase {
 			title: "📥 New Session Request",
 			message: `You received a session request for "${session.topic}".`,
 			isRead: false,
-			recipientId: dto.mentorId,
+			recipientId: input.mentorId,
 			type: NotificationTypeEnum.SESSION,
 			link: "/mentor/requests",
 		});
 
-		return mapToUserSessionDTO(saved, dto.userId);
+		return mapToUserSessionDTO(saved, input.userId);
 	}
 }

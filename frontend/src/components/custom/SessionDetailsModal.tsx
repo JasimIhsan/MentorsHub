@@ -67,7 +67,7 @@ export function SessionDetailsModal({ session, onClose }: SessionDetailsModalPro
 									<div>
 										<Label className="text-sm font-medium text-muted-foreground">Time</Label>
 										<p className="text-foreground">
-											{formatTime(session.time)} ({session.hours} hours)
+											{`${formatTime(session.startTime)} - ${formatTime(session.endTime)}`} ({session.hours} hours)
 										</p>
 									</div>
 								</div>

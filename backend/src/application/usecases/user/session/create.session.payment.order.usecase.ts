@@ -13,13 +13,11 @@ export class CreateSessionPaymentOrderUseCase implements ICreateSessionPaymentOr
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 
 		// Check if session is expired
-		const sessionDate = new Date(session.date);
-		const [hour, minute] = session.time.split(":").map(Number);
-		sessionDate.setHours(hour);
-		sessionDate.setMinutes(minute);
+		const sessionDateTime = new Date(`${session.date}T${session.startTime}`);
+		sessionDateTime.setMinutes(sessionDateTime.getMinutes() + 10);
 
-		if (sessionDate.getTime() < Date.now()) {
-			throw new Error("Session is already expired. You cannot make payment.");
+		if (sessionDateTime.getTime() < Date.now()) {
+			throw new Error("Payment time expired. The session has already started or ended.");
 		}
 
 		const participant = session.participants.find((p) => p.user.id === userId);

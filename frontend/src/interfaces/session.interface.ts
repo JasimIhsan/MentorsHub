@@ -4,7 +4,8 @@ interface BaseSession {
 	topic: string;
 	sessionFormat: string;
 	date: string;
-	time: string;
+	startTime: string;
+	endTime: string;
 	hours: number;
 	message: string;
 	status: SessionStatus;

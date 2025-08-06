@@ -61,7 +61,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({ selectedDate, setSelect
 					key={day}
 					className={`p-2 text-center rounded-full 
                         ${isDisabled ? "text-gray-400 cursor-not-allowed" : "cursor-pointer"} 
-                        ${isSelected ? "bg-primary text-white" : ""} 
+                        ${isSelected ? "bg-primary ring-2 ring-blue-500 ring-offset-1 text-white" : ""} 
                         ${isToday ? "border-2 border-primary" : ""} 
                         ${!isDisabled && !isSelected ? "hover:bg-blue-100" : ""}`}
 					onClick={() => !isDisabled && handleDateClick(day)}>

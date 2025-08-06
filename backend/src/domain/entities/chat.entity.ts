@@ -21,7 +21,7 @@ export class ChatEntity {
 		this._lastMessage = props.lastMessage;
 		this._createdAt = props.createdAt;
 		this._updatedAt = props.updatedAt;
-	}
+}
 
 	// 🔓 Getters
 	get id(): string {

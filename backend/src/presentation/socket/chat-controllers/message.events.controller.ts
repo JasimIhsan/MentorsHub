@@ -1,7 +1,7 @@
 // File: infrastructure/socket/registerMessageHandlers.ts
 import { Server, Socket } from "socket.io";
 import { createChatUseCase, deleteMessageUseCase, getMessageUnreadCountsByUser, markMessageAsReadUseCase, sendMessageUsecase, updateUnreadCountsForChatUseCase } from "../../../application/usecases/text-message/composer";
-import { chatRepository, userRepository } from "../../../infrastructure/composer";
+import { userRepository } from "../../../infrastructure/composer";
 import { mapToChatDTO } from "../../../application/dtos/chats.dto";
 
 export function registerMessageHandlers(io: Server, socket: Socket) {

@@ -29,7 +29,7 @@ export function startSessionReminderJob() {
 				0: `Your "${session.topic}" session is starting now!`,
 			};
 
-			const sessionDateTime = getFullSessionDate(session.date, session.time);
+			const sessionDateTime = getFullSessionDate(session.date, session.startTime);
 
 			const diff = differenceInMinutes(sessionDateTime, now);
 

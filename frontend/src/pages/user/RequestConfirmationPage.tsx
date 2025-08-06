@@ -54,7 +54,7 @@ export function RequestConfirmationPage() {
 										</div>
 										<div>
 											<p className="text-sm text-muted-foreground">Time</p>
-											<p className="font-medium">{formatTime(requestData.time) || "Not set"}</p>
+											<span className="text-sm">{requestData.startTime && requestData.endTime ? `${formatTime(requestData.startTime)} - ${formatTime(requestData.endTime)}` : "Not selected"}</span>
 										</div>
 									</div>
 									<div className="flex items-center gap-3">

@@ -6,7 +6,8 @@ interface BaseSession {
 	topic: string;
 	sessionFormat: string;
 	date: string;
-	time: string;
+	startTime: string;
+	endTime: string;
 	hours: number;
 	message: string;
 	status: SessionStatusEnum;
@@ -65,7 +66,8 @@ export function mapToUserSessionDTO(session: SessionEntity, userId: string): ISe
 		topic: session.topic,
 		sessionFormat: session.sessionFormat,
 		date: session.date.toISOString(),
-		time: session.time,
+		startTime: session.startTime,
+		endTime: session.endTime,
 		hours: session.hours,
 		message: session.message,
 		status: session.status,
@@ -91,7 +93,8 @@ export function mapToMentorSessionDTO(session: SessionEntity): ISessionMentorDTO
 		topic: session.topic,
 		sessionFormat: session.sessionFormat,
 		date: session.date.toISOString(),
-		time: session.time,
+		startTime: session.startTime,
+		endTime: session.endTime,
 		hours: session.hours,
 		message: session.message,
 		status: session.status,
