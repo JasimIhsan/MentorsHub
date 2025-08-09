@@ -1,0 +1,21 @@
+import { Request, Response, NextFunction } from "express";
+import { IAcceptRescheduleRequestUseCase } from "../../../application/interfaces/reschedule.request";
+import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
+import { logger } from "../../../infrastructure/utils/logger";
+
+export class AcceptRescheduleRequestController {
+	constructor(private readonly _useCase: IAcceptRescheduleRequestUseCase) {}
+	async handle(req: Request, res: Response, next: NextFunction) {
+		try {
+			const { sessionId, userId } = req.params;
+			const { isCounter } = req.body;
+			await this._useCase.execute(userId, sessionId, isCounter);
+
+			res.status(HttpStatusCode.OK).json({ success: true, message: "Request accepted successfully" });
+		} catch (error) {
+			console.log(`❌ Error in AcceptRescheduleRequestController: ${error}`);
+			logger.error(`❌ Error in AcceptRescheduleRequestController: ${error}`);
+			next(error);
+		}
+	}
+}

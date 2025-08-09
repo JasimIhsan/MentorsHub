@@ -10,4 +10,5 @@ export enum NotificationTypeEnum {
 	WELCOME = "welcome",
 	SESSION = "session",
 	NEW_MESSAGE = "new_message",
+	RESCHEDULE_REQUEST = "reschedule_request",
 }

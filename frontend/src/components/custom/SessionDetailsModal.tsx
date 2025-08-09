@@ -71,7 +71,6 @@ export function SessionDetailsModal({ session, onClose }: SessionDetailsModalPro
 										</p>
 									</div>
 								</div>
-								
 							</div>
 						</div>
 

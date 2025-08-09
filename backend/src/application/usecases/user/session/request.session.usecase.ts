@@ -30,8 +30,6 @@ export class RequestSessionUseCase implements IRequestSessionUseCase {
 		const mentorProfile = await this.mentorRepo.findMentorByUserId(input.mentorId);
 		if (!mentorProfile) throw new Error("Mentor not found");
 
-		console.log(`input : `, input);
-
 		const availableSlots = await this.getAvailability.execute(input.mentorId, input.date, input.hours);
 		console.log("availableSlots in request: ", availableSlots);
 		if (!availableSlots.includes(input.startTime)) {

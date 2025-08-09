@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ClipboardList, Star, Users, Menu, BarChart3, BookOpenText, Clock } from "lucide-react";
+import { ClipboardList, Star, Users, Menu, BarChart3, BookOpenText, Clock, Calendar } from "lucide-react";
 
 interface Route {
 	title: string;
@@ -42,12 +42,12 @@ export function MentorSidebar() {
 			href: "/mentor/upcoming-sessions",
 			active: pathname === "/mentor/upcoming-sessions",
 		},
-		// {
-		// 	title: "Calendar",
-		// 	icon: Calendar,
-		// 	href: "/mentor/calendar",
-		// 	active: pathname === "/mentor/calendar",
-		// },
+		{
+			title: "Reschedule Requests",
+			icon: Calendar,
+			href: "/mentor/reschedule-requests",
+			active: pathname === "/mentor/reschedule-requests",
+		},
 		{
 			title: "Availability",
 			icon: Clock,

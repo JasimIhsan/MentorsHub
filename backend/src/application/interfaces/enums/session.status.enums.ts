@@ -8,4 +8,3 @@ export enum SessionStatusEnum {
 	EXPIRED = "expired",
 	ONGOING = "ongoing",
 }
-

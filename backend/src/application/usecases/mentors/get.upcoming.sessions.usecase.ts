@@ -26,6 +26,6 @@ export class GetUpcomingSessionMentorUsecase implements IGetUpcomingSessionMento
 			})
 			.sort((sessionA, sessionB) => new Date(sessionA.date).getTime() - new Date(sessionB.date).getTime());
 
-		return { sessions: upcoming.map(mapToMentorSessionDTO), total: sessions.total };
+		return { sessions: upcoming.map((session) => mapToMentorSessionDTO(session)), total: sessions.total };
 	}
 }

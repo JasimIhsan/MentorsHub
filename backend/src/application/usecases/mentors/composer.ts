@@ -1,9 +1,10 @@
-import { cloudinaryService, mentorRepository, s3BucketService, sessionRepository, specialAvailabilityRepository, userRepository, weeklyAvailabilityRepository } from "../../../infrastructure/composer";
+import { cloudinaryService, mentorRepository, rescheduleRequestRepository, s3BucketService, sessionRepository, specialAvailabilityRepository, userRepository, weeklyAvailabilityRepository } from "../../../infrastructure/composer";
 import { UploadMentorDocumentUseCase } from "../documents/upload.mentor.document.usecase";
 import { updateUserTaskProgressUseCase } from "../gamification/composer";
 import { notifyUserUseCase } from "../notification/composer";
 import { GetAvailabilityUseCase } from "./get.mentor.availability.usecase";
 import { GetSessionHistoryUsecase } from "./get.session.history.usecase";
+import { GetSessionRescheduleRequestsByMentorUseCase } from "./get.session.reschedule.requests.by.mentor.usecase";
 import { GetUpcomingSessionMentorUsecase } from "./get.upcoming.sessions.usecase";
 import { GetAllApprovedMentorsUsecase } from "./getAllApprovedMentors.usecase";
 import { GetAllMentorsUseCase } from "./getAllMentors.usecase";
@@ -23,3 +24,4 @@ export const getSessionHistoryUsecase = new GetSessionHistoryUsecase(sessionRepo
 export const getAvailabilityUsecase = new GetAvailabilityUseCase(sessionRepository, weeklyAvailabilityRepository, specialAvailabilityRepository);
 export const updateMentorProfileUseCase = new UpdateMentorProfileUseCase(mentorRepository, userRepository, uploadMentorDocumentUseCase, notifyUserUseCase, cloudinaryService);
 export const updateSessionStatusUsecase = new UpdateSessionStatusUsecase(sessionRepository, updateUserTaskProgressUseCase, userRepository, notifyUserUseCase, getAvailabilityUsecase);
+export const getSessionRescheduleRequestsByMentorUseCase = new GetSessionRescheduleRequestsByMentorUseCase(rescheduleRequestRepository, sessionRepository);

@@ -169,6 +169,35 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		}
 	}
 
+	async update(session: SessionEntity): Promise<SessionEntity> {
+		try {
+			const updated = await SessionModel.findByIdAndUpdate(session.id, {
+				id: session.id,
+				mentorId: session.mentor.id,
+				participants: session.participants.map((p) => ({
+					userId: p.user.id,
+					paymentStatus: p.paymentStatus,
+					paymentId: p.paymentId,
+				})),
+				topic: session.topic,
+				sessionFormat: session.sessionFormat,
+				date: session.date,
+				startTime: session.startTime,
+				endTime: session.endTime,
+				hours: session.hours,
+				message: session.message,
+				status: session.status,
+				pricing: session.pricing,
+				totalAmount: session.totalAmount,
+				rejectReason: session.rejectReason,
+			});
+			if (!updated) throw new Error("Session not found");
+			return SessionEntity.fromDB(updated);
+		} catch (error) {
+			return handleExceptionError(error, "Error updating session");
+		}
+	}
+
 	async updateStatus(sessionId: string, status: SessionStatusEnum, reason?: string): Promise<SessionEntity> {
 		console.log("reason: ", reason);
 		try {

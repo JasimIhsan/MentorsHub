@@ -11,6 +11,7 @@ import { MentorSessionHistoryPage } from "@/pages/mentor/MentorSessionHistoryPag
 import { MentorPageNotFoundPage } from "@/pages/mentor/MentorPageNotFoundPage";
 import { MentorProfilePage } from "@/pages/mentor/MentorProfilePage";
 import { MentorReviewsPage } from "@/pages/mentor/MentorReviewPage";
+import { MentorRescheduleRequestsPage } from "@/pages/mentor/MentorSessionRescheduleRequestPage";
 
 const MentorRoutes = () => {
 	return (
@@ -63,6 +64,15 @@ const MentorRoutes = () => {
 					element={
 						<MentorProtectedRoute>
 							<MentorUpcomingSessionsPage />
+						</MentorProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="reschedule-requests"
+					element={
+						<MentorProtectedRoute>
+							<MentorRescheduleRequestsPage />
 						</MentorProtectedRoute>
 					}
 				/>

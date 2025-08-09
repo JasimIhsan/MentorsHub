@@ -1,4 +1,7 @@
-export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected" | 'expired';
+import { SessionPaymentStatusEnum, SessionStatusEnum } from "./enums/session.status.enum";
+import { IRescheduleRequestDTO } from "./reschedule.interface";
+
+export type SessionStatus = "upcoming" | "completed" | "canceled" | "approved" | "pending" | "rejected" | "expired";
 
 interface BaseSession {
 	topic: string;
@@ -8,12 +11,13 @@ interface BaseSession {
 	endTime: string;
 	hours: number;
 	message: string;
-	status: SessionStatus;
-	paymentStatus?: "pending" | "completed" | "failed"; // (can be removed if moved to participant level)
+	status: SessionStatusEnum;
+	paymentStatus?: SessionPaymentStatusEnum; // (can be removed if moved to participant level)
 	pricing: "free" | "paid";
 	rejectReason?: string;
 	paymentId?: string; // (can be removed if moved to participant level)
 	totalAmount?: number;
+	rescheduleRequest?: IRescheduleRequestDTO;
 	createdAt: string;
 }
 

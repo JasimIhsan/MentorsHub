@@ -8,6 +8,9 @@ export class GetSessionHistoryUsecase implements IGetSessionHistoryUsecase {
 
 	async execute(mentorId: string, queryParams: { page: number; limit: number; status: SessionStatusEnum }): Promise<{ sessions: ISessionMentorDTO[]; total: number }> {
 		const sessions = await this.sessionRepo.findByMentor(mentorId, queryParams);
-		return { sessions: sessions.sessions.map(mapToMentorSessionDTO), total: sessions.total };
+
+		const sessionDtos = sessions.sessions.map((session) => mapToMentorSessionDTO(session));
+		
+		return { sessions: sessionDtos, total: sessions.total };
 	}
 }

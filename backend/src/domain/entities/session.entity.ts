@@ -93,6 +93,12 @@ export class SessionEntity {
 		return this.props.pricing === "free" ? 0 : this.totalAmount;
 	}
 
+	updateSchedule(date: Date, startTime: string, endTime: string) {
+		this.props.date = date;
+		this.props.startTime = startTime;
+		this.props.endTime = endTime;
+	}
+
 	toObject(): SessionProps {
 		return { ...this.props };
 	}
