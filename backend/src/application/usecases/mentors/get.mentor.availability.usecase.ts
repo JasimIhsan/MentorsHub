@@ -26,11 +26,9 @@ export class GetAvailabilityUseCase implements IGetAvailabilityUseCase {
 
 		// 4. Get all sessions for the day
 		const sessions = await this._sessionRepo.findByDate(userId, date);
-		console.log("sessions: ", sessions);
 
 		// 5. Filter active sessions only
 		const activeSessions = sessions?.filter((s) => [SessionStatusEnum.APPROVED, SessionStatusEnum.UPCOMING, SessionStatusEnum.ONGOING].includes(s.status));
-		console.log("activeSessions: ", activeSessions);
 
 		// 6. Mark booked slots
 		const bookedSlotSet = new Set<string>();

@@ -42,6 +42,7 @@ import { SocketNotificationGateway } from "./socket/handlers/notification/socket
 import { WeeklyAvailabilityRepositoryImpl } from "./database/implementation/availability/weekly.availability.repository.impl";
 import { IWeeklyAvailabilityRepository } from "../domain/repositories/availability/weekly.availability.repository";
 import { SpecialAvailabilityRepositoryImpl } from "./database/implementation/availability/special.availability.repository.impl";
+import { RescheduleRequestRepositoryImpl } from "./database/implementation/reschedule.request.repository.impl";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -61,6 +62,7 @@ export const userProgressRepository = new UserProgressRepositoryImpl();
 export const reportRepository = new ReportRepositoryImpl();
 export const weeklyAvailabilityRepository: IWeeklyAvailabilityRepository = new WeeklyAvailabilityRepositoryImpl();
 export const specialAvailabilityRepository = new SpecialAvailabilityRepositoryImpl();
+export const rescheduleRequestRepository = new RescheduleRequestRepositoryImpl();
 
 // Initialize services implementation
 export const hashService: IHashService = new HashServiceImpl();

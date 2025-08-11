@@ -29,6 +29,7 @@ import {
 	verifySessionPaymentUseCase,
 	paySessionWithGatewayUsecase,
 	getCreateSessionPaymentOrderUsecase,
+	getSessionByUserUseCase,
 } from "../../../application/usecases/user/composer";
 import { UpdateUserProfileController } from "./user-profile/update.user.profile.controller";
 import { cloudinaryService } from "../../../infrastructure/composer";
@@ -36,7 +37,7 @@ import { ChangePasswordController } from "./user-profile/change.password.control
 import { BecomeMentorController } from "./user-profile/become.mentor.application.controller";
 import { GetUserProfileController } from "./user-profile/get.user.profile.controller";
 import { RequestSessionController } from "./session/request.session.controller";
-import { GetSessionByUserController } from "./session/get.session.by.user.controller";
+import { GetSessionsByUserController } from "./session/get.sessions.by.user.controller";
 import { PaySessionWithWalletController } from "./session/pay.session.usecase.controller";
 import { GetMentorAvailabilityController } from "./session/get.mentor.availability.controller";
 import { getAvailabilityUsecase } from "../../../application/usecases/mentors/composer";
@@ -48,6 +49,9 @@ import { PaySessionWithGatewayController } from "./session/pay.session.with.gate
 import { GetAllListedGamificationTasksController } from "./gamification/get.all.listed.gamification.task.controller";
 import { getAllListedGamificationTasksUseCase, getUserProgressUseCase } from "../../../application/usecases/gamification/composer";
 import { GetUserProgressController } from "./gamification/get.user.progress.controller";
+import { RescheduleSessionController } from "../reschedule-request/reschedule.session.controller";
+import { createRescheduleRequestUseCase } from "../../../application/usecases/reschedule-session/composer";
+import { GetSessionByUserController } from "./session/get.session.by.user.controller";
 
 export const signupController = new SignupController(signupUseCase);
 export const signinController = new SigninController(signinUseCase);
@@ -64,7 +68,7 @@ export const becomeMentorApplicationController = new BecomeMentorController(beco
 export const reApplyMentorApplicationController = new ReApplyMentorApplicationController(reApplyMentorApplicationUseCase);
 export const getUserProfileController = new GetUserProfileController(getUserProfileUsecase);
 export const createSessionController = new RequestSessionController(requestSessionUsecase);
-export const getSessionsByUserController = new GetSessionByUserController(getSessionsByUserUsecase);
+export const getSessionsByUserController = new GetSessionsByUserController(getSessionsByUserUsecase);
 export const paySessionWithWalletController = new PaySessionWithWalletController(paySessionWithWalletUseCase);
 export const paySessionWithGatewayController = new PaySessionWithGatewayController(paySessionWithGatewayUsecase);
 export const getAvailabilityController = new GetMentorAvailabilityController(getAvailabilityUsecase);
@@ -72,6 +76,7 @@ export const cancelSessionController = new CancelSessionController(cancelSession
 export const verifySessionPaymentController = new VerifySessionPaymentController(verifySessionPaymentUseCase);
 export const getAllListedGamificationTasksController = new GetAllListedGamificationTasksController(getAllListedGamificationTasksUseCase);
 export const getUserProgressController = new GetUserProgressController(getUserProgressUseCase);
+export const getSessionByUserController = new GetSessionByUserController(getSessionByUserUseCase);
 
 // lazy loading
 export const getCreateSessionPaymentOrderController = () => new CreateSessionPaymentOrderController(getCreateSessionPaymentOrderUsecase());

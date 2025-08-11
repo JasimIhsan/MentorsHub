@@ -1,6 +1,9 @@
+import { RescheduleRequestEntity } from "../../domain/entities/reschedule.request.entity";
 import { PersonEntity, PricingType, SessionEntity } from "../../domain/entities/session.entity";
+import { RescheduleStatusEnum } from "../interfaces/enums/reschedule.status.enum";
 import { SessionPaymentStatusEnum } from "../interfaces/enums/session.payment.status.enum";
 import { SessionStatusEnum } from "../interfaces/enums/session.status.enums";
+import { IRescheduleRequestDTO, mapToRescheduleRequestDTO } from "./reschedule.request.dto";
 
 interface BaseSession {
 	topic: string;
@@ -16,6 +19,7 @@ interface BaseSession {
 	rejectReason?: string;
 	paymentId?: string;
 	totalAmount?: number;
+	rescheduleRequest?: IRescheduleRequestDTO;
 	createdAt: string;
 }
 
@@ -56,7 +60,7 @@ function mapToPerson(user: PersonEntity): Mentee {
 }
 
 // ✅ Mapper: Entity → ISessionUserDTO
-export function mapToUserSessionDTO(session: SessionEntity, userId: string): ISessionUserDTO {
+export function mapToUserSessionDTO(session: SessionEntity, userId: string, rescheduleRequest?: RescheduleRequestEntity): ISessionUserDTO {
 	const mentor = session.mentor;
 
 	return {
@@ -65,7 +69,7 @@ export function mapToUserSessionDTO(session: SessionEntity, userId: string): ISe
 		userId,
 		topic: session.topic,
 		sessionFormat: session.sessionFormat,
-		date: session.date.toISOString(),
+		date: session.date?.toISOString(),
 		startTime: session.startTime,
 		endTime: session.endTime,
 		hours: session.hours,
@@ -74,12 +78,13 @@ export function mapToUserSessionDTO(session: SessionEntity, userId: string): ISe
 		pricing: session.pricing,
 		rejectReason: session.rejectReason,
 		totalAmount: session.totalAmount,
-		createdAt: session.createdAt.toISOString(),
+		rescheduleRequest: rescheduleRequest ? mapToRescheduleRequestDTO(rescheduleRequest) : undefined,
+		createdAt: session.createdAt?.toISOString(),
 	};
 }
 
 // ✅ Mapper: Entity → ISessionMentorDTO
-export function mapToMentorSessionDTO(session: SessionEntity): ISessionMentorDTO {
+export function mapToMentorSessionDTO(session: SessionEntity, rescheduleRequest?: RescheduleRequestEntity): ISessionMentorDTO {
 	const participants: SessionParticipant[] = session.participants.map((p) => ({
 		...mapToPerson(p.user),
 		paymentStatus: p.paymentStatus,
@@ -101,6 +106,7 @@ export function mapToMentorSessionDTO(session: SessionEntity): ISessionMentorDTO
 		pricing: session.pricing,
 		rejectReason: session.rejectReason,
 		totalAmount: session.fee,
+		rescheduleRequest: rescheduleRequest ? mapToRescheduleRequestDTO(rescheduleRequest) : undefined,
 		createdAt: session.createdAt.toISOString(),
 	};
 }

@@ -3,6 +3,7 @@ import {
 	cancelSessionController,
 	createSessionController,
 	getCreateSessionPaymentOrderController,
+	getSessionByUserController,
 	getSessionsByUserController,
 	paySessionWithGatewayController,
 	paySessionWithWalletController,
@@ -18,6 +19,8 @@ import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 export const sessionRouter = Router();
 
 sessionRouter.post("/create-session", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => createSessionController.handle(req, res, next));
+
+sessionRouter.get("/:userId/:sessionId", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => getSessionByUserController.handle(req, res, next));
 
 sessionRouter.get("/:userId", verifyAccessToken, requireRole(RoleEnum.MENTOR, RoleEnum.USER), (req, res, next) => getSessionsByUserController.handle(req, res, next));
 

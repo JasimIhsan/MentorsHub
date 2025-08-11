@@ -1,3 +1,5 @@
+import { RescheduleRequestEntity } from "../../../domain/entities/reschedule.request.entity";
+import { IRescheduleRequestRepository } from "../../../domain/repositories/reschedule.request.repository";
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { mapToMentorSessionDTO } from "../../dtos/session.dto";
 import { SessionStatusEnum } from "../../interfaces/enums/session.status.enums";
@@ -11,7 +13,7 @@ interface QueryParams {
 }
 
 export class GetUpcomingSessionMentorUsecase implements IGetUpcomingSessionMentorUsecase {
-	constructor(private sessionRepo: ISessionRepository) {}
+	constructor(private sessionRepo: ISessionRepository, private rescheduleRequestRepo: IRescheduleRequestRepository) {}
 
 	async execute(mentorId: string, queryParams: QueryParams) {
 		const sessions = await this.sessionRepo.findByMentor(mentorId, queryParams);
@@ -26,6 +28,20 @@ export class GetUpcomingSessionMentorUsecase implements IGetUpcomingSessionMento
 			})
 			.sort((sessionA, sessionB) => new Date(sessionA.date).getTime() - new Date(sessionB.date).getTime());
 
-		return { sessions: upcoming.map(mapToMentorSessionDTO), total: sessions.total };
+		if (upcoming.length === 0) return { sessions: [], total: sessions.total };
+
+		const sessionIds = upcoming.map((s) => s.id);
+
+		const requests = await this.rescheduleRequestRepo.findBySessionIds(sessionIds);
+
+		const requestsMap = new Map<string, RescheduleRequestEntity>();
+
+		for (const req of requests) {
+			requestsMap.set(req.sessionId, req);
+		}
+
+		const sessionDtos = upcoming.map((session) => mapToMentorSessionDTO(session, requestsMap.get(session.id)));
+
+		return { sessions: sessionDtos, total: sessions.total };
 	}
 }

@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
-import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
+// import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
 import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { fetchUpcomingSessionsByMentorAPI, updateSessionStatatusAPI } from "@/api/session.api.service";
 import { SessionList } from "@/components/mentor/upcoming-sessions/SessionList";
@@ -19,7 +19,7 @@ export function MentorUpcomingSessionsPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [filterOption, setFilterOption] = useState<"all" | "today" | "month">("all");
 	const [currentPage, setCurrentPage] = useState(1);
-	const [selectedSession, setSelectedSession] = useState<ISessionMentorDTO | null>(null);
+	// const [selectedSession, setSelectedSession] = useState<ISessionMentorDTO | null>(null);
 	const sessionsPerPage = 6;
 	const user = useSelector((state: RootState) => state.userAuth.user);
 	const navigate = useNavigate();
@@ -114,10 +114,10 @@ export function MentorUpcomingSessionsPage() {
 					<h1 className="text-3xl font-bold tracking-tight">Upcoming Sessions</h1>
 					<SessionFilter filterOption={filterOption} setFilterOption={setFilterOption} />
 				</div>
-				{loading ? <SessionSkeleton /> : <SessionList sessions={sessions} onStartSession={handleStartSession} setSelectedSession={setSelectedSession} handleUpdateSession={handleUpdateSession} />}
+				{loading ? <SessionSkeleton /> : <SessionList sessions={sessions} onStartSession={handleStartSession} handleUpdateSession={handleUpdateSession} />}
 				{totalPages > 0 && <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
 			</div>
-			{selectedSession && <SessionDetailsModal session={selectedSession} onClose={() => setSelectedSession(null)} />}
+			{/* {selectedSession && <SessionDetailsModal session={selectedSession} onClose={() => setSelectedSession(null)} />} */}
 		</div>
 	);
 }

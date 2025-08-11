@@ -18,7 +18,7 @@ export const fetchSessionsByMentor = async (userId: string, filterOption: string
 };
 
 export const updateSessionStatatusAPI = async (sessionId: string, status: string, reason?: string) => {
-	console.log('reason: ', reason);
+	console.log("reason: ", reason);
 	try {
 		const response = await axiosInstance.put(`/mentor/sessions/${sessionId}/status`, { status, reason });
 		return response.data;
@@ -86,5 +86,23 @@ export const fetchSessionsByUser = async (userId: string, page: number, limit: n
 		return res.data;
 	} catch (error: any) {
 		throw new Error(error.response?.data?.message || "Failed to fetch user sessions.");
+	}
+};
+
+export const fetchSessionByUser = async (userId: string, sessionId: string) => {
+	try {
+		const res = await axiosInstance.get(`/user/sessions/${userId}/${sessionId}`);
+		return res.data;
+	} catch (error: any) {
+		throw new Error(error.response?.data?.message || "Failed to fetch user sessions.");
+	}
+};
+
+export const cancelSessionAPI = async (userId: string, sessionId: string) => {
+	try {
+		const res = await axiosInstance.put(`/user/sessions/cancel-session`, { userId, sessionId });
+		return res.data;
+	} catch (error: any) {
+		throw new Error(error.response?.data?.message || "Failed to cancel session.");
 	}
 };

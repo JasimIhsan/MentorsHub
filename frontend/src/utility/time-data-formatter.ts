@@ -9,6 +9,7 @@ export const formatDate = (date: string) => {
 
 // Format time for display
 export const formatTime = (time: string | Date) => {
+	if(!time) return "";
 	let dateObj: Date;
 
 	if (typeof time === "string") {

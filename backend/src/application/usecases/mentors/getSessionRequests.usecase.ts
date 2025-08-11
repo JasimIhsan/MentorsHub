@@ -18,6 +18,6 @@ export class GetSessionRequests implements IGetSessionRequestsUseCase {
 
 	async execute(mentorId: string, queryParams: QueryParams): Promise<{ requests: ISessionMentorDTO[]; total: number }> {
 		const sessions = await this.sessionRepo.findByMentor(mentorId, queryParams);
-		return { requests: sessions.sessions.map(mapToMentorSessionDTO), total: sessions.total };
+		return { requests: sessions.sessions.map((session) => mapToMentorSessionDTO(session)), total: sessions.total };
 	}
 }

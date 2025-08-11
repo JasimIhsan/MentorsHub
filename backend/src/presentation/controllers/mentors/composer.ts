@@ -4,6 +4,7 @@ import {
 	getMentorUsecase,
 	getRequestUsecase,
 	getSessionHistoryUsecase,
+	getSessionRescheduleRequestsByMentorUseCase,
 	getUpcomingSessionMentorUsecase,
 	updateMentorProfileUseCase,
 	updateSessionStatusUsecase,
@@ -16,6 +17,7 @@ import { UpdateSessionStatusController } from "./update.session.status.controlle
 import { GetUpcomingSessionMentorController } from "./get.upcoming.session.mentors.controller";
 import { GetSessionHistoryController } from "./get.session.history.controller";
 import { UpdateMentorProfileController } from "./update.mentor.profile.controller";
+import { GetRescheduleRequestsByMentorController } from "./get.reschedule.reqeusts.by.mentor.controller";
 
 export const getAllMentorsController = new GetAllMentorsController(getAllMentorsUsecase);
 export const getAllApprovedMentorsController = new GetAllApprovedMentorsController(getAllApprovedMentorsUsecase);
@@ -25,3 +27,4 @@ export const updateSessionStatusController = new UpdateSessionStatusController(u
 export const getUpcomingSessionMentorController = new GetUpcomingSessionMentorController(getUpcomingSessionMentorUsecase);
 export const getSessionHistoryController = new GetSessionHistoryController(getSessionHistoryUsecase);
 export const updateMentorProfileController = new UpdateMentorProfileController(updateMentorProfileUseCase);
+export const getRescheduleRequestsByMentorController = new GetRescheduleRequestsByMentorController(getSessionRescheduleRequestsByMentorUseCase);

@@ -7,9 +7,10 @@ import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enum
 import { ICancelSessionUseCase } from "../../../interfaces/session";
 import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
+import { IRescheduleRequestRepository } from "../../../../domain/repositories/reschedule.request.repository";
 
 export class CancelSessionUseCase implements ICancelSessionUseCase {
-	constructor(private sessionRepository: ISessionRepository, private notifyUserUseCase: INotifyUserUseCase) {}
+	constructor(private sessionRepository: ISessionRepository, private rescheduleRequestRepo: IRescheduleRequestRepository, private notifyUserUseCase: INotifyUserUseCase) {}
 
 	async execute(sessionId: string, userId: string): Promise<ISessionUserDTO> {
 		const session = await this.sessionRepository.findById(sessionId);
@@ -28,6 +29,12 @@ export class CancelSessionUseCase implements ICancelSessionUseCase {
 
 		if (session.toObject().pricing === "paid" && participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) {
 			throw new Error("Cannot cancel session that has already been paid");
+		}
+
+		const requestEntity = await this.rescheduleRequestRepo.findBySessionId(sessionId);
+		if (requestEntity) {
+			requestEntity.cancel(userId);
+			await this.rescheduleRequestRepo.update(requestEntity);
 		}
 
 		const updatedSession = await this.sessionRepository.updateStatus(sessionId, SessionStatusEnum.CANCELED);

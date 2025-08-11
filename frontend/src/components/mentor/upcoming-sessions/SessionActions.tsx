@@ -8,10 +8,11 @@ interface SessionActionsProps {
 	session: ISessionMentorDTO;
 	onStartSession: () => void;
 	handleUpdateSession: (sessionId: string) => void;
-	setSelectedSession: (session: ISessionMentorDTO) => void;
+	// setSelectedSession: (session: ISessionMentorDTO) => void;
+	navigateSessionPage: () => void;
 }
 
-export default function SessionActions({ session, onStartSession, handleUpdateSession, setSelectedSession }: SessionActionsProps) {
+export default function SessionActions({ session, onStartSession, handleUpdateSession, navigateSessionPage }: SessionActionsProps) {
 	return (
 		<>
 			{session.status === "upcoming" && (
@@ -32,7 +33,7 @@ export default function SessionActions({ session, onStartSession, handleUpdateSe
 					/>
 				</div>
 			)}
-			<Button variant="ghost" size="icon" onClick={() => setSelectedSession(session)}>
+			<Button variant="ghost" size="icon" onClick={() => navigateSessionPage()}>
 				<FileText className="h-4 w-4" />
 			</Button>
 		</>

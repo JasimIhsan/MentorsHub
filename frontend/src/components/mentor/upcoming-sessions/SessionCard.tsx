@@ -3,22 +3,27 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Clock, Video, IndianRupee } from "lucide-react";
 import { ISessionMentorDTO } from "@/interfaces/session.interface";
-import SessionParticipants from "./SessionParticipants";
 import SessionActions from "./SessionActions";
+import { useNavigate } from "react-router-dom";
 
 interface SessionCardProps {
 	session: ISessionMentorDTO;
 	onStartSession: () => void;
-	setSelectedSession: (session: ISessionMentorDTO) => void;
+	// setSelectedSession: (session: ISessionMentorDTO) => void;
 	handleUpdateSession: (sessionId: string) => void;
 }
 
-export function SessionCard({ session, onStartSession, setSelectedSession, handleUpdateSession }: SessionCardProps) {
+export function SessionCard({ session, onStartSession, handleUpdateSession }: SessionCardProps) {
+	const navigate = useNavigate();
 	const formatTime = (time: string) => {
 		const [hour, minute] = time.split(":").map(Number);
 		const ampm = hour >= 12 ? "PM" : "AM";
 		const hour12 = hour % 12 || 12;
 		return `${hour12}:${minute.toString().padStart(2, "0")} ${ampm}`;
+	};
+
+	const handleNavigateSessionPage = () => {
+		navigate(`/mentor/session-details/${session.id}`);
 	};
 
 	return (
@@ -27,7 +32,7 @@ export function SessionCard({ session, onStartSession, setSelectedSession, handl
 				<div className="flex flex-col md:flex-row gap-6">
 					<div className="flex-1">
 						<div className="flex justify-between items-center">
-							<h3 className="font-bold text-xl text-primary cursor-pointer hover:underline" onClick={() => setSelectedSession(session)}>
+							<h3 className="font-bold text-xl text-primary cursor-pointer hover:underline" onClick={handleNavigateSessionPage}>
 								{session.topic}
 							</h3>
 						</div>
@@ -53,11 +58,26 @@ export function SessionCard({ session, onStartSession, setSelectedSession, handl
 						</div>
 					</div>
 					<div className="flex justify-center items-center gap-2">
+						{session.rescheduleRequest && (
+							<Badge
+								variant="outline"
+								className={
+									session.rescheduleRequest.status === "pending"
+										? "bg-yellow-100 text-yellow-800"
+										: session.rescheduleRequest.status === "accepted"
+										? "bg-green-100 text-green-800"
+										: session.rescheduleRequest.status === "rejected"
+										? "bg-red-100 text-red-800"
+										: "bg-gray-100 text-gray-800"
+								}>
+								Reschedule {session.rescheduleRequest.status && session.rescheduleRequest.status.charAt(0).toUpperCase() + session.rescheduleRequest.status.slice(1)}
+							</Badge>
+						)}
 						<Badge variant={session.status === "completed" ? "outline" : "default"} className={`${session.status === "completed" ? "bg-primary/5 text-primary" : "bg-primary text-primary-foreground"} capitalize`}>
 							{session.status}
 						</Badge>
-						<SessionParticipants participants={session.participants} />
-						<SessionActions session={session} onStartSession={onStartSession} handleUpdateSession={handleUpdateSession} setSelectedSession={setSelectedSession} />
+						{/* <SessionParticipants participants={session.participants} /> */}
+						<SessionActions session={session} onStartSession={onStartSession} handleUpdateSession={handleUpdateSession} navigateSessionPage={handleNavigateSessionPage} />
 					</div>
 				</div>
 			</CardContent>

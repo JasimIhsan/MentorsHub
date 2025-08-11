@@ -25,6 +25,7 @@ export interface ISessionRepository {
 		}
 	): Promise<{ sessions: SessionEntity[]; total: number }>;
 	updateStatus(sessionId: string, status: SessionStatusEnum, reason?: string): Promise<SessionEntity>;
+	update(session: SessionEntity): Promise<SessionEntity>;
 	markPayment(sessionId: string, userId: string, paymentStatus: SessionPaymentStatusEnum, paymentId: string, newStatus: SessionStatusEnum): Promise<void>;
 	getAllByMentor(mentorId: string): Promise<SessionEntity[]>;
 	deleteById(sessionId: string): Promise<void>;

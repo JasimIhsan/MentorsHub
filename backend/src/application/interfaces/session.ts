@@ -5,6 +5,10 @@ export interface IRequestSessionUseCase {
 	execute(data: SessionRequestInput): Promise<ISessionUserDTO>;
 }
 
+export interface IGetSessionByUserUseCase {
+	execute(sessionId: string, userId: string): Promise<ISessionUserDTO>;
+}
+
 export interface IGetSessionsByUserUseCase {
 	execute(
 		userId: string,

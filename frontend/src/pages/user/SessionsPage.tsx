@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { ISessionUserDTO } from "@/interfaces/session.interface";
-import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
 import { fetchSessionsByUser } from "@/api/session.api.service";
 import { PaginationControls } from "@/components/custom/PaginationControls";
 import { SessionCardSkeleton } from "@/components/mentor/session-history/SessionSkeleton";
@@ -18,6 +17,7 @@ import { ReviewModal } from "@/components/user/session/ReviewModal";
 import { SessionCard } from "@/components/user/session/SessionCard";
 import { CategoryFilter } from "@/components/user/session/CategoryFilter";
 import { CancelSessionDialog } from "@/components/user/session/CancelSessionDialog";
+import { SessionStatusEnum } from "@/interfaces/enums/session.status.enum";
 
 declare global {
 	interface Window {
@@ -33,7 +33,6 @@ export function SessionsPage() {
 	const [showPaymentModal, setShowPaymentModal] = useState(false);
 	const [paidSession, setPaidSession] = useState<ISessionUserDTO | null>(null);
 	const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
-	const [selectedSession, setSelectedSession] = useState<ISessionUserDTO | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [itemsPerPage] = useState(5);
@@ -123,7 +122,7 @@ export function SessionsPage() {
 				userId: user.id,
 			});
 			if (response.data.success) {
-				setSessions((prevSessions) => prevSessions.map((s) => (s.id === sessionToCancel.id ? { ...s, status: "canceled" } : s)));
+				setSessions((prevSessions) => prevSessions.map((s) => (s.id === sessionToCancel.id ? { ...s, status: SessionStatusEnum.CANCELED } : s)));
 				toast.success("Session canceled successfully.");
 			} else {
 				toast.error(response.data.message || "Failed to cancel session.");
@@ -179,7 +178,6 @@ export function SessionsPage() {
 										setShowPaymentModal={setShowPaymentModal}
 										setPaidSession={setPaidSession}
 										isRazorpayLoaded={isRazorpayLoaded}
-										setSelectedSession={setSelectedSession}
 										setShowCancelDialog={setShowCancelDialog}
 										setSessionToCancel={setSessionToCancel}
 										setShowReviewModal={setShowReviewModal}
@@ -220,7 +218,6 @@ export function SessionsPage() {
 					session={paidSession}
 				/>
 			)}
-			{selectedSession && <SessionDetailsModal session={selectedSession} onClose={() => setSelectedSession(null)} />}
 			{sessionToReview && (
 				<ReviewModal
 					isOpen={showReviewModal}
