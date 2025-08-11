@@ -22,6 +22,8 @@ export function ProposalCard({
 	const bgClass = variant === "highlight" ? "bg-blue-50 border-blue-200" : variant === "counter" ? "bg-orange-50 border-orange-200" : "bg-gray-50";
 	const titleColor = variant === "highlight" ? "text-blue-900" : variant === "counter" ? "text-orange-900" : "text-gray-900";
 
+	console.log(`show actions in proposal card : `, showActions);
+
 	return (
 		<div className={`p-4 rounded-lg border ${bgClass}`}>
 			<h4 className={`font-medium ${titleColor} mb-3`}>{title}</h4>
@@ -42,9 +44,9 @@ export function ProposalCard({
 				</div>
 			</div>
 			{proposal.message && (
-				<div className="mt-3">
+				<div className="mt-3 py-3">
 					<p className="text-sm font-medium text-gray-700">Message:</p>
-					<p className="text-sm text-gray-900 italic">"{proposal.message}"</p>
+					<p className="text-sm text-gray-900 italic pl-4">"{proposal.message}"</p>
 				</div>
 			)}
 			{showActions && (

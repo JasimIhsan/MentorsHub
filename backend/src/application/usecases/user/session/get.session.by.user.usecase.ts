@@ -10,7 +10,9 @@ export class GetSessionByUserUseCase implements IGetSessionByUserUseCase {
 	async execute(sessionId: string, userId: string): Promise<ISessionUserDTO> {
 		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
-		if (session.participants.find((p) => p.user.id === userId) === undefined) throw new Error("Unauthorized: User is not a participant in this session");
+		// const isMentor = session.mentor.id === userId;
+		// const isParticipant = session.participants.find((p) => p.user.id === userId) !== undefined;
+		// if (!isMentor && !isParticipant) throw new Error("You are not a mentor or participant in this session");
 
 		const rescheduleRequests = await this.rescheduleRequestRepo.findBySessionId(sessionId);
 

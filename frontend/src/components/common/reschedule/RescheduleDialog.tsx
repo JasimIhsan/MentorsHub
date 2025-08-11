@@ -16,7 +16,7 @@ interface RescheduleDialogProps {
 	userId: string;
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
-	onSuccess: (updatedRequest: any) => void; // Callback to update session state
+	onSuccess: (updatedRequest: any) => void;
 }
 
 // Reusable component for sending reschedule requests

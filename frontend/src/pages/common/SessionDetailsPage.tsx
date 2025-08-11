@@ -9,7 +9,7 @@ import { ISessionUserDTO } from "@/interfaces/session.interface";
 import { SessionPaymentStatusEnum, SessionStatusEnum } from "@/interfaces/enums/session.status.enum";
 import { RescheduleStatusEnum } from "@/interfaces/enums/reschedule.request.enum";
 import { toast } from "sonner";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { fetchSessionByUser } from "@/api/session.api.service";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
@@ -20,26 +20,8 @@ import { acceptProposalRescheduleAPI } from "@/api/rescheduling.api.service";
 import { RescheduleDialog } from "@/components/common/reschedule/RescheduleDialog";
 import { CounterProposeDialog } from "@/components/common/reschedule/CounterProposalDialog";
 import { ProposalCard } from "@/components/common/reschedule/ProposalCard";
-
-// Returns badge variant based on session status
-function getStatusBadgeVariant(status: SessionStatusEnum) {
-	switch (status) {
-		case SessionStatusEnum.UPCOMING:
-		case SessionStatusEnum.APPROVED:
-			return "default";
-		case SessionStatusEnum.COMPLETED:
-			return "secondary";
-		case SessionStatusEnum.CANCELED:
-		case SessionStatusEnum.REJECTED:
-			return "destructive";
-		case SessionStatusEnum.PENDING:
-			return "outline";
-		case SessionStatusEnum.EXPIRED:
-			return "secondary";
-		default:
-			return "outline";
-	}
-}
+import { getStatusBadgeVariant } from "@/utility/session.status.badge";
+import { IRescheduleRequestDTO } from "@/interfaces/reschedule.interface";
 
 // Returns payment status badge component
 function getPaymentStatusBadge(status: SessionPaymentStatusEnum) {
@@ -80,7 +62,7 @@ export function SessionDetailsPage() {
 	// Check if user is initiator of reschedule request
 	const rescheduleRequest = session?.rescheduleRequest;
 	const isInitiator = user?.id === rescheduleRequest?.initiatedBy;
-	const canTakeAction = rescheduleRequest?.lastActionBy !== rescheduleRequest?.initiatedBy && rescheduleRequest?.status === RescheduleStatusEnum.PENDING;
+	const canTakeAction = rescheduleRequest?.lastActionBy !== user?.id && rescheduleRequest?.status === RescheduleStatusEnum.PENDING;
 
 	// Fetch session data
 	useEffect(() => {
@@ -99,6 +81,8 @@ export function SessionDetailsPage() {
 		};
 		fetchSession();
 	}, [user?.id, sessionId]);
+
+	console.log(`counter proposal : `, session?.rescheduleRequest?.counterProposal);
 
 	// Handle session cancellation
 	const handleCancelSession = async () => {
@@ -126,11 +110,7 @@ export function SessionDetailsPage() {
 			const response = await acceptProposalRescheduleAPI(user.id, rescheduleRequest.sessionId, isCounterProposal);
 			if (response.success) {
 				toast.success("Proposal accepted successfully.");
-				// Refetch session data to update UI
-				const sessionResponse = await fetchSessionByUser(user.id, sessionId!);
-				if (sessionResponse.success) {
-					setSession(sessionResponse.session);
-				}
+				setSession(response.session);
 			}
 		} catch (error) {
 			if (error instanceof Error) toast.error(error.message);
@@ -138,7 +118,7 @@ export function SessionDetailsPage() {
 	};
 
 	// Update session state with new reschedule request
-	const handleRescheduleSuccess = (updatedRequest: any) => {
+	const handleRescheduleSuccess = (updatedRequest: IRescheduleRequestDTO) => {
 		setSession((prev) => {
 			if (!prev) return prev;
 			return { ...prev, rescheduleRequest: updatedRequest };
@@ -277,7 +257,7 @@ export function SessionDetailsPage() {
 							</h4>
 
 							{/* Current/Original Proposal */}
-							<ProposalCard proposal={rescheduleRequest.currentProposal} title="Current Proposal" variant="default" />
+							<ProposalCard proposal={rescheduleRequest.currentProposal} showActions={canTakeAction} onAccept={() => handleAcceptProposal(false)} onReject={handleCancelSession} title="Current Proposal" variant="default" />
 
 							{/* Counter Proposal */}
 							{rescheduleRequest.counterProposal && (
@@ -293,22 +273,11 @@ export function SessionDetailsPage() {
 							{/* Show actions for original proposal if no counter proposal */}
 							{!rescheduleRequest.counterProposal && canTakeAction && !isInitiator && (
 								<div className="flex gap-2">
-									<Button onClick={() => handleAcceptProposal(false)} className="bg-green-600 hover:bg-green-700">
-										<CheckCircle className="w-4 h-4 mr-2" />
-										Accept Original Proposal
+									<Button onClick={() => setIsCounterProposeDialogOpen(true)} variant="outline">
+										<RefreshCw className="w-4 h-4 mr-2" />
+										Counter Propose
 									</Button>
-									<Alert
-										triggerElement={
-											<Button variant="destructive">
-												<XCircle className="w-4 h-4 mr-2" />
-												Cancel
-											</Button>
-										}
-										actionText="Cancel"
-										contentTitle="Cancel Session"
-										contentDescription="Are you sure you want to cancel this session?"
-										onConfirm={handleCancelSession}
-									/>
+
 									<CounterProposeDialog session={session} userId={user?.id || ""} isOpen={isCounterProposeDialogOpen} onOpenChange={setIsCounterProposeDialogOpen} onSuccess={handleRescheduleSuccess} />
 								</div>
 							)}
@@ -445,38 +414,45 @@ export function SessionDetailsPage() {
 				</CardContent>
 			</Card>
 
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<Settings className="w-5 h-5" />
-						<span>Actions</span>
-					</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="flex flex-wrap gap-3">
-						{[SessionStatusEnum.UPCOMING, SessionStatusEnum.APPROVED].includes(session.status) && !rescheduleRequest && (
-							<RescheduleDialog session={session} userId={user?.id || ""} isOpen={isRescheduleDialogOpen} onOpenChange={setIsRescheduleDialogOpen} onSuccess={handleRescheduleSuccess} />
-						)}
-						{session.status === SessionStatusEnum.COMPLETED && (
-							<Button variant="outline">
-								<MessageSquare className="w-4 h-4 mr-2" />
-								Leave Feedback
-							</Button>
-						)}
-						<Alert
-							triggerElement={
-								<Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
-									Cancel Session
+			{session.status !== SessionStatusEnum.CANCELED && (
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Settings className="w-5 h-5" />
+							<span>Actions</span>
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="flex flex-wrap gap-3">
+							{[SessionStatusEnum.UPCOMING, SessionStatusEnum.APPROVED].includes(session.status) && !rescheduleRequest && (
+								<RescheduleDialog session={session} userId={user?.id || ""} isOpen={isRescheduleDialogOpen} onOpenChange={setIsRescheduleDialogOpen} onSuccess={handleRescheduleSuccess} />
+							)}
+							{session.status === SessionStatusEnum.UPCOMING && (
+								<Button>
+									<Link to={`/video-call/${session.id}`}>Join Session</Link>
 								</Button>
-							}
-							actionText="Cancel Session"
-							contentTitle="Cancel Session"
-							contentDescription="Are you sure you want to cancel this session?"
-							onConfirm={handleCancelSession}
-						/>
-					</div>
-				</CardContent>
-			</Card>
+							)}
+							{session.status === SessionStatusEnum.COMPLETED && (
+								<Button variant="outline">
+									<MessageSquare className="w-4 h-4 mr-2" />
+									Leave Feedback
+								</Button>
+							)}
+							<Alert
+								triggerElement={
+									<Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+										Cancel Session
+									</Button>
+								}
+								actionText="Cancel Session"
+								contentTitle="Cancel Session"
+								contentDescription="Are you sure you want to cancel this session?"
+								onConfirm={handleCancelSession}
+							/>
+						</div>
+					</CardContent>
+				</Card>
+			)}
 		</div>
 	);
 }

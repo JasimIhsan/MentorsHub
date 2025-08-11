@@ -64,9 +64,9 @@ export const getSessionsByUserUsecase = new GetSessionsByUserUseCase(sessionRepo
 export const getSessionByMentorUsecase = new GetSessionsByUserUseCase(sessionRepository, rescheduleRequestRepository);
 export const paySessionWithWalletUseCase = new PaySessionWithWalletUseCase(sessionRepository, walletRepository, notifyUserUseCase);
 export const paySessionWithGatewayUsecase = new PaySessionWithGatewayUseCase(sessionRepository, walletRepository, notifyUserUseCase);
-export const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository, notifyUserUseCase);
+export const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository, rescheduleRequestRepository, notifyUserUseCase);
 export const verifySessionPaymentUseCase = new VerifySessionPaymentUseCase(sessionRepository);
-export const getSessionByUserUseCase = new GetSessionByUserUseCase(sessionRepository, rescheduleRequestRepository);	
+export const getSessionByUserUseCase = new GetSessionByUserUseCase(sessionRepository, rescheduleRequestRepository);
 
 // lazy loading usecases
 export const getCreateSessionPaymentOrderUsecase = () => new CreateSessionPaymentOrderUseCase(sessionRepository, getPaymentGatewayService());

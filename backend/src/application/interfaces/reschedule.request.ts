@@ -24,5 +24,5 @@ export interface ICounterRescheduleRequestUseCase {
 }
 
 export interface IAcceptRescheduleRequestUseCase {
-	execute(userId: string, sessionId: string, isCounter: boolean): Promise<void>
+	execute(userId: string, sessionId: string, isCounter: boolean): Promise<ISessionUserDTO | ISessionMentorDTO>;
 }

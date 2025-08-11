@@ -6,17 +6,17 @@ import { SessionCard } from "./SessionCard";
 interface SessionListProps {
 	sessions: ISessionMentorDTO[];
 	onStartSession: (sessionId: string) => void;
-	setSelectedSession: (session: ISessionMentorDTO) => void;
+	// setSelectedSession: (session: ISessionMentorDTO) => void;
 	handleUpdateSession: (sessionId: string) => void;
 }
 
-export function SessionList({ sessions, onStartSession, setSelectedSession, handleUpdateSession }: SessionListProps) {
+export function SessionList({ sessions, onStartSession,  handleUpdateSession }: SessionListProps) {
 	return (
 		<Card className="p-0 border-none bg-background shadow-none">
 			<CardContent className="p-0">
 				<div className="space-y-6">
 					{sessions.map((session) => (
-						<SessionCard key={session.id} session={session} onStartSession={() => onStartSession(session.id)} setSelectedSession={setSelectedSession} handleUpdateSession={handleUpdateSession} />
+						<SessionCard key={session.id} session={session} onStartSession={() => onStartSession(session.id)}  handleUpdateSession={handleUpdateSession} />
 					))}
 					{sessions.length === 0 && (
 						<div className="text-center p-4">

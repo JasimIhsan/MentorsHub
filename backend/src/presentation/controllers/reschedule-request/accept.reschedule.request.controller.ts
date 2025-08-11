@@ -9,9 +9,9 @@ export class AcceptRescheduleRequestController {
 		try {
 			const { sessionId, userId } = req.params;
 			const { isCounter } = req.body;
-			await this._useCase.execute(userId, sessionId, isCounter);
+			const session = await this._useCase.execute(userId, sessionId, isCounter);
 
-			res.status(HttpStatusCode.OK).json({ success: true, message: "Request accepted successfully" });
+			res.status(HttpStatusCode.OK).json({ success: true, session, message: "Request accepted successfully" });
 		} catch (error) {
 			console.log(`❌ Error in AcceptRescheduleRequestController: ${error}`);
 			logger.error(`❌ Error in AcceptRescheduleRequestController: ${error}`);

@@ -97,3 +97,12 @@ export const fetchSessionByUser = async (userId: string, sessionId: string) => {
 		throw new Error(error.response?.data?.message || "Failed to fetch user sessions.");
 	}
 };
+
+export const cancelSessionAPI = async (userId: string, sessionId: string) => {
+	try {
+		const res = await axiosInstance.put(`/user/sessions/cancel-session`, { userId, sessionId });
+		return res.data;
+	} catch (error: any) {
+		throw new Error(error.response?.data?.message || "Failed to cancel session.");
+	}
+};

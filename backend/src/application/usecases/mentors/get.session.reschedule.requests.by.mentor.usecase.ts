@@ -11,14 +11,15 @@ export class GetSessionRescheduleRequestsByMentorUseCase implements IGetSessionR
 	async execute(mentorId: string, filters: { page: number; limit: number; status?: RescheduleStatusEnum }): Promise<{ sessions: ISessionMentorDTO[]; total: number }> {
 		const requests = await this.rescheduleRequestRepo.findByMentorId(mentorId, filters);
 		if (!requests.length) return { sessions: [], total: 0 };
+		const requestByUser = requests.filter((r) => r.initiatedBy !== mentorId);
 
-		const sessionIds = requests.map((request) => request.sessionId);
+		const sessionIds = requestByUser.map((request) => request.sessionId);
 
 		const sessions = await this.sessionRepo.findByIds(sessionIds);
 
 		const requestMap = new Map<string, RescheduleRequestEntity>();
 
-		for (const req of requests) {
+		for (const req of requestByUser) {
 			requestMap.set(req.sessionId, req);
 		}
 
@@ -27,6 +28,6 @@ export class GetSessionRescheduleRequestsByMentorUseCase implements IGetSessionR
 			return mapToMentorSessionDTO(session, request);
 		});
 
-		return { sessions: sessionDtos, total: requests.length };
+		return { sessions: sessionDtos, total: requestByUser.length };
 	}
 }

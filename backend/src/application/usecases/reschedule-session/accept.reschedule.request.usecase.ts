@@ -1,12 +1,13 @@
 import { IRescheduleRequestRepository } from "../../../domain/repositories/reschedule.request.repository";
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
+import { ISessionMentorDTO, ISessionUserDTO, mapToMentorSessionDTO, mapToUserSessionDTO } from "../../dtos/session.dto";
 import { IAcceptRescheduleRequestUseCase } from "../../interfaces/reschedule.request";
 
 export class AcceptRescheduleRequestUseCase implements IAcceptRescheduleRequestUseCase {
 	constructor(private readonly rescheduleRequestRepo: IRescheduleRequestRepository, private readonly sessionRepo: ISessionRepository) {}
 
-	async execute(userId: string, sessionId: string, isCounter: boolean): Promise<void> {
-		console.log('isCounter: ', isCounter);
+	async execute(userId: string, sessionId: string, isCounter: boolean): Promise<ISessionUserDTO | ISessionMentorDTO> {
+		console.log("isCounter: ", isCounter);
 		// 1. Find the reschedule request
 		const rescheduleRequest = await this.rescheduleRequestRepo.findBySessionId(sessionId);
 		if (!rescheduleRequest) throw new Error("Reschedule request not found.");
@@ -23,13 +24,16 @@ export class AcceptRescheduleRequestUseCase implements IAcceptRescheduleRequestU
 		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error("Session not found.");
 
-		session.updateSchedule(proposal.proposedDate, proposal.proposedStartTime, proposal.proposedEndTime);
+		const isMentor = session.mentor.id === userId;
 
-		console.log(`Session updated : `, session);
-		console.log(`Reschedule request updated : `, rescheduleRequest);
+		session.updateSchedule(proposal.proposedDate, proposal.proposedStartTime, proposal.proposedEndTime);
 
 		// 5. Save changes
 		await this.sessionRepo.update(session);
 		await this.rescheduleRequestRepo.update(rescheduleRequest);
+
+		const sessionDTO = isMentor ? mapToMentorSessionDTO(session, rescheduleRequest) : mapToUserSessionDTO(session, userId, rescheduleRequest);
+
+		return sessionDTO;
 	}
 }

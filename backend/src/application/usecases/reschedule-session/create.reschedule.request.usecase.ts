@@ -15,6 +15,10 @@ export class CreateRescheduleRequestUseCase implements ICreateRescheduleRequestU
 		const sessionEntity = await this.sessionRepo.findById(input.sessionId);
 		if (!sessionEntity) throw new Error("Session not found");
 
+		const isSameTime = sessionEntity.startTime === input.proposedStartTime && sessionEntity.endTime === input.proposedEndTime;
+		const isSameDate = new Date(sessionEntity.date).getTime() === new Date(input.proposedDate).getTime();
+		if (isSameTime && isSameDate) throw new Error("You cannot reschedule to the same time and date.");
+
 		const existingRequest = await this.rescheduleRequestRepo.findBySessionId(input.sessionId);
 		if (existingRequest) {
 			throw new Error("A reschedule request is already pending for this session.");

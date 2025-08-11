@@ -31,6 +31,7 @@ function mapToProposal(proposal: ProposalEntity): IProposalDTO {
 }
 
 export function mapToRescheduleRequestDTO(rescheduleRequest: RescheduleRequestEntity): IRescheduleRequestDTO {
+
 	return {
 		id: rescheduleRequest.id,
 		sessionId: rescheduleRequest.sessionId,

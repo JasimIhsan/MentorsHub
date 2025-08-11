@@ -136,22 +136,26 @@ export class RescheduleRequestEntity {
 		if (this.status !== RescheduleStatusEnum.PENDING) {
 			throw new Error("Cannot cancel a non-pending request");
 		}
-		if (userId !== this.initiatedBy) {
-			throw new Error("Only initiator can cancel");
-		}
+		// if (userId !== this.initiatedBy) {
+		// 	throw new Error("Only initiator can cancel");
+		// }
 		this.props.status = RescheduleStatusEnum.CANCELED;
 		this.props.lastActionBy = userId;
 	}
 
 	// --- Mapper: from DB to Entity ---
 	static fromDbDocument(doc: IRescheduleRequestDocument): RescheduleRequestEntity {
+		const hasCounterProposal = doc.counterProposal && Object.keys(doc.counterProposal).length > 0 && doc.counterProposal.proposedDate && doc.counterProposal.proposedStartTime && doc.counterProposal.proposedEndTime;
+
+		const counter = hasCounterProposal ? new ProposalEntity(doc.counterProposal as IProposalProps) : undefined;
+
 		return new RescheduleRequestEntity({
 			id: doc._id.toString(),
 			sessionId: doc.sessionId.toString(),
 			initiatedBy: doc.initiatedBy.toString(),
 			oldProposal: new ProposalEntity(doc.oldProposal),
 			currentProposal: new ProposalEntity(doc.currentProposal),
-			counterProposal: doc.counterProposal ? new ProposalEntity(doc.counterProposal) : undefined,
+			counterProposal: counter,
 			status: doc.status,
 			lastActionBy: doc.lastActionBy.toString(),
 			createdAt: doc.createdAt,
@@ -161,13 +165,16 @@ export class RescheduleRequestEntity {
 
 	// --- Mapper: Entity to Plain Object (for response/DTO)
 	static toObject(entity: RescheduleRequestEntity) {
+		const counterProposalObj = entity.counterProposal?.toObject();
+		const hasCounterProposal = counterProposalObj && counterProposalObj.proposedDate && counterProposalObj.proposedStartTime && counterProposalObj.proposedEndTime;
+
 		return {
 			id: entity.id,
 			sessionId: entity.sessionId,
 			initiatedBy: entity.initiatedBy,
 			oldProposal: entity.oldProposal.toObject(),
 			currentProposal: entity.currentProposal.toObject(),
-			counterProposal: entity.counterProposal?.toObject(),
+			counterProposal: hasCounterProposal ? counterProposalObj : undefined,
 			status: entity.status,
 			lastActionBy: entity.lastActionBy,
 			createdAt: entity.createdAt,

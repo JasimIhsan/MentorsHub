@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Clock, Check, X } from "lucide-react";
 import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { formatTime } from "@/utility/time-data-formatter";
+import { SessionStatusEnum } from "@/interfaces/enums/session.status.enum";
+import { useNavigate } from "react-router-dom";
 
 interface RequestCardProps {
 	request: ISessionMentorDTO;
@@ -16,7 +18,12 @@ interface RequestCardProps {
 }
 
 export const RequestCard: React.FC<RequestCardProps> = memo(({ request, status, setSelectedRequest, handleApprove, handleReject }) => {
+	const navigate = useNavigate();
 	const participant = request.participants[0]; // Assuming one participant for one-on-one sessions
+
+	const handleNavigateSessionPage = () => {
+		navigate(`/mentor/session-details/${request.id}`);
+	};
 
 	return (
 		<Card>
@@ -56,7 +63,7 @@ export const RequestCard: React.FC<RequestCardProps> = memo(({ request, status, 
 				</div>
 			</CardContent>
 			<CardFooter>
-				{status === "pending" ? (
+				{status === SessionStatusEnum.PENDING ? (
 					<div className="flex items-center gap-2 w-full">
 						<Button variant="outline" className="flex-1" onClick={() => setSelectedRequest(request)}>
 							View Details
@@ -70,6 +77,10 @@ export const RequestCard: React.FC<RequestCardProps> = memo(({ request, status, 
 							<span className="sr-only">Reject</span>
 						</Button>
 					</div>
+				) : status === SessionStatusEnum.APPROVED ? (
+					<Button variant="outline" className="w-full" onClick={handleNavigateSessionPage}>
+						View Details
+					</Button>
 				) : (
 					<Button variant="outline" className="w-full" onClick={() => setSelectedRequest(request)}>
 						View Details

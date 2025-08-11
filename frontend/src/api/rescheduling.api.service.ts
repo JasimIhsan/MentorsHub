@@ -52,12 +52,3 @@ export const acceptProposalRescheduleAPI = async (userId: string, sessionId: str
 		throw new Error(error.response.data.message || "Failed to accept reschedule proposal.");
 	}
 };
-
-export const rejectProposalRescheduleAPI = async (userId: string, sessionId: string) => {
-	try {
-		const response = await axiosInstance.put(`/user/reschedule/reject/${userId}/${sessionId}`);
-		return response.data;
-	} catch (error: any) {
-		throw new Error(error.response.data.message || "Failed to reject reschedule proposal.");
-	}
-};
