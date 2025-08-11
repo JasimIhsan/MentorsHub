@@ -43,6 +43,7 @@ import { WeeklyAvailabilityRepositoryImpl } from "./database/implementation/avai
 import { IWeeklyAvailabilityRepository } from "../domain/repositories/availability/weekly.availability.repository";
 import { SpecialAvailabilityRepositoryImpl } from "./database/implementation/availability/special.availability.repository.impl";
 import { RescheduleRequestRepositoryImpl } from "./database/implementation/reschedule.request.repository.impl";
+import { RefundRepositoryImpl } from "./database/implementation/refund.repository.impl";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -63,6 +64,7 @@ export const reportRepository = new ReportRepositoryImpl();
 export const weeklyAvailabilityRepository: IWeeklyAvailabilityRepository = new WeeklyAvailabilityRepositoryImpl();
 export const specialAvailabilityRepository = new SpecialAvailabilityRepositoryImpl();
 export const rescheduleRequestRepository = new RescheduleRequestRepositoryImpl();
+export const refundRepository = new RefundRepositoryImpl();
 
 // Initialize services implementation
 export const hashService: IHashService = new HashServiceImpl();
