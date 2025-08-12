@@ -133,12 +133,6 @@ export class RescheduleRequestEntity {
 	}
 
 	cancel(userId: string) {
-		if (this.status !== RescheduleStatusEnum.PENDING) {
-			throw new Error("Cannot cancel a non-pending request");
-		}
-		// if (userId !== this.initiatedBy) {
-		// 	throw new Error("Only initiator can cancel");
-		// }
 		this.props.status = RescheduleStatusEnum.CANCELED;
 		this.props.lastActionBy = userId;
 	}

@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
-import { RefundInitiatorEnum, RefundMethodEnum, RefundStatusEnum } from "../../../../application/interfaces/enums/refund.enums";
+import { RefundInitiatorEnum, RefundStatusEnum } from "../../../../application/interfaces/enums/refund.enums";
 
 export interface IRefundDocument extends Document {
 	_id: ObjectId;
@@ -7,7 +7,6 @@ export interface IRefundDocument extends Document {
 	paymentId: string; // Gateway payment ID (Stripe/Razorpay)
 	userId: ObjectId; // User getting refunded
 	initiatedBy: RefundInitiatorEnum;
-	method: RefundMethodEnum;
 	reason?: string;
 	originalAmount: number; // Full amount paid
 	refundAmount: number; // Amount being refunded
@@ -28,11 +27,6 @@ const RefundSchema = new Schema<IRefundDocument>(
 			type: String,
 			enum: Object.values(RefundInitiatorEnum),
 			required: true,
-		},
-		method: {
-			type: String,
-			enum: Object.values(RefundMethodEnum),
-			default: RefundMethodEnum.WALLET,
 		},
 		reason: { type: String },
 		originalAmount: { type: Number, required: true },

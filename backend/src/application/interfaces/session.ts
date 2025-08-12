@@ -26,7 +26,7 @@ export interface IUpdateSessionStatusUseCase {
 }
 
 export interface IPaySessionWithWalletUseCase {
-	execute(sessionId: string, userId: string, paymentId: string, paymentStatus: string, status: string): Promise<void>;
+	execute(sessionId: string, userId: string, paymentStatus: string, status: string): Promise<void>;
 }
 
 export interface IPaySessionWithGatewayUseCase {

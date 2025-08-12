@@ -211,6 +211,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 	}
 
 	async markPayment(sessionId: string, userId: string, paymentStatus: SessionPaymentStatusEnum, paymentId: string, newStatus: SessionStatusEnum): Promise<void> {
+		console.log('paymentId: ', paymentId);
 		try {
 			await SessionModel.findOneAndUpdate(
 				{ _id: sessionId, "participants.userId": userId },

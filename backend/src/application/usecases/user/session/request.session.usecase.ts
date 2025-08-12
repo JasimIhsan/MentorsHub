@@ -31,7 +31,6 @@ export class RequestSessionUseCase implements IRequestSessionUseCase {
 		if (!mentorProfile) throw new Error("Mentor not found");
 
 		const availableSlots = await this.getAvailability.execute(input.mentorId, input.date, input.hours);
-		console.log("availableSlots in request: ", availableSlots);
 		if (!availableSlots.includes(input.startTime)) {
 			throw new Error("The requested slot is already booked or unavailable.");
 		}

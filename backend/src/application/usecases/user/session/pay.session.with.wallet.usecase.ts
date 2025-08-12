@@ -9,6 +9,7 @@ import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enum
 import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
 import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
+import { v4 as uuid } from "uuid";
 
 // Constants
 const PLATFORM_FIXED_FEE = 40;
@@ -25,7 +26,7 @@ function getSessionDateTime(date: Date, time: string): Date {
 export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository, private readonly notifyUserUseCase: INotifyUserUseCase) {}
 
-	async execute(sessionId: string, userId: string, paymentId: string, paymentStatus: SessionPaymentStatusEnum, status: SessionStatusEnum): Promise<void> {
+	async execute(sessionId: string, userId: string, paymentStatus: SessionPaymentStatusEnum, status: SessionStatusEnum): Promise<void> {
 		// Get session
 		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
@@ -37,10 +38,10 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		}
 
 		// Validate participant
-		const participant = session.participants.find((p) => p.user.id === userId);
+		const participant = session.findParticipant(userId);
 		if (!participant) throw new Error("Unauthorized: User is not a participant in this session");
 		if (participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) {
-			throw new Error("Session already booked");
+			throw new Error("Session already paid");
 		}
 
 		// Calculate Fees
@@ -119,6 +120,8 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 		}
 
 		// Mark payment complete
+		const paymentId = `wal-${uuid()}`;
+		console.log('paymentId in wallet usecase: ', paymentId);
 		await this.sessionRepo.markPayment(sessionId, userId, paymentStatus, paymentId, status);
 
 		// Notify both mentor & user

@@ -6,6 +6,7 @@ import axiosInstance from "@/api/config/api.config";
 import { toast } from "sonner";
 import { ISessionUserDTO } from "@/interfaces/session.interface";
 import { createRazorpayOrderAPI } from "@/api/session.api.service";
+import { SessionPaymentStatusEnum, SessionStatusEnum } from "@/interfaces/enums/session.status.enum";
 
 interface PaymentMethodModalProps {
 	isOpen: boolean;
@@ -33,11 +34,11 @@ export function PaymentMethodModal({ isOpen, onClose, session, walletBalance, is
 			const response = await axiosInstance.post("/user/sessions/pay/wallet", {
 				sessionId: session.id,
 				userId: userId,
-				paymentStatus: "completed",
-				status: "upcoming",
+				paymentStatus: SessionPaymentStatusEnum.COMPLETED,
+				status: SessionStatusEnum.UPCOMING,
 			});
 			if (response.data.success) {
-				setPaidSession({ ...session, status: "upcoming" });
+				setPaidSession({ ...session, status: SessionStatusEnum.UPCOMING });
 				setShowPaymentModal(true);
 				toast.success("Payment successful using wallet!");
 				onClose();
@@ -85,11 +86,11 @@ export function PaymentMethodModal({ isOpen, onClose, session, walletBalance, is
 							paymentId: response.razorpay_payment_id,
 							orderId: response.razorpay_order_id,
 							signature: response.razorpay_signature,
-							paymentStatus: "completed",
-							status: "upcoming",
+							paymentStatus: SessionPaymentStatusEnum.COMPLETED,
+							status: SessionStatusEnum.UPCOMING,
 						});
 						if (paymentResponse.data.success) {
-							setPaidSession({ ...session, status: "upcoming" });
+							setPaidSession({ ...session, status: SessionStatusEnum.UPCOMING });
 							setShowPaymentModal(true);
 							toast.success("Payment successful!");
 							onClose();

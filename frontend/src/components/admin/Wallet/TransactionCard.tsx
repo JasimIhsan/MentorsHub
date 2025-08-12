@@ -42,7 +42,7 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
 						<div>
 							<p className="font-medium text-gray-900">{getPurposeLabel(transaction.purpose)}</p>
 							<p className="text-sm text-gray-500">{transaction.description || "No description"}</p>
-							{transaction.fromUserId && transaction.purpose !== "withdrawal" && <p className="text-sm text-gray-500">From: {transaction.fromUserId.name}</p>}
+							{transaction.fromUserId && transaction.purpose !== "withdrawal" && transaction.purpose !== "wallet_topup" && transaction.purpose !== "refund" && <p className="text-sm text-gray-500">From: {transaction.fromUserId.name}</p>}
 							<p className="text-sm text-gray-500">{formatDate(String(transaction.createdAt))}</p>
 						</div>
 					</div>

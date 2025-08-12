@@ -27,7 +27,7 @@ export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCa
 		}
 
 		// 🧑‍🤝‍🧑 Validate participant
-		const participant = session.participants.find((p) => p.user.id === userId);
+		const participant = session.findParticipant(userId);
 		if (!participant) throw new Error("Unauthorized access to session");
 		if (participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) {
 			throw new Error("Payment already completed for this session.");

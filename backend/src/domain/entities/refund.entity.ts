@@ -1,4 +1,4 @@
-import { RefundInitiatorEnum, RefundMethodEnum, RefundStatusEnum } from "../../application/interfaces/enums/refund.enums";
+import { RefundInitiatorEnum, RefundStatusEnum } from "../../application/interfaces/enums/refund.enums";
 import { IRefundDocument } from "../../infrastructure/database/models/refund/refund.model";
 
 export interface IRefundEntityProps {
@@ -7,7 +7,6 @@ export interface IRefundEntityProps {
 	paymentId: string;
 	userId: string;
 	initiatedBy: RefundInitiatorEnum;
-	method: RefundMethodEnum;
 	reason?: string;
 	originalAmount: number;
 	refundAmount: number;
@@ -53,9 +52,6 @@ export class RefundEntity {
 	}
 	get initiatedBy() {
 		return this.props.initiatedBy;
-	}
-	get method() {
-		return this.props.method;
 	}
 	get reason() {
 		return this.props.reason;
@@ -119,11 +115,6 @@ export class RefundEntity {
 		this.touch();
 	}
 
-	set method(method: RefundMethodEnum) {
-		this.props.method = method;
-		this.touch();
-	}
-
 	set walletTransactionId(txId: string | undefined) {
 		this.props.walletTransactionId = txId;
 		this.touch();
@@ -164,7 +155,6 @@ export class RefundEntity {
 			paymentId: doc.paymentId,
 			userId: doc.userId.toString(),
 			initiatedBy: doc.initiatedBy,
-			method: doc.method,
 			reason: doc.reason,
 			originalAmount: doc.originalAmount,
 			refundAmount: doc.refundAmount,
@@ -184,7 +174,6 @@ export class RefundEntity {
 			paymentId: entity.paymentId,
 			userId: entity.userId,
 			initiatedBy: entity.initiatedBy,
-			method: entity.method,
 			reason: entity.reason,
 			originalAmount: entity.originalAmount,
 			refundAmount: entity.refundAmount,

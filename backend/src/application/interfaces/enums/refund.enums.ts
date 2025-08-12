@@ -6,10 +6,10 @@ export enum RefundStatusEnum {
 	FAILED = "failed", // Refund processing failed
 }
 
-export enum RefundMethodEnum {
-	WALLET = "wallet", // Refund to in-app wallet
-	ORIGINAL_PAYMENT = "original_payment", // Refund to original payment method
-}
+// export enum RefundMethodEnum {
+// 	WALLET = "wallet", // Refund to in-app wallet
+// 	ORIGINAL_PAYMENT = "original_payment", // Refund to original payment method
+// }
 
 export enum RefundInitiatorEnum {
 	SYSTEM = "system", // Auto refund (cancellation)
