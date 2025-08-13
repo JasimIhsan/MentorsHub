@@ -2,8 +2,6 @@ import { IRescheduleRequestRepository } from "../../../domain/repositories/resch
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { CommonStringMessage } from "../../../shared/constants/string.messages";
 import { IRescheduleRequestDTO, mapToRescheduleRequestDTO } from "../../dtos/reschedule.request.dto";
-import { NotificationTypeEnum } from "../../interfaces/enums/notification.type.enum";
-import { RescheduleStatusEnum } from "../../interfaces/enums/reschedule.status.enum";
 import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
 import { ICounterRescheduleRequestUseCase } from "../../interfaces/reschedule.request";
 

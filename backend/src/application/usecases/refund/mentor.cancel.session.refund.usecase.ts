@@ -7,7 +7,7 @@ import { RefundInitiatorEnum, RefundStatusEnum } from "../../interfaces/enums/re
 import { RoleEnum } from "../../interfaces/enums/role.enum";
 import { SessionStatusEnum } from "../../interfaces/enums/session.status.enums";
 import { TransactionPurposeEnum } from "../../interfaces/enums/transaction.purpose.enum";
-import { TransactionMethodEnum, TransactionsTypeEnum } from "../../interfaces/enums/transaction.type.enum";
+import { TransactionsTypeEnum } from "../../interfaces/enums/transaction.type.enum";
 import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
 import { ICancelSessionRefundUseCase } from "../../interfaces/refund";
 

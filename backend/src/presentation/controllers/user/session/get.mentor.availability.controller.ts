@@ -9,7 +9,7 @@ export class GetMentorAvailabilityController {
 		try {
 			const { mentorId } = req.params;
 			const { date, hours } = req.query;
-			console.log('date: ', date);
+			console.log("date: ", date);
 
 			if (!date || !hours) {
 				res.status(HttpStatusCode.BAD_REQUEST).json({
@@ -21,7 +21,7 @@ export class GetMentorAvailabilityController {
 
 			// Safely parse date
 			const parsedDate = new Date(date as string);
-			console.log('parsedDate: ', parsedDate);
+			console.log("parsedDate: ", parsedDate);
 			const parsedHours = parseInt(hours as string, 10);
 
 			if (isNaN(parsedDate.getTime())) {

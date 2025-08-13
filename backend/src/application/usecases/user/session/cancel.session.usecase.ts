@@ -1,5 +1,4 @@
-import { differenceInHours, formatDate } from "date-fns";
-import { IRefundRepository } from "../../../../domain/repositories/refund.repository";
+import { formatDate } from "date-fns";
 import { IRescheduleRequestRepository } from "../../../../domain/repositories/reschedule.request.repository";
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { isSessionExpired } from "../../../../infrastructure/utils/isSessionExpired";
@@ -17,7 +16,7 @@ export class CancelSessionUseCase implements ICancelSessionUseCase {
 		private sessionRepository: ISessionRepository,
 		private rescheduleRequestRepo: IRescheduleRequestRepository,
 		private notifyUserUseCase: INotifyUserUseCase,
-		private userCancelSessionRefundUseCase: ICancelSessionRefundUseCase // inject refund use case
+		private userCancelSessionRefundUseCase: ICancelSessionRefundUseCase, // inject refund use case
 	) {}
 
 	async execute(sessionId: string, userId: string): Promise<ISessionUserDTO> {

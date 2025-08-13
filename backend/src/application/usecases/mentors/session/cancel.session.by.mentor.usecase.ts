@@ -15,7 +15,7 @@ export class CancelSessionByMentorUseCase implements ICancelSessionByMentorUseCa
 		private readonly _sessionRepo: ISessionRepository, //
 		private readonly _rescheduleRequestRepo: IRescheduleRequestRepository,
 		private readonly _refundUseCase: ICancelSessionRefundUseCase,
-		private readonly _notifyUserUseCase: INotifyUserUseCase
+		private readonly _notifyUserUseCase: INotifyUserUseCase,
 	) {}
 
 	async execute(sessionId: string, mentorId: string): Promise<ISessionMentorDTO> {

@@ -43,7 +43,7 @@ const RefundSchema = new Schema<IRefundDocument>(
 		},
 		processedAt: { type: Date },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const RefundModel = mongoose.model<IRefundDocument>("Refund", RefundSchema);

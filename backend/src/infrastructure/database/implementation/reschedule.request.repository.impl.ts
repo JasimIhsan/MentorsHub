@@ -1,8 +1,6 @@
-import { session } from "passport";
 import { RescheduleStatusEnum } from "../../../application/interfaces/enums/reschedule.status.enum";
 import { RescheduleRequestEntity } from "../../../domain/entities/reschedule.request.entity";
 import { IRescheduleRequestRepository } from "../../../domain/repositories/reschedule.request.repository";
-import { sessionRepository } from "../../composer";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 import { RescheduleRequestModel } from "../models/session/reschedule.request.model";
 import { SessionModel } from "../models/session/session.model";

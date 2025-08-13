@@ -20,7 +20,6 @@ import { GetSessionHistoryController } from "./get.session.history.controller";
 import { UpdateMentorProfileController } from "./update.mentor.profile.controller";
 import { GetRescheduleRequestsByMentorController } from "./get.reschedule.reqeusts.by.mentor.controller";
 import { CancelSessionByMentorController } from "./cancel.session.by.mentor.controller";
-import { mentorCancelSessionRefundUseCase } from "../../../application/usecases/refund/composer";
 
 export const getAllMentorsController = new GetAllMentorsController(getAllMentorsUsecase);
 export const getAllApprovedMentorsController = new GetAllApprovedMentorsController(getAllApprovedMentorsUsecase);

@@ -1,7 +1,7 @@
 import { SpecialAvailabilityEntity } from "../../../../domain/entities/availability/special.availability.entity";
 import { ISpecialAvailabilityRepository } from "../../../../domain/repositories/availability/special.availabiltity.repository";
 import { handleExceptionError } from "../../../utils/handle.exception.error";
-import { ISpecialAvailabilityDocument, SpecialAvailabilityModel } from "../../models/availability/special.availability.model";
+import { SpecialAvailabilityModel } from "../../models/availability/special.availability.model";
 
 export class SpecialAvailabilityRepositoryImpl implements ISpecialAvailabilityRepository {
 	async create(entity: SpecialAvailabilityEntity): Promise<SpecialAvailabilityEntity> {

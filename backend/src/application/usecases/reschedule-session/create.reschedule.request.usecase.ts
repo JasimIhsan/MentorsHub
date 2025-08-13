@@ -2,8 +2,6 @@ import { ProposalEntity, RescheduleRequestEntity } from "../../../domain/entitie
 import { IRescheduleRequestRepository } from "../../../domain/repositories/reschedule.request.repository";
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { IRescheduleRequestDTO, mapToRescheduleRequestDTO } from "../../dtos/reschedule.request.dto";
-import { ISessionUserDTO, mapToUserSessionDTO } from "../../dtos/session.dto";
-import { NotificationTypeEnum } from "../../interfaces/enums/notification.type.enum";
 import { RescheduleStatusEnum } from "../../interfaces/enums/reschedule.status.enum";
 import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
 import { ICreateRescheduleRequestInput, ICreateRescheduleRequestUsecase } from "../../interfaces/reschedule.request";
