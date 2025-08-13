@@ -62,7 +62,7 @@ const RescheduleRequestSchema = new Schema(
 
 		lastActionBy: { type: Schema.Types.ObjectId, ref: "Users" },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const RescheduleRequestModel = mongoose.model<IRescheduleRequestDocument>("Reschedule-Request", RescheduleRequestSchema);

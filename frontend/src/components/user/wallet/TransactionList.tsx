@@ -53,9 +53,9 @@ export function TransactionList({ transactions, isLoading, currentPage, totalPag
 											<div>
 												<p className="font-medium text-gray-900">{getPurposeLabel(transaction.purpose)}</p>
 												<p className="text-sm text-gray-500">{transaction.description || "No description"}</p>
-												{transaction.purpose !== "wallet_topup" && (
+												{/* {!["wallet_topup", "refund", "withdrawal"].includes(transaction.purpose) && (
 													<p className="text-sm text-gray-500">{transaction.toUserId ? `To: ${transaction.toUserId.name}` : transaction.fromUserId ? `From: ${transaction.fromUserId.name}` : ""} </p>
-												)}
+												)} */}
 												<p className="text-sm text-gray-500">{formatDate(String(transaction.createdAt))}</p>
 											</div>
 										</div>

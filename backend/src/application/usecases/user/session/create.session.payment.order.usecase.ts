@@ -20,7 +20,7 @@ export class CreateSessionPaymentOrderUseCase implements ICreateSessionPaymentOr
 			throw new Error("Payment time expired. The session has already started or ended.");
 		}
 
-		const participant = session.participants.find((p) => p.user.id === userId);
+		const participant = session.findParticipant(userId);
 		if (!participant) throw new Error("Unauthorized: User is not a participant in this session");
 		if (participant.paymentStatus === SessionPaymentStatusEnum.COMPLETED) throw new Error("Session already paid");
 

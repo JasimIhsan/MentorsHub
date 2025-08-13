@@ -10,7 +10,7 @@ export class VerifySessionPaymentUseCase implements IVerifySessionPaymentUseCase
 		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 
-		const user = session.participants.find((p) => p.user.id === userId);
+		const user = session.findParticipant(userId);
 		if (!user) throw new Error("Unauthorized: User is not a participant in this session");
 
 		return user.paymentStatus === SessionPaymentStatusEnum.PENDING;

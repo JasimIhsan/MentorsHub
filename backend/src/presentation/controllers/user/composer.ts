@@ -49,8 +49,6 @@ import { PaySessionWithGatewayController } from "./session/pay.session.with.gate
 import { GetAllListedGamificationTasksController } from "./gamification/get.all.listed.gamification.task.controller";
 import { getAllListedGamificationTasksUseCase, getUserProgressUseCase } from "../../../application/usecases/gamification/composer";
 import { GetUserProgressController } from "./gamification/get.user.progress.controller";
-import { RescheduleSessionController } from "../reschedule-request/reschedule.session.controller";
-import { createRescheduleRequestUseCase } from "../../../application/usecases/reschedule-session/composer";
 import { GetSessionByUserController } from "./session/get.session.by.user.controller";
 
 export const signupController = new SignupController(signupUseCase);

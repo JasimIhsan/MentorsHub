@@ -1,6 +1,5 @@
 import { RescheduleRequestEntity } from "../../domain/entities/reschedule.request.entity";
 import { PersonEntity, PricingType, SessionEntity } from "../../domain/entities/session.entity";
-import { RescheduleStatusEnum } from "../interfaces/enums/reschedule.status.enum";
 import { SessionPaymentStatusEnum } from "../interfaces/enums/session.payment.status.enum";
 import { SessionStatusEnum } from "../interfaces/enums/session.status.enums";
 import { IRescheduleRequestDTO, mapToRescheduleRequestDTO } from "./reschedule.request.dto";

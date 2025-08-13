@@ -40,7 +40,7 @@ const ParticipantSchema = new Schema(
 		},
 		paymentId: { type: String },
 	},
-	{ _id: false }
+	{ _id: false },
 );
 
 const SessionSchema = new Schema(
@@ -72,7 +72,7 @@ const SessionSchema = new Schema(
 		totalAmount: { type: Number },
 		rejectReason: { type: String },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const SessionModel = mongoose.model<ISessionDocument>("Sessions", SessionSchema);

@@ -7,9 +7,9 @@ export class PaySessionWithWalletController {
 	constructor(private paySessionWithWalletUseCase: IPaySessionWithWalletUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
-			const { sessionId, userId, paymentId, paymentStatus, status } = req.body;
+			const { sessionId, userId, paymentStatus, status } = req.body;
 
-			await this.paySessionWithWalletUseCase.execute(sessionId, userId, paymentId, paymentStatus, status);
+			await this.paySessionWithWalletUseCase.execute(sessionId, userId, paymentStatus, status);
 
 			res.status(HttpStatusCode.OK).json({
 				success: true,

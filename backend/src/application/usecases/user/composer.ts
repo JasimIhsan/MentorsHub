@@ -41,6 +41,7 @@ import { PaySessionWithGatewayUseCase } from "./session/pay.session.with.gateway
 import { createUserProgressUseCase } from "../gamification/composer";
 import { notifyUserUseCase } from "../notification/composer";
 import { GetSessionByUserUseCase } from "./session/get.session.by.user.usecase";
+import { userCancelSessionRefundUseCase } from "../refund/composer";
 
 // Initialize UseCases
 export const signinUseCase = new SigninUseCase(userRepository, tokenService, hashService, notifyUserUseCase);
@@ -64,7 +65,7 @@ export const getSessionsByUserUsecase = new GetSessionsByUserUseCase(sessionRepo
 export const getSessionByMentorUsecase = new GetSessionsByUserUseCase(sessionRepository, rescheduleRequestRepository);
 export const paySessionWithWalletUseCase = new PaySessionWithWalletUseCase(sessionRepository, walletRepository, notifyUserUseCase);
 export const paySessionWithGatewayUsecase = new PaySessionWithGatewayUseCase(sessionRepository, walletRepository, notifyUserUseCase);
-export const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository, rescheduleRequestRepository, notifyUserUseCase);
+export const cancelSessionUseCase = new CancelSessionUseCase(sessionRepository, rescheduleRequestRepository, notifyUserUseCase, userCancelSessionRefundUseCase);
 export const verifySessionPaymentUseCase = new VerifySessionPaymentUseCase(sessionRepository);
 export const getSessionByUserUseCase = new GetSessionByUserUseCase(sessionRepository, rescheduleRequestRepository);
 
