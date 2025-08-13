@@ -13,7 +13,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { calculateEndTime } from "@/utility/calculate.endTime";
 import { ISessionUserDTO } from "@/interfaces/session.interface";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
-import { isSessionExpired } from "@/utility/is-session-expired";
 import { toast } from "sonner";
 import { requestSessionRescheduleAPI } from "@/api/rescheduling.api.service";
 
@@ -31,6 +30,7 @@ interface SessionCardProps {
 }
 
 export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, setSessionToCancel, setShowReviewModal, setSessionToReview, setShowPaymentMethodModal, setSessionToPay }: SessionCardProps) {
+	console.log('session: ', session);
 	const [showRescheduleModal, setShowRescheduleModal] = useState(false);
 	const [isReasonOpen, setIsReasonOpen] = useState(false);
 	// Format current date to YYYY-MM-DD
@@ -46,9 +46,9 @@ export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, se
 		message: "",
 	});
 
-	// Check if session is expired
-	const isExpired = session.status === "upcoming" && isSessionExpired(session.date, session.endTime);
-	const type = isExpired ? "expired" : session.status;
+	// // Check if session is expired
+	// const isExpired = session.status === "upcoming" && isSessionExpired(session.date, session.endTime);
+	// const type = isExpired ? "expired" : session.status;
 
 	// Update endTime when startTime changes
 	useEffect(() => {
@@ -130,7 +130,7 @@ export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, se
 								</div>
 							</div>
 							<div className="flex items-center gap-2">
-								{type === "upcoming" && (
+								{session.status === "upcoming" && (
 									<>
 										<Button asChild>
 											<Link to={`/video-call/${session.id}`}>Join Session</Link>
@@ -171,7 +171,7 @@ export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, se
 										</DropdownMenu>
 									</>
 								)}
-								{type === "approved" && (
+								{session.status === "approved" && (
 									<>
 										<Badge variant="outline" className="bg-yellow-100 text-yellow-800">
 											Awaiting Payment
@@ -216,7 +216,7 @@ export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, se
 										</DropdownMenu>
 									</>
 								)}
-								{type === "completed" && (
+								{session.status === "completed" && (
 									<>
 										<Badge variant="outline" className="text-primary bg-primary/5">
 											Completed
@@ -237,7 +237,7 @@ export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, se
 										</Button>
 									</>
 								)}
-								{type === "canceled" && (
+								{session.status === "canceled" && (
 									<>
 										<Badge variant="outline" className="bg-destructive/10 text-destructive">
 											Canceled
@@ -247,8 +247,8 @@ export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, se
 										</Button>
 									</>
 								)}
-								{type === "pending" && <Badge variant="outline">Pending</Badge>}
-								{type === "rejected" && (
+								{session.status === "pending" && <Badge variant="outline">Pending</Badge>}
+								{session.status === "rejected" && (
 									<>
 										<Badge className="bg-red-100 text-red-800">Rejected</Badge>
 										<DropdownMenu open={isReasonOpen} onOpenChange={setIsReasonOpen}>
@@ -266,7 +266,7 @@ export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, se
 										</Button>
 									</>
 								)}
-								{type === "expired" && (
+								{session.status === "expired" && (
 									<>
 										<Badge variant="outline" className="bg-gray-100 text-gray-800">
 											Expired

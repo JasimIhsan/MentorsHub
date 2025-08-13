@@ -20,24 +20,21 @@ export const registerVideoCallHandlers = (io: Server, socket: Socket) => {
 				return socket.emit("error", { message: "Session is not available or not paid" });
 			}
 
-			// ✅ Combine session.date and session.time to get start datetime in IST
-			const sessionDate = new Date(session.date); // example: 2025-07-28T00:00:00.000Z
+			// Extract hours and minutes from the start time
 			const [hours, minutes] = session.startTime.split(":").map(Number);
 
-			// Important: this sets time in **local time** (assumed to be IST)
-			const sessionStartTime = new Date(sessionDate);
-			sessionStartTime.setHours(hours, minutes, 0, 0); // Use setHours, not setUTCHours
+			// Build UTC datetime from session.date (which is likely stored in UTC midnight)
+			const sessionStartUTC = new Date(session.date);
+			sessionStartUTC.setUTCHours(hours - 5, minutes - 30, 0, 0); // subtract IST offset to get true UTC time
 
-			// Optional: allow joining 5 mins before start
-			const earlyJoinBufferMinutes = 5;
-			const joinAllowedTime = new Date(sessionStartTime.getTime() - earlyJoinBufferMinutes * 60 * 1000);
+			// Calculate allowed join time in UTC
+			const joinAllowedTimeUTC = new Date(sessionStartUTC.getTime() - 5 * 60 * 1000);
 
-			const now = new Date();
+			// Now is also in UTC
+			const nowUTC = new Date();
 
-			if (now < joinAllowedTime) {
-				return socket.emit("error", {
-					message: "You can join the session 5 minutes before it starts.",
-				});
+			if (nowUTC < joinAllowedTimeUTC) {
+				return socket.emit("error", { message: "You can join the session 5 minutes before it starts." });
 			}
 
 			// ✅ Setup participant data
