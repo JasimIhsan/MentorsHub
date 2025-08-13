@@ -5,17 +5,13 @@ import { IWalletRepository } from "../../../domain/repositories/wallet.repositor
 import { NotificationTypeEnum } from "../../interfaces/enums/notification.type.enum";
 import { RefundInitiatorEnum, RefundStatusEnum } from "../../interfaces/enums/refund.enums";
 import { RoleEnum } from "../../interfaces/enums/role.enum";
-import { SessionPaymentStatusEnum } from "../../interfaces/enums/session.payment.status.enum";
 import { SessionStatusEnum } from "../../interfaces/enums/session.status.enums";
 import { TransactionPurposeEnum } from "../../interfaces/enums/transaction.purpose.enum";
 import { TransactionMethodEnum, TransactionsTypeEnum } from "../../interfaces/enums/transaction.type.enum";
 import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
 import { ICancelSessionRefundUseCase } from "../../interfaces/refund";
 
-const PLATFORM_FIXED_FEE = 40;
-const PLATFORM_COMMISSION_PERCENTAGE = 0.15;
-
-export class UserCancelSessionRefundUseCase implements ICancelSessionRefundUseCase {
+export class MentorCancelSessionRefundUseCase implements ICancelSessionRefundUseCase {
 	constructor(private readonly sessionRepository: ISessionRepository, private readonly walletRepo: IWalletRepository, private readonly notifyUserUseCase: INotifyUserUseCase, private readonly refundRepo: IRefundRepository) {}
 
 	async execute(sessionId: string, userId: string): Promise<void> {
@@ -23,23 +19,12 @@ export class UserCancelSessionRefundUseCase implements ICancelSessionRefundUseCa
 		if (!session) throw new Error("Session not found");
 		if (session.pricing === "free") return;
 
-		const participant = session.findParticipant(userId);
-		if (!participant) throw new Error("You are not a participant in this session");
-
-		if (![SessionStatusEnum.UPCOMING, SessionStatusEnum.APPROVED].includes(session.status)) {
-			throw new Error("Only upcoming or approved sessions can be refunded");
-		}
-
-		if (participant.paymentStatus !== SessionPaymentStatusEnum.COMPLETED) {
-			throw new Error("Payment not completed, cannot refund");
-		}
-
-		// --- Fee calculations ---
-		const sessionAmount = session.totalAmount;
-		const userRefund = sessionAmount - PLATFORM_FIXED_FEE; // refund everything except fixed fee
-
-		// --- Platform wallet holds all funds
+		// Get platform wallet
 		const platformWallet = await this.walletRepo.platformWallet();
+
+		// --- Full refund (mentor at fault) ---
+		const sessionAmount = session.totalAmount;
+		const userRefund = sessionAmount; // includes ₹40 fixed fee
 
 		// Refund from platform wallet
 		await this.walletRepo.updateBalance(platformWallet.userId, userRefund, TransactionsTypeEnum.DEBIT, RoleEnum.ADMIN);
@@ -52,9 +37,9 @@ export class UserCancelSessionRefundUseCase implements ICancelSessionRefundUseCa
 			fromRole: RoleEnum.ADMIN,
 			toRole: RoleEnum.USER,
 			amount: userRefund,
-			type: TransactionsTypeEnum.DEBIT, // Money going out of platform
+			type: TransactionsTypeEnum.DEBIT, // Platform losing money
 			purpose: TransactionPurposeEnum.REFUND,
-			description: `Refund debited from platform wallet for canceled session "${session.topic}" by user`,
+			description: `Refund debited from platform wallet for canceled session "${session.topic}"`,
 			sessionId,
 		});
 
@@ -65,22 +50,24 @@ export class UserCancelSessionRefundUseCase implements ICancelSessionRefundUseCa
 			fromRole: RoleEnum.ADMIN,
 			toRole: RoleEnum.USER,
 			amount: userRefund,
-			type: TransactionsTypeEnum.CREDIT, // Money credited to user
+			type: TransactionsTypeEnum.CREDIT, // User gaining money
 			purpose: TransactionPurposeEnum.REFUND,
-			description: `Refund credited to your wallet for canceled session "${session.topic}" (platform fee ₹${PLATFORM_FIXED_FEE} retained)`,
+			description: `Full refund credited to your wallet for canceled session "${session.topic}"`,
 			sessionId,
 		});
+
+		const participant = session.paidParticipants.find((p) => p.user.id === userId);
 
 		// --- Save refund record ---
 		const refundEntity = new RefundEntity({
 			sessionId: session.id,
-			paymentId: participant.paymentId || "",
+			paymentId: participant?.paymentId || "",
 			userId,
 			initiatedBy: RefundInitiatorEnum.SYSTEM,
-			reason: "User canceled paid session before 24 hours",
+			reason: "Mentor canceled session before 24 hours",
 			originalAmount: sessionAmount,
 			refundAmount: userRefund,
-			platformFeeRefunded: false,
+			platformFeeRefunded: true,
 			status: RefundStatusEnum.PROCESSED,
 			createdAt: new Date(),
 			updatedAt: new Date(),
@@ -93,17 +80,17 @@ export class UserCancelSessionRefundUseCase implements ICancelSessionRefundUseCa
 
 		// --- Notify user ---
 		await this.notifyUserUseCase.execute({
-			title: "💰 Refund Processed",
-			message: `Your refund of ₹${userRefund} for the session "${session.topic}" has been processed.`,
+			title: "💰 Full Refund Processed",
+			message: `Your full refund of ₹${userRefund} for the session "${session.topic}" has been processed because the mentor canceled.`,
 			isRead: false,
 			recipientId: userId,
 			type: NotificationTypeEnum.PAYMENT,
 		});
 
-		// --- Notify mentor (earnings cancelled, but no negative balance) ---
+		// --- Notify mentor ---
 		await this.notifyUserUseCase.execute({
-			title: "⚠️ Earnings Cancelled",
-			message: `Earnings for the session "${session.topic}" have been cancelled due to a user cancellation before start time.`,
+			title: "⚠️ Session Canceled",
+			message: `You canceled the session "${session.topic}". The user has been fully refunded, including the platform fee.`,
 			isRead: false,
 			recipientId: session.mentor.id,
 			type: NotificationTypeEnum.ERROR,

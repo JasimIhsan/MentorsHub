@@ -1,4 +1,4 @@
-import { ISessionUserDTO } from "../dtos/session.dto";
+import { ISessionMentorDTO, ISessionUserDTO } from "../dtos/session.dto";
 import { SessionRequestInput } from "../usecases/user/session/request.session.usecase";
 
 export interface IRequestSessionUseCase {
@@ -41,10 +41,19 @@ export interface ICancelSessionUseCase {
 	execute(sessionId: string, userId: string): Promise<ISessionUserDTO>;
 }
 
+export interface ICancelSessionByMentorUseCase {
+	execute(sessionId: string, userId: string): Promise<ISessionMentorDTO>;
+}
+
 export interface IVerifySessionPaymentUseCase {
 	execute(sessionId: string, userId: string): Promise<boolean>;
 }
 
 export interface ICreateSessionPaymentOrderUseCase {
 	execute(sessionId: string, userId: string): Promise<string>;
+}
+
+
+export interface IReleaseSessionFundsUseCase {
+	execute(sessionId: string): Promise<void>;
 }

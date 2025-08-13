@@ -11,28 +11,17 @@ import { INotifyUserUseCase } from "../../../interfaces/notification/notificatio
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 import { v4 as uuid } from "uuid";
 
-// Constants
-const PLATFORM_FIXED_FEE = 40;
-const PLATFORM_COMMISSION_PERCENTAGE = 0.15;
-
-// Utility
-function getSessionDateTime(date: Date, time: string): Date {
-	const [hours, minutes] = time.split(":").map(Number);
-	const sessionDate = new Date(date);
-	sessionDate.setHours(hours, minutes, 0, 0);
-	return sessionDate;
-}
-
 export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository, private readonly notifyUserUseCase: INotifyUserUseCase) {}
 
 	async execute(sessionId: string, userId: string, paymentStatus: SessionPaymentStatusEnum, status: SessionStatusEnum): Promise<void> {
-		// Get session
 		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error(CommonStringMessage.SESSION_NOT_FOUND);
 
-		// Check session expiry
-		const sessionDateTime = getSessionDateTime(session.date, session.startTime);
+		// Check session time
+		const [hours, minutes] = session.startTime.split(":").map(Number);
+		const sessionDateTime = new Date(session.date);
+		sessionDateTime.setHours(hours, minutes, 0, 0);
 		if (sessionDateTime.getTime() < Date.now()) {
 			throw new Error("Session is already expired. You cannot make payment.");
 		}
@@ -44,11 +33,8 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 			throw new Error("Session already paid");
 		}
 
-		// Calculate Fees
+		// Payment amount
 		const totalPaid = session.totalAmount;
-		const platformCommission = session.fee * PLATFORM_COMMISSION_PERCENTAGE;
-		const totalPlatformFee = PLATFORM_FIXED_FEE + platformCommission;
-		const mentorEarning = Math.max(totalPaid - totalPlatformFee, 0);
 
 		// Wallet check
 		const userWallet = await this.walletRepo.findWalletByUserId(userId);
@@ -56,91 +42,57 @@ export class PaySessionWithWalletUseCase implements IPaySessionWithWalletUseCase
 			throw new Error("Insufficient wallet balance");
 		}
 
-		// Wallet Transfers
-		const mentorId = session.mentor.id;
+		// Move funds into platform wallet (HOLD)
 		const platformWallet = await this.walletRepo.platformWallet();
-
 		await this.walletRepo.updateBalance(userId, totalPaid, TransactionsTypeEnum.DEBIT);
-		if (mentorEarning > 0) {
-			await this.walletRepo.updateBalance(mentorId, mentorEarning, TransactionsTypeEnum.CREDIT);
-		}
-		await this.walletRepo.updateBalance(platformWallet.userId, totalPlatformFee, TransactionsTypeEnum.CREDIT, RoleEnum.ADMIN);
+		await this.walletRepo.updateBalance(platformWallet.userId, totalPaid, TransactionsTypeEnum.CREDIT, RoleEnum.ADMIN);
 
-		// Record Transactions
-		await this.walletRepo.createTransaction({
-			fromUserId: userId,
-			toUserId: mentorId,
-			fromRole: RoleEnum.USER,
-			toRole: RoleEnum.MENTOR,
-			amount: totalPaid,
-			type: TransactionsTypeEnum.DEBIT,
-			purpose: TransactionPurposeEnum.SESSION_FEE,
-			description: `Wallet payment for session "${session.topic}"`,
-			sessionId,
-		});
-
-		if (mentorEarning > 0) {
-			await this.walletRepo.createTransaction({
-				fromUserId: userId,
-				toUserId: mentorId,
-				fromRole: RoleEnum.USER,
-				toRole: RoleEnum.MENTOR,
-				amount: mentorEarning,
-				type: TransactionsTypeEnum.CREDIT,
-				purpose: TransactionPurposeEnum.SESSION_FEE,
-				description: `Mentor earning for session "${session.topic}"`,
-				sessionId,
-			});
-		}
-
+		// Record HOLD transaction
 		await this.walletRepo.createTransaction({
 			fromUserId: userId,
 			toUserId: platformWallet.userId,
 			fromRole: RoleEnum.USER,
 			toRole: RoleEnum.ADMIN,
-			amount: PLATFORM_FIXED_FEE,
+			amount: totalPaid,
 			type: TransactionsTypeEnum.CREDIT,
-			purpose: TransactionPurposeEnum.PLATFORM_FEE,
-			description: `Fixed platform fee for session "${session.topic}"`,
+			purpose: TransactionPurposeEnum.SESSION_FEE,
+			description: `Funds held for session "${session.topic}"`,
 			sessionId,
 		});
 
-		if (platformCommission > 0) {
-			await this.walletRepo.createTransaction({
-				fromUserId: userId,
-				toUserId: platformWallet.userId,
-				fromRole: RoleEnum.USER,
-				toRole: RoleEnum.ADMIN,
-				amount: platformCommission,
-				type: TransactionsTypeEnum.CREDIT,
-				purpose: TransactionPurposeEnum.PLATFORM_COMMISSION,
-				description: `15% platform commission for session "${session.topic}"`,
-				sessionId,
-			});
-		}
+		// Record DEBIT transaction
+		await this.walletRepo.createTransaction({
+			fromUserId: userId,
+			toUserId: platformWallet.userId,
+			fromRole: RoleEnum.USER,
+			toRole: RoleEnum.ADMIN,
+			amount: totalPaid,
+			type: TransactionsTypeEnum.DEBIT,
+			purpose: TransactionPurposeEnum.SESSION_FEE,
+			description: `Debited from your wallet for session "${session.topic}"`,
+			sessionId,
+		});
 
 		// Mark payment complete
-		const paymentId = `wal-${uuid()}`;
-		console.log('paymentId in wallet usecase: ', paymentId);
+		const paymentId = `wal-${uuid().slice(0, 8)}`;
 		await this.sessionRepo.markPayment(sessionId, userId, paymentStatus, paymentId, status);
 
-		// Notify both mentor & user
+		// Notify user
 		await this.notifyUserUseCase.execute({
 			title: "💰 Payment Successful",
-			message: `Your wallet payment of ₹${totalPaid.toFixed(2)} for the session "${session.topic}" was successful.`,
+			message: `Your wallet payment of ₹${totalPaid.toFixed(2)} for the session "${session.topic}" was successful and is being held until the session completes.`,
 			isRead: false,
 			recipientId: userId,
 			type: NotificationTypeEnum.PAYMENT,
 		});
 
-		if (mentorEarning > 0) {
-			await this.notifyUserUseCase.execute({
-				title: "💰 Session Payout Received",
-				message: `You've received ₹${mentorEarning.toFixed(2)} for the session "${session.topic}".`,
-				isRead: false,
-				recipientId: mentorId,
-				type: NotificationTypeEnum.PAYMENT,
-			});
-		}
+		// Notify mentor (payment held)
+		await this.notifyUserUseCase.execute({
+			title: "📅 New Booking Paid",
+			message: `A new session "${session.topic}" has been booked and paid. The payment is securely held by the platform and will be released to you once the session is completed.`,
+			isRead: false,
+			recipientId: session.mentor.id,
+			type: NotificationTypeEnum.PAYMENT,
+		});
 	}
 }

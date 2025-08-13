@@ -9,7 +9,7 @@ import { NotificationTypeEnum } from "../../../interfaces/enums/notification.typ
 import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
 import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
-import { IUserCancelSessionRefundUseCase } from "../../../interfaces/refund";
+import { ICancelSessionRefundUseCase } from "../../../interfaces/refund";
 import { ICancelSessionUseCase } from "../../../interfaces/session";
 
 export class CancelSessionUseCase implements ICancelSessionUseCase {
@@ -17,7 +17,7 @@ export class CancelSessionUseCase implements ICancelSessionUseCase {
 		private sessionRepository: ISessionRepository,
 		private rescheduleRequestRepo: IRescheduleRequestRepository,
 		private notifyUserUseCase: INotifyUserUseCase,
-		private userCancelSessionRefundUseCase: IUserCancelSessionRefundUseCase // inject refund use case
+		private userCancelSessionRefundUseCase: ICancelSessionRefundUseCase // inject refund use case
 	) {}
 
 	async execute(sessionId: string, userId: string): Promise<ISessionUserDTO> {
@@ -70,6 +70,6 @@ export class CancelSessionUseCase implements ICancelSessionUseCase {
 			link: "/mentor/sessions",
 		});
 
-		return mapToUserSessionDTO(updatedSession, userId);
+		return requestEntity ? mapToUserSessionDTO(updatedSession, userId, requestEntity) : mapToUserSessionDTO(updatedSession, userId);
 	}
 }

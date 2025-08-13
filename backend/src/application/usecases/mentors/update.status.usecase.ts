@@ -1,6 +1,6 @@
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { IUpdateUserTaskProgressUseCase } from "../../interfaces/gamification";
-import { IUpdateSessionStatusUseCase } from "../../interfaces/session";
+import { IReleaseSessionFundsUseCase, IUpdateSessionStatusUseCase } from "../../interfaces/session";
 import { SessionStatusEnum } from "../../interfaces/enums/session.status.enums";
 import { SessionPaymentStatusEnum } from "../../interfaces/enums/session.payment.status.enum";
 import { ActionTypeEnum } from "../../interfaces/enums/gamification.action.type.enum";
@@ -16,6 +16,7 @@ export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 		private readonly userRepo: IUserRepository,
 		private readonly notifyUserUseCase: INotifyUserUseCase,
 		private readonly getAvailabilityUseCase: IGetAvailabilityUseCase,
+		private readonly releaseSessionFundsUseCase: IReleaseSessionFundsUseCase
 	) {}
 
 	async execute(sessionId: string, status: SessionStatusEnum, rejectReason?: string): Promise<void> {
@@ -43,6 +44,7 @@ export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 				await this.userRepo.updateUser(user.id!, user);
 				await this.updateUserProgress.execute(p.user.id, ActionTypeEnum.COMPLETE_SESSION);
 			}
+			await this.releaseSessionFundsUseCase.execute(sessionId);
 		}
 
 		const { title, msg, type } = SessionStatusNotificationMap[status];

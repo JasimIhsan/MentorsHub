@@ -30,6 +30,20 @@ export class RequestSessionUseCase implements IRequestSessionUseCase {
 		const mentorProfile = await this.mentorRepo.findMentorByUserId(input.mentorId);
 		if (!mentorProfile) throw new Error("Mentor not found");
 
+		// Check if date is exactly tomorrow
+		// const today = new Date();
+		// today.setHours(0, 0, 0, 0); // midnight today
+
+		// const tomorrow = new Date(today);
+		// tomorrow.setDate(today.getDate() + 1); // midnight tomorrow
+
+		// const requestedDate = new Date(input.date);
+		// requestedDate.setHours(0, 0, 0, 0);
+
+		// if (requestedDate.getTime() !== tomorrow.getTime()) {
+		// 	throw new Error("You can only request sessions for the next day.");
+		// }
+
 		const availableSlots = await this.getAvailability.execute(input.mentorId, input.date, input.hours);
 		if (!availableSlots.includes(input.startTime)) {
 			throw new Error("The requested slot is already booked or unavailable.");

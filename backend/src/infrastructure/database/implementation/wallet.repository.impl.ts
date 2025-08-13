@@ -8,7 +8,7 @@ import { AdminModel } from "../models/admin/admin.model";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 import { WalletTransactionEntity } from "../../../domain/entities/wallet/wallet.transaction.entity";
 import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
-import { TransactionsTypeEnum } from "../../../application/interfaces/enums/transaction.type.enum";
+import { TransactionMethodEnum, TransactionsTypeEnum } from "../../../application/interfaces/enums/transaction.type.enum";
 import mongoose from "mongoose";
 import { TransactionPurposeEnum } from "../../../application/interfaces/enums/transaction.purpose.enum";
 
@@ -62,6 +62,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		amount: number;
 		type: TransactionsTypeEnum;
 		purpose: string;
+		method: TransactionMethodEnum;
 		description?: string;
 		sessionId?: string | null;
 	}): Promise<WalletTransactionEntity> {
@@ -76,6 +77,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 				amount: data.amount,
 				type: data.type,
 				purpose: data.purpose,
+				method: data.method,
 				description: data.description,
 				sessionId: data.sessionId || undefined,
 			});
@@ -171,7 +173,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 
 	async revenueChartData(
 		adminId: string,
-		months: number, // 0 = all, 1 = last‑30‑days, 6 = 6 months, 12 = 1 year
+		months: number // 0 = all, 1 = last‑30‑days, 6 = 6 months, 12 = 1 year
 	): Promise<{ name: string; total: number }[]> {
 		try {
 			/* ---------- 1. Match filter ------------------------------------ */

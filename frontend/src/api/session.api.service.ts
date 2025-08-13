@@ -106,3 +106,12 @@ export const cancelSessionAPI = async (userId: string, sessionId: string) => {
 		throw new Error(error.response?.data?.message || "Failed to cancel session.");
 	}
 };
+
+export const cancelSessionByMentorAPI = async (mentorId: string, sessionId: string) => {
+	try {
+		const res = await axiosInstance.put(`/mentor/sessions/cancel-session/${mentorId}/${sessionId}`);
+		return res.data;
+	} catch (error: any) {
+		throw new Error(error.response?.data?.message || "Failed to cancel session.");
+	}
+};

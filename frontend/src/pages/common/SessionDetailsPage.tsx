@@ -10,11 +10,10 @@ import { SessionPaymentStatusEnum, SessionStatusEnum } from "@/interfaces/enums/
 import { RescheduleStatusEnum } from "@/interfaces/enums/reschedule.request.enum";
 import { toast } from "sonner";
 import { Link, useParams } from "react-router-dom";
-import { fetchSessionByUser } from "@/api/session.api.service";
+import { cancelSessionAPI, cancelSessionByMentorAPI, fetchSessionByUser } from "@/api/session.api.service";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
-import axiosInstance from "@/api/config/api.config";
 import { Alert } from "@/components/custom/alert";
 import { acceptProposalRescheduleAPI } from "@/api/rescheduling.api.service";
 import { RescheduleDialog } from "@/components/common/reschedule/RescheduleDialog";
@@ -87,19 +86,16 @@ export function SessionDetailsPage() {
 	// Handle session cancellation
 	const handleCancelSession = async () => {
 		if (!user?.id || !session) return;
+		const isMentor = user.id === session.mentor._id;
+		console.log("isMentor: ", isMentor);
 		try {
-			const response = await axiosInstance.put(`/user/sessions/cancel-session`, {
-				sessionId: session.id,
-				userId: user.id,
-			});
-			if (response.data.success) {
-				setSession(response.data.session);
+			const response = isMentor ? await cancelSessionByMentorAPI(user.id, session.id) : await cancelSessionAPI(user.id, session.id);
+			if (response.success) {
+				setSession(response.session);
 				toast.success("Session canceled successfully.");
-			} else {
-				toast.error(response.data.message || "Failed to cancel session.");
 			}
-		} catch (error: any) {
-			toast.error(error.response?.data?.message || "Failed to cancel session.");
+		} catch (error) {
+			if (error instanceof Error) toast.error(error.message);
 		}
 	};
 
@@ -414,7 +410,7 @@ export function SessionDetailsPage() {
 				</CardContent>
 			</Card>
 
-			{session.status !== SessionStatusEnum.CANCELED && (
+			{![SessionStatusEnum.CANCELED, SessionStatusEnum.COMPLETED].includes(session.status) && (
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">

@@ -1,5 +1,5 @@
 import { RoleEnum } from "../../application/interfaces/enums/role.enum";
-import { TransactionsTypeEnum } from "../../application/interfaces/enums/transaction.type.enum";
+import { TransactionMethodEnum, TransactionsTypeEnum } from "../../application/interfaces/enums/transaction.type.enum";
 import { WalletEntity } from "../entities/wallet/wallet.entity";
 import { WalletTransactionEntity } from "../entities/wallet/wallet.transaction.entity";
 import { WithdrawalRequestEntity } from "../entities/wallet/wallet.withdrawel.request.entity";

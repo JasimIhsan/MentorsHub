@@ -7,6 +7,7 @@ export class RefundRepositoryImpl implements IRefundRepository {
 	async create(entity: RefundEntity): Promise<RefundEntity> {
 		try {
 			const refundObj = RefundEntity.toObject(entity);
+			console.log('refundObj: ', refundObj);
 			const refund = await RefundModel.create(refundObj);
 			return RefundEntity.fromDBDocument(refund);
 		} catch (error) {
