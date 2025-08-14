@@ -6,16 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CreditCard, AlertCircle, CheckCircle, XCircle, Clock } from "lucide-react";
 import type { JSX } from "react";
 import { RequestPaymentConfirmationModal } from "@/components/admin/withdrawal-requests/RequestPaymentConfirmationModal";
 import { formatDate } from "@/utility/time-data-formatter";
-import { fetchWithdrawalsAdminAPI } from "@/api/withdrawal.api.service";
+import { fetchWithdrawalsAdminAPI, rejectWithdrawalRequestAdminAPI } from "@/api/withdrawal.api.service";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PaginationControls } from "@/components/custom/PaginationControls";
+import { toast } from "sonner";
+import { Alert } from "@/components/custom/alert";
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 4;
 
 export function AdminWithdrawalRequestPage() {
 	const [requests, setRequests] = useState<IWithdrawalRequestDTO[]>([]);
@@ -24,8 +25,6 @@ export function AdminWithdrawalRequestPage() {
 	const [status, setStatus] = useState<WithdrawalStatusEnum | "ALL">("ALL");
 	const [selectedRequest, setSelectedRequest] = useState<IWithdrawalRequestDTO | null>(null);
 	const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-	const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-	const [confirmAction, setConfirmAction] = useState<{ type: string; request: IWithdrawalRequestDTO } | null>(null);
 	const [totalPages, setTotalPages] = useState(1);
 
 	useEffect(() => {
@@ -50,43 +49,28 @@ export function AdminWithdrawalRequestPage() {
 		setCurrentPage(page);
 	};
 
-	const handlePaymentSuccess = (_requestId: string, _transactionId: string) => {
-		// setRequests((prev) =>
-		// 	prev.map((req) =>
-		// 		req._id === requestId
-		// 			? {
-		// 					...req,
-		// 					status: WithdrawalStatusEnum.COMPLETED,
-		// 					transactionId,
-		// 					processedAt: new Date().toISOString(),
-		// 			  }
-		// 			: req
-		// 	)
-		// );
+	const handlePaymentSuccess = (requestId: string, transactionId: string) => {
+		setRequests((prev) => {
+			const updated = prev.map((req) => (req.id === requestId ? { ...req, status: WithdrawalStatusEnum.COMPLETED, transactionId, processedAt: new Date().toISOString() } : req));
+
+			// if we are in pending tab → filter out non-pending
+			if (activeTab === "pending") {
+				return updated.filter((req) => req.status === WithdrawalStatusEnum.PENDING);
+			}
+
+			return updated;
+		});
 	};
 
-	const handleStatusChange = (request: IWithdrawalRequestDTO, newStatus: WithdrawalStatusEnum) => {
-		setConfirmAction({ type: newStatus, request });
-		setIsConfirmDialogOpen(true);
-	};
-
-	const confirmStatusChange = () => {
-		if (!confirmAction) return;
-
-		// setRequests((prev) =>
-		// 	prev.map((req) =>
-		// 		req._id === confirmAction.request._id
-		// 			? {
-		// 					...req,
-		// 					status: confirmAction.type as WithdrawalStatusEnum,
-		// 					processedAt: new Date().toISOString(),
-		// 			  }
-		// 			: req
-		// 	)
-		// );
-
-		setIsConfirmDialogOpen(false);
-		setConfirmAction(null);
+	const handleRejectRequest = async (request: IWithdrawalRequestDTO) => {
+		try {
+			const response = await rejectWithdrawalRequestAdminAPI(request.id);
+			if (response.success) {
+				setRequests((prev) => prev.filter((req) => req.id !== request.id));
+			}
+		} catch (error) {
+			if (error instanceof Error) toast.error(error.message);
+		}
 	};
 
 	const getStatusBadge = (status: WithdrawalStatusEnum): JSX.Element => {
@@ -165,28 +149,30 @@ export function AdminWithdrawalRequestPage() {
 						<TabsContent value="pending" className="mt-6">
 							<RequestsTable
 								requests={requests}
-								onPayment={handlePayment}
-								onStatusChange={handleStatusChange}
+								onApprove={handlePayment}
+								onReject={handleRejectRequest}
 								getStatusBadge={getStatusBadge}
 								formatCurrency={formatCurrency}
 								showPayButton={true}
 								currentPage={currentPage}
 								totalPages={totalPages}
 								onPageChange={handlePageChange}
+								activeTab="pending"
 							/>
 						</TabsContent>
 
 						<TabsContent value="all" className="mt-6">
 							<RequestsTable
 								requests={requests}
-								onPayment={handlePayment}
-								onStatusChange={handleStatusChange}
+								onApprove={handlePayment}
+								onReject={handleRejectRequest}
 								getStatusBadge={getStatusBadge}
 								formatCurrency={formatCurrency}
 								showPayButton={false}
 								currentPage={currentPage}
 								totalPages={totalPages}
 								onPageChange={handlePageChange}
+								activeTab="all"
 							/>
 						</TabsContent>
 					</Tabs>
@@ -195,39 +181,24 @@ export function AdminWithdrawalRequestPage() {
 
 			{/* Payment Modal */}
 			<RequestPaymentConfirmationModal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} request={selectedRequest} onPaymentSuccess={handlePaymentSuccess} />
-
-			{/* Confirmation Dialog */}
-			<Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Confirm Status Change</DialogTitle>
-						<DialogDescription>Are you sure you want to change the status of this request to {confirmAction?.type}?</DialogDescription>
-					</DialogHeader>
-					<DialogFooter>
-						<Button variant="outline" onClick={() => setIsConfirmDialogOpen(false)}>
-							Cancel
-						</Button>
-						<Button onClick={confirmStatusChange}>Confirm</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
 		</div>
 	);
 }
 
 interface RequestsTableProps {
 	requests: IWithdrawalRequestDTO[];
-	onPayment: (request: IWithdrawalRequestDTO) => void;
-	onStatusChange: (request: IWithdrawalRequestDTO, status: WithdrawalStatusEnum) => void;
+	onApprove: (request: IWithdrawalRequestDTO) => void;
+	onReject: (request: IWithdrawalRequestDTO) => void;
 	getStatusBadge: (status: WithdrawalStatusEnum) => JSX.Element;
 	formatCurrency: (amount: number) => string;
+	activeTab: "pending" | "all";
 	showPayButton: boolean;
 	currentPage: number;
 	totalPages: number;
 	onPageChange: (page: number) => void;
 }
 
-function RequestsTable({ requests, currentPage, totalPages, onPageChange, onPayment, onStatusChange, getStatusBadge, formatCurrency, showPayButton }: RequestsTableProps) {
+function RequestsTable({ requests, activeTab, currentPage, totalPages, onPageChange, onApprove, onReject, getStatusBadge, formatCurrency, showPayButton }: RequestsTableProps) {
 	if (requests.length === 0) {
 		return (
 			<div className="text-center py-8">
@@ -248,7 +219,7 @@ function RequestsTable({ requests, currentPage, totalPages, onPageChange, onPaym
 						<TableHead>Status</TableHead>
 						<TableHead>Created</TableHead>
 						<TableHead>Processed</TableHead>
-						<TableHead>Actions</TableHead>
+						{activeTab === "pending" && <TableHead>Actions</TableHead>}
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -271,21 +242,30 @@ function RequestsTable({ requests, currentPage, totalPages, onPageChange, onPaym
 							<TableCell>{getStatusBadge(request.status)}</TableCell>
 							<TableCell className="text-sm">{request.createdAt ? formatDate(request.createdAt) : "-"}</TableCell>
 							<TableCell className="text-sm">{request.processedAt ? formatDate(request.processedAt) : "-"}</TableCell>
-							<TableCell>
-								<div className="flex gap-2">
-									{showPayButton && request.status === WithdrawalStatusEnum.PENDING && (
-										<Button size="sm" onClick={() => onPayment(request)}>
-											<CreditCard className="w-3 h-3 mr-1" />
-											Pay
-										</Button>
-									)}
-									{request.status === WithdrawalStatusEnum.PENDING && (
-										<Button size="sm" variant="destructive" onClick={() => onStatusChange(request, WithdrawalStatusEnum.REJECTED)}>
-											Reject
-										</Button>
-									)}
-								</div>
-							</TableCell>
+							{activeTab === "pending" && (
+								<TableCell>
+									<div className="flex gap-2">
+										{showPayButton && request.status === WithdrawalStatusEnum.PENDING && (
+											<Button size="sm" onClick={() => onApprove(request)}>
+												<CreditCard className="w-3 h-3 mr-1" />
+												Pay
+											</Button>
+										)}
+
+										<Alert
+											triggerElement={
+												<Button size="sm" variant="destructive">
+													Reject
+												</Button>
+											}
+											actionText="Yes, Reject"
+											contentDescription="Are you sure you want to reject this withdrawal request?"
+											contentTitle="Reject Withdrawal Request?"
+											onConfirm={() => onReject(request)}
+										/>
+									</div>
+								</TableCell>
+							)}
 						</TableRow>
 					))}
 				</TableBody>

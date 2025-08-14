@@ -42,3 +42,13 @@ export const approveWithdrawalRequestAdminAPI = async (requestId: string, paymen
 		throw new Error(error.response.data.message);
 	}
 };
+
+export const rejectWithdrawalRequestAdminAPI = async (requestId: string) => {
+	try {
+		const response = await axiosInstance.put(`/admin/withdrawal/reject/${requestId}`);
+		return response.data;
+	} catch (error: any) {
+		console.error("Error in rejectWithdrawalRequestAdminAPI:", error);
+		throw new Error(error.response.data.message);
+	}
+};

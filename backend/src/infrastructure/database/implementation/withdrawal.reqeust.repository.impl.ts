@@ -14,7 +14,7 @@ export class WithdrawalRequestRepositoryImpl implements IWithdrawalRequestReposi
 		}
 	}
 
-	async find(input: { page: number; limit: number; status: string; searchTerm?: string }): Promise<WithdrawalRequestEntity[]> {
+	async find(input: { page: number; limit: number; status: string; searchTerm?: string }): Promise<{requests: WithdrawalRequestEntity[], totalCount: number}> {
 		try {
 			const skip = (input.page - 1) * input.limit;
 
@@ -22,7 +22,10 @@ export class WithdrawalRequestRepositoryImpl implements IWithdrawalRequestReposi
 			if (input.status && input.status !== "ALL") query.status = input.status;
 
 			const docs = await WithdrawalRequestModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(input.limit).lean();
-			return docs.map((doc) => WithdrawalRequestEntity.fromDBDocument(doc));
+
+			const total = await WithdrawalRequestModel.countDocuments(query);
+
+			return { requests: docs.map((doc) => WithdrawalRequestEntity.fromDBDocument(doc)), totalCount: total };
 		} catch (error) {
 			return handleExceptionError(error, "Error finding withdrawal requests");
 		}

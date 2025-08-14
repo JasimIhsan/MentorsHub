@@ -10,9 +10,9 @@ export class GetWithdrawalRequestsController {
 		try {
 			const { page, limit, status, searchTerm } = req.query;
 			console.log(`req.query : `, req.query);
-			const requests = await this._useCase.execute({ page: parseInt(page as string), limit: parseInt(limit as string), status: status as string, searchTerm: searchTerm as string });
+			const result = await this._useCase.execute({ page: parseInt(page as string), limit: parseInt(limit as string), status: status as string, searchTerm: searchTerm as string });
 
-			res.status(HttpStatusCode.OK).json({ success: true, requests });
+			res.status(HttpStatusCode.OK).json({ success: true, requests: result.requests, total: result.totalCount });
 		} catch (error) {
 			console.log(`❌ Error in GetWithdrawalRequestsController: ${error}`);
 			logger.error(`❌ Error in GetWithdrawalRequestsController: ${error}`);

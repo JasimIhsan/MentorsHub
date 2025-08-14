@@ -9,9 +9,9 @@ import { IGetWithdrawalRequestsUseCase } from "../../../interfaces/usecases/with
 export class GetWithdrawalRequestsUseCase implements IGetWithdrawalRequestsUseCase {
 	constructor(private readonly _withdrawalRequestRepo: IWithdrawalRequestRepository, private readonly _userRepo: IUserRepository) {}
 
-	async execute(input: { page: number; limit: number; status: string; searchTerm?: string }): Promise<IWithdrawalRequestDTO[]> {
-		const withdrawalRequests = await this._withdrawalRequestRepo.find(input);
-		console.log('withdrawalRequests: ', withdrawalRequests);
+	async execute(input: { page: number; limit: number; status: string; searchTerm?: string }): Promise<{requests: IWithdrawalRequestDTO[], totalCount: number}> {
+		const result = await this._withdrawalRequestRepo.find(input);
+		const withdrawalRequests = result.requests;
 
 		const userIds = withdrawalRequests.map((r) => r.userId);
 
@@ -21,6 +21,6 @@ export class GetWithdrawalRequestsUseCase implements IGetWithdrawalRequestsUseCa
 
 		users.forEach((u) => usersMap.set(u.id!, u));
 
-		return withdrawalRequests.map((r) => mapToWithdrawalRequestDTO(r, usersMap.get(r.userId)));
+		return { requests: withdrawalRequests.map((r) => mapToWithdrawalRequestDTO(r, usersMap.get(r.userId))), totalCount: result.totalCount };
 	}
 }

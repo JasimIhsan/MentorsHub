@@ -5,7 +5,7 @@ export interface IRequestWithdrawalUseCase {
 }
 
 export interface IGetWithdrawalRequestsUseCase {
-	execute(input: { page: number; limit: number; status: string; searchTerm?: string }): Promise<IWithdrawalRequestDTO[]>;
+	execute(input: { page: number; limit: number; status: string; searchTerm?: string }): Promise<{requests: IWithdrawalRequestDTO[], totalCount: number}>;
 }
 
 export interface IWithdrawPaymentCreateOrderUseCase {
@@ -13,5 +13,9 @@ export interface IWithdrawPaymentCreateOrderUseCase {
 }
 
 export interface IApproveWithdrawalRequestUseCase {
-	execute(requestId: string, paymentId: string): Promise<IWithdrawalRequestDTO> 
+	execute(requestId: string, paymentId: string): Promise<IWithdrawalRequestDTO>;
+}
+
+export interface IRejectWithdrawalRequestUseCase {
+	execute(requestId: string): Promise<IWithdrawalRequestDTO>;
 }
