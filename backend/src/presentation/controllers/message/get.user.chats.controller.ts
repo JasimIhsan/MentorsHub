@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IGetUserChatsUseCase } from "../../../application/interfaces/messages";
+import { IGetUserChatsUseCase } from "../../../application/interfaces/usecases/messages";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
 

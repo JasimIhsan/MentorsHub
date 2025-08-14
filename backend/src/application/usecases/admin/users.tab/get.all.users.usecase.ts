@@ -1,6 +1,6 @@
 import { FindUsersParams, IUserRepository } from "../../../../domain/repositories/user.repository";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
-import { IGetAllUsersUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
+import { IGetAllUsersUsecase } from "../../../interfaces/usecases/admin/admin.usertab.interfaces";
 
 export class GetAllUsersUsecase implements IGetAllUsersUsecase {
 	constructor(private userRepository: IUserRepository) {}

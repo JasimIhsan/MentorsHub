@@ -1,11 +1,12 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
+import { WithdrawalRequestStatusEnum } from "../../../../application/interfaces/enums/withdrawel.request.status.enum";
 
 export interface IWithdrawalRequestDocument extends Document {
 	_id: ObjectId;
-	mentorId: ObjectId;
+	userId: ObjectId;
 	amount: number;
-	status: "pending" | "approved" | "rejected" | "completed";
-	requestedAt: Date;
+	status: WithdrawalRequestStatusEnum;
+	transactionId?: ObjectId;
 	processedAt?: Date;
 	createdAt: Date;
 	updatedAt: Date;
@@ -13,17 +14,17 @@ export interface IWithdrawalRequestDocument extends Document {
 
 const WithdrawalRequestSchema = new Schema<IWithdrawalRequestDocument>(
 	{
-		mentorId: { type: Schema.Types.ObjectId, ref: "Users", required: true },
+		userId: { type: Schema.Types.ObjectId, ref: "Users", required: true },
 		amount: { type: Number, required: true },
 		status: {
 			type: String,
-			enum: ["pending", "approved", "rejected", "completed"],
-			default: "pending",
+			enum: Object.values(WithdrawalRequestStatusEnum),
+			default: WithdrawalRequestStatusEnum.PENDING,
 		},
-		requestedAt: { type: Date, default: Date.now },
+		transactionId: { type: Schema.Types.ObjectId, ref: "WalletTransaction" },
 		processedAt: { type: Date },
 	},
-	{ timestamps: true },
+	{ timestamps: true }
 );
 
-export const WithdrawalRequestModel = mongoose.model<IWithdrawalRequestDocument>("WithdrawalRequest", WithdrawalRequestSchema);
+export const WithdrawalRequestModel = mongoose.model<IWithdrawalRequestDocument>("Withdrawal-Request", WithdrawalRequestSchema);

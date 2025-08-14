@@ -4,7 +4,7 @@ import { IChatRepository } from "../../../domain/repositories/chat.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { ISendMessageDTO, mapToSendMessageDTO } from "../../dtos/message.dto";
 import { NotificationTypeEnum } from "../../interfaces/enums/notification.type.enum";
-import { INotificationGateway } from "../../interfaces/notification/notification.gatway";
+import { INotificationGateway } from "../../interfaces/usecases/notification/notification.gatway";
 
 interface SendMessageInput {
 	chatId?: string;

@@ -1,5 +1,5 @@
-import { ISpecialAvailabilityDTO } from "../../dtos/availability/special.availability.dto";
-import { IWeeklyAvailabilityDTO } from "../../dtos/availability/weekly.availability.dto";
+import { ISpecialAvailabilityDTO } from "../../../dtos/availability/special.availability.dto";
+import { IWeeklyAvailabilityDTO } from "../../../dtos/availability/weekly.availability.dto";
 
 export interface IAddSlotAvailabilityToWeekUseCase {
 	execute(mentorId: string, dayOfWeek: number, startTime: string, endTime: string): Promise<IWeeklyAvailabilityDTO>;

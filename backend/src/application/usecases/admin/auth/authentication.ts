@@ -1,8 +1,8 @@
 import { IAdminRepository } from "../../../../domain/repositories/admin.repository";
 import { comparePassword } from "../../../../infrastructure/utils/compare.password";
 import { IAdminDTO, mapToAdminDTO } from "../../../dtos/admin.dtos";
-import { IAdminAuthUsecase } from "../../../interfaces/admin/admin.auth.interface";
-import { ITokenService } from "../../../interfaces/user/token.service.interface";
+import { IAdminAuthUsecase } from "../../../interfaces/usecases/admin/admin.auth.interface";
+import { ITokenService } from "../../../interfaces/usecases/user/token.service.interface";
 
 export class AdminLoginUsecase implements IAdminAuthUsecase {
 	constructor(private adminAuthRepo: IAdminRepository, private tokenService: ITokenService) {}

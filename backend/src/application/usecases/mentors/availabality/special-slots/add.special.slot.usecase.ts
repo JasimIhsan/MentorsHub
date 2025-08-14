@@ -2,7 +2,7 @@ import { SpecialAvailabilityEntity } from "../../../../../domain/entities/availa
 import { ISpecialAvailabilityRepository } from "../../../../../domain/repositories/availability/special.availabiltity.repository";
 import { IWeeklyAvailabilityRepository } from "../../../../../domain/repositories/availability/weekly.availability.repository";
 import { ISpecialAvailabilityDTO, mapToISpecialAvailabilityDTO } from "../../../../dtos/availability/special.availability.dto";
-import { IAddSpecialSlotUseCase } from "../../../../interfaces/mentors/mentor.availability.interfaces";
+import { IAddSpecialSlotUseCase } from "../../../../interfaces/usecases/mentors/mentor.availability.interfaces";
 
 export class AddSpecialSlotUseCase implements IAddSpecialSlotUseCase {
 	constructor(private readonly _specialRepo: ISpecialAvailabilityRepository, private readonly _weekRepo: IWeeklyAvailabilityRepository) {}

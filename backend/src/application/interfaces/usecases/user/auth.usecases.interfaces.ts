@@ -1,4 +1,4 @@
-import { IUserDTO } from "../../dtos/user.dtos";
+import { IUserDTO } from "../../../dtos/user.dtos";
 
 export interface IForgotPasswordUseCase {
 	execute(email: string): Promise<void>;

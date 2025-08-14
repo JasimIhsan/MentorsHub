@@ -1,7 +1,7 @@
 // application/usecases/gamification/EditGamificationTaskUseCase.ts
 import { IGamificationTaskRepository } from "../../../domain/repositories/gamification/gamification.task.repository";
 import { IActionTypeRepository } from "../../../domain/repositories/gamification/action.type.repository";
-import { IEditGamificationTaskUseCase } from "../../interfaces/gamification";
+import { IEditGamificationTaskUseCase } from "../../interfaces/usecases/gamification";
 import { IGamificationTaskDTO, mapToGamificationTaskDTO } from "../../dtos/gamification.dto";
 
 export class EditGamificationTaskUseCase implements IEditGamificationTaskUseCase {

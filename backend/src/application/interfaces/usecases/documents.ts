@@ -1,5 +1,5 @@
-import { AdminEntity } from "../../domain/entities/admin.entity";
-import { UserEntity } from "../../domain/entities/user.entity";
+import { AdminEntity } from "../../../domain/entities/admin.entity";
+import { UserEntity } from "../../../domain/entities/user.entity";
 
 export interface UploadMentorDocumentInput {
 	fileBuffer: Buffer;

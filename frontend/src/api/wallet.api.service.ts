@@ -32,16 +32,6 @@ export const topupWalletAPI = async (userId: string, data: { amount: number; pur
 	}
 };
 
-export const withdrawWalletAPI = async (userId: string, amount: number) => {
-	try {
-		const response = await axiosInstance.post(`/user/wallet/withdraw/${userId}`, { amount });
-		return response.data;
-	} catch (error: any) {
-		console.error("Error in withdrawWalletAPI:", error);
-		throw new Error(error.response.data.message);
-	}
-};
-
 export const fetchPlatformWalletDataAPI = async (userId: string) => {
 	try {
 		const response = await axiosInstance.get(`/admin/wallet/${userId}`);
@@ -76,7 +66,7 @@ export const withdrawPlatformWalletAPI = async (userId: string, amount: number) 
 
 export const createWalletAPI = async (userId: string, role: string) => {
 	try {
-		const response = await axiosInstance.post(`/user/wallet/create`, { userId, role }); 
+		const response = await axiosInstance.post(`/user/wallet/create`, { userId, role });
 		return response.data;
 	} catch (error: any) {
 		console.error("Error in createWalletAPI:", error);

@@ -2,7 +2,7 @@ import { PricingType } from "../../../../domain/entities/session.entity";
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { ISessionMentorDTO, mapToMentorSessionDTO } from "../../../dtos/session.dto";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
-import { IGetSessionRequestsUseCase } from "../../../interfaces/mentors/mentors.interface";
+import { IGetSessionRequestsUseCase } from "../../../interfaces/usecases/mentors/mentors.interface";
 
 interface QueryParams {
 	status?: SessionStatusEnum;

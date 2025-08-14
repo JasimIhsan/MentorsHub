@@ -1,6 +1,6 @@
 import { WalletModel } from "../models/wallet/wallet.model";
 import { WalletTransactionModel } from "../models/wallet/wallet.transaction.model";
-import { IWithdrawalRequestDocument, WithdrawalRequestModel } from "../models/wallet/wallet.withdrawel.request.model";
+import { WithdrawalRequestModel } from "../models/wallet/wallet.withdrawel.request.model";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { WalletEntity } from "../../../domain/entities/wallet/wallet.entity";
 import { WithdrawalRequestEntity } from "../../../domain/entities/wallet/wallet.withdrawel.request.entity";
@@ -121,31 +121,6 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		}
 	}
 
-	async createWithdrawalRequest(data: Partial<IWithdrawalRequestDocument>): Promise<WithdrawalRequestEntity> {
-		try {
-			const doc = await WithdrawalRequestModel.create(data);
-			return WithdrawalRequestEntity.fromDBDocument(doc);
-		} catch (error) {
-			return handleExceptionError(error, "Error creating withdrawal request");
-		}
-	}
-
-	async getWithdrawalRequests(mentorId: string, page: number = 1, limit: number = 10, filter: Record<string, any> = {}): Promise<{ data: WithdrawalRequestEntity[]; total: number }> {
-		try {
-			const query = { mentorId, ...filter };
-			const total = await WithdrawalRequestModel.countDocuments(query);
-			const docs = await WithdrawalRequestModel.find(query)
-				.sort({ createdAt: -1 })
-				.skip((page - 1) * limit)
-				.limit(limit);
-
-			const data = docs.map((doc) => WithdrawalRequestEntity.fromDBDocument(doc));
-			return { data, total };
-		} catch (error) {
-			return handleExceptionError(error, "Error fetching withdrawal requests");
-		}
-	}
-
 	async adminRevenue(adminId: string): Promise<number> {
 		try {
 			const result = await WalletTransactionModel.aggregate([
@@ -173,7 +148,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 
 	async revenueChartData(
 		adminId: string,
-		months: number, // 0 = all, 1 = last‑30‑days, 6 = 6 months, 12 = 1 year
+		months: number // 0 = all, 1 = last‑30‑days, 6 = 6 months, 12 = 1 year
 	): Promise<{ name: string; total: number }[]> {
 		try {
 			/* ---------- 1. Match filter ------------------------------------ */

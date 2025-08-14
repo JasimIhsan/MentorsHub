@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy, Profile } from "passport-google-oauth20";
 import dotenv from "dotenv";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
-import { ITokenService } from "../../../application/interfaces/user/token.service.interface";
+import { ITokenService } from "../../../application/interfaces/usecases/user/token.service.interface";
 import { IHashService } from "../../../application/interfaces/services/hash.service";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { GoogleConfig } from "./config/google.config";

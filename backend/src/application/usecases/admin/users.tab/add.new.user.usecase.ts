@@ -1,7 +1,7 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { UserEntity } from "../../../../domain/entities/user.entity";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
-import { ICreateUserUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
+import { ICreateUserUsecase } from "../../../interfaces/usecases/admin/admin.usertab.interfaces";
 import { IHashService } from "../../../interfaces/services/hash.service";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 

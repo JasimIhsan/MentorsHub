@@ -1,5 +1,5 @@
 import { IReviewRepository } from "../../../../domain/repositories/review.repository";
-import { IGetMentorWeeklyRatingsUseCase } from "../../../interfaces/mentors/mentor.dashboard.interface";
+import { IGetMentorWeeklyRatingsUseCase } from "../../../interfaces/usecases/mentors/mentor.dashboard.interface";
 
 export class GetMentorWeeklyRatingsUseCase implements IGetMentorWeeklyRatingsUseCase {
 	constructor(private reviewRepository: IReviewRepository) {}

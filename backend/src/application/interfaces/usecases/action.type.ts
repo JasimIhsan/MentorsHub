@@ -1,4 +1,4 @@
-import { ActionTypeEntity } from "../../domain/entities/gamification/action.types.entity";
+import { ActionTypeEntity } from "../../../domain/entities/gamification/action.types.entity";
 
 export interface IGetAllActionTypeUseCase {
 	execute(): Promise<ActionTypeEntity[]>;

@@ -1,5 +1,5 @@
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
-import { ICloudinaryService } from "../../../interfaces/user/user.profile.usecase.interfaces";
+import { ICloudinaryService } from "../../../interfaces/usecases/user/user.profile.usecase.interfaces";
 
 export class UploadAvatarUseCase {
 	constructor(private uploader: ICloudinaryService) {}

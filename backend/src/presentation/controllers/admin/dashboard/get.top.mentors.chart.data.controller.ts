@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IGetTopMentorsUseCase } from "../../../../application/interfaces/admin/admin.dashboard.interface";
+import { IGetTopMentorsUseCase } from "../../../../application/interfaces/usecases/admin/admin.dashboard.interface";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ISendOtpUsecase } from "../../../../application/interfaces/user/auth.usecases.interfaces";
+import { ISendOtpUsecase } from "../../../../application/interfaces/usecases/user/auth.usecases.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 

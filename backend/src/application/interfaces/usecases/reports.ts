@@ -1,5 +1,5 @@
-import { ReportProps } from "../../domain/entities/report.entity";
-import { IReportDTO } from "../dtos/report.dto";
+import { ReportProps } from "../../../domain/entities/report.entity";
+import { IReportDTO } from "../../dtos/report.dto";
 
 export type ReportInput = Omit<ReportProps, "id" | "status" | "createdAt" | "updatedAt">;
 

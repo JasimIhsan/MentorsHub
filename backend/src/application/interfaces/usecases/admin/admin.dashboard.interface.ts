@@ -1,4 +1,4 @@
-import { IAdminStatsDTO, IPlatformRevenueChartDataDTO, ITopFiveMentorsDTO, IUsersGrowthChartDataDTO } from "../../dtos/admin.dashboard.dtos";
+import { IAdminStatsDTO, IPlatformRevenueChartDataDTO, ITopFiveMentorsDTO, IUsersGrowthChartDataDTO } from "../../../dtos/admin.dashboard.dtos";
 
 export interface IGetAdminStatsUseCase {
 	execute(adminId: string): Promise<IAdminStatsDTO>;

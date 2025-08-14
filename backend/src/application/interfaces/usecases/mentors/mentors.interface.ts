@@ -1,7 +1,7 @@
-import { PricingType } from "../../../domain/entities/session.entity";
-import { IMentorDTO } from "../../dtos/mentor.dtos";
-import { ISessionMentorDTO } from "../../dtos/session.dto";
-import { SessionStatusEnum } from "../enums/session.status.enums";
+import { PricingType } from "../../../../domain/entities/session.entity";
+import { IMentorDTO } from "../../../dtos/mentor.dtos";
+import { ISessionMentorDTO } from "../../../dtos/session.dto";
+import { SessionStatusEnum } from "../../enums/session.status.enums";
 
 export interface IGetAllMentorsUsecase {
 	execute(query: { page?: number; limit?: number; search?: string; status?: string }): Promise<{

@@ -1,7 +1,7 @@
 import { ICacheRepository } from "../../../../domain/repositories/cache.respository";
-import { IVerifyOtpUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
+import { IVerifyOtpUsecase } from "../../../interfaces/usecases/user/auth.usecases.interfaces";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
+import { INotifyUserUseCase } from "../../../interfaces/usecases/notification/notification.usecase";
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 
 export class VerifyOtpUsecase implements IVerifyOtpUsecase {

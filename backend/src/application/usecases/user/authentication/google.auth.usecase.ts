@@ -1,8 +1,8 @@
 import axios from "axios";
 import { UserEntity } from "../../../../domain/entities/user.entity";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import { ITokenService } from "../../../interfaces/user/token.service.interface";
-import { IGoogleAuthUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
+import { ITokenService } from "../../../interfaces/usecases/user/token.service.interface";
+import { IGoogleAuthUsecase } from "../../../interfaces/usecases/user/auth.usecases.interfaces";
 import { IHashService } from "../../../interfaces/services/hash.service";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";

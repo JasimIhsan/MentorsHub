@@ -2,7 +2,7 @@
 import { NextFunction, Request, Response } from "express";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { AdminEntity } from "../../../domain/entities/admin.entity";
-import { IGetDocumentsUseCase } from "../../../application/interfaces/documents";
+import { IGetDocumentsUseCase } from "../../../application/interfaces/usecases/documents";
 import { logger } from "../../../infrastructure/utils/logger";
 
 export interface CustomRequest extends Request {

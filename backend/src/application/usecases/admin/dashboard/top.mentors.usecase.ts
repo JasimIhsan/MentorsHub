@@ -1,6 +1,6 @@
 import { IMentorProfileRepository } from "../../../../domain/repositories/mentor.details.repository";
 import { ITopFiveMentorsDTO } from "../../../dtos/admin.dashboard.dtos";
-import { IGetTopMentorsUseCase } from "../../../interfaces/admin/admin.dashboard.interface";
+import { IGetTopMentorsUseCase } from "../../../interfaces/usecases/admin/admin.dashboard.interface";
 
 export class GetTopMentorsUseCase implements IGetTopMentorsUseCase {
 	constructor(private readonly _mentorRepo: IMentorProfileRepository) {}

@@ -1,13 +1,13 @@
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
-import { IPaySessionWithWalletUseCase } from "../../../interfaces/session";
+import { IPaySessionWithWalletUseCase } from "../../../interfaces/usecases/session";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { TransactionsTypeEnum } from "../../../interfaces/enums/transaction.type.enum";
 import { TransactionPurposeEnum } from "../../../interfaces/enums/transaction.purpose.enum";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
 import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
-import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
+import { INotifyUserUseCase } from "../../../interfaces/usecases/notification/notification.usecase";
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 import { v4 as uuid } from "uuid";
 

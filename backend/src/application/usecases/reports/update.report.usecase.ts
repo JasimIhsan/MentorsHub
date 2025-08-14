@@ -3,7 +3,7 @@ import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { IReportDTO, mapToReportDTO } from "../../dtos/report.dto";
 import { ReportStatusEnum } from "../../interfaces/enums/report.status.enum";
 import { UserStatusEnums } from "../../interfaces/enums/user.status.enums";
-import { IUpdateReportStatusUseCase } from "../../interfaces/reports";
+import { IUpdateReportStatusUseCase } from "../../interfaces/usecases/reports";
 
 export class UpdateReportStatusUseCase implements IUpdateReportStatusUseCase {
 	constructor(private readonly _reportRepo: IReportRepository, private readonly _userRepo: IUserRepository) {}

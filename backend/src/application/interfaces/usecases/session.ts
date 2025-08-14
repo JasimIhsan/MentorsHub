@@ -1,5 +1,5 @@
-import { ISessionMentorDTO, ISessionUserDTO } from "../dtos/session.dto";
-import { SessionRequestInput } from "../usecases/user/session/request.session.usecase";
+import { ISessionMentorDTO, ISessionUserDTO } from "../../dtos/session.dto";
+import { SessionRequestInput } from "../../usecases/user/session/request.session.usecase";
 
 export interface IRequestSessionUseCase {
 	execute(data: SessionRequestInput): Promise<ISessionUserDTO>;

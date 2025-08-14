@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IUpdateMentorProfileUseCase } from "../../../application/interfaces/mentors/mentor.profile.interfaces";
+import { IUpdateMentorProfileUseCase } from "../../../application/interfaces/usecases/mentors/mentor.profile.interfaces";
 import { logger } from "../../../infrastructure/utils/logger";
 
 export class UpdateMentorProfileController {

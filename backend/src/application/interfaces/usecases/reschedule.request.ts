@@ -1,6 +1,6 @@
-import { IRescheduleRequestDTO } from "../dtos/reschedule.request.dto";
-import { ISessionMentorDTO, ISessionUserDTO } from "../dtos/session.dto";
-import { RescheduleStatusEnum } from "./enums/reschedule.status.enum";
+import { IRescheduleRequestDTO } from "../../dtos/reschedule.request.dto";
+import { ISessionMentorDTO, ISessionUserDTO } from "../../dtos/session.dto";
+import { RescheduleStatusEnum } from "../enums/reschedule.status.enum";
 
 export interface ICreateRescheduleRequestInput {
 	sessionId: string;

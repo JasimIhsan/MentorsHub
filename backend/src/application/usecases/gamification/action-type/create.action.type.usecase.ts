@@ -1,6 +1,6 @@
 import { ActionTypeEntity } from "../../../../domain/entities/gamification/action.types.entity";
 import { IActionTypeRepository } from "../../../../domain/repositories/gamification/action.type.repository";
-import { ICreateActionTypeUseCase } from "../../../interfaces/action.type";
+import { ICreateActionTypeUseCase } from "../../../interfaces/usecases/action.type";
 
 export class CreateActionTypeUseCase implements ICreateActionTypeUseCase {
 	constructor(private repo: IActionTypeRepository) {}

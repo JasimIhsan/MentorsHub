@@ -1,5 +1,5 @@
 import { INotificationRepository } from "../../../domain/repositories/notification.repository";
-import { ICreateNotificationUseCase } from "../../interfaces/notification/notification.usecase";
+import { ICreateNotificationUseCase } from "../../interfaces/usecases/notification/notification.usecase";
 import { NotificationTypeEnum } from "../../interfaces/enums/notification.type.enum";
 import { INotificationDTO, mapToNotificationDTO } from "../../dtos/notification.dto";
 

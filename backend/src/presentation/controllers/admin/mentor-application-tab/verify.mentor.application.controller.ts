@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IVerifyMentorApplicationUsecase } from "../../../../application/interfaces/admin/admin.mentor.application.interface";
+import { IVerifyMentorApplicationUsecase } from "../../../../application/interfaces/usecases/admin/admin.mentor.application.interface";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 

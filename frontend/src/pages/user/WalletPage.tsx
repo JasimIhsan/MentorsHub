@@ -2,17 +2,16 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
 import { format } from "date-fns";
-import { createWalletAPI, fetchTransactionsAPI, fetchWalletDataAPI, topupWalletAPI, withdrawWalletAPI } from "@/api/wallet.api.service";
+import { createWalletAPI, fetchTransactionsAPI, fetchWalletDataAPI, topupWalletAPI } from "@/api/wallet.api.service";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useMotionValue } from "framer-motion";
 import { toast } from "sonner";
-import { WalletNotification } from "@/components/user/wallet/WalletNotification";
 import { AddMoneyModal } from "@/components/user/wallet/AddMoneyModal";
 import { TransactionHistory } from "@/components/user/wallet/TransactionHistory";
 import { WalletBalanceCard } from "@/components/user/wallet/WalletBalanceCard";
-import { WalletCreationCard } from "@/components/user/wallet/WalletCreationCard";
 import { WithdrawMoneyModal } from "@/components/user/wallet/WithdrawMoneyModal";
+import { reqeustWithdrawalAPI } from "@/api/withdrawal.api.service";
 
 // Interface for wallet transactions
 export interface IWalletTransaction {
@@ -39,7 +38,6 @@ declare global {
 // Main WalletPage component
 export function WalletPage() {
 	const [walletBalance, setWalletBalance] = useState<number | null>(null);
-	const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
 	const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
 	const [transactionType, setTransactionType] = useState<string>("all");
 	const [isWalletCreated, setIsWalletCreated] = useState(false);
@@ -47,7 +45,7 @@ export function WalletPage() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [isLoadingWallet, setIsLoadingWallet] = useState(true);
-	const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
+	const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
 	const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 	const [amount, setAmount] = useState<string>("");
 	const [isAddMoneyModalOpen, setIsAddMoneyModalOpen] = useState(false);
@@ -63,10 +61,7 @@ export function WalletPage() {
 		script.src = "https://checkout.razorpay.com/v1/checkout.js";
 		script.async = true;
 		script.onload = () => setIsRazorpayLoaded(true);
-		script.onerror = () => {
-			setNotification({ type: "error", message: "Failed to load Razorpay SDK" });
-			setTimeout(() => setNotification(null), 3000);
-		};
+		script.onerror = () => toast.error("Failed to load Razorpay SDK");
 		document.body.appendChild(script);
 		return () => {
 			document.body.removeChild(script);
@@ -84,8 +79,9 @@ export function WalletPage() {
 					setWalletBalance(response.wallet.balance);
 				}
 			} catch (error: any) {
-				setNotification({ type: "error", message: error.message || "Failed to fetch wallet data" });
-				setTimeout(() => setNotification(null), 3000);
+				setWalletBalance(0); // Set balance to 0 if wallet doesn't exist
+				setTransactions([]); // Set empty transactions
+				toast.error(error.message || "Failed to fetch wallet data");
 			} finally {
 				setIsLoadingWallet(false);
 			}
@@ -105,8 +101,7 @@ export function WalletPage() {
 				setTotalPages(Math.ceil(response.total / transactionsPerPage));
 			}
 		} catch (error: any) {
-			setNotification({ type: "error", message: error.message || "Failed to fetch transactions" });
-			setTimeout(() => setNotification(null), 3000);
+			toast.error(error.message || "Failed to fetch transactions");
 		} finally {
 			setIsLoadingTransactions(false);
 		}
@@ -114,7 +109,7 @@ export function WalletPage() {
 
 	// Initial fetch on wallet creation
 	useEffect(() => {
-		if (isWalletCreated && user?.id) {
+		if (user?.id) {
 			fetchTransactions();
 		}
 	}, [isWalletCreated, user?.id]);
@@ -127,10 +122,10 @@ export function WalletPage() {
 			if (response.success) {
 				setIsWalletCreated(true);
 				setWalletBalance(response.wallet.balance);
+				toast.success("Wallet created successfully");
 			}
 		} catch (error: any) {
-			setNotification({ type: "error", message: error.message || "Failed to fetch wallet data" });
-			setTimeout(() => setNotification(null), 3000);
+			toast.error(error.message || "Failed to create wallet");
 		} finally {
 			setIsLoadingWallet(false);
 		}
@@ -140,21 +135,17 @@ export function WalletPage() {
 	const handleWithdraw = async () => {
 		const amountNum = parseFloat(withdrawAmount);
 		if (!withdrawAmount || amountNum <= 0) {
-			setNotification({ type: "error", message: "Please enter a valid amount" });
-			setTimeout(() => setNotification(null), 3000);
+			toast.error("Please enter a valid amount");
 			return;
 		}
 		if (walletBalance !== null && amountNum > walletBalance) {
-			setNotification({ type: "error", message: "Insufficient balance" });
-			setTimeout(() => setNotification(null), 3000);
+			toast.error("Insufficient balance");
 			return;
 		}
 		try {
-			const response = await withdrawWalletAPI(user?.id as string, amountNum);
+			const response = await reqeustWithdrawalAPI(user?.id as string, amountNum);
 			if (response.success) {
-				setWalletBalance(response.wallet.balance);
-				setTransactions((prev) => [response.transaction, ...prev]);
-				setNotification({ type: "success", message: "Withdrawal successfully!" });
+				toast.success(response.message || "Withdrawal request submitted successfully.");
 				setIsWithdrawModalOpen(false);
 				setWithdrawAmount("");
 			}
@@ -169,14 +160,12 @@ export function WalletPage() {
 	// Handle adding money
 	const handleAddMoney = async () => {
 		if (!isRazorpayLoaded) {
-			setNotification({ type: "error", message: "Razorpay SDK not loaded" });
-			setTimeout(() => setNotification(null), 3000);
+			toast.error("Razorpay SDK not loaded");
 			return;
 		}
 		const amountInPaise = parseFloat(amount) * 100;
 		if (!amount || amountInPaise <= 0) {
-			setNotification({ type: "error", message: "Please enter a valid amount" });
-			setTimeout(() => setNotification(null), 3000);
+			toast.error("Please enter a valid amount");
 			return;
 		}
 		try {
@@ -200,20 +189,18 @@ export function WalletPage() {
 						if (topUpResponse.success) {
 							setWalletBalance(topUpResponse.data.wallet.balance);
 							setTransactions((prev) => [topUpResponse.data.transaction, ...prev]);
-							setNotification({ type: "success", message: "Money added successfully!" });
+							toast.success("Money added successfully!");
 							setIsAddMoneyModalOpen(false);
 							setAmount("");
 						} else {
 							throw new Error("Failed to top up wallet");
 						}
 					} catch (error: any) {
-						setNotification({ type: "error", message: error.message || "Payment verification failed" });
-					} finally {
-						setTimeout(() => setNotification(null), 3000);
+						toast.error(error.message || "Payment verification failed");
 					}
 				},
 				prefill: {
-					name: user?.firstName || "" + " " + user?.lastName || "",
+					name: `${user?.firstName || ""} ${user?.lastName || ""}`,
 					email: user?.email || "",
 				},
 				theme: {
@@ -223,52 +210,55 @@ export function WalletPage() {
 			const razorpay = new window.Razorpay(options);
 			razorpay.open();
 		} catch (error: any) {
-			setNotification({ type: "error", message: error.message || "Failed to initiate payment" });
-			setTimeout(() => setNotification(null), 3000);
+			toast.error(error.message || "Failed to initiate payment");
 		}
 	};
 
 	return (
-		<div className="flex flex-col items-center w-full py-8">
-			<div className="flex flex-col gap-4 px-10 md:px-20 xl:px-25 w-full min-h-screen">
-				<div className="mb-8">
-					<h1 className="text-3xl font-bold tracking-tight">My Wallet</h1>
-					<p className="text-muted-foreground">Manage your money with ease</p>
+		<div className="flex flex-col items-center w-full py-12 bg-gradient-to-b from-gray-50 to-gray-100">
+			<div className="flex flex-col gap-8 px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 w-full max-w-7xl">
+				<div className="text-center md:text-left">
+					<h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">My Wallet</h1>
+					<p className="mt-2 text-lg text-gray-600">Manage your balance and track your transactions seamlessly</p>
 				</div>
-				<WalletNotification notification={notification} />
-				{!isWalletCreated && !isLoadingWallet ? (
-					<WalletCreationCard onCreateWallet={handleCreateWallet} isLoading={isLoadingWallet} />
-				) : (
-					<>
-						<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-							<WalletBalanceCard balance={walletBalance} isLoading={isLoadingWallet} />
-							<div className="flex flex-col gap-4">
-								<Button onClick={() => setIsAddMoneyModalOpen(true)} className="flex-1 text-lg font-semibold bg-green-600 hover:bg-green-700 shadow-lg">
+
+				<>
+					<div className={`${isWalletCreated ? "grid grid-cols-1 lg:grid-cols-3 gap-6" : "flex flex-col gap-8"}`}>
+						<WalletBalanceCard
+							isWalletExists={isWalletCreated}
+							balance={walletBalance ?? 0}
+							isLoading={isLoadingWallet}
+							handleCreateWallet={handleCreateWallet} // Pass handleCreateWallet as prop
+						/>
+						{isWalletCreated && (
+							<div className="flex sm:flex-col flex-row gap-4 lg:col-span-1">
+								<Button onClick={() => setIsAddMoneyModalOpen(true)} className="flex-1 text-lg font-semibold bg-green-600 hover:bg-green-700 shadow-md rounded-lg py-3">
 									<Plus className="h-6 w-6 mr-2" />
 									Add Money
 								</Button>
-								<Button onClick={() => setIsWithdrawModalOpen(true)} variant="outline" className="flex-1 text-lg font-semibold border-2 border-blue-600 text-blue-600 hover:bg-blue-50 shadow-lg">
+								<Button onClick={() => setIsWithdrawModalOpen(true)} variant="outline" className="flex-1 text-lg font-semibold border-2 border-blue-600 text-blue-600 hover:bg-blue-50 shadow-md rounded-lg py-3">
 									<Minus className="h-6 w-6 mr-2" />
 									Withdraw
 								</Button>
 							</div>
-						</div>
-						<AddMoneyModal isOpen={isAddMoneyModalOpen} onOpenChange={setIsAddMoneyModalOpen} amount={amount} setAmount={setAmount} onAddMoney={handleAddMoney} isRazorpayLoaded={isRazorpayLoaded} />
-						<WithdrawMoneyModal isOpen={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen} amount={withdrawAmount} setAmount={setWithdrawAmount} onWithdraw={handleWithdraw} isRazorpayLoaded={isRazorpayLoaded} x={x} />
-						<TransactionHistory
-							transactions={transactions}
-							isLoading={isLoadingTransactions}
-							transactionType={transactionType}
-							setTransactionType={setTransactionType}
-							dateRange={dateRange}
-							setDateRange={setDateRange}
-							currentPage={currentPage}
-							setCurrentPage={setCurrentPage}
-							totalPages={totalPages}
-							fetchTransactions={fetchTransactions}
-						/>
-					</>
-				)}
+						)}
+					</div>
+					<AddMoneyModal isOpen={isAddMoneyModalOpen} onOpenChange={setIsAddMoneyModalOpen} amount={amount} setAmount={setAmount} onAddMoney={handleAddMoney} isRazorpayLoaded={isRazorpayLoaded} />
+					<WithdrawMoneyModal isOpen={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen} amount={withdrawAmount} setAmount={setWithdrawAmount} onWithdraw={handleWithdraw} isRazorpayLoaded={isRazorpayLoaded} x={x} />
+				</>
+
+				<TransactionHistory
+					transactions={transactions}
+					isLoading={isLoadingTransactions}
+					transactionType={transactionType}
+					setTransactionType={setTransactionType}
+					dateRange={dateRange}
+					setDateRange={setDateRange}
+					currentPage={currentPage}
+					setCurrentPage={setCurrentPage}
+					totalPages={totalPages}
+					fetchTransactions={fetchTransactions}
+				/>
 			</div>
 		</div>
 	);

@@ -1,5 +1,5 @@
 import { IS3Service } from "../../../domain/interface/s3.service.interface";
-import { UploadMentorDocumentInput } from "../../interfaces/documents";
+import { UploadMentorDocumentInput } from "../../interfaces/usecases/documents";
 
 export class UploadMentorDocumentUseCase {
 	constructor(private s3Service: IS3Service) {}

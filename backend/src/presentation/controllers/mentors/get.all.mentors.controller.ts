@@ -1,5 +1,5 @@
 // src/interfaces/http/controllers/mentors/get.all.mentors.controller.ts
-import { IGetAllMentorsUsecase } from "../../../application/interfaces/mentors/mentors.interface";
+import { IGetAllMentorsUsecase } from "../../../application/interfaces/usecases/mentors/mentors.interface";
 import { NextFunction, Request, Response } from "express";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";

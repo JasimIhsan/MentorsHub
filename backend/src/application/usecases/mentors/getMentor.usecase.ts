@@ -1,6 +1,6 @@
 import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
 import { IMentorDTO, mapToMentorDTOWithoutUser } from "../../dtos/mentor.dtos";
-import { IGetMentorUsecase } from "../../interfaces/mentors/mentors.interface";
+import { IGetMentorUsecase } from "../../interfaces/usecases/mentors/mentors.interface";
 
 export class GetMentorUsecase implements IGetMentorUsecase {
 	constructor(private mentorRepo: IMentorProfileRepository) {}

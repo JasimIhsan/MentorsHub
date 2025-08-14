@@ -1,12 +1,12 @@
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
-import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
+import { INotifyUserUseCase } from "../../../interfaces/usecases/notification/notification.usecase";
 import { TransactionsTypeEnum } from "../../../interfaces/enums/transaction.type.enum";
 import { TransactionPurposeEnum } from "../../../interfaces/enums/transaction.purpose.enum";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
-import { IReleaseSessionFundsUseCase } from "../../../interfaces/session";
+import { IReleaseSessionFundsUseCase } from "../../../interfaces/usecases/session";
 
 export class ReleaseSessionFundsUseCase implements IReleaseSessionFundsUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository, private readonly notifyUserUseCase: INotifyUserUseCase) {}

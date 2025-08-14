@@ -1,6 +1,6 @@
 import { IChatRepository } from "../../../domain/repositories/chat.repository";
 import { ChatEntity } from "../../../domain/entities/chat.entity";
-import { ICreateChatUseCase } from "../../interfaces/messages";
+import { ICreateChatUseCase } from "../../interfaces/usecases/messages";
 
 export class CreateChatUseCase implements ICreateChatUseCase {
 	constructor(private readonly chatRepository: IChatRepository) {}

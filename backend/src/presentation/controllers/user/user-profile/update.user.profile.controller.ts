@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { ICloudinaryService, IUpdateUserProfileUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
+import { ICloudinaryService, IUpdateUserProfileUseCase } from "../../../../application/interfaces/usecases/user/user.profile.usecase.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 

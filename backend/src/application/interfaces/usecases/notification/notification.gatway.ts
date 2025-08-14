@@ -1,4 +1,4 @@
-import { INotificationDTO } from "../../dtos/notification.dto";
+import { INotificationDTO } from "../../../dtos/notification.dto";
 
 
 export interface INotificationGateway {

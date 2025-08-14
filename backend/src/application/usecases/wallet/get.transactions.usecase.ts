@@ -4,7 +4,7 @@ import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletTransactionDTO, mapToTransactionDTO } from "../../dtos/wallet.transation.dto";
 import { RoleEnum } from "../../interfaces/enums/role.enum";
-import { IGetTransactionsUsecase } from "../../interfaces/wallet";
+import { IGetTransactionsUsecase } from "../../interfaces/usecases/wallet";
 
 export class GetTransactionsUseCase implements IGetTransactionsUsecase {
 	constructor(

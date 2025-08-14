@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IGetUserProfileUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
+import { IGetUserProfileUseCase } from "../../../../application/interfaces/usecases/user/user.profile.usecase.interfaces";
 import { UserEntity } from "../../../../domain/entities/user.entity";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";

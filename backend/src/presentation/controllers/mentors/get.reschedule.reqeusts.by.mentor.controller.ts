@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IGetSessionRescheduleRequestsByMentorUseCase } from "../../../application/interfaces/reschedule.request";
+import { IGetSessionRescheduleRequestsByMentorUseCase } from "../../../application/interfaces/usecases/reschedule.request";
 import { RescheduleStatusEnum } from "../../../application/interfaces/enums/reschedule.status.enum";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";

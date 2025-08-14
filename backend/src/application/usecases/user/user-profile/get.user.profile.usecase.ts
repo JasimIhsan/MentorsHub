@@ -1,6 +1,6 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
-import { IGetUserProfileUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
+import { IGetUserProfileUseCase } from "../../../interfaces/usecases/user/user.profile.usecase.interfaces";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
 
 export class GetUserProfileUseCase implements IGetUserProfileUseCase {

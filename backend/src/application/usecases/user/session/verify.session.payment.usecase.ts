@@ -1,7 +1,7 @@
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
-import { IVerifySessionPaymentUseCase } from "../../../interfaces/session";
+import { IVerifySessionPaymentUseCase } from "../../../interfaces/usecases/session";
 
 export class VerifySessionPaymentUseCase implements IVerifySessionPaymentUseCase {
 	constructor(private sessionRepo: ISessionRepository) {}

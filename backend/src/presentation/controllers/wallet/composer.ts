@@ -1,10 +1,8 @@
 import {
 	createTransactionUsecase,
 	createWalletUsecase,
-	createWithdrawalRequestUseCase,
 	getTransactionsUsecase,
 	getWalletUsecase,
-	getWithdrawalRequestsUsecase,
 	topupWalletUsecase,
 	withdrawWalletUsecase,
 } from "../../../application/usecases/wallet/composer";
@@ -20,10 +18,8 @@ import { WithdrawWalletController } from "./withdrawal.wallet.controller";
 
 export const createWalletController = new CreateWalletController(createWalletUsecase);
 export const createTransactionController = new CreateTransactionController(createTransactionUsecase);
-export const createWithdrawalRequestController = new CreateWithdrawalRequestController(createWithdrawalRequestUseCase);
 // export const updateWalletBalanceController = new UpdateWalletBalanceController(updateWalletBalanceUseCase);
 export const getTransactionsController = new GetTransactionsController(getTransactionsUsecase);
-export const getWithdrawalRequestsController = new GetWithdrawalRequestsController(getWithdrawalRequestsUsecase);
 export const getWalletController = new GetWalletController(getWalletUsecase);
 export const topupWalletController = new WalletTopUpController(topupWalletUsecase);
 export const withdrawWalletController = new WithdrawWalletController(withdrawWalletUsecase);

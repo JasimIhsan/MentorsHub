@@ -1,7 +1,7 @@
 import { IMessageRepository } from "../../../domain/repositories/message.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { ISendMessageDTO, mapToSendMessageDTO } from "../../dtos/message.dto";
-import { IGetMessagesByChatUseCase } from "../../interfaces/messages";
+import { IGetMessagesByChatUseCase } from "../../interfaces/usecases/messages";
 
 export class GetMessagesByChatUseCase implements IGetMessagesByChatUseCase {
 	constructor(private readonly messageRepo: IMessageRepository, private readonly userRepo: IUserRepository) {}

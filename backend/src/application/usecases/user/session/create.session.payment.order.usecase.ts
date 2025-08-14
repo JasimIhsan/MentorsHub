@@ -2,7 +2,7 @@ import { ISessionRepository } from "../../../../domain/repositories/session.repo
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
 import { IPaymentGateway } from "../../../interfaces/services/payment.service";
-import { ICreateSessionPaymentOrderUseCase } from "../../../interfaces/session";
+import { ICreateSessionPaymentOrderUseCase } from "../../../interfaces/usecases/session";
 import { v4 as uuidv4 } from "uuid";
 
 export class CreateSessionPaymentOrderUseCase implements ICreateSessionPaymentOrderUseCase {

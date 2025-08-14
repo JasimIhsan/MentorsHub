@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IGetSessionRequestsUseCase } from "../../../application/interfaces/mentors/mentors.interface";
+import { IGetSessionRequestsUseCase } from "../../../application/interfaces/usecases/mentors/mentors.interface";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
 import { PricingType } from "../../../domain/entities/session.entity";

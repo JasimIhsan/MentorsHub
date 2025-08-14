@@ -1,6 +1,6 @@
-import { NotificationEntityProps } from "../../../domain/entities/notification.entity";
-import { INotificationDTO } from "../../dtos/notification.dto";
-import { NotificationTypeEnum } from "../enums/notification.type.enum";
+import { NotificationEntityProps } from "../../../../domain/entities/notification.entity";
+import { INotificationDTO } from "../../../dtos/notification.dto";
+import { NotificationTypeEnum } from "../../enums/notification.type.enum";
 
 export interface ICreateNotificationUseCase {
 	execute(userId: string, title: string, message: string, type: NotificationTypeEnum): Promise<INotificationDTO>;

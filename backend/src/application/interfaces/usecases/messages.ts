@@ -1,6 +1,6 @@
-import { ChatEntity } from "../../domain/entities/chat.entity";
-import { IChatDTO } from "../dtos/chats.dto";
-import { ISendMessageDTO } from "../dtos/message.dto";
+import { ChatEntity } from "../../../domain/entities/chat.entity";
+import { IChatDTO } from "../../dtos/chats.dto";
+import { ISendMessageDTO } from "../../dtos/message.dto";
 
 export interface IGetUserChatsUseCase {
 	execute(userId: string): Promise<IChatDTO[]>;

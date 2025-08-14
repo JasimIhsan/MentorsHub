@@ -1,12 +1,12 @@
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { IMentorProfileRepository } from "../../../../domain/repositories/mentor.details.repository";
 import { SessionEntity, SessionParticipantEntity, PricingType } from "../../../../domain/entities/session.entity";
-import { IGetAvailabilityUseCase } from "../../../interfaces/mentors/mentors.interface";
+import { IGetAvailabilityUseCase } from "../../../interfaces/usecases/mentors/mentors.interface";
 import { ISessionUserDTO, mapToUserSessionDTO } from "../../../dtos/session.dto";
-import { IRequestSessionUseCase } from "../../../interfaces/session";
+import { IRequestSessionUseCase } from "../../../interfaces/usecases/session";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
 import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
-import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
+import { INotifyUserUseCase } from "../../../interfaces/usecases/notification/notification.usecase";
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 
 export interface SessionRequestInput {

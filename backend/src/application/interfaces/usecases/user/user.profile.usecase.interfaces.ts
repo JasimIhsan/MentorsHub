@@ -1,6 +1,6 @@
-import { UserEntity, UserEntityProps } from "../../../domain/entities/user.entity";
-import { MentorProfileProps, MentorProfileEntity } from "../../../domain/entities/mentor.detailes.entity";
-import { IUserDTO } from "../../dtos/user.dtos";
+import { UserEntity, UserEntityProps } from "../../../../domain/entities/user.entity";
+import { MentorProfileProps, MentorProfileEntity } from "../../../../domain/entities/mentor.detailes.entity";
+import { IUserDTO } from "../../../dtos/user.dtos";
 
 export interface IUpdateUserProfileUseCase {
 	execute(userId: string, data: Partial<UserEntityProps>, imageUrl?: string): Promise<IUserDTO>;

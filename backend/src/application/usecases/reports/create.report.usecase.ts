@@ -1,6 +1,6 @@
 import { ReportEntity } from "../../../domain/entities/report.entity";
 import { IReportRepository } from "../../../domain/repositories/report.repository";
-import { ICreateReportUseCase, ReportInput } from "../../interfaces/reports";
+import { ICreateReportUseCase, ReportInput } from "../../interfaces/usecases/reports";
 
 
 export class CreateReportUseCase implements ICreateReportUseCase {

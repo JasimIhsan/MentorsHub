@@ -1,10 +1,10 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import { ITokenService } from "../../../interfaces/user/token.service.interface";
-import { ISignInUseCase } from "../../../interfaces/user/auth.usecases.interfaces";
+import { ITokenService } from "../../../interfaces/usecases/user/token.service.interface";
+import { ISignInUseCase } from "../../../interfaces/usecases/user/auth.usecases.interfaces";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IHashService } from "../../../interfaces/services/hash.service";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
-import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
+import { INotifyUserUseCase } from "../../../interfaces/usecases/notification/notification.usecase";
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 
 export class SigninUseCase implements ISignInUseCase {

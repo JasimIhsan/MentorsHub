@@ -1,5 +1,5 @@
-import { ITokenService } from "../../../interfaces/user/token.service.interface";
-import { IRefreshTokenUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
+import { ITokenService } from "../../../interfaces/usecases/user/token.service.interface";
+import { IRefreshTokenUsecase } from "../../../interfaces/usecases/user/auth.usecases.interfaces";
 
 export class RefreshTokenUseCase implements IRefreshTokenUsecase {
 	constructor(private tokenServices: ITokenService) {}

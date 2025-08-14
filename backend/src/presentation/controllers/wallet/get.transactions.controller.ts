@@ -1,7 +1,7 @@
 // GetTransactionsController.ts
 
 import { NextFunction, Request, Response } from "express";
-import { IGetTransactionsUsecase } from "../../../application/interfaces/wallet";
+import { IGetTransactionsUsecase } from "../../../application/interfaces/usecases/wallet";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
 

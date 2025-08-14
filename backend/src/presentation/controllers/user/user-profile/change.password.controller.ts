@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IChangePasswordUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
+import { IChangePasswordUseCase } from "../../../../application/interfaces/usecases/user/user.profile.usecase.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 

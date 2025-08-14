@@ -1,78 +1,88 @@
-export type WithdrawalStatus = "pending" | "approved" | "rejected" | "completed";
+import { WithdrawalRequestStatusEnum } from "../../../application/interfaces/enums/withdrawel.request.status.enum";
+import { IWithdrawalRequestDocument } from "../../../infrastructure/database/models/wallet/wallet.withdrawel.request.model";
+import { PersonEntity } from "../session.entity";
+
+export type WithdrawalRequestEntityProps = {
+	id?: string;
+	userId: string;
+	amount: number;
+	status: WithdrawalRequestStatusEnum;
+	transactionId?: string;
+	processedAt?: Date;
+	createdAt?: Date;
+	updatedAt?: Date;
+};
 
 export class WithdrawalRequestEntity {
-	private _id?: string;
-	private mentorId: string;
-	private amount: number;
-	private status: WithdrawalStatus;
-	private createdAt?: Date;
-	private updatedAt?: Date;
+	constructor(private props: WithdrawalRequestEntityProps) {}
 
-	constructor(props: { _id?: string; mentorId: string; amount: number; status?: WithdrawalStatus; createdAt?: Date; updatedAt?: Date }) {
-		this._id = props._id;
-		this.mentorId = props.mentorId;
-		this.amount = props.amount;
-		this.status = props.status ?? "pending";
-		this.createdAt = props.createdAt;
-		this.updatedAt = props.updatedAt;
-	}
-
-	// ✅ Getters
+	// Getters
 	get id(): string | undefined {
-		return this._id;
+		return this.props.id;
+	}
+	get userId(): string {
+		return this.props.userId;
+	}
+	get amount(): number {
+		return this.props.amount;
+	}
+	get status(): WithdrawalRequestStatusEnum {
+		return this.props.status;
+	}
+	get processedDate(): Date | undefined {
+		return this.props.processedAt;
+	}
+	get transactionId(): string | undefined {
+		return this.props.transactionId;
+	}
+	get createdAt(): Date | undefined {
+		return this.props.createdAt;
+	}
+	get updatedAt(): Date | undefined {
+		return this.props.updatedAt;
 	}
 
-	get mentor(): string {
-		return this.mentorId;
-	}
-
-	get withdrawalAmount(): number {
-		return this.amount;
-	}
-
-	get withdrawalStatus(): WithdrawalStatus {
-		return this.status;
-	}
-
-	get created(): Date | undefined {
-		return this.createdAt;
-	}
-
-	get updated(): Date | undefined {
-		return this.updatedAt;
-	}
-
-	// ✅ Domain actions
-	approve(): void {
-		this.status = "approved";
-	}
-
+	// Domain actions with state checks
 	reject(): void {
-		this.status = "rejected";
+		if (this.props.status !== WithdrawalRequestStatusEnum.PENDING) {
+			throw new Error("Only pending requests can be rejected.");
+		}
+		this.props.status = WithdrawalRequestStatusEnum.REJECTED;
+		this.props.processedAt = new Date();
 	}
 
-	complete(): void {
-		this.status = "completed";
+	complete(transactionId: string): void {
+		if (this.props.status !== WithdrawalRequestStatusEnum.PENDING) {
+			throw new Error("Only pending requests can be completed.");
+		}
+		this.props.status = WithdrawalRequestStatusEnum.COMPLETED;
+		this.props.transactionId = transactionId;
+		this.props.processedAt = new Date();
 	}
 
-	// ✅ For saving or serialization
+	// For saving/serialization
 	toObject() {
 		return {
-			_id: this._id,
-			mentorId: this.mentorId,
-			amount: this.amount,
-			status: this.status,
-			createdAt: this.createdAt,
-			updatedAt: this.updatedAt,
+			_id: this.props.id,
+			userId: this.props.userId, // store just id in DB
+			amount: this.props.amount,
+			status: this.props.status,
+			transactionId: this.props.transactionId,
+			processedAt: this.props.processedAt,
+			createdAt: this.props.createdAt,
+			updatedAt: this.props.updatedAt,
 		};
 	}
 
-	static fromDBDocument(doc: any): WithdrawalRequestEntity {
+	// Factory method to build entity from DB doc
+	static fromDBDocument(doc: IWithdrawalRequestDocument): WithdrawalRequestEntity {
 		return new WithdrawalRequestEntity({
-			_id: doc._id?.toString(),
-			mentorId: doc.mentorId,
+			id: doc._id?.toString(),
+			userId: doc.userId.toString(),
 			amount: doc.amount,
 			status: doc.status,
+			transactionId: doc.transactionId?.toString(),
+			processedAt: doc.processedAt,
 			createdAt: doc.createdAt,
 			updatedAt: doc.updatedAt,
 		});

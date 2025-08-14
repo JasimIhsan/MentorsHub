@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IGetMentorReviewsUseCase } from "../../../application/interfaces/review";
+import { IGetMentorReviewsUseCase } from "../../../application/interfaces/usecases/review";
 import { logger } from "../../../infrastructure/utils/logger";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 

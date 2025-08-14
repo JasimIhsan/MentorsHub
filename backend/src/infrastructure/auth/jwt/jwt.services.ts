@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { ITokenService, Payload } from "../../../application/interfaces/user/token.service.interface";
+import { ITokenService, Payload } from "../../../application/interfaces/usecases/user/token.service.interface";
 import { ICacheRepository } from "../../../domain/repositories/cache.respository";
 import { TokenConfig } from "./config/jwt.config";
 import dotenv from "dotenv";

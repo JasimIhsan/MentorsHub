@@ -2,8 +2,8 @@ import { IRescheduleRequestRepository } from "../../../domain/repositories/resch
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { CommonStringMessage } from "../../../shared/constants/string.messages";
 import { IRescheduleRequestDTO, mapToRescheduleRequestDTO } from "../../dtos/reschedule.request.dto";
-import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
-import { ICounterRescheduleRequestUseCase } from "../../interfaces/reschedule.request";
+import { INotifyUserUseCase } from "../../interfaces/usecases/notification/notification.usecase";
+import { ICounterRescheduleRequestUseCase } from "../../interfaces/usecases/reschedule.request";
 
 export class CouterRescheduleRequestUseCase implements ICounterRescheduleRequestUseCase {
 	constructor(private readonly rescheduleRequestRepo: IRescheduleRequestRepository, private readonly sessionRepo: ISessionRepository, private readonly notifyUserUseCase: INotifyUserUseCase) {}

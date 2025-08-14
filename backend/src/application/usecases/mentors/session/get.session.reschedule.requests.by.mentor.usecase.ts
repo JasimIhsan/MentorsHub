@@ -3,7 +3,7 @@ import { IRescheduleRequestRepository } from "../../../../domain/repositories/re
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { ISessionMentorDTO, mapToMentorSessionDTO } from "../../../dtos/session.dto";
 import { RescheduleStatusEnum } from "../../../interfaces/enums/reschedule.status.enum";
-import { IGetSessionRescheduleRequestsByMentorUseCase } from "../../../interfaces/reschedule.request";
+import { IGetSessionRescheduleRequestsByMentorUseCase } from "../../../interfaces/usecases/reschedule.request";
 
 export class GetSessionRescheduleRequestsByMentorUseCase implements IGetSessionRescheduleRequestsByMentorUseCase {
 	constructor(private readonly rescheduleRequestRepo: IRescheduleRequestRepository, private readonly sessionRepo: ISessionRepository) {}

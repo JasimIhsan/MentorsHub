@@ -26,6 +26,7 @@ import { mentorProfileRouter } from "./presentation/routes/mentors/mentor.profil
 import { mentorAvailabilityRouter } from "./presentation/routes/mentors/mentor.availability.routes";
 import { rescheduleRouter } from "./presentation/routes/user/reschedule.routes";
 import { mentorRescheduleRouter } from "./presentation/routes/mentors/mentor.reschedule.routes";
+import { withdrawalRouter } from "./presentation/routes/user/withdrawal.routes";
 
 export function registerRoutes(app: Express) {
 	app.use("/api/user", authRouter);
@@ -39,6 +40,7 @@ export function registerRoutes(app: Express) {
 	app.use("/api/user/gamification", gamificationRoute);
 	app.use("/api/user/reports", userReportRouter);
 	app.use("/api/user/reschedule", rescheduleRouter);
+	app.use("/api/user/withdrawal", withdrawalRouter);
 
 	app.use("/api/admin", adminAuthRouter);
 	app.use("/api/admin/users", usertabRouter);

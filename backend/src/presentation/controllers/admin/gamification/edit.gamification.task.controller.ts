@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IEditGamificationTaskUseCase } from "../../../../application/interfaces/gamification";
+import { IEditGamificationTaskUseCase } from "../../../../application/interfaces/usecases/gamification";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 

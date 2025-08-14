@@ -1,13 +1,13 @@
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
-import { IUpdateUserTaskProgressUseCase } from "../../interfaces/gamification";
-import { IReleaseSessionFundsUseCase, IUpdateSessionStatusUseCase } from "../../interfaces/session";
+import { IUpdateUserTaskProgressUseCase } from "../../interfaces/usecases/gamification";
+import { IReleaseSessionFundsUseCase, IUpdateSessionStatusUseCase } from "../../interfaces/usecases/session";
 import { SessionStatusEnum } from "../../interfaces/enums/session.status.enums";
 import { SessionPaymentStatusEnum } from "../../interfaces/enums/session.payment.status.enum";
 import { ActionTypeEnum } from "../../interfaces/enums/gamification.action.type.enum";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
-import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
+import { INotifyUserUseCase } from "../../interfaces/usecases/notification/notification.usecase";
 import { SessionStatusNotificationMap } from "../../constants/session.notification.messages";
-import { IGetAvailabilityUseCase } from "../../interfaces/mentors/mentors.interface";
+import { IGetAvailabilityUseCase } from "../../interfaces/usecases/mentors/mentors.interface";
 
 export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 	constructor(

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ICreateNotificationUseCase } from "../../../application/interfaces/notification/notification.usecase";
+import { ICreateNotificationUseCase } from "../../../application/interfaces/usecases/notification/notification.usecase";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
 

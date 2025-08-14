@@ -1,7 +1,7 @@
 import { IGamificationTaskRepository } from "../../../domain/repositories/gamification/gamification.task.repository";
 import { IUserTaskProgressRepository } from "../../../domain/repositories/gamification/user.task.progress.repository";
 import { IUserTaskWithProgressDTO, mapToUserTaskWithProgressDTO } from "../../dtos/gamification.dto";
-import { IGetAllListedGamificationTasksUseCase } from "../../interfaces/gamification";
+import { IGetAllListedGamificationTasksUseCase } from "../../interfaces/usecases/gamification";
 
 export class GetAllListedGamificationTasksUseCase implements IGetAllListedGamificationTasksUseCase {
 	constructor(private taskRepo: IGamificationTaskRepository, private userTaskProgressRepo: IUserTaskProgressRepository) {}

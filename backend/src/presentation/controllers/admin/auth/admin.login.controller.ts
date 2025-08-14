@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IAdminAuthUsecase } from "../../../../application/interfaces/admin/admin.auth.interface";
+import { IAdminAuthUsecase } from "../../../../application/interfaces/usecases/admin/admin.auth.interface";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 

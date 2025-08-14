@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { RefreshTokenUseCase } from "../../../../application/usecases/user/authentication/refresh.token.usecase";
-import { Payload } from "../../../../application/interfaces/user/token.service.interface";
+import { Payload } from "../../../../application/interfaces/usecases/user/token.service.interface";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 

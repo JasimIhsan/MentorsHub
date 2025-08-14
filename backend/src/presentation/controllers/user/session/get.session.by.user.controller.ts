@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IGetSessionByUserUseCase } from "../../../../application/interfaces/session";
+import { IGetSessionByUserUseCase } from "../../../../application/interfaces/usecases/session";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class GetSessionByUserController {

@@ -1,8 +1,8 @@
 import { ICacheRepository } from "../../../../domain/repositories/cache.respository";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { generateOtp } from "../../../../infrastructure/utils/generate.otp";
-import { ISendOtpUsecase } from "../../../interfaces/user/auth.usecases.interfaces";
-import { IEmailService } from "../../../interfaces/user/email.service.interface";
+import { ISendOtpUsecase } from "../../../interfaces/usecases/user/auth.usecases.interfaces";
+import { IEmailService } from "../../../interfaces/usecases/user/email.service.interface";
 
 export class SendOtpUsecase implements ISendOtpUsecase {
 	constructor(private emailService: IEmailService, private userRepo: IUserRepository, private redisService: ICacheRepository) {}

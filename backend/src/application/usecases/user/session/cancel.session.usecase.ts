@@ -7,9 +7,9 @@ import { ISessionUserDTO, mapToUserSessionDTO } from "../../../dtos/session.dto"
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.payment.status.enum";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
-import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
-import { ICancelSessionRefundUseCase } from "../../../interfaces/refund";
-import { ICancelSessionUseCase } from "../../../interfaces/session";
+import { INotifyUserUseCase } from "../../../interfaces/usecases/notification/notification.usecase";
+import { ICancelSessionRefundUseCase } from "../../../interfaces/usecases/refund";
+import { ICancelSessionUseCase } from "../../../interfaces/usecases/session";
 
 export class CancelSessionUseCase implements ICancelSessionUseCase {
 	constructor(

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IUpdateReviewUseCase } from "../../../application/interfaces/review";
+import { IUpdateReviewUseCase } from "../../../application/interfaces/usecases/review";
 import { logger } from "../../../infrastructure/utils/logger";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 

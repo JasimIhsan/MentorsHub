@@ -4,7 +4,7 @@ import { IWalletRepository } from "../../../domain/repositories/wallet.repositor
 import { IWalletTransactionDTO, mapToTransactionDTO } from "../../dtos/wallet.transation.dto";
 import { RoleEnum } from "../../interfaces/enums/role.enum";
 import { TransactionsTypeEnum } from "../../interfaces/enums/transaction.type.enum";
-import { ICreateTransactionUsecase } from "../../interfaces/wallet";
+import { ICreateTransactionUsecase } from "../../interfaces/usecases/wallet";
 
 export class CreateTransactionUseCase implements ICreateTransactionUsecase {
 	constructor(private walletRepo: IWalletRepository, private userRepo: IUserRepository, private sessionRepo: ISessionRepository) {}

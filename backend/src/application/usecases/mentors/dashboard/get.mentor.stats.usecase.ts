@@ -1,7 +1,7 @@
 import { IReviewRepository } from "../../../../domain/repositories/review.repository";
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
-import { IGetMentorStatsUseCase, MentorStats } from "../../../interfaces/mentors/mentor.dashboard.interface";
+import { IGetMentorStatsUseCase, MentorStats } from "../../../interfaces/usecases/mentors/mentor.dashboard.interface";
 
 export class GetMentorStatsUseCase implements IGetMentorStatsUseCase {
 	constructor(private sessionRepository: ISessionRepository, private reviewRepository: IReviewRepository) {}

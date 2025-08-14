@@ -4,12 +4,12 @@ import { IMentorProfileRepository } from "../../../domain/repositories/mentor.de
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { CommonStringMessage } from "../../../shared/constants/string.messages";
 import { IMentorDTO, mapToMentorDTO } from "../../dtos/mentor.dtos";
-import { IUploadMentorDocuments } from "../../interfaces/documents";
+import { IUploadMentorDocuments } from "../../interfaces/usecases/documents";
 import { NotificationTypeEnum } from "../../interfaces/enums/notification.type.enum";
 import { RoleEnum } from "../../interfaces/enums/role.enum";
-import { IUpdateMentorProfileUseCase } from "../../interfaces/mentors/mentor.profile.interfaces";
-import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
-import { ICloudinaryService } from "../../interfaces/user/user.profile.usecase.interfaces";
+import { IUpdateMentorProfileUseCase } from "../../interfaces/usecases/mentors/mentor.profile.interfaces";
+import { INotifyUserUseCase } from "../../interfaces/usecases/notification/notification.usecase";
+import { ICloudinaryService } from "../../interfaces/usecases/user/user.profile.usecase.interfaces";
 
 export class UpdateMentorProfileUseCase implements IUpdateMentorProfileUseCase {
 	constructor(

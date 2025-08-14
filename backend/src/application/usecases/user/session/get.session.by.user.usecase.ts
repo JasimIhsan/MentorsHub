@@ -2,7 +2,7 @@ import { IRescheduleRequestRepository } from "../../../../domain/repositories/re
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { ISessionUserDTO, mapToUserSessionDTO } from "../../../dtos/session.dto";
-import { IGetSessionByUserUseCase } from "../../../interfaces/session";
+import { IGetSessionByUserUseCase } from "../../../interfaces/usecases/session";
 
 export class GetSessionByUserUseCase implements IGetSessionByUserUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly rescheduleRequestRepo: IRescheduleRequestRepository) {}

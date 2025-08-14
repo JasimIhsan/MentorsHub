@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IGetUserProgressUseCase } from "../../../../application/interfaces/gamification";
+import { IGetUserProgressUseCase } from "../../../../application/interfaces/usecases/gamification";
 import { logger } from "../../../../infrastructure/utils/logger";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 

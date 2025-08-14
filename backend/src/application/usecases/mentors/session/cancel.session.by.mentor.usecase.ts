@@ -4,11 +4,11 @@ import { ISessionRepository } from "../../../../domain/repositories/session.repo
 import { isSessionExpired } from "../../../../infrastructure/utils/isSessionExpired";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
-import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
-import { ICancelSessionRefundUseCase } from "../../../interfaces/refund";
+import { INotifyUserUseCase } from "../../../interfaces/usecases/notification/notification.usecase";
+import { ICancelSessionRefundUseCase } from "../../../interfaces/usecases/refund";
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 import { ISessionMentorDTO, mapToMentorSessionDTO } from "../../../dtos/session.dto";
-import { ICancelSessionByMentorUseCase } from "../../../interfaces/session";
+import { ICancelSessionByMentorUseCase } from "../../../interfaces/usecases/session";
 
 export class CancelSessionByMentorUseCase implements ICancelSessionByMentorUseCase {
 	constructor(

@@ -1,7 +1,7 @@
 import { IReportRepository } from "../../../domain/repositories/report.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { IReportDTO, mapToReportDTO } from "../../dtos/report.dto";
-import { IGetReportsUseCase } from "../../interfaces/reports";
+import { IGetReportsUseCase } from "../../interfaces/usecases/reports";
 
 export class GetReportsUseCase implements IGetReportsUseCase {
 	constructor(private readonly _reportRepo: IReportRepository, private readonly _userRepo: IUserRepository) {}

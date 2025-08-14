@@ -1,11 +1,11 @@
-import { ICreateTransactionUsecase, IWalletTopUpUsecase } from "../../interfaces/wallet";
+import { ICreateTransactionUsecase, IWalletTopUpUsecase } from "../../interfaces/usecases/wallet";
 import { IWalletTransactionDTO } from "../../dtos/wallet.transation.dto";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletDTO, mapToWalletDTO } from "../../dtos/wallet.dtos";
 import { RoleEnum } from "../../interfaces/enums/role.enum";
 import { TransactionsTypeEnum } from "../../interfaces/enums/transaction.type.enum";
 import { TransactionPurposeEnum } from "../../interfaces/enums/transaction.purpose.enum";
-import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
+import { INotifyUserUseCase } from "../../interfaces/usecases/notification/notification.usecase";
 import { NotificationTypeEnum } from "../../interfaces/enums/notification.type.enum";
 
 interface TopUpWalletInput {

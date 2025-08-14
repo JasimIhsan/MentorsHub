@@ -1,7 +1,7 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import { IEmailService } from "../../../interfaces/user/email.service.interface";
+import { IEmailService } from "../../../interfaces/usecases/user/email.service.interface";
 import crypto from "crypto";
-import { IForgotPasswordUseCase } from "../../../interfaces/user/auth.usecases.interfaces";
+import { IForgotPasswordUseCase } from "../../../interfaces/usecases/user/auth.usecases.interfaces";
 import { IForgotPasswordTokensRepository } from "../../../../domain/repositories/forgot.password.token.respository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 
