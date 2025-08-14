@@ -3,7 +3,7 @@ import { ISessionRepository } from "../../../../domain/repositories/session.repo
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
 import { IAdminStatsDTO } from "../../../dtos/admin.dashboard.dtos";
-import { IGetAdminStatsUseCase } from "../../../interfaces/admin/admin.dashboard.interface";
+import { IGetAdminStatsUseCase } from "../../../interfaces/usecases/admin/admin.dashboard.interface";
 
 export class GetAdminStatsUseCase implements IGetAdminStatsUseCase {
 	constructor(private readonly _adminRepository: IAdminRepository, private readonly _userRepo: IUserRepository, private readonly _sessionRepo: ISessionRepository, private readonly _walletRepo: IWalletRepository) {}

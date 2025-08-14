@@ -3,8 +3,8 @@ import { IUserRepository } from "../../../../domain/repositories/user.repository
 import { MentorProfileProps, MentorProfileEntity } from "../../../../domain/entities/mentor.detailes.entity";
 import { UserEntityProps } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
-import { IUploadMentorDocuments } from "../../../interfaces/documents";
-import { IBecomeMentorUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
+import { IUploadMentorDocuments } from "../../../interfaces/usecases/documents";
+import { IBecomeMentorUseCase } from "../../../interfaces/usecases/user/user.profile.usecase.interfaces";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";

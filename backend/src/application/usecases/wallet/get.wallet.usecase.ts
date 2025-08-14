@@ -1,6 +1,6 @@
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletDTO, mapToWalletDTO } from "../../dtos/wallet.dtos";
-import { IGetWalletUsecase } from "../../interfaces/wallet";
+import { IGetWalletUsecase } from "../../interfaces/usecases/wallet";
 
 export class GetWalletUsecase implements IGetWalletUsecase {
 	constructor(private walletRepository: IWalletRepository) {}

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IGetSessionHistoryUsecase } from "../../../application/interfaces/mentors/mentors.interface";
+import { IGetSessionHistoryUsecase } from "../../../application/interfaces/usecases/mentors/mentors.interface";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
 import { SessionStatusEnum } from "../../../application/interfaces/enums/session.status.enums";

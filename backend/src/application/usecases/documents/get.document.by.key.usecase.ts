@@ -2,7 +2,7 @@ import { AdminEntity } from "../../../domain/entities/admin.entity";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { IS3Service } from "../../../domain/interface/s3.service.interface";
 import { IMentorProfileRepository } from "../../../domain/repositories/mentor.details.repository";
-import { IGetDocumentByKeyUseCase } from "../../interfaces/documents";
+import { IGetDocumentByKeyUseCase } from "../../interfaces/usecases/documents";
 import { RoleEnum } from "../../interfaces/enums/role.enum";
 
 interface Input {

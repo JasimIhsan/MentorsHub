@@ -1,7 +1,7 @@
 import { GamificationTaskEntity } from "../../../domain/entities/gamification/gamification.task.entity";
 import { IActionTypeRepository } from "../../../domain/repositories/gamification/action.type.repository";
 import { IGamificationTaskRepository } from "../../../domain/repositories/gamification/gamification.task.repository";
-import { ICreateGamificationTaskUseCase } from "../../interfaces/gamification";
+import { ICreateGamificationTaskUseCase } from "../../interfaces/usecases/gamification";
 
 export class CreateGamificationTaskUseCase implements ICreateGamificationTaskUseCase {
 	constructor(private taskRepo: IGamificationTaskRepository, private actionTypeRepo: IActionTypeRepository) {}

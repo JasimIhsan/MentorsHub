@@ -1,6 +1,6 @@
 import { IReviewRepository } from "../../../domain/repositories/review.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
-import { IDeleteReviewUseCase } from "../../interfaces/review";
+import { IDeleteReviewUseCase } from "../../interfaces/usecases/review";
 
 export class DeleteReviewUseCase implements IDeleteReviewUseCase {
 	constructor(private reviewRepo: IReviewRepository, private userRepo: IUserRepository) {}

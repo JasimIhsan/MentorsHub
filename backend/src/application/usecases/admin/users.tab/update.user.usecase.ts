@@ -1,7 +1,7 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
-import { IUpdateUserUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
+import { IUpdateUserUsecase } from "../../../interfaces/usecases/admin/admin.usertab.interfaces";
 
 export class UpdateUserUsecase implements IUpdateUserUsecase {
 	constructor(private userRepo: IUserRepository) {}

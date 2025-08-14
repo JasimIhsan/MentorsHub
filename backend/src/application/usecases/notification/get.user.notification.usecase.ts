@@ -1,5 +1,5 @@
 import { INotificationRepository } from "../../../domain/repositories/notification.repository";
-import { IGetUserNotificationsUseCase } from "../../interfaces/notification/notification.usecase";
+import { IGetUserNotificationsUseCase } from "../../interfaces/usecases/notification/notification.usecase";
 import { INotificationDTO, mapToNotificationDTO } from "../../dtos/notification.dto";
 
 // Interface for paginated response

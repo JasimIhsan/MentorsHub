@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IGetSpecialSlotByMentorUseCase } from "../../../../../application/interfaces/mentors/mentor.availability.interfaces";
+import { IGetSpecialSlotByMentorUseCase } from "../../../../../application/interfaces/usecases/mentors/mentor.availability.interfaces";
 import { logger } from "../../../../../infrastructure/utils/logger";
 
 export class GetSpecialSlotByMentorController {

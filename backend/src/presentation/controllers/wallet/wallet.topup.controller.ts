@@ -2,7 +2,7 @@
 
 import { NextFunction, Request, Response } from "express";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
-import { IWalletTopUpUsecase } from "../../../application/interfaces/wallet";
+import { IWalletTopUpUsecase } from "../../../application/interfaces/usecases/wallet";
 import { logger } from "../../../infrastructure/utils/logger";
 
 export class WalletTopUpController {

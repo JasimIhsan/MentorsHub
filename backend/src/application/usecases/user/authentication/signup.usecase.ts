@@ -1,8 +1,8 @@
 import { UserEntity } from "../../../../domain/entities/user.entity";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
-import { ITokenService } from "../../../interfaces/user/token.service.interface";
-import { IVerifyOtpUsecase, ISignupUseCase } from "../../../interfaces/user/auth.usecases.interfaces";
-import { ICreateUserProgressUseCase } from "../../../interfaces/gamification";
+import { ITokenService } from "../../../interfaces/usecases/user/token.service.interface";
+import { IVerifyOtpUsecase, ISignupUseCase } from "../../../interfaces/usecases/user/auth.usecases.interfaces";
+import { ICreateUserProgressUseCase } from "../../../interfaces/usecases/gamification";
 import { IHashService } from "../../../interfaces/services/hash.service";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";

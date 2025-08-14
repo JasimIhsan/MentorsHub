@@ -1,7 +1,7 @@
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletDTO, mapToWalletDTO } from "../../dtos/wallet.dtos";
 import { RoleEnum } from "../../interfaces/enums/role.enum";
-import { ICreateWalletUsecase } from "../../interfaces/wallet";
+import { ICreateWalletUsecase } from "../../interfaces/usecases/wallet";
 
 export class CreateWalletUseCase implements ICreateWalletUsecase {
 	constructor(private walletRepo: IWalletRepository) {}

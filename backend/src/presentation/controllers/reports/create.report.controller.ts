@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { ICreateReportUseCase } from "../../../application/interfaces/reports";
+import { ICreateReportUseCase } from "../../../application/interfaces/usecases/reports";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
 

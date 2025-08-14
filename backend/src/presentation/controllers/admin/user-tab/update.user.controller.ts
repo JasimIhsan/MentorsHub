@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { IUserDTO } from "../../../../application/dtos/user.dtos";
-import { IUpdateUserProfileUseCase } from "../../../../application/interfaces/user/user.profile.usecase.interfaces";
+import { IUpdateUserProfileUseCase } from "../../../../application/interfaces/usecases/user/user.profile.usecase.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 

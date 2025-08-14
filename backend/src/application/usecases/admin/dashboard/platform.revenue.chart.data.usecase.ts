@@ -1,7 +1,7 @@
 import { IAdminRepository } from "../../../../domain/repositories/admin.repository";
 import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
 import { IPlatformRevenueChartDataDTO } from "../../../dtos/admin.dashboard.dtos";
-import { IGetPlatformRevenueChartDataUseCase } from "../../../interfaces/admin/admin.dashboard.interface";
+import { IGetPlatformRevenueChartDataUseCase } from "../../../interfaces/usecases/admin/admin.dashboard.interface";
 
 export class GetPlatformRevenueChartDataUseCase implements IGetPlatformRevenueChartDataUseCase {
 	constructor(private readonly _walletRepo: IWalletRepository, private readonly _adminRepo: IAdminRepository) {}

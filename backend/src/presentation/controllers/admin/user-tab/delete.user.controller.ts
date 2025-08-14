@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IDeleteUserUsecase } from "../../../../application/interfaces/admin/admin.usertab.interfaces";
+import { IDeleteUserUsecase } from "../../../../application/interfaces/usecases/admin/admin.usertab.interfaces";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 

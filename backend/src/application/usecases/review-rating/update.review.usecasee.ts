@@ -1,8 +1,8 @@
 import { IReviewRepository } from "../../../domain/repositories/review.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
-import { IUpdateReviewUseCase } from "../../interfaces/review";
+import { IUpdateReviewUseCase } from "../../interfaces/usecases/review";
 import { mapToReviewDTO, ReviewDTO } from "../../dtos/review.dtos";
-import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
+import { INotifyUserUseCase } from "../../interfaces/usecases/notification/notification.usecase";
 import { NotificationTypeEnum } from "../../interfaces/enums/notification.type.enum";
 
 export class UpdateReviewUseCase implements IUpdateReviewUseCase {

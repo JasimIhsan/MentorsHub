@@ -1,6 +1,6 @@
 import { IGamificationTaskRepository } from "../../../domain/repositories/gamification/gamification.task.repository";
 import { IGamificationTaskDTO, mapToGamificationTaskDTO } from "../../dtos/gamification.dto";
-import { IUpdateGamificationTaskStatusUseCase } from "../../interfaces/gamification";
+import { IUpdateGamificationTaskStatusUseCase } from "../../interfaces/usecases/gamification";
 
 export class UpdateGamificationTaskStatusUseCase implements IUpdateGamificationTaskStatusUseCase {
 	constructor(private taskRepo: IGamificationTaskRepository) {}

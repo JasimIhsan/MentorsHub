@@ -1,6 +1,6 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
-import { IDeleteUserUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
+import { IDeleteUserUsecase } from "../../../interfaces/usecases/admin/admin.usertab.interfaces";
 
 export class DeleteUserUseCase implements IDeleteUserUsecase {
 	constructor(private userRepo: IUserRepository) {}

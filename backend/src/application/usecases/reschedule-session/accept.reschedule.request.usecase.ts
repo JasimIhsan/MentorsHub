@@ -1,7 +1,7 @@
 import { IRescheduleRequestRepository } from "../../../domain/repositories/reschedule.request.repository";
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { ISessionMentorDTO, ISessionUserDTO, mapToMentorSessionDTO, mapToUserSessionDTO } from "../../dtos/session.dto";
-import { IAcceptRescheduleRequestUseCase } from "../../interfaces/reschedule.request";
+import { IAcceptRescheduleRequestUseCase } from "../../interfaces/usecases/reschedule.request";
 
 export class AcceptRescheduleRequestUseCase implements IAcceptRescheduleRequestUseCase {
 	constructor(private readonly rescheduleRequestRepo: IRescheduleRequestRepository, private readonly sessionRepo: ISessionRepository) {}

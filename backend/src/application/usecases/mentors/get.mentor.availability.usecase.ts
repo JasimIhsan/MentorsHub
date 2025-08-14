@@ -1,5 +1,5 @@
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
-import { IGetAvailabilityUseCase } from "../../interfaces/mentors/mentors.interface";
+import { IGetAvailabilityUseCase } from "../../interfaces/usecases/mentors/mentors.interface";
 import { SessionStatusEnum } from "../../interfaces/enums/session.status.enums";
 import { IWeeklyAvailabilityRepository } from "../../../domain/repositories/availability/weekly.availability.repository";
 import { ISpecialAvailabilityRepository } from "../../../domain/repositories/availability/special.availabiltity.repository";

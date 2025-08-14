@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IGetDocumentByKeyUseCase } from "../../../application/interfaces/documents";
+import { IGetDocumentByKeyUseCase } from "../../../application/interfaces/usecases/documents";
 import { AdminEntity } from "../../../domain/entities/admin.entity";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";

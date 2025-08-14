@@ -5,12 +5,12 @@ import { EmailServiceImpl } from "./services/email-services/email.service";
 import { RedisCacheRepository } from "./cache/redis.cache.repository";
 import { IUserRepository } from "../domain/repositories/user.repository";
 import { IForgotPasswordTokensRepository } from "../domain/repositories/forgot.password.token.respository";
-import { ITokenService } from "../application/interfaces/user/token.service.interface";
-import { IEmailService } from "../application/interfaces/user/email.service.interface";
+import { ITokenService } from "../application/interfaces/usecases/user/token.service.interface";
+import { IEmailService } from "../application/interfaces/usecases/user/email.service.interface";
 import { ICacheRepository } from "../domain/repositories/cache.respository";
 import { IAdminRepository } from "../domain/repositories/admin.repository";
 import { AdminRepositoryImpl } from "./database/implementation/admin.repository.impl";
-import { ICloudinaryService } from "../application/interfaces/user/user.profile.usecase.interfaces";
+import { ICloudinaryService } from "../application/interfaces/usecases/user/user.profile.usecase.interfaces";
 import { CloudinaryService } from "./cloud/cloudinary/cloudinary";
 import { IMentorProfileRepository } from "../domain/repositories/mentor.details.repository";
 import { MentorDetailsRepositoryImpl } from "./database/implementation/mentor.respository.impl";
@@ -44,6 +44,7 @@ import { IWeeklyAvailabilityRepository } from "../domain/repositories/availabili
 import { SpecialAvailabilityRepositoryImpl } from "./database/implementation/availability/special.availability.repository.impl";
 import { RescheduleRequestRepositoryImpl } from "./database/implementation/reschedule.request.repository.impl";
 import { RefundRepositoryImpl } from "./database/implementation/refund.repository.impl";
+import { WithdrawalRequestRepositoryImpl } from "./database/implementation/withdrawal.reqeust.repository.impl";
 
 // Initialize Database Implementations
 export const userRepository: IUserRepository = new UserRepositoryImpl();
@@ -65,6 +66,7 @@ export const weeklyAvailabilityRepository: IWeeklyAvailabilityRepository = new W
 export const specialAvailabilityRepository = new SpecialAvailabilityRepositoryImpl();
 export const rescheduleRequestRepository = new RescheduleRequestRepositoryImpl();
 export const refundRepository = new RefundRepositoryImpl();
+export const withdrawalRequestRepository = new WithdrawalRequestRepositoryImpl();
 
 // Initialize services implementation
 export const hashService: IHashService = new HashServiceImpl();

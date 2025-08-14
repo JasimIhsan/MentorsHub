@@ -1,5 +1,5 @@
 import { ISpecialAvailabilityRepository } from "../../../../../domain/repositories/availability/special.availabiltity.repository";
-import { IDeleteSpecialSlotUseCase } from "../../../../interfaces/mentors/mentor.availability.interfaces";
+import { IDeleteSpecialSlotUseCase } from "../../../../interfaces/usecases/mentors/mentor.availability.interfaces";
 
 export class DeleteSpecialSlotUseCase implements IDeleteSpecialSlotUseCase {
 	constructor(private readonly _specialRepo: ISpecialAvailabilityRepository) {}

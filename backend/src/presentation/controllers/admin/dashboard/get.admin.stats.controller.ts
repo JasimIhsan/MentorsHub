@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IGetAdminStatsUseCase } from "../../../../application/interfaces/admin/admin.dashboard.interface";
+import { IGetAdminStatsUseCase } from "../../../../application/interfaces/usecases/admin/admin.dashboard.interface";
 
 export class GetAdminStatsController {
 	constructor(private useCase: IGetAdminStatsUseCase) {}

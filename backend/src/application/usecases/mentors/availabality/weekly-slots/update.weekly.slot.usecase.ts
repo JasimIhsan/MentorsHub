@@ -1,6 +1,6 @@
 import { IWeeklyAvailabilityRepository } from "../../../../../domain/repositories/availability/weekly.availability.repository";
 import { ISessionRepository } from "../../../../../domain/repositories/session.repository";
-import { IUpdateWeeklySlotUseCase } from "../../../../interfaces/mentors/mentor.availability.interfaces";
+import { IUpdateWeeklySlotUseCase } from "../../../../interfaces/usecases/mentors/mentor.availability.interfaces";
 
 export class UpdateWeeklySlotUseCase implements IUpdateWeeklySlotUseCase {
 	constructor(private readonly _weekRepo: IWeeklyAvailabilityRepository, private readonly _sessionRepo: ISessionRepository) {}

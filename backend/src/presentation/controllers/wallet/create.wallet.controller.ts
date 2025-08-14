@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ICreateWalletUsecase } from "../../../application/interfaces/wallet";
+import { ICreateWalletUsecase } from "../../../application/interfaces/usecases/wallet";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
 

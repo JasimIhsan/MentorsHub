@@ -5,6 +5,7 @@ export interface IWalletDTO {
 	userId: string;
 	role: string;
 	balance: number;
+	isRequestedWithdrawal: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -15,6 +16,7 @@ export function mapToWalletDTO(entity: WalletEntity): IWalletDTO {
 		userId: entity.userId,
 		role: entity.role,
 		balance: entity.balance,
+		isRequestedWithdrawal: entity.isRequestedWithdrawal,
 		createdAt: entity.createdAt!,
 		updatedAt: entity.updatedAt!,
 	};

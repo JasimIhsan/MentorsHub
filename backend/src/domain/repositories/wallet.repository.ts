@@ -8,6 +8,7 @@ export interface IWalletRepository {
 	findWalletByUserId(userId: string): Promise<WalletEntity | null>;
 	createWallet(userId: string, role: RoleEnum): Promise<WalletEntity>;
 	platformWallet(): Promise<WalletEntity>;
+	update(wallet: WalletEntity): Promise<WalletEntity>;
 	updateBalance(userId: string, amount: number, type?: TransactionsTypeEnum, role?: RoleEnum): Promise<WalletEntity | null>;
 	createTransaction(data: {
 		fromUserId: string | null;
@@ -21,8 +22,6 @@ export interface IWalletRepository {
 		sessionId?: string | null;
 	}): Promise<WalletTransactionEntity>;
 	getTransactionsByUser(userId: string, page?: number, limit?: number, filter?: Record<string, any>): Promise<{ data: WalletTransactionEntity[]; total: number }>;
-	createWithdrawalRequest(data: Partial<WithdrawalRequestEntity>): Promise<WithdrawalRequestEntity>;
-	getWithdrawalRequests(mentorId: string, page?: number, limit?: number, filter?: Record<string, any>): Promise<{ data: WithdrawalRequestEntity[]; total: number }>;
 	adminRevenue(adminId: string): Promise<number>;
 	revenueChartData(adminId: string, months: number): Promise<{ name: string; total: number }[]>;
 }

@@ -6,6 +6,7 @@ export interface IWalletDocument extends Document {
 	userId: ObjectId;
 	role: RoleEnum;
 	balance: number;
+	isRequestedWithdrawal: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -15,8 +16,9 @@ const WalletSchema = new Schema<IWalletDocument>(
 		userId: { type: Schema.Types.ObjectId, ref: "Users", required: true },
 		role: { type: String, enum: ["user", "mentor", "admin"], required: true },
 		balance: { type: Number, required: true, default: 0 },
+		isRequestedWithdrawal: { type: Boolean, default: false },
 	},
-	{ timestamps: true },
+	{ timestamps: true }
 );
 
 // Optional: one wallet per user-role combination

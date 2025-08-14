@@ -10,6 +10,7 @@ import { AdminMentorApplicationsPage } from "@/pages/admin/AdminMentorRequestApp
 import { AdminWalletPage } from "@/pages/admin/AdminWalletPage";
 import AdminGamificationPage from "@/pages/admin/AdminGamificationPage";
 import { AdminReportsPage } from "@/pages/admin/AdminReportsPage";
+import { AdminWithdrawalRequestPage } from "@/pages/admin/AdminWithdrawalRequestPage";
 
 const AdminRoutes = () => {
 	return (
@@ -74,6 +75,15 @@ const AdminRoutes = () => {
 					element={
 						<AdminProtectedRoute>
 							<AdminReportsPage />
+						</AdminProtectedRoute>
+					}
+				/>
+
+				<Route
+					path="withdrawal-requests"
+					element={
+						<AdminProtectedRoute>
+							<AdminWithdrawalRequestPage />
 						</AdminProtectedRoute>
 					}
 				/>

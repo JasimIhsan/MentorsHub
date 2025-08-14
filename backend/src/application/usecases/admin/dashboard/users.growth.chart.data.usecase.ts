@@ -1,7 +1,7 @@
 import { IAdminRepository } from "../../../../domain/repositories/admin.repository";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { IUsersGrowthChartDataDTO } from "../../../dtos/admin.dashboard.dtos";
-import { IGetUsersGrowthChartDataUseCase } from "../../../interfaces/admin/admin.dashboard.interface";
+import { IGetUsersGrowthChartDataUseCase } from "../../../interfaces/usecases/admin/admin.dashboard.interface";
 
 export class GetUsersGrowthChartDataUseCase implements IGetUsersGrowthChartDataUseCase {
 	constructor(private readonly _adminRepo: IAdminRepository, private readonly _userRepo: IUserRepository) {}

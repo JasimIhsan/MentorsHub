@@ -1,5 +1,5 @@
 import { IGamificationTaskRepository } from "../../../domain/repositories/gamification/gamification.task.repository";
-import { IDeleteGamificationTaskUseCase } from "../../interfaces/gamification";
+import { IDeleteGamificationTaskUseCase } from "../../interfaces/usecases/gamification";
 
 export class DeleteGamificationTaskUseCase implements IDeleteGamificationTaskUseCase {
 	constructor(private taskRepo: IGamificationTaskRepository) {}

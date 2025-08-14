@@ -1,6 +1,6 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
-import { IChangePasswordUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
+import { IChangePasswordUseCase } from "../../../interfaces/usecases/user/user.profile.usecase.interfaces";
 import { IHashService } from "../../../interfaces/services/hash.service";
 
 export class ChangePasswordUsecase implements IChangePasswordUseCase {

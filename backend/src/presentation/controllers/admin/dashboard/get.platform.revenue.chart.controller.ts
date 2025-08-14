@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IGetPlatformRevenueChartDataUseCase } from "../../../../application/interfaces/admin/admin.dashboard.interface";
+import { IGetPlatformRevenueChartDataUseCase } from "../../../../application/interfaces/usecases/admin/admin.dashboard.interface";
 import { logger } from "../../../../infrastructure/utils/logger";
 
 export class GetPlatformRevenueChartDataController {

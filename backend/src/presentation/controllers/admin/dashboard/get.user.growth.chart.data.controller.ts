@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IGetUsersGrowthChartDataUseCase } from "../../../../application/interfaces/admin/admin.dashboard.interface";
+import { IGetUsersGrowthChartDataUseCase } from "../../../../application/interfaces/usecases/admin/admin.dashboard.interface";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class GetUsersGrowthChartDataController {

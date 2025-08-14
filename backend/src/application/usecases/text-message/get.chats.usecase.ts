@@ -3,7 +3,7 @@ import { IChatRepository } from "../../../domain/repositories/chat.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { IMessageRepository } from "../../../domain/repositories/message.repository";
 import { IChatDTO, mapToChatDTO } from "../../dtos/chats.dto";
-import { IGetUserChatsUseCase } from "../../interfaces/messages";
+import { IGetUserChatsUseCase } from "../../interfaces/usecases/messages";
 
 export class GetUserChatsUseCase implements IGetUserChatsUseCase {
 	constructor(private readonly chatRepository: IChatRepository, private readonly userRepository: IUserRepository, private readonly messageRepository: IMessageRepository) {}

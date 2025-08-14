@@ -1,6 +1,6 @@
 // Handles HTTP requests for session operations
 import { NextFunction, Request, Response } from "express";
-import { ICancelSessionUseCase } from "../../../../application/interfaces/session";
+import { ICancelSessionUseCase } from "../../../../application/interfaces/usecases/session";
 import { logger } from "../../../../infrastructure/utils/logger";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 

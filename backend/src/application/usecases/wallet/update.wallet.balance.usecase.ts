@@ -1,6 +1,6 @@
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { IWalletDTO, mapToWalletDTO } from "../../dtos/wallet.dtos";
-import { IUpdateWalletBalanceUsecase } from "../../interfaces/wallet";
+import { IUpdateWalletBalanceUsecase } from "../../interfaces/usecases/wallet";
 
 export class UpdateWalletBalanceUseCase implements IUpdateWalletBalanceUsecase {
 	constructor(private walletRepo: IWalletRepository) {}

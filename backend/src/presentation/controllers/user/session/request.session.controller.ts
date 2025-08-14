@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IRequestSessionUseCase } from "../../../../application/interfaces/session";
+import { IRequestSessionUseCase } from "../../../../application/interfaces/usecases/session";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 

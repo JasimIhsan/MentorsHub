@@ -1,5 +1,5 @@
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
-import { IGetMentorWeeklyPerformanceUseCase } from "../../../interfaces/mentors/mentor.dashboard.interface";
+import { IGetMentorWeeklyPerformanceUseCase } from "../../../interfaces/usecases/mentors/mentor.dashboard.interface";
 
 export class GetMentorWeeklyPerformanceUseCase implements IGetMentorWeeklyPerformanceUseCase {
 	constructor(private sessionRepository: ISessionRepository) {}

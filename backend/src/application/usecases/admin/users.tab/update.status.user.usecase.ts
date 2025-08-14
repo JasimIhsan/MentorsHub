@@ -1,7 +1,7 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
 import { IUserDTO, mapToUserDTO } from "../../../dtos/user.dtos";
-import { IUpdateUserStatusUsecase } from "../../../interfaces/admin/admin.usertab.interfaces";
+import { IUpdateUserStatusUsecase } from "../../../interfaces/usecases/admin/admin.usertab.interfaces";
 import { UserStatusEnums } from "../../../interfaces/enums/user.status.enums";
 
 export class UpdateUserStatusUsecase implements  IUpdateUserStatusUsecase{

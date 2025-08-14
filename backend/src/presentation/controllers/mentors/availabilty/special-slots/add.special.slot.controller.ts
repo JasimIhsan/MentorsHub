@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IAddSpecialSlotUseCase } from "../../../../../application/interfaces/mentors/mentor.availability.interfaces";
+import { IAddSpecialSlotUseCase } from "../../../../../application/interfaces/usecases/mentors/mentor.availability.interfaces";
 import { HttpStatusCode } from "../../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../../infrastructure/utils/logger";
 

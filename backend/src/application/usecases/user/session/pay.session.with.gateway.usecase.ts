@@ -7,8 +7,8 @@ import { SessionPaymentStatusEnum } from "../../../interfaces/enums/session.paym
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
 import { TransactionPurposeEnum } from "../../../interfaces/enums/transaction.purpose.enum";
 import { TransactionsTypeEnum } from "../../../interfaces/enums/transaction.type.enum";
-import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
-import { IPaySessionWithGatewayUseCase } from "../../../interfaces/session";
+import { INotifyUserUseCase } from "../../../interfaces/usecases/notification/notification.usecase";
+import { IPaySessionWithGatewayUseCase } from "../../../interfaces/usecases/session";
 
 export class PaySessionWithGatewayUseCase implements IPaySessionWithGatewayUseCase {
 	constructor(private readonly sessionRepo: ISessionRepository, private readonly walletRepo: IWalletRepository, private readonly notifyUserUseCase: INotifyUserUseCase) {}

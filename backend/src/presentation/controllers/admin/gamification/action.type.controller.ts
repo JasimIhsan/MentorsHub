@@ -1,6 +1,6 @@
 // presentation/controllers/admin/action-type.controller.ts
 import { Request, Response, NextFunction } from "express";
-import { ICreateActionTypeUseCase, IGetAllActionTypeUseCase } from "../../../../application/interfaces/action.type";
+import { ICreateActionTypeUseCase, IGetAllActionTypeUseCase } from "../../../../application/interfaces/usecases/action.type";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class ActionTypeController {

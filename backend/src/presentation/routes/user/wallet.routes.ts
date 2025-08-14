@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createTransactionController, createWalletController, createWithdrawalRequestController, getTransactionsController, getWalletController, topupWalletController, withdrawWalletController } from "../../controllers/wallet/composer";
+import { createTransactionController, createWalletController, getTransactionsController, getWalletController, topupWalletController, withdrawWalletController } from "../../controllers/wallet/composer";
 import { verifyAccessToken } from "../../middlewares/auth.access.token.middleware";
 import { requireRole } from "../../middlewares/require.role.middleware";
 import { RoleEnum } from "../../../application/interfaces/enums/role.enum";
@@ -10,8 +10,6 @@ userWalletRouter.post("/create", verifyAccessToken, requireRole(RoleEnum.USER, R
 userWalletRouter.get("/transactions/:userId", verifyAccessToken, requireRole(RoleEnum.USER, RoleEnum.MENTOR), (req, res, next) => getTransactionsController.handle(req, res, next));
 
 userWalletRouter.post("/create-transaction", verifyAccessToken, requireRole(RoleEnum.USER, RoleEnum.MENTOR), (req, res, next) => createTransactionController.handle(req, res, next));
-
-userWalletRouter.post("/create-withdrawal-request", verifyAccessToken, requireRole(RoleEnum.USER, RoleEnum.MENTOR), (req, res, next) => createWithdrawalRequestController.handle(req, res, next));
 
 userWalletRouter.get("/:userId", verifyAccessToken, requireRole(RoleEnum.USER, RoleEnum.MENTOR), (req, res, next) => getWalletController.handle(req, res, next));
 

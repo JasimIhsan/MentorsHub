@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IAcceptRescheduleRequestUseCase } from "../../../application/interfaces/reschedule.request";
+import { IAcceptRescheduleRequestUseCase } from "../../../application/interfaces/usecases/reschedule.request";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
 

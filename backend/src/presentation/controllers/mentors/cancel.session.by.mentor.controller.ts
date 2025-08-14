@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { logger } from "../../../infrastructure/utils/logger";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
-import { ICancelSessionByMentorUseCase } from "../../../application/interfaces/session";
+import { ICancelSessionByMentorUseCase } from "../../../application/interfaces/usecases/session";
 
 export class CancelSessionByMentorController {
 	constructor(private readonly _useCase: ICancelSessionByMentorUseCase) {}

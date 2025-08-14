@@ -2,8 +2,8 @@ import { IMentorProfileRepository } from "../../../../domain/repositories/mentor
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { UserEntity } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
-import { IVerifyMentorApplicationUsecase } from "../../../interfaces/admin/admin.mentor.application.interface";
-import { INotifyUserUseCase } from "../../../interfaces/notification/notification.usecase";
+import { IVerifyMentorApplicationUsecase } from "../../../interfaces/usecases/admin/admin.mentor.application.interface";
+import { INotifyUserUseCase } from "../../../interfaces/usecases/notification/notification.usecase";
 import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
 import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";

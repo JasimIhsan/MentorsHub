@@ -3,14 +3,16 @@ export class WalletEntity {
 	private _userId: string;
 	private _role: string;
 	private _balance: number;
+	private _isRequestedWithdrawal: boolean;
 	private _createdAt?: Date;
 	private _updatedAt?: Date;
 
-	constructor(props: { _id?: string; userId: string; role: string; balance: number; createdAt?: Date; updatedAt?: Date }) {
+	constructor(props: { _id?: string; userId: string; role: string; balance: number; isRequestedWithdrawal: boolean; createdAt?: Date; updatedAt?: Date }) {
 		this._id = props._id;
 		this._userId = props.userId;
 		this._role = props.role;
 		this._balance = props.balance;
+		this._isRequestedWithdrawal = props.isRequestedWithdrawal;
 		this._createdAt = props.createdAt;
 		this._updatedAt = props.updatedAt;
 	}
@@ -40,6 +42,22 @@ export class WalletEntity {
 		return this._updatedAt;
 	}
 
+	get isRequestedWithdrawal(): boolean {
+		return this._isRequestedWithdrawal;
+	}
+
+	withdrawalRequested(): void {
+		this._isRequestedWithdrawal = true;
+	}
+
+	withdrawalCompleted(): void {
+		this._isRequestedWithdrawal = false;
+	}
+
+	withdrawalRequestRejected(): void {
+		this._isRequestedWithdrawal = false;
+	}
+
 	credit(amount: number): void {
 		this._balance += amount;
 	}
@@ -57,6 +75,7 @@ export class WalletEntity {
 			userId: this._userId,
 			role: this._role,
 			balance: this._balance,
+			isRequestedWithdrawal: this._isRequestedWithdrawal,
 			createdAt: this._createdAt,
 			updatedAt: this._updatedAt,
 		};
@@ -68,6 +87,7 @@ export class WalletEntity {
 			userId: doc.userId,
 			role: doc.role,
 			balance: doc.balance,
+			isRequestedWithdrawal: doc.isRequestedWithdrawal,
 			createdAt: doc.createdAt,
 			updatedAt: doc.updatedAt,
 		});

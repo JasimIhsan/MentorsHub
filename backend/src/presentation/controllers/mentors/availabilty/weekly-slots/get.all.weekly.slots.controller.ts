@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IGetAllWeeklyAvailabilityUseCase } from "../../../../../application/interfaces/mentors/mentor.availability.interfaces";
+import { IGetAllWeeklyAvailabilityUseCase } from "../../../../../application/interfaces/usecases/mentors/mentor.availability.interfaces";
 import { logger } from "../../../../../infrastructure/utils/logger";
 import { HttpStatusCode } from "../../../../../shared/constants/http.status.codes";
 

@@ -1,7 +1,7 @@
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { UserEntityProps } from "../../../../domain/entities/user.entity";
 import { CommonStringMessage } from "../../../../shared/constants/string.messages";
-import { IUpdateUserProfileUseCase } from "../../../interfaces/user/user.profile.usecase.interfaces";
+import { IUpdateUserProfileUseCase } from "../../../interfaces/usecases/user/user.profile.usecase.interfaces";
 import { mapToUserDTO } from "../../../dtos/user.dtos";
 
 export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase {

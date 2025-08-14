@@ -3,7 +3,7 @@ import { IRescheduleRequestRepository } from "../../../../domain/repositories/re
 import { ISessionRepository } from "../../../../domain/repositories/session.repository";
 import { mapToMentorSessionDTO } from "../../../dtos/session.dto";
 import { SessionStatusEnum } from "../../../interfaces/enums/session.status.enums";
-import { IGetUpcomingSessionMentorUsecase } from "../../../interfaces/mentors/mentors.interface";
+import { IGetUpcomingSessionMentorUsecase } from "../../../interfaces/usecases/mentors/mentors.interface";
 
 interface QueryParams {
 	status?: SessionStatusEnum;

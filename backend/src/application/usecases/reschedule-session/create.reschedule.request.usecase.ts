@@ -3,8 +3,8 @@ import { IRescheduleRequestRepository } from "../../../domain/repositories/resch
 import { ISessionRepository } from "../../../domain/repositories/session.repository";
 import { IRescheduleRequestDTO, mapToRescheduleRequestDTO } from "../../dtos/reschedule.request.dto";
 import { RescheduleStatusEnum } from "../../interfaces/enums/reschedule.status.enum";
-import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
-import { ICreateRescheduleRequestInput, ICreateRescheduleRequestUsecase } from "../../interfaces/reschedule.request";
+import { INotifyUserUseCase } from "../../interfaces/usecases/notification/notification.usecase";
+import { ICreateRescheduleRequestInput, ICreateRescheduleRequestUsecase } from "../../interfaces/usecases/reschedule.request";
 
 export class CreateRescheduleRequestUseCase implements ICreateRescheduleRequestUsecase {
 	constructor(private rescheduleRequestRepo: IRescheduleRequestRepository, private sessionRepo: ISessionRepository, private readonly notifyUserUseCase: INotifyUserUseCase) {}

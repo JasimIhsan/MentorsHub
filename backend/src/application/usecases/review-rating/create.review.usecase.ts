@@ -1,10 +1,10 @@
-import { ICreateReviewUseCase } from "../../interfaces/review";
+import { ICreateReviewUseCase } from "../../interfaces/usecases/review";
 import { IReviewRepository } from "../../../domain/repositories/review.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
-import { IUpdateUserTaskProgressUseCase } from "../../interfaces/gamification";
+import { IUpdateUserTaskProgressUseCase } from "../../interfaces/usecases/gamification";
 import { mapToReviewDTO, ReviewDTO } from "../../dtos/review.dtos";
 import { ActionTypeEnum } from "../../interfaces/enums/gamification.action.type.enum";
-import { INotifyUserUseCase } from "../../interfaces/notification/notification.usecase";
+import { INotifyUserUseCase } from "../../interfaces/usecases/notification/notification.usecase";
 import { NotificationTypeEnum } from "../../interfaces/enums/notification.type.enum";
 
 export class CreateReviewUseCase implements ICreateReviewUseCase {
