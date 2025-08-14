@@ -50,6 +50,10 @@ export class WalletEntity {
 		this._isRequestedWithdrawal = true;
 	}
 
+	withdrawalCompleted(): void {
+		this._isRequestedWithdrawal = false;
+	}
+
 	credit(amount: number): void {
 		this._balance += amount;
 	}

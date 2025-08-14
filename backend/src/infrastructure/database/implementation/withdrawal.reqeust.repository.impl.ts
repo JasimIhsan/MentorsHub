@@ -1,3 +1,4 @@
+import { WithdrawalRequestStatusEnum } from "../../../application/interfaces/enums/withdrawel.request.status.enum";
 import { WithdrawalRequestEntity } from "../../../domain/entities/wallet/wallet.withdrawel.request.entity";
 import { IWithdrawalRequestRepository } from "../../../domain/repositories/withdrawal.request.repository";
 import { handleExceptionError } from "../../utils/handle.exception.error";
@@ -13,6 +14,20 @@ export class WithdrawalRequestRepositoryImpl implements IWithdrawalRequestReposi
 		}
 	}
 
+	async find(input: { page: number; limit: number; status: string; searchTerm?: string }): Promise<WithdrawalRequestEntity[]> {
+		try {
+			const skip = (input.page - 1) * input.limit;
+
+			const query: any = {};
+			if (input.status && input.status !== "ALL") query.status = input.status;
+
+			const docs = await WithdrawalRequestModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(input.limit).lean();
+			return docs.map((doc) => WithdrawalRequestEntity.fromDBDocument(doc));
+		} catch (error) {
+			return handleExceptionError(error, "Error finding withdrawal requests");
+		}
+	}
+
 	async findById(id: string): Promise<WithdrawalRequestEntity | null> {
 		try {
 			const doc = await WithdrawalRequestModel.findById(id);
@@ -22,9 +37,18 @@ export class WithdrawalRequestRepositoryImpl implements IWithdrawalRequestReposi
 		}
 	}
 
-	async findByUserId(userId: string): Promise<WithdrawalRequestEntity | null> {
+	async findByUserId(userId: string): Promise<WithdrawalRequestEntity[]> {
 		try {
-			const doc = await WithdrawalRequestModel.findOne({ userId });
+			const doc = await WithdrawalRequestModel.find({ userId });
+			return doc ? doc.map(WithdrawalRequestEntity.fromDBDocument) : [];
+		} catch (error) {
+			return handleExceptionError(error, "Error finding withdrawal request by userId");
+		}
+	}
+
+	async findPendingByUserId(userId: string): Promise<WithdrawalRequestEntity | null> {
+		try {
+			const doc = await WithdrawalRequestModel.findOne({ userId, status: WithdrawalRequestStatusEnum.PENDING });
 			return doc ? WithdrawalRequestEntity.fromDBDocument(doc) : null;
 		} catch (error) {
 			return handleExceptionError(error, "Error finding withdrawal request by userId");
@@ -33,7 +57,9 @@ export class WithdrawalRequestRepositoryImpl implements IWithdrawalRequestReposi
 
 	async update(entity: WithdrawalRequestEntity): Promise<WithdrawalRequestEntity | null> {
 		try {
-			const doc = await WithdrawalRequestModel.findOneAndUpdate({ _id: entity.id }, entity.toObject(), { new: true });
+			const requestObj = entity.toObject();
+			console.log("requestObj: ", requestObj);
+			const doc = await WithdrawalRequestModel.findOneAndUpdate({ _id: entity.id }, requestObj, { new: true });
 			return doc ? WithdrawalRequestEntity.fromDBDocument(doc) : null;
 		} catch (error) {
 			return handleExceptionError(error, "Error updating withdrawal request");

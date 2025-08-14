@@ -11,7 +11,6 @@ import { CreateWalletController } from "./create.wallet.controller";
 import { CreateWithdrawalRequestController } from "./create.withdrawal.request.controller";
 import { GetTransactionsController } from "./get.transactions.controller";
 import { GetWalletController } from "./get.wallet.controller";
-import { GetWithdrawalRequestsController } from "./get.withdrawal.requests.controller";
 // import { UpdateWalletBalanceController } from "./update.wallet.balance.controller";
 import { WalletTopUpController } from "./wallet.topup.controller";
 import { WithdrawWalletController } from "./withdrawal.wallet.controller";

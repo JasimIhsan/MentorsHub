@@ -135,7 +135,12 @@ export function WalletPage() {
 
 	// Handle withdrawal
 	const handleWithdraw = async () => {
+		if (!walletBalance) return;
 		const amountNum = parseFloat(withdrawAmount);
+		if (walletBalance < 0) {
+			toast.error("Withdrawal not allowed. Your wallet is in debt to the platform.");
+			return;
+		}
 		if (!withdrawAmount || amountNum <= 0) {
 			toast.error("Please enter a valid amount");
 			return;
@@ -248,7 +253,7 @@ export function WalletPage() {
 						)}
 					</div>
 					<AddMoneyModal isOpen={isAddMoneyModalOpen} onOpenChange={setIsAddMoneyModalOpen} amount={amount} setAmount={setAmount} onAddMoney={handleAddMoney} isRazorpayLoaded={isRazorpayLoaded} />
-					<WithdrawMoneyModal isOpen={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen} amount={withdrawAmount} setAmount={setWithdrawAmount} onWithdraw={handleWithdraw} isRazorpayLoaded={isRazorpayLoaded} x={x} />
+					<WithdrawMoneyModal walletBalance={walletBalance ?? 0} isOpen={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen} amount={withdrawAmount} setAmount={setWithdrawAmount} onWithdraw={handleWithdraw} isRazorpayLoaded={isRazorpayLoaded} x={x} />
 				</>
 
 				<TransactionHistory

@@ -15,11 +15,14 @@ export class RequestWithdrawalUseCase implements IRequestWithdrawalUseCase {
 
 	async execute(userId: string, amount: number): Promise<IWithdrawalRequestDTO> {
 		console.log("userId: ", userId);
-		const existingRequest = await this._withdrawalRequestRepo.findByUserId(userId);
-		if (existingRequest && existingRequest.status === WithdrawalRequestStatusEnum.PENDING) throw new Error("User already has a pending withdrawal request.");
+		const existigRequest = await this._withdrawalRequestRepo.findPendingByUserId(userId);
+
+		if (existigRequest) throw new Error("User already has a pending withdrawal request.");
 
 		const wallet = await this._walletRepo.findWalletByUserId(userId);
 		if (!wallet) throw new Error("Wallet not found for user.");
+		if (wallet.isRequestedWithdrawal) throw new Error("User already has a pending withdrawal request.");
+		if (wallet.balance < 0) throw new Error("Withdrawal not allowed. Your wallet is in debt to the platform.");
 		if (wallet.balance < amount) throw new Error("Insufficient balance.");
 
 		const request = new WithdrawalRequestEntity({
