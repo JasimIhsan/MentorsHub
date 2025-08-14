@@ -8,6 +8,7 @@ export interface IWalletRepository {
 	findWalletByUserId(userId: string): Promise<WalletEntity | null>;
 	createWallet(userId: string, role: RoleEnum): Promise<WalletEntity>;
 	platformWallet(): Promise<WalletEntity>;
+	update(wallet: WalletEntity): Promise<WalletEntity>;
 	updateBalance(userId: string, amount: number, type?: TransactionsTypeEnum, role?: RoleEnum): Promise<WalletEntity | null>;
 	createTransaction(data: {
 		fromUserId: string | null;

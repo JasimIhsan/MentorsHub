@@ -42,6 +42,15 @@ export class WalletRepositoryImpl implements IWalletRepository {
 		}
 	}
 
+	async update(wallet: WalletEntity): Promise<WalletEntity> {
+		try {
+			const doc = await WalletModel.findByIdAndUpdate(wallet.id, wallet.toObject(), { new: true });
+			return WalletEntity.fromDBDocument(doc);
+		} catch (error) {
+			return handleExceptionError(error, "Error updating wallet");
+		}
+	}
+
 	async updateBalance(userId: string, amount: number, type: TransactionsTypeEnum = TransactionsTypeEnum.CREDIT, role: RoleEnum = RoleEnum.USER): Promise<WalletEntity | null> {
 		try {
 			let roleQuery: any = role === RoleEnum.ADMIN ? RoleEnum.ADMIN : { $in: [RoleEnum.USER, RoleEnum.MENTOR] };

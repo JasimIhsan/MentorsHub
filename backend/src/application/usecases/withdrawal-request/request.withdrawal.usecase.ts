@@ -30,6 +30,11 @@ export class RequestWithdrawalUseCase implements IRequestWithdrawalUseCase {
 
 		const savedRequest = await this._withdrawalRequestRepo.create(request);
 
+		if (savedRequest) {
+			wallet.withdrawalRequested();
+			await this._walletRepo.update(wallet);
+		}
+
 		const user = await this._userRepo.findUserById(userId);
 		return mapToWithdrawalRequestDTO(savedRequest, user ?? undefined);
 	}

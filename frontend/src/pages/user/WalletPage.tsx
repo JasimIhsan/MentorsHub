@@ -38,6 +38,7 @@ declare global {
 // Main WalletPage component
 export function WalletPage() {
 	const [walletBalance, setWalletBalance] = useState<number | null>(null);
+	const [isRequestedWithdrawal, setIsRequestedWithdrawal] = useState(false);
 	const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
 	const [transactionType, setTransactionType] = useState<string>("all");
 	const [isWalletCreated, setIsWalletCreated] = useState(false);
@@ -77,6 +78,7 @@ export function WalletPage() {
 				if (response.success) {
 					setIsWalletCreated(true);
 					setWalletBalance(response.wallet.balance);
+					setIsRequestedWithdrawal(response.wallet.isRequestedWithdrawal);
 				}
 			} catch (error: any) {
 				setWalletBalance(0); // Set balance to 0 if wallet doesn't exist
@@ -146,6 +148,7 @@ export function WalletPage() {
 			const response = await reqeustWithdrawalAPI(user?.id as string, amountNum);
 			if (response.success) {
 				toast.success(response.message || "Withdrawal request submitted successfully.");
+				setIsRequestedWithdrawal(true);
 				setIsWithdrawModalOpen(false);
 				setWithdrawAmount("");
 			}
@@ -225,6 +228,7 @@ export function WalletPage() {
 				<>
 					<div className={`${isWalletCreated ? "grid grid-cols-1 lg:grid-cols-3 gap-6" : "flex flex-col gap-8"}`}>
 						<WalletBalanceCard
+							isRequestedWithdrawal={isRequestedWithdrawal}
 							isWalletExists={isWalletCreated}
 							balance={walletBalance ?? 0}
 							isLoading={isLoadingWallet}
