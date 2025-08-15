@@ -11,7 +11,6 @@ import axiosInstance from "@/api/config/api.config";
 import { fetchMentorAPI } from "@/api/mentors.api.service";
 import { RootState } from "@/store/store";
 import { MentorApplicationFormData } from "@/interfaces/mentor.application";
-import { AvailabilityStep } from "@/components/user/become-mentor/AvailabilityStep";
 import { DocumentsVerificationStep } from "@/components/user/become-mentor/DocumentsVerificationStep";
 import { ExperienceEducationStep } from "@/components/user/become-mentor/ExpericeEducationStep";
 import { ExpertiseSkillsStep } from "@/components/user/become-mentor/ExpertiseSkillsStep";
@@ -19,7 +18,6 @@ import { MentoringPreferencesStep } from "@/components/user/become-mentor/Mentor
 import { PersonalInfoStep } from "@/components/user/become-mentor/PersonalInfoStep";
 import { SubmissionSuccess } from "@/components/user/become-mentor/SubmissionSuccess";
 import { ValidationErrorModal } from "@/components/user/become-mentor/ValidationErrorModal";
-import { WeekDay } from "@/interfaces/mentor.interface";
 import { AxiosError } from "axios";
 import { validateFormData } from "@/schema/mentor.application.form";
 
@@ -29,9 +27,8 @@ export function BecomeMentorPage() {
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [showErrorModal, setShowErrorModal] = useState(false);
 	const [validationErrors, setValidationErrors] = useState<string[]>([]);
-	const [timeArray, setTimeArray] = useState<string[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
-	const totalSteps = 6;
+	const totalSteps = 5;
 	const progress = (step / totalSteps) * 100;
 	const user = useSelector((state: RootState) => state.userAuth.user);
 	const navigate = useNavigate();
@@ -51,15 +48,6 @@ export function BecomeMentorPage() {
 		sessionFormat: "both",
 		pricing: "free",
 		hourlyRate: 0,
-		availability: {
-			[WeekDay.Monday]: [],
-			[WeekDay.Tuesday]: [],
-			[WeekDay.Wednesday]: [],
-			[WeekDay.Thursday]: [],
-			[WeekDay.Friday]: [],
-			[WeekDay.Saturday]: [],
-			[WeekDay.Sunday]: [],
-		},
 		documents: [],
 		terms: false,
 		guidelines: false,
@@ -94,15 +82,6 @@ export function BecomeMentorPage() {
 						sessionFormat: mentorData.sessionFormat || "one-on-one",
 						pricing: mentorData.pricing || "free",
 						hourlyRate: mentorData.hourlyRate || 0,
-						availability: mentorData.availability || {
-							[WeekDay.Monday]: [],
-							[WeekDay.Tuesday]: [],
-							[WeekDay.Wednesday]: [],
-							[WeekDay.Thursday]: [],
-							[WeekDay.Friday]: [],
-							[WeekDay.Saturday]: [],
-							[WeekDay.Sunday]: [],
-						},
 						documents: [],
 						terms: false,
 						guidelines: false,
@@ -121,18 +100,6 @@ export function BecomeMentorPage() {
 			fetchUser(user.id);
 		}
 	}, [user]);
-
-	useEffect(() => {
-		const timeSlots = [];
-		for (let hour = 0; hour < 24; hour++) {
-			for (let min = 0; min < 60; min += 30) {
-				const formattedHour = hour.toString().padStart(2, "0");
-				const formattedMin = min.toString().padStart(2, "0");
-				timeSlots.push(`${formattedHour}:${formattedMin}`);
-			}
-		}
-		setTimeArray(timeSlots);
-	}, []);
 
 	const handleInputChange = (field: keyof MentorApplicationFormData, value: any) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
@@ -202,39 +169,6 @@ export function BecomeMentorPage() {
 		}));
 	};
 
-	const handleTimeChange = (day: WeekDay, value: string) => {
-		if (!value) return;
-		setFormData((prev) => {
-			const currentSlots = prev.availability[day] || [];
-			if (currentSlots.includes(value)) {
-				toast.warning(`Time slot ${value} is already selected for ${day}`);
-				return prev;
-			}
-			const updatedSlots = [...currentSlots, value].sort((a, b) => a.localeCompare(b));
-			return {
-				...prev,
-				availability: {
-					...prev.availability,
-					[day]: updatedSlots,
-				},
-			};
-		});
-	};
-
-	const handleRemoveTimeSlot = (day: WeekDay, index: number) => {
-		setFormData((prev) => {
-			const currentSlots = prev.availability[day] || [];
-			const updatedSlots = currentSlots.filter((_, i) => i !== index);
-			return {
-				...prev,
-				availability: {
-					...prev.availability,
-					[day]: updatedSlots,
-				},
-			};
-		});
-	};
-
 	const handleNext = async () => {
 		if (step === totalSteps) {
 			const { isValid, errors } = validateFormData(formData);
@@ -268,7 +202,6 @@ export function BecomeMentorPage() {
 			submissionData.append("sessionFormat", formData.sessionFormat);
 			submissionData.append("pricing", formData.pricing);
 			submissionData.append("hourlyRate", formData.hourlyRate.toString());
-			submissionData.append("availability", JSON.stringify(formData.availability));
 
 			formData.documents.forEach((file) => {
 				submissionData.append("documents", file);
@@ -312,7 +245,7 @@ export function BecomeMentorPage() {
 
 	if (user?.role === "mentor") {
 		return (
-			<div className="min-h-screen flex items-center justify-center bg-gray-100">
+			<div className="min-h-screen w-full flex items-center justify-center bg-gray-100">
 				<div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg text-center">
 					<h1 className="text-3xl font-bold tracking-tight text-gray-900">You are already a mentor</h1>
 					<p className="mt-4 text-gray-600">Thank you for your dedication! As a mentor, you're already making a difference. Continue to guide and inspire through your dashboard.</p>
@@ -353,16 +286,14 @@ export function BecomeMentorPage() {
 							{step === 2 && "Expertise & Skills"}
 							{step === 3 && "Experience & Education"}
 							{step === 4 && "Mentoring Preferences"}
-							{step === 5 && "Weekly Availability"}
-							{step === 6 && "Documents & Verification"}
+							{step === 5 && "Documents & Verification"}
 						</CardTitle>
 						<CardDescription>
 							{step === 1 && "Tell us about yourself"}
 							{step === 2 && "Share your areas of expertise and skills"}
 							{step === 3 && "Tell us about your professional background"}
 							{step === 4 && "Set your mentoring preferences"}
-							{step === 5 && "Select the times when you are available for mentoring each day. Each slot represents a one-hour session."}
-							{step === 6 && "Upload supporting documents and complete your application"}
+							{step === 5 && "Upload supporting documents and complete your application"}
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
@@ -370,8 +301,7 @@ export function BecomeMentorPage() {
 						{step === 2 && <ExpertiseSkillsStep formData={formData} handleInputChange={handleInputChange} />}
 						{step === 3 && <ExperienceEducationStep formData={formData} handleNestedChange={handleNestedChange} handleAddNested={handleAddNested} handleRemoveNested={handleRemoveNested} />}
 						{step === 4 && <MentoringPreferencesStep formData={formData} handleInputChange={handleInputChange} handleArrayChange={handleArrayChange} />}
-						{step === 5 && <AvailabilityStep formData={formData} timeArray={timeArray} handleTimeChange={handleTimeChange} handleRemoveTimeSlot={handleRemoveTimeSlot} />}
-						{step === 6 && <DocumentsVerificationStep formData={formData} handleInputChange={handleInputChange} handleFileChange={handleFileChange} handleRemoveFile={handleRemoveFile} />}
+						{step === 5 && <DocumentsVerificationStep formData={formData} handleInputChange={handleInputChange} handleFileChange={handleFileChange} handleRemoveFile={handleRemoveFile} />}
 					</CardContent>
 					<CardFooter className="flex justify-between">
 						{step > 1 ? (

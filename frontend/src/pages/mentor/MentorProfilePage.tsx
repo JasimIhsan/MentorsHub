@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,8 +16,6 @@ import { toast } from "sonner";
 import { extractDocumentName } from "@/utility/extractDocumentName";
 import { fetchDocumentUrlsAPI } from "@/api/admin/common/fetchDocuments";
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from "@/components/ui/dialog";
-import { formatTime } from "@/utility/time-data-formatter";
-import { WeekDay } from "@/interfaces/mentor.application";
 import { Checkbox } from "@/components/ui/checkbox";
 import MultipleSelector from "@/components/ui/multiple-selector";
 import { SKILL_OPTIONS } from "@/constants/skill.option";
@@ -74,7 +72,6 @@ const mentorProfileSchema = z.object({
 			expiryDate: z.string().nullable(),
 		})
 	),
-	availability: z.record(z.enum(Object.values(WeekDay) as [string, ...string[]]), z.array(z.string())),
 	avatar: z.instanceof(File).optional(),
 	documents: z.array(z.instanceof(File)).optional(),
 });
@@ -84,7 +81,7 @@ type FormData = z.infer<typeof mentorProfileSchema>;
 export function MentorProfilePage() {
 	const [isEditing, setIsEditing] = useState(false);
 	const [formErrors, setFormErrors] = useState<Partial<Record<keyof FormData, string | any>>>({});
-	const [timeArray, setTimeArray] = useState<string[]>([]);
+	const [, setTimeArray] = useState<string[]>([]);
 	const [selectedDocUrl, setSelectedDocUrl] = useState<string | null>(null);
 	const [documentUrls, setDocumentUrls] = useState<string[]>([]);
 	const [newDocuments, setNewDocuments] = useState<File[]>([]); // Track new documents
@@ -110,15 +107,6 @@ export function MentorProfilePage() {
 		workExperiences: [{ jobTitle: "", company: "", startDate: "", endDate: null, currentJob: false, description: "" }],
 		educations: [{ degree: "", institution: "", startYear: "", endYear: "" }],
 		certifications: [],
-		availability: {
-			[WeekDay.Monday]: [],
-			[WeekDay.Tuesday]: [],
-			[WeekDay.Wednesday]: [],
-			[WeekDay.Thursday]: [],
-			[WeekDay.Friday]: [],
-			[WeekDay.Saturday]: [],
-			[WeekDay.Sunday]: [],
-		},
 		documents: [],
 	});
 
@@ -165,15 +153,6 @@ export function MentorProfilePage() {
 								expiryDate: cert.expiryDate || null,
 						  }))
 						: [],
-				availability: mentor.availability || {
-					[WeekDay.Monday]: [],
-					[WeekDay.Tuesday]: [],
-					[WeekDay.Wednesday]: [],
-					[WeekDay.Thursday]: [],
-					[WeekDay.Friday]: [],
-					[WeekDay.Saturday]: [],
-					[WeekDay.Sunday]: [],
-				},
 				documents: [],
 			});
 		}
@@ -289,28 +268,6 @@ export function MentorProfilePage() {
 		handleArrayChange("skills", skill, false);
 	};
 
-	// Handle time slot addition/removal
-	const handleTimeChange = (day: WeekDay, value: string) => {
-		if (!value) return;
-		const currentSlots = formData.availability[day] || [];
-		if (currentSlots.includes(value)) {
-			toast.warning(`Time slot ${value} is already selected for ${day}`);
-			return;
-		}
-		const updatedSlots = [...currentSlots, value].sort((a, b) => a.localeCompare(b));
-		handleInputChange("availability", {
-			...formData.availability,
-			[day]: updatedSlots,
-		});
-	};
-
-	const handleRemoveTimeSlot = (day: WeekDay, index: number) => {
-		handleInputChange("availability", {
-			...formData.availability,
-			[day]: formData.availability[day].filter((_, i) => i !== index),
-		});
-	};
-
 	// Handle work experience addition/removal
 	const handleAddWorkExperience = () => {
 		handleInputChange("workExperiences", [
@@ -422,7 +379,6 @@ export function MentorProfilePage() {
 			submissionData.append("workExperiences", JSON.stringify(formData.workExperiences));
 			submissionData.append("educations", JSON.stringify(formData.educations));
 			submissionData.append("certifications", JSON.stringify(formData.certifications));
-			submissionData.append("availability", JSON.stringify(formData.availability));
 
 			if (formData.avatar) {
 				submissionData.append("avatar", formData.avatar);
@@ -567,11 +523,10 @@ export function MentorProfilePage() {
 
 				{/* Main Content */}
 				<Tabs defaultValue="about" className="w-full">
-					<TabsList className="grid w-full grid-cols-4">
+					<TabsList className="grid w-full grid-cols-3">
 						<TabsTrigger value="about">About</TabsTrigger>
 						<TabsTrigger value="experience">Experience</TabsTrigger>
 						<TabsTrigger value="preferences">Preferences</TabsTrigger>
-						<TabsTrigger value="availability">Availability</TabsTrigger>
 					</TabsList>
 
 					{/* About Tab */}
@@ -1072,7 +1027,7 @@ export function MentorProfilePage() {
 									</div>
 								)}
 							</CardContent>
-							{isEditing && (
+							{/* {isEditing && (
 								<CardFooter>
 									<Button onClick={handleSubmit} disabled={isLoading}>
 										{isLoading ? (
@@ -1085,64 +1040,7 @@ export function MentorProfilePage() {
 										)}
 									</Button>
 								</CardFooter>
-							)}
-						</Card>
-					</TabsContent>
-
-					{/* Availability Tab */}
-					<TabsContent value="availability" className="mt-6">
-						<Card>
-							<CardHeader>
-								<CardTitle>Your Slot Availability</CardTitle>
-								<CardDescription>Your availability for mentoring sessions</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<div className="space-y-4">
-									{Object.values(WeekDay).map((day) => (
-										<div key={day} className="rounded-lg border p-4">
-											<h4 className="font-medium mb-2">{day}</h4>
-											{(formData.availability[day] || []).length > 0 ? (
-												<div className="mb-4">
-													<p className="text-sm font-semibold">Selected Time Slots:</p>
-													<div className="flex flex-wrap gap-2 mt-2">
-														{(formData.availability[day] || []).map((slot, index) => (
-															<div key={index} className="flex items-center bg-gray-200/70 rounded-full px-3 py-1 text-sm">
-																<span>{formatTime(slot)}</span>
-																{isEditing && (
-																	<Button variant="ghost" size="sm" className="ml-2 h-6 w-6 p-0" onClick={() => handleRemoveTimeSlot(day, index)} disabled={isLoading}>
-																		<X className="h-4 w-4" />
-																		<span className="sr-only">Remove {slot}</span>
-																	</Button>
-																)}
-															</div>
-														))}
-													</div>
-												</div>
-											) : (
-												<p className="text-sm text-muted-foreground italic">No time slots provided</p>
-											)}
-											{isEditing && (
-												<div className="space-y-2">
-													<Label htmlFor={`time-slot-${day}`}>Add Time Slot</Label>
-													<Select onValueChange={(value) => handleTimeChange(day, value)} disabled={isLoading}>
-														<SelectTrigger id={`time-slot-${day}`}>
-															<SelectValue placeholder="Select a time slot" />
-														</SelectTrigger>
-														<SelectContent>
-															{timeArray.map((time) => (
-																<SelectItem key={time} value={time} disabled={(formData.availability[day] || []).includes(time)}>
-																	{formatTime(time)}
-																</SelectItem>
-															))}
-														</SelectContent>
-													</Select>
-												</div>
-											)}
-										</div>
-									))}
-									<p className="text-xs text-gray-500">Select at least one time slot to indicate your availability. Each slot represents a one-hour session.</p>
-								</div>
-							</CardContent>
+							)} */}
 						</Card>
 					</TabsContent>
 				</Tabs>

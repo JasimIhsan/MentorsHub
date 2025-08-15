@@ -46,7 +46,6 @@ export interface MentorApplicationFormData {
 	sessionFormat: "one-on-one" | "group" | "both";
 	pricing: "free" | "paid";
 	hourlyRate: number;
-	availability: Partial<Record<WeekDay, string[]>>;
 	documents: File[];
 	terms: boolean;
 	guidelines: boolean;

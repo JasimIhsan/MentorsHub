@@ -139,7 +139,6 @@ export function MentorRescheduleRequestsPage() {
 							if (!rescheduleRequest || rescheduleRequest.status !== RescheduleStatusEnum.PENDING) return null;
 
 							const initiator = session.participants.find((p) => p._id === rescheduleRequest.initiatedBy);
-							console.log(`initiator of ${session.topic} : `, initiator);
 							const canTakeAction = rescheduleRequest.lastActionBy !== userId;
 							const isExpanded = expandedSessionIds.includes(session.id);
 
@@ -299,22 +298,10 @@ export function MentorRescheduleRequestsPage() {
 							<p className="text-sm sm:text-base text-gray-500 max-w-md mb-6">It looks like there are no reschedule requests at the moment. Check back later or explore your scheduled sessions.</p>
 
 							{/* Call to Action Buttons */}
-							<div className="flex flex-col sm:flex-row gap-3">
-								<Button
-									variant="default"
-									onClick={() => {
-										// Replace with navigation logic to view all sessions
-									}}>
-									View All Sessions
-								</Button>
-								<Button
-									variant="outline"
-									onClick={() => {
-										// Replace with navigation logic to create a new session
-									}}>
-									Schedule New Session
-								</Button>
-							</div>
+							{/* <div className="flex flex-col sm:flex-row gap-3">
+								<Button variant="default">View All Sessions</Button>
+								<Button variant="outline">Schedule New Session</Button>
+							</div> */}
 						</div>
 					)}
 				</>

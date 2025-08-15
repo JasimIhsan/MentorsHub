@@ -18,9 +18,9 @@ export class SpecialAvailabilityEntity {
 		if (!props.endTime.match(/^\d{2}:\d{2}$/)) {
 			throw new Error("Invalid end time format");
 		}
-		if (props.date < new Date()) {
-			throw new Error("Date must be in the future");
-		}
+		// if (props.date < new Date()) {
+		// 	throw new Error("Date must be in the future");
+		// }
 	}
 
 	get id(): string {

@@ -69,7 +69,10 @@ export function MentorSessionHistoryPage() {
 		<div className="w-full">
 			<div className="flex flex-col gap-8">
 				<div className="flex justify-between items-center">
-					<h1 className="text-3xl font-bold tracking-tight">Session History</h1>
+					<div>
+						<h1 className="text-3xl font-bold tracking-tight">Session History</h1>
+						<p className="text-sm text-muted-foreground">View and manage your session history.</p>
+					</div>
 					<FilterDropdown filterOption={filterOption} onFilterChange={handleFilterChange} />
 				</div>
 				<Card className="p-0 border-none bg-transparent shadow-none">

@@ -4,6 +4,7 @@ export interface ISpecialAvailabilityRepository {
 	create(entity: SpecialAvailabilityEntity): Promise<SpecialAvailabilityEntity>;
 	delete(id: string): Promise<void>;
 	update(entity: SpecialAvailabilityEntity): Promise<void>;
+	find(): Promise<SpecialAvailabilityEntity[]>;
 	findById(id: string): Promise<SpecialAvailabilityEntity | null>;
 	findByMentorId(mentorId: string): Promise<SpecialAvailabilityEntity[]>;
 	isExists(mentorId: string, date: Date, startTime: string, endTime: string): Promise<boolean>;

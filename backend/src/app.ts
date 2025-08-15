@@ -6,6 +6,7 @@ import { registerRoutes } from "./routes";
 import { applyGlobalMiddlewares } from "./middlewares";
 import { startSessionExpiryJob } from "./infrastructure/schedulers/session.expiry.scheduler";
 import { startSessionReminderJob } from "./infrastructure/schedulers/session.reminder.scheduler";
+import { startSlotCleanupJob } from "./infrastructure/schedulers/delete.expired.date.specific.slots";
 
 export const app = express();
 
@@ -15,6 +16,7 @@ connectDB();
 // start Schedulers
 startSessionExpiryJob();
 startSessionReminderJob();
+startSlotCleanupJob();
 
 // Passport setup
 app.use(passport.initialize());
