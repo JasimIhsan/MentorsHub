@@ -28,6 +28,7 @@ import { rescheduleRouter } from "./presentation/routes/user/reschedule.routes";
 import { mentorRescheduleRouter } from "./presentation/routes/mentors/mentor.reschedule.routes";
 import { withdrawalRouter } from "./presentation/routes/user/withdrawal.routes";
 import { adminWithdrawalRequestsRouter } from "./presentation/routes/admin/admin.withdrawal.requests.routes";
+import { mentorAvailabilityToUserRouter } from "./presentation/routes/user/mentor.availability.routes";
 
 export function registerRoutes(app: Express) {
 	app.use("/api/user", authRouter);
@@ -42,6 +43,7 @@ export function registerRoutes(app: Express) {
 	app.use("/api/user/reports", userReportRouter);
 	app.use("/api/user/reschedule", rescheduleRouter);
 	app.use("/api/user/withdrawal", withdrawalRouter);
+	app.use("/api/user/mentor-availability", mentorAvailabilityToUserRouter);
 
 	app.use("/api/admin", adminAuthRouter);
 	app.use("/api/admin/users", usertabRouter);

@@ -19,9 +19,6 @@ export const validateFormData = (data: MentorApplicationFormData): { isValid: bo
 	if (!data.guidelines) errors.push("You must agree to the Mentor Guidelines");
 	if (!data.interview) errors.push("You must acknowledge the interview possibility");
 	if (!data.documents || data.documents.length === 0) errors.push("At least one document is required");
-	if (!Object.values(data.availability).some((times) => times && times.length > 0)) {
-		errors.push("At least one availability time slot is required");
-	}
 
 	data.workExperiences.forEach((exp, index) => {
 		if (!exp.jobTitle.trim()) errors.push(`Work experience ${index + 1}: Job title is required`);

@@ -13,6 +13,15 @@ export class SpecialAvailabilityRepositoryImpl implements ISpecialAvailabilityRe
 		}
 	}
 
+	async find(): Promise<SpecialAvailabilityEntity[]> {
+		try {
+			const docs = await SpecialAvailabilityModel.find();
+			return docs.map(SpecialAvailabilityEntity.fromDbDocument);
+		} catch (error) {
+			return handleExceptionError(error, "Error finding availability slots");
+		}
+	}
+
 	async findById(id: string): Promise<SpecialAvailabilityEntity | null> {
 		try {
 			const doc = await SpecialAvailabilityModel.findById(id);

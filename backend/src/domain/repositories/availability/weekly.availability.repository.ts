@@ -9,4 +9,5 @@ export interface IWeeklyAvailabilityRepository {
 	findAllByMentorId(mentorId: string): Promise<WeeklyAvailabilityEntity[]>;
 	toggleAvailabilityByWeekDay(mentorId: string, dayOfWeek: number, status: boolean): Promise<void>;
 	findAvailableSlots(mentorId: string, date: Date, durationInHours: number): Promise<string[] | null>;
+	findByMentorId(mentorId: string): Promise<WeeklyAvailabilityEntity[]>;
 }

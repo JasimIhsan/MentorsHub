@@ -1,3 +1,4 @@
+import { IAvailabilityToUserDTO } from "../../../dtos/availability/availability.to.user.dto";
 import { ISpecialAvailabilityDTO } from "../../../dtos/availability/special.availability.dto";
 import { IWeeklyAvailabilityDTO } from "../../../dtos/availability/weekly.availability.dto";
 
@@ -39,4 +40,8 @@ export interface IDeleteSpecialSlotUseCase {
 
 export interface IUpdateSpecialSlotUseCase {
 	execute(id: string, mentorId: string, startTime: string, endTime: string): Promise<void>;
+}
+
+export interface IGetMentorAvailabilityToUserUseCase {
+	execute(mentorId: string): Promise<IAvailabilityToUserDTO>;
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -7,7 +7,6 @@ import { MoreVertical } from "lucide-react";
 import { useMentor } from "@/hooks/useMentor";
 import { WeekDay } from "@/interfaces/mentor.interface";
 import { MentorAbout } from "@/components/user/mentor-details/MentorAbout";
-import { MentorAvailability } from "@/components/user/mentor-details/MentorAvailibility";
 import { MentorExperience } from "@/components/user/mentor-details/MentorExperience";
 import { MentorReviews } from "@/components/user/mentor-details/MentorReviews";
 import { MentorReviewModal } from "@/components/user/mentor-details/MentorReviewModal";
@@ -16,6 +15,17 @@ import { MentorHeader } from "@/components/user/mentor-details/MentorHeader";
 import { IReviewDTO } from "@/interfaces/review.interface";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { mentorAvailabilityToUserAPI } from "@/api/mentor.availability.api.service";
+import { toast } from "sonner";
+import { MentorAvailability } from "@/components/user/mentor-details/MentorAvailibility";
+
+interface AvailabilitySlot {
+	id: string;
+	dayOfWeek?: number;
+	date?: string;
+	startTime: string;
+	endTime: string;
+}
 
 // Main Mentor Details Page Component
 export function MentorDetailsPage() {
@@ -26,9 +36,26 @@ export function MentorDetailsPage() {
 	const [reviewToEdit, setReviewToEdit] = useState<IReviewDTO | null>(null);
 	const [selectedDay, setSelectedDay] = useState<WeekDay>(WeekDay.Monday);
 	const [activeTab, setActiveTab] = useState("about");
+	const [availabilityData, setAvailabilityData] = useState<{ weekly: AvailabilitySlot[]; special: AvailabilitySlot[] } | undefined>(undefined);
 	const { mentorId } = useParams<{ mentorId: string }>();
 	const { mentor, loading } = useMentor(mentorId as string);
 	const user = useSelector((state: RootState) => state.userAuth.user);
+
+	useEffect(() => {
+		const fetchAvailability = async () => {
+			if (!mentorId) return;
+			try {
+				console.log(`mentor : `, mentor);
+				const response = await mentorAvailabilityToUserAPI(mentorId as string);
+				if (response.success) {
+					setAvailabilityData(response.availability);
+				}
+			} catch (error) {
+				if (error instanceof Error) toast.error(error.message);
+			}
+		};
+		if (mentor) fetchAvailability();
+	}, [mentor]);
 
 	if (loading) {
 		return <MentorDetailsSkeleton />;
@@ -95,7 +122,7 @@ export function MentorDetailsPage() {
 						/>
 					</TabsContent>
 					<TabsContent value="availability" className="mt-6">
-						<MentorAvailability mentor={mentor} selectedDay={selectedDay} setSelectedDay={setSelectedDay} />
+						<MentorAvailability selectedDay={selectedDay} setSelectedDay={setSelectedDay} availabilityData={availabilityData} />
 					</TabsContent>
 				</Tabs>
 				<MentorReviewModal

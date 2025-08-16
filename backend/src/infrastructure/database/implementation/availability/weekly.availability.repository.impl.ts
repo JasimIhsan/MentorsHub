@@ -140,4 +140,13 @@ export class WeeklyAvailabilityRepositoryImpl implements IWeeklyAvailabilityRepo
 			return null;
 		}
 	}
+
+	async findByMentorId(mentorId: string): Promise<WeeklyAvailabilityEntity[]> {
+		try {
+			const docs = await WeeklyAvailabilityModel.find({ mentorId, isActive: true });
+			return docs.map(WeeklyAvailabilityEntity.fromDbDocument);
+		} catch (error) {
+			return handleExceptionError(error, "Error finding availability slots by mentor ID");
+		}
+	}
 }
