@@ -72,7 +72,7 @@ export const fetchDateSlotsAPI = async (mentorId: string) => {
 	}
 };
 
-export const addDateSlotAPI = async (mentorId: string, slot: { date: string; startTime: string; endTime: string;}) => {
+export const addDateSlotAPI = async (mentorId: string, slot: { date: string; startTime: string; endTime: string }) => {
 	try {
 		const response = await axiosInstance.post(`/mentor/availability/special/create/${mentorId}`, slot);
 		return response.data;
@@ -93,6 +93,16 @@ export const deleteDateSlotAPI = async (mentorId: string, slotId: string) => {
 export const updateDateSlotAPI = async (mentorId: string, slotId: string, startTime: string, endTime: string) => {
 	try {
 		const response = await axiosInstance.put(`/mentor/availability/special/update/${mentorId}/${slotId}`, { startTime, endTime });
+		return response.data;
+	} catch (error: any) {
+		throw new Error(error.response.data.message);
+	}
+};
+
+export const mentorAvailabilityToUserAPI = async (mentorId: string) => {
+	console.log('mentorId: ', mentorId);
+	try {
+		const response = await axiosInstance.get(`/user/mentor-availability/${mentorId}`);
 		return response.data;
 	} catch (error: any) {
 		throw new Error(error.response.data.message);
