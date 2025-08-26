@@ -83,7 +83,7 @@ const TopRatedMentors: React.FC<TopRatedMentorsProps> = ({ mentors, isLoading })
 									</div>
 									<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 										<div className="flex flex-wrap gap-2 sm:gap-3">
-											{mentor.pricing === "paid" || mentor.pricing === "both-pricing" ? (
+											{mentor.pricing === "paid" ? (
 												<span className="text-xs sm:text-sm text-muted-foreground font-medium">₹{mentor.hourlyRate}</span>
 											) : (
 												<Badge variant="outline" className="text-xs sm:text-sm">

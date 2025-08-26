@@ -1,6 +1,5 @@
 import { useSocket } from "@/context/SocketContext";
-import { INotification } from "@/interfaces/notification.interface";
-import { addNotification, fetchNotificationsThunk, markNotificationAsReadThunk, markAllNotificationsAsReadThunk } from "@/store/slices/notificationSlice";
+import { fetchNotificationsThunk, markNotificationAsReadThunk, markAllNotificationsAsReadThunk } from "@/store/slices/notificationSlice";
 import { AppDispatch, RootState } from "@/store/store";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
