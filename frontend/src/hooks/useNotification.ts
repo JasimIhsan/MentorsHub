@@ -12,6 +12,7 @@ interface PaginationOptions {
 	isRead?: boolean;
 }
 
+
 export function useNotifications(userId: string, options: PaginationOptions = {}) {
 	const dispatch = useDispatch<AppDispatch>();
 	const { socket } = useSocket();

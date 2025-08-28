@@ -1,65 +1,35 @@
 services:
-   mentorshub: # Backend container
+   server:
       container_name: mentorshub_server
       build:
          context: .
          dockerfile: Dockerfile
+      restart: always
+      env_file:
+         - .env
       ports:
          - "5858:5858"
-      depends_on:
-         - mongodb
-         - redis
-      environment:
-         - MONGO_URI=mongodb://mongodb:27017/MentorsHub
-         - REDIS_HOST=redis
-         - REDIS_PORT=6379
-         - NODE_ENV=production
       volumes:
          - .:/app
          - /app/node_modules
       networks:
          - app-network
 
-   mongodb: # MongoDB container
-      container_name: mentorshub_mongodb
-      image: mongo:6.0
+   nginx:
+      image: nginx:alpine
+      container_name: mentorshub_nginx_proxy
       restart: always
       ports:
-         - "27000:27017"
+         - "80:80"
+         - "443:443"
       volumes:
-         - mongo-data:/data/db
+         - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+         - ./nginx/certs:/etc/ssl/certs:ro   # mount certs folder
+      depends_on:
+         - server
       networks:
          - app-network
-
-   redis: # Redis container
-      container_name: mentorshub_redis
-      image: redis:latest
-      restart: always
-      ports:
-         - "6379:6379"
-      volumes:
-         - redis-data:/data
-      networks:
-         - app-network
-
-   # nginx: # Nginx container
-   #    container_name: mentorshub_nginx
-   #    image: nginx:latest
-   #    ports:
-   #       - "80:80"
-   #       - "443:443"
-   #    volumes:
-   #       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-   #       - ./nginx/certs:/etc/nginx/certs
-   #    depends_on:
-   #       - mentorshub
-   #    networks:
-   #       - app-network
 
 networks:
    app-network:
       driver: bridge
-
-volumes:
-   mongo-data:
-   redis-data:

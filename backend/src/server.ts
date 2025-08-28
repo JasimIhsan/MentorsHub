@@ -22,7 +22,7 @@ import { createSocketLayer } from "./infrastructure/socket";
 
 		// Start listening
 		const PORT = process.env.PORT || 5858;
-		server.listen(PORT, () => logger.info(" Server is running     : ✅✅✅"));
+		server.listen(PORT, () => logger.info(" Server is running  : ✅✅✅"));
 	} catch (err) {
 		logger.error("❌ Failed to start server", err);
 		process.exit(1);

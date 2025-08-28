@@ -13,7 +13,7 @@ export function applyGlobalMiddlewares(app: Express) {
 	app.use(helmet());
 	app.use(
 		cors({
-			origin: [process.env.FRONTEND_ORIGIN!],
+			origin: [process.env.FRONTEND_ORIGIN!, "https://mentors-hub-in.vercel.app"],
 			methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 			credentials: true,
 		}),

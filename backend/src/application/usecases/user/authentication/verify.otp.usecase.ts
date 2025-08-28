@@ -13,6 +13,7 @@ export class VerifyOtpUsecase implements IVerifyOtpUsecase {
 
 	async execute(email: string, enteredOtp: string): Promise<boolean> {
 		const cachedOtp = await this.redisService.getCachedData(`otp:${email}`);
+		console.log('cachedOtp: ', cachedOtp);
 		if (!cachedOtp) throw new Error("OTP not found");
 
 		if (cachedOtp === enteredOtp) {
