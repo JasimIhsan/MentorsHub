@@ -16,14 +16,14 @@ export class SigninController {
 
 			res.cookie("access_token", accessToken, {
 				httpOnly: true,
-				sameSite: "strict",
+				sameSite: "none",
 				secure: true,
 				maxAge: access_token_expires, // 5 minutes
 			});
 
 			res.cookie("refresh_token", refreshToken, {
 				httpOnly: true,
-				sameSite: "strict",
+				sameSite: "none",
 				secure: true,
 				maxAge: refresh_token_expires, // 24 hours
 			});

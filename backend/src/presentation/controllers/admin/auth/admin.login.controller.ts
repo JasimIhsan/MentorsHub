@@ -14,14 +14,14 @@ export class AdminLoginController {
 
 			res.cookie("access_token", accessToken, {
 				httpOnly: true,
-				sameSite: "strict",
+				sameSite: "none",
 				secure: true,
 				maxAge: parseInt(process.env.JWT_ACCESS_TOKEN_EXPIRES as string), // 5 minutes
 			});
 
 			res.cookie("refresh_token", refreshToken, {
 				httpOnly: true,
-				sameSite: "strict",
+				sameSite: "none",
 				secure: true,
 				maxAge: parseInt(process.env.JWT_REFRESH_TOKEN_EXPIRES as string), // 24 hours
 			});

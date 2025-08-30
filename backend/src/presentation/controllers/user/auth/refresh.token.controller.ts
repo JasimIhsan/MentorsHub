@@ -15,7 +15,7 @@ export class RefreshTokenController {
 
 			res.cookie("access_token", newAccessToken, {
 				httpOnly: true,
-				sameSite: "strict",
+				sameSite: "none",
 				secure: true,
 				maxAge: parseInt(process.env.JWT_ACCESS_TOKEN_EXPIRES as string), // 5 minutes
 			});
