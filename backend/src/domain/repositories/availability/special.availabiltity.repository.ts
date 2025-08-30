@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { SpecialAvailabilityEntity } from "../../entities/availability/special.availability.entity";
 
 export interface ISpecialAvailabilityRepository {
@@ -11,17 +10,3 @@ export interface ISpecialAvailabilityRepository {
 	isExists(mentorId: string, date: Date, startTime: string, endTime: string): Promise<boolean>;
 	findAvailableSlot(mentorId: string, date: Date, durationInHours: number): Promise<string[] | null>;
 }
-=======
-import { SpecialAvailabilityEntity } from "../../entities/availability/special.availability.entity";
-
-export interface ISpecialAvailabilityRepository {
-	create(entity: SpecialAvailabilityEntity): Promise<SpecialAvailabilityEntity>;
-	delete(id: string): Promise<void>;
-	update(entity: SpecialAvailabilityEntity): Promise<void>;
-	find(): Promise<SpecialAvailabilityEntity[]>;
-	findById(id: string): Promise<SpecialAvailabilityEntity | null>;
-	findByMentorId(mentorId: string): Promise<SpecialAvailabilityEntity[]>;
-	isExists(mentorId: string, date: Date, startTime: string, endTime: string): Promise<boolean>;
-	findAvailableSlot(mentorId: string, date: Date, durationInHours: number): Promise<string[] | null>;
-}
->>>>>>> refractor/code-cleanup

@@ -4,7 +4,6 @@ import { UserEntity } from "../../../domain/entities/user.entity";
 import { FindUsersParams, IUserRepository, PaginatedUsers } from "../../../domain/repositories/user.repository";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 import { IUsersDocument, UserModel } from "../models/user/user.model";
-import mongoose from "mongoose";
 
 /**
  * Helper to convert raw Mongo document (lean object) ➜ UserEntityProps
@@ -57,7 +56,6 @@ export class UserRepositoryImpl implements IUserRepository {
 
 	async findUserById(id: string): Promise<UserEntity | null> {
 		try {
-			if (!mongoose.Types.ObjectId.isValid(id)) return null;
 			const doc = await UserModel.findById(id).lean();
 			return doc ? mapDocToEntity(doc) : null;
 		} catch (error) {

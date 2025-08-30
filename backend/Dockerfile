@@ -14,11 +14,10 @@ RUN npm install
 COPY . .
 
 # Build the TypeScript project
-# RUN npm run build
+RUN npm run build
 
 # Expose the application port
 EXPOSE 5858
 
 # Start the application
-# CMD ["pwd"]
-CMD ["npm", "run" , "dev"]
+CMD ["npm", "start"]

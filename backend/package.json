@@ -4,9 +4,8 @@
 	"main": "server.js",
 	"scripts": {
 		"dev": "nodemon src/server.ts --legacy-watch",
-		"start": "ts-node src/server.ts",
+		"start": "node dist/server.js",
 		"build": "tsc",
-		"serve": "node dist/server.js",
 		"lint": "eslint . --config eslint.config.mjs",
 		"lint:fix": "eslint . --config eslint.config.mjs --fix"
 	},
