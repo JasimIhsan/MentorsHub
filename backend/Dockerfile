@@ -1,23 +1,45 @@
-# Use official Node.js image as base
-FROM node:22
+# ---------------------------
+# Stage 1: Build
+# ---------------------------
+FROM node:22 AS build
 
-# Set working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json to install dependencies first (to leverage caching)
+# Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install all dependencies (including dev for build)
 RUN npm install
 
-# Copy the entire project
+# Copy source code
 COPY . .
 
-# Build the TypeScript project
-RUN npm run build
+# Build TypeScript
+RUN npm run build && ls -l dist
 
-# Expose the application port
+# ---------------------------
+# Stage 2: Production
+# ---------------------------
+FROM node:22-slim AS production
+
+WORKDIR /app
+
+# Copy only package.json & package-lock.json
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm install --omit=dev
+
+# Copy built files from build stage
+COPY --from=build /app/dist ./dist
+
+# Copy any other needed files (e.g., env.loader.js, config, etc.)
+# COPY --from=build /app/.env .   # optional
+# COPY --from=build /app/config ./config
+
+# Expose port
 EXPOSE 5858
 
-# Start the application
-CMD ["npm", "start"]
+# Run the app
+CMD ["node", "dist/server.js"]

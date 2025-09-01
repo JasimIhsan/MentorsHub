@@ -18,6 +18,13 @@ startSessionExpiryJob();
 startSessionReminderJob();
 startSlotCleanupJob();
 
+// ⚠️ Important for secure cookies (SameSite=None + Secure) in production
+// Express needs to trust the proxy (Vercel, Nginx, AWS LB, etc.)
+// Without this, `secure: true` cookies will not be set over HTTPS
+if (process.env.NODE_ENV === "production") {
+	app.set("trust proxy", 1);
+}
+
 // Passport setup
 app.use(passport.initialize());
 

@@ -6,6 +6,8 @@ services:
       restart: always
       env_file:
          - .env
+      environment:
+         - NODE_ENV=production
       ports:
          - "5858:5858"
       volumes:
