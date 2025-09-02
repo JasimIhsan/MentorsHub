@@ -1,6 +1,8 @@
 services:
    server:
       container_name: mentorshub_server
+      image: mentorshub-backend:latest
+      pull_policy: never
       build:
          context: .
          dockerfile: Dockerfile
@@ -12,6 +14,7 @@ services:
       ports:
          - "5858:5858"
       volumes:
+         - .:/app
          - /app/node_modules
       networks:
          - app-network
@@ -25,7 +28,7 @@ services:
          - "443:443"
       volumes:
          - ./nginx/nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro
-         - ./nginx/certs:/etc/ssl/certs:ro   # mount certs folder
+         - ./nginx/certs:/etc/ssl/certs:ro # mount certs folder
       depends_on:
          - server
       networks:
