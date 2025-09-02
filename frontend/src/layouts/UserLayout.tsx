@@ -20,7 +20,7 @@ export default function MainLayout() {
 
 			<header className="sticky top-0 z-50 w-full h-16 border-b backdrop-blur-3xl bg-transparent">
 				<div className=" flex h-16 justify-between items-center w-full">
-					<UserMainNavbar />
+					<UserMainNavbar isAuthenticated={isAuthenticated} />
 					{isAuthenticated ? (
 						<div>
 							<div className="hidden md:flex items-center gap-4">

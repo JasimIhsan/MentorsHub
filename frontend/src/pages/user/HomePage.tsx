@@ -14,6 +14,7 @@ import { MobileNav } from "@/components/user/navbar/MobileNavbar";
 import { UserInterface } from "@/interfaces/interfaces";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { toast } from "sonner";
 
 const mentors = [
 	{
@@ -63,12 +64,28 @@ const testimonials = [
 export default function Home() {
 	const { isAuthenticated, user } = useSelector((state: RootState) => state.userAuth);
 	const navigate = useNavigate();
+
+	const handleBecomeMentor = () => {
+		if (isAuthenticated) {
+			navigate("/become-mentor");
+		} else {
+			toast.error("Please login to become a mentor");
+		}
+	};
+
+	const handleFindMentors = () => {
+		if (isAuthenticated) {
+			navigate("/browse");
+		} else {
+			toast.error("Please login to find mentors");
+		}
+	};
 	return (
 		// Remove overflow-y-hidden to allow scrolling
 		<div className="flex min-h-screen flex-col">
 			<header className="sticky top-0 z-50 w-full h-16 border-b backdrop-blur-3xl bg-transparent">
 				<div className=" flex h-16 justify-between items-center w-full">
-					<UserMainNavbar />
+					<UserMainNavbar isAuthenticated={isAuthenticated} />
 					{isAuthenticated ? (
 						<div>
 							<div className="hidden md:flex items-center gap-4">
@@ -122,11 +139,11 @@ export default function Home() {
 							</h1>
 							<p className="text-xl text-muted-foreground">Connect with mentors, learn new skills, and grow your potential through personalized guidance.</p>
 							<div className="flex flex-col gap-4 sm:flex-row">
-								<Button size="lg" className="gap-2" onClick={() => navigate("/browse")}>
+								<Button size="lg" className="gap-2" onClick={handleFindMentors}>
 									Find a Mentor
 									<ArrowRight className="h-4 w-4" />
 								</Button>
-								<Button size="lg" variant="outline" className="gap-2" onClick={() => navigate("/become-mentor")}>
+								<Button size="lg" variant="outline" className="gap-2" onClick={handleBecomeMentor}>
 									Become a Mentor
 								</Button>
 							</div>
@@ -201,16 +218,16 @@ export default function Home() {
 											<span className="text-sm text-muted-foreground">{mentor.rate}</span>
 										</div>
 									</div>
-									<div className="bg-muted ">
+									{/* <div className="bg-muted ">
 										<Button variant="ghost" className="w-full py-7 rounded-t-none ">
 											View Profile
 										</Button>
-									</div>
+									</div> */}
 								</Card>
 							))}
 						</div>
 						<div className="mt-12 flex justify-center">
-							<Button size="lg" variant="outline" className="gap-2">
+							<Button size="lg" variant="outline" className="gap-2" onClick={handleFindMentors}>
 								Explore More Mentors
 								<ArrowRight className="h-4 w-4" />
 							</Button>

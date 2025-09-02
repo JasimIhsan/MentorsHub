@@ -2,14 +2,16 @@ services:
    server:
       container_name: mentorshub_server
       image: jasimihsan9656/mentorshub-backend:latest
+      platform: linux/amd64
       pull_policy: always
+      build:
+         context: .
+         dockerfile: Dockerfile.prod
       restart: always
       env_file:
          - .env
       environment:
          - NODE_ENV=production
-      ports:
-         - "5858:5858"
       volumes:
          - /app/node_modules
 
