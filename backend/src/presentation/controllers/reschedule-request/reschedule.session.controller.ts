@@ -21,7 +21,6 @@ export class RescheduleSessionController {
 
 			res.status(HttpStatusCode.OK).json({ success: true, request });
 		} catch (error) {
-			console.log(`❌ Error in RescheduleSessionController: ${error}`);
 			logger.error(`❌ Error in RescheduleSessionController: ${error}`);
 			next(error);
 		}

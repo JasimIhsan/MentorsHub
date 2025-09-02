@@ -11,7 +11,6 @@ export class DeleteWeeklySlotController {
 			await this._useCase.execute(slotId, mentorId);
 			res.status(HttpStatusCode.OK).json({ success: true });
 		} catch (error) {
-			console.log(`❌ Error in DeleteWeeklySlotController: ${error}`);
 			logger.error(`❌ Error in DeleteWeeklySlotController: ${error}`);
 			next(error);
 		}

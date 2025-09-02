@@ -12,7 +12,6 @@ export class AddSpecialSlotController {
 			const slot = await this._useCase.execute(mentorId, new Date(date), startTime, endTime);
 			res.status(HttpStatusCode.OK).json({ success: true, slot, message: "Slot added successfully" });
 		} catch (error) {
-			console.log(`❌ Error in AddSpecialSlotController: ${error}`);
 			logger.error(`❌ Error in AddSpecialSlotController: ${error}`);
 			next(error);
 		}

@@ -28,7 +28,6 @@ export class GetSessionsByUserController {
 				total,
 			});
 		} catch (error) {
-			console.log(`❌❌❌ Error in GetSessionByUserController: ${error}`);
 			logger.error(`❌ Error in GetSessionByUserController: ${error}`);
 			next(error);
 		}

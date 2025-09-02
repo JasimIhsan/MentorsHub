@@ -8,7 +8,6 @@ import {
 } from "../../../application/usecases/wallet/composer";
 import { CreateTransactionController } from "./create.transaction.controller";
 import { CreateWalletController } from "./create.wallet.controller";
-import { CreateWithdrawalRequestController } from "./create.withdrawal.request.controller";
 import { GetTransactionsController } from "./get.transactions.controller";
 import { GetWalletController } from "./get.wallet.controller";
 // import { UpdateWalletBalanceController } from "./update.wallet.balance.controller";

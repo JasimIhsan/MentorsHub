@@ -1,9 +1,7 @@
 import { UserEntity } from "../../../../domain/entities/user.entity";
-import { WithdrawalRequestEntity } from "../../../../domain/entities/wallet/wallet.withdrawel.request.entity";
 import { IUserRepository } from "../../../../domain/repositories/user.repository";
 import { IWithdrawalRequestRepository } from "../../../../domain/repositories/withdrawal.request.repository";
 import { IWithdrawalRequestDTO, mapToWithdrawalRequestDTO } from "../../../dtos/withdrawal.request.dto";
-import { WithdrawalRequestStatusEnum } from "../../../interfaces/enums/withdrawel.request.status.enum";
 import { IGetWithdrawalRequestsUseCase } from "../../../interfaces/usecases/withdrawal.request";
 
 export class GetWithdrawalRequestsUseCase implements IGetWithdrawalRequestsUseCase {

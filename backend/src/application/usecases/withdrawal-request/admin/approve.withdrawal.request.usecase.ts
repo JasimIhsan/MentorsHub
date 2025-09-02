@@ -16,7 +16,7 @@ export class ApproveWithdrawalRequestUseCase implements IApproveWithdrawalReques
 		private readonly _withdrawalRequestRepo: IWithdrawalRequestRepository, //
 		private readonly _walletRepo: IWalletRepository,
 		private readonly _notifyUserUsecase: INotifyUserUseCase,
-		private readonly _userRepo: IUserRepository
+		private readonly _userRepo: IUserRepository,
 	) {}
 
 	async execute(requestId: string, paymentId: string): Promise<IWithdrawalRequestDTO> {

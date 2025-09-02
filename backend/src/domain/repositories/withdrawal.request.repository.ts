@@ -1,4 +1,3 @@
-import { WithdrawalRequestStatusEnum } from "../../application/interfaces/enums/withdrawel.request.status.enum";
 import { WithdrawalRequestEntity } from "../entities/wallet/wallet.withdrawel.request.entity";
 
 export interface IWithdrawalRequestRepository {

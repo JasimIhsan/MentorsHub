@@ -14,7 +14,6 @@ export class CouterRescheduleRequestController {
 
 			res.status(HttpStatusCode.OK).json({ success: true, request, message: "Request sent successfully" });
 		} catch (error) {
-			console.log(`❌ Error in CouterRescheduleRequestController: ${error}`);
 			logger.error(`❌ Error in CouterRescheduleRequestController: ${error}`);
 			next(error);
 		}

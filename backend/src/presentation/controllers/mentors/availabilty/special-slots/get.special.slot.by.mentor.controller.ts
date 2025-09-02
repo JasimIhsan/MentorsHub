@@ -10,7 +10,6 @@ export class GetSpecialSlotByMentorController {
 			const slots = await this._useCase.execute(mentorId);
 			res.status(200).json({ success: true, slots });
 		} catch (error) {
-			console.log(`❌ Error in GetSpecialSlotByMentorController: ${error}`);
 			logger.error(`❌ Error in GetSpecialSlotByMentorController: ${error}`);
 			next(error);
 		}

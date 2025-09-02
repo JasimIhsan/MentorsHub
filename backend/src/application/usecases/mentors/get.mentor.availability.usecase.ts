@@ -9,15 +9,12 @@ export class GetAvailabilityUseCase implements IGetAvailabilityUseCase {
 	constructor(private readonly _sessionRepo: ISessionRepository, private readonly _weekAvailabilityRepo: IWeeklyAvailabilityRepository, private readonly _specialAvailabilityRepo: ISpecialAvailabilityRepository) {}
 
 	async execute(userId: string, date: Date, hours: number): Promise<string[]> {
-		console.log("📅 Requested date:", date);
 
 		// 1. Fetch special availability
 		const specialSlots = await this._specialAvailabilityRepo.findAvailableSlot(userId, date, hours);
-		console.log("🎯 Special slots:", specialSlots);
 
 		// 2. Fetch weekly availability
 		const weekSlots = await this._weekAvailabilityRepo.findAvailableSlots(userId, date, hours);
-		console.log("🗓️ Weekly slots:", weekSlots);
 
 		// 3. Merge and sort
 		const slotsInDate: string[] = [...(specialSlots || []), ...(weekSlots || [])];
@@ -40,11 +37,9 @@ export class GetAvailabilityUseCase implements IGetAvailabilityUseCase {
 				bookedSlotSet.add(slot);
 			}
 		});
-		console.log("⛔ Booked slots: ", Array.from(bookedSlotSet));
 
 		// 7. Remove booked slots from available ones
 		const availableSlots = slotsInDate.filter((slot) => !bookedSlotSet.has(slot));
-		console.log("✅ Final Available Slots:", availableSlots);
 
 		return availableSlots;
 	}

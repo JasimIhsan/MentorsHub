@@ -12,7 +12,6 @@ export class ApproveWithdrawalRequestController {
 			const request = await this._useCase.execute(requestId, paymentId);
 			res.status(HttpStatusCode.OK).json({ success: true, request });
 		} catch (error) {
-			console.log(`❌ Error in ApproveWithdrawalRequestController: ${error}`);
 			logger.error(`❌ Error in ApproveWithdrawalRequestController: ${error}`);
 			next(error);
 		}

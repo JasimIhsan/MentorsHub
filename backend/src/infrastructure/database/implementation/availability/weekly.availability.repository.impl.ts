@@ -86,7 +86,6 @@ export class WeeklyAvailabilityRepositoryImpl implements IWeeklyAvailabilityRepo
 	}
 
 	async findAvailableSlots(mentorId: string, date: Date, durationInHours: number): Promise<string[] | null> {
-		console.log("📅 date in impl: ", date);
 		try {
 			const targetDay = new Date(date).getDay(); // 0 = Sunday, 6 = Saturday
 

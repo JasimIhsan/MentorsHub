@@ -9,7 +9,6 @@ export class UpdateSessionStatusController {
 		try {
 			const { requestId } = req.params;
 			const { status, reason } = req.body;
-			console.log("reason: ", reason);
 			await this.updateSessionStatusUsecase.execute(requestId, status, reason);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Request updated successfully" });
 		} catch (error) {

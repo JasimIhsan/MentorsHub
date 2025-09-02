@@ -199,7 +199,6 @@ export class SessionRepositoryImpl implements ISessionRepository {
 	}
 
 	async updateStatus(sessionId: string, status: SessionStatusEnum, reason?: string): Promise<SessionEntity> {
-		console.log("reason: ", reason);
 		try {
 			const updated = await SessionModel.findByIdAndUpdate(sessionId, { status, rejectReason: reason }, { new: true }).populate("mentorId", "firstName lastName avatar").populate("participants.userId", "firstName lastName avatar");
 
@@ -211,7 +210,6 @@ export class SessionRepositoryImpl implements ISessionRepository {
 	}
 
 	async markPayment(sessionId: string, userId: string, paymentStatus: SessionPaymentStatusEnum, paymentId: string, newStatus: SessionStatusEnum): Promise<void> {
-		console.log("paymentId: ", paymentId);
 		try {
 			await SessionModel.findOneAndUpdate(
 				{ _id: sessionId, "participants.userId": userId },

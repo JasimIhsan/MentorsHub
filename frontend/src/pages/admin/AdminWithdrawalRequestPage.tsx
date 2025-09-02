@@ -28,7 +28,7 @@ export function AdminWithdrawalRequestPage() {
 	const [totalPages, setTotalPages] = useState(1);
 
 	useEffect(() => {
-		let finalStatus: WithdrawalStatusEnum | "ALL" = activeTab === "pending" ? WithdrawalStatusEnum.PENDING : status;
+		const finalStatus: WithdrawalStatusEnum | "ALL" = activeTab === "pending" ? WithdrawalStatusEnum.PENDING : status;
 		const fetchRequests = async () => {
 			const response = await fetchWithdrawalsAdminAPI(currentPage, ITEMS_PER_PAGE, finalStatus);
 			if (response.success) {

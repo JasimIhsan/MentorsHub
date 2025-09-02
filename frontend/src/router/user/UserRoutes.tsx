@@ -7,7 +7,7 @@ import PageNotFound from "@/pages/user/PageNotFoundPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { AuthGuard } from "./AuthGuard";
 import { DashboardPage } from "@/pages/user/DashboardPage";
-import UserProfilePage from "@/pages/user/UserProfilePage";
+import { UserProfilePage } from "@/pages/user/UserProfilePage";
 import BrowseMentorsPage from "@/pages/user/BrowseMentorsPage";
 import { BecomeMentorPage } from "@/pages/user/BecomeMentorPage";
 import { MentorDetailsPage } from "@/pages/user/MentorDetailsPage";

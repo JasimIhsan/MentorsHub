@@ -1,7 +1,7 @@
 export const calculateEndTime = (startTime: string, hours: number): string => {
 	const [startHours, minutes] = startTime.split(":").map(Number);
 	let newHours = startHours + hours;
-	let newMinutes = minutes;
+	const newMinutes = minutes;
 
 	// Handle hour overflow
 	if (newHours >= 24) {

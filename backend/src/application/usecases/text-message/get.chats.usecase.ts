@@ -1,4 +1,3 @@
-// ✅ 2. GetUserChatsUseCase (Populates DTOs)
 import { IChatRepository } from "../../../domain/repositories/chat.repository";
 import { IUserRepository } from "../../../domain/repositories/user.repository";
 import { IMessageRepository } from "../../../domain/repositories/message.repository";

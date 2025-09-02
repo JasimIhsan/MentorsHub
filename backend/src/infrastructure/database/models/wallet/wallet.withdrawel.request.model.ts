@@ -24,7 +24,7 @@ const WithdrawalRequestSchema = new Schema<IWithdrawalRequestDocument>(
 		transactionId: { type: Schema.Types.ObjectId, ref: "WalletTransaction" },
 		processedAt: { type: Date },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 export const WithdrawalRequestModel = mongoose.model<IWithdrawalRequestDocument>("Withdrawal-Request", WithdrawalRequestSchema);

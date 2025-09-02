@@ -1,4 +1,3 @@
-import { IWalletRepository } from "../../../../domain/repositories/wallet.repository";
 import { IWithdrawalRequestRepository } from "../../../../domain/repositories/withdrawal.request.repository";
 import { WithdrawalRequestStatusEnum } from "../../../interfaces/enums/withdrawel.request.status.enum";
 import { IPaymentGateway } from "../../../interfaces/services/payment.service";

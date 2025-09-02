@@ -20,8 +20,8 @@ type PeriodType = "all" | "month" | "sixMonths" | "year";
 // Utility function to generate date range based on PeriodType
 const getDateRange = (filter: PeriodType, currentDate: Date = new Date("2025-07-14")) => {
 	const endDate = new Date(currentDate);
-	let startDate = new Date(currentDate);
-	let dateFormat = { month: "short", day: "2-digit", year: "numeric" } as const;
+	const startDate = new Date(currentDate);
+	const dateFormat = { month: "short", day: "2-digit", year: "numeric" } as const;
 
 	switch (filter) {
 		case "all":

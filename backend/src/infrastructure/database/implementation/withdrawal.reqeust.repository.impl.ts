@@ -61,7 +61,6 @@ export class WithdrawalRequestRepositoryImpl implements IWithdrawalRequestReposi
 	async update(entity: WithdrawalRequestEntity): Promise<WithdrawalRequestEntity | null> {
 		try {
 			const requestObj = entity.toObject();
-			console.log("requestObj: ", requestObj);
 			const doc = await WithdrawalRequestModel.findOneAndUpdate({ _id: entity.id }, requestObj, { new: true });
 			return doc ? WithdrawalRequestEntity.fromDBDocument(doc) : null;
 		} catch (error) {

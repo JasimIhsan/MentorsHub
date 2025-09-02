@@ -13,7 +13,6 @@ import { INotifyUserUseCase } from "../../interfaces/usecases/notification/notif
 import { ICancelSessionRefundUseCase } from "../../interfaces/usecases/refund";
 
 const PLATFORM_FIXED_FEE = 40;
-const PLATFORM_COMMISSION_PERCENTAGE = 0.15;
 
 export class UserCancelSessionRefundUseCase implements ICancelSessionRefundUseCase {
 	constructor(private readonly sessionRepository: ISessionRepository, private readonly walletRepo: IWalletRepository, private readonly notifyUserUseCase: INotifyUserUseCase, private readonly refundRepo: IRefundRepository) {}

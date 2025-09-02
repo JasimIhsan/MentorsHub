@@ -30,7 +30,6 @@ export class UpdateMentorProfileUseCase implements IUpdateMentorProfileUseCase {
 		}
 
 		const existingProfile = await this.mentorProfileRepo.findByUserId(userId);
-		console.log("existingProfile: ", existingProfile);
 		if (!existingProfile) {
 			throw new Error("Mentor profile not found.");
 		}
@@ -48,7 +47,7 @@ export class UpdateMentorProfileUseCase implements IUpdateMentorProfileUseCase {
 				),
 			);
 			// Merge existing documents with new ones
-			const existingDocuments = existingProfile.documents; 
+			const existingDocuments = existingProfile.documents;
 			mentorData.documents = [...existingDocuments, ...uploadedUrls];
 		}
 
@@ -56,9 +55,6 @@ export class UpdateMentorProfileUseCase implements IUpdateMentorProfileUseCase {
 			const avatarUrl = await this.uploadAvatarUseCase.uploadProfilePicture(newAvatar);
 			userData.avatar = avatarUrl;
 		}
-
-		console.log("mentorData : ", mentorData);
-		console.log("userData : ", userData);
 
 		userEntity.updateUserDetails(userData);
 		await this.userRepo.updateUser(userEntity.id!, userEntity);
@@ -68,7 +64,6 @@ export class UpdateMentorProfileUseCase implements IUpdateMentorProfileUseCase {
 
 		// Save changes
 		const mentorProfileEntity = await this.mentorProfileRepo.updateMentorProfile(userId, existingProfile);
-		console.log("mentorProfileEntity: ", mentorProfileEntity);
 
 		await this.notifyUserUseCase.execute({
 			title: "👤 Profile Updated Successfully",

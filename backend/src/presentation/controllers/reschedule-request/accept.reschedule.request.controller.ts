@@ -13,7 +13,6 @@ export class AcceptRescheduleRequestController {
 
 			res.status(HttpStatusCode.OK).json({ success: true, session, message: "Request accepted successfully" });
 		} catch (error) {
-			console.log(`❌ Error in AcceptRescheduleRequestController: ${error}`);
 			logger.error(`❌ Error in AcceptRescheduleRequestController: ${error}`);
 			next(error);
 		}

@@ -15,7 +15,7 @@ import { updateProfileSchema, UpdateProfileFormData } from "@/schema/updateProfi
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 
-export default function UserProfilePage() {
+export function UserProfilePage() {
 	const [isEditing, setIsEditing] = useState(false);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 	const user = useSelector((state: RootState) => state.userAuth.user as UserInterface);
@@ -179,7 +179,7 @@ export default function UserProfilePage() {
 	}
 
 	return (
-		<div className="container py-8 px-10 md:px-20 xl:px-25">
+		<div className="py-8 px-10 md:px-20 xl:px-45">
 			<div className="flex flex-col gap-8">
 				<div className="flex flex-col gap-8">
 					<ProfileHeader

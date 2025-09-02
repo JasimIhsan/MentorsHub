@@ -9,11 +9,9 @@ export class ToggleAvailabilityByWeekDayController {
 		try {
 			const { mentorId } = req.params;
 			const { dayOfWeek, status } = req.body;
-			console.log("status: ", status);
 			await this._useCase.execute(mentorId, parseInt(dayOfWeek), status);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Availability updated successfully" });
 		} catch (error) {
-			console.log(`❌ Error in ToggleAvailabilityByWeekDayController: ${error}`);
 			logger.error(`❌ Error in ToggleAvailabilityByWeekDayController: ${error}`);
 			next(error);
 		}

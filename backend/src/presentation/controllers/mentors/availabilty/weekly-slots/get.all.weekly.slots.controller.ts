@@ -8,11 +8,9 @@ export class GetAllWeeklyAvailabilityController {
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const mentorId = req.params.mentorId;
-			console.log("mentorId: ", mentorId);
 			const slots = await this._useCase.execute(mentorId);
 			res.status(HttpStatusCode.OK).json({ success: true, slots });
 		} catch (error) {
-			console.log(`❌ Error in GetAllWeeklyAvailabilityController: ${error}`);
 			logger.error(`❌ Error in GetAllWeeklyAvailabilityController: ${error}`);
 			next(error);
 		}

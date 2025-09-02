@@ -30,7 +30,7 @@ export function PaginationControls({ currentPage, totalPages, onPageChange, maxP
 
 		// Calculate start and end pages for display
 		let startPage = Math.max(1, validatedCurrentPage - Math.floor(maxPagesToShow / 2));
-		let endPage = Math.min(validatedTotalPages, startPage + maxPagesToShow - 1);
+		const endPage = Math.min(validatedTotalPages, startPage + maxPagesToShow - 1);
 
 		// Adjust startPage if endPage is at the limit
 		if (endPage - startPage < maxPagesToShow - 1) {

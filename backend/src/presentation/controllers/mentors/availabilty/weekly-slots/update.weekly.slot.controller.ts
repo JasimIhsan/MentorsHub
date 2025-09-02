@@ -12,7 +12,6 @@ export class UpdateWeeklySlotController {
 			await this._useCase.execute(slotId, mentorId, startTime, endTime);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Slot updated successfully" });
 		} catch (error) {
-			console.log(`❌ Error in UpdateWeeklySlotController: ${error}`);
 			logger.error(`❌ Error in UpdateWeeklySlotController: ${error}`);
 			next(error);
 		}

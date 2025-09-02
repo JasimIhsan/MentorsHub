@@ -198,7 +198,7 @@ export const registerVideoCallHandlers = (io: Server, socket: Socket) => {
 	});
 
 	socket.on("leave-session", () => {
-		const { sessionId, userId, role } = socket.data;
+		const { sessionId, userId } = socket.data;
 		if (!sessionId || !userId) return;
 
 		const participants = videoRooms.get(sessionId);

@@ -33,7 +33,7 @@ export class RejectWithdrawalRequestUseCase implements IRejectWithdrawalRequestU
 			type: NotificationTypeEnum.ERROR,
 		});
 
-		const user = await this._userRepo.findUserById(withdrawalRequest.userId)
+		const user = await this._userRepo.findUserById(withdrawalRequest.userId);
 		return user ? mapToWithdrawalRequestDTO(withdrawalRequest, user) : mapToWithdrawalRequestDTO(withdrawalRequest);
 	}
 }

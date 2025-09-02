@@ -14,7 +14,6 @@ export class UpdateSpecialSlotController {
 
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Slot updated successfully" });
 		} catch (error) {
-			console.log(`❌ Error in UpdateSpecialSlotController: ${error}`);
 			logger.error(`❌ Error in UpdateSpecialSlotController: ${error}`);
 			next(error);
 		}

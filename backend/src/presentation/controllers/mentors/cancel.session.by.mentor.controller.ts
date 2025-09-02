@@ -9,9 +9,6 @@ export class CancelSessionByMentorController {
 		try {
 			const { sessionId, userId } = req.params;
 
-			console.log("userId: ", userId);
-			console.log("sessionId: ", sessionId);
-
 			const session = await this._useCase.execute(sessionId, userId);
 			res.status(HttpStatusCode.OK).json({ success: true, session, message: "Session cancelled successfully" });
 		} catch (error) {

@@ -10,11 +10,10 @@ export class RequestWithdrawalUseCase implements IRequestWithdrawalUseCase {
 	constructor(
 		private readonly _withdrawalRequestRepo: IWithdrawalRequestRepository, //
 		private readonly _walletRepo: IWalletRepository,
-		private readonly _userRepo: IUserRepository
+		private readonly _userRepo: IUserRepository,
 	) {}
 
 	async execute(userId: string, amount: number): Promise<IWithdrawalRequestDTO> {
-		console.log("userId: ", userId);
 		const existigRequest = await this._withdrawalRequestRepo.findPendingByUserId(userId);
 
 		if (existigRequest) throw new Error("User already has a pending withdrawal request.");

@@ -11,7 +11,6 @@ export class DeleteSpecialSlotController {
 			await this._useCase.execute(slotId, mentorId);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Slot deleted successfully" });
 		} catch (error) {
-			console.log(`❌ Error in DeleteSpecialSlotController: ${error}`);
 			logger.error(`❌ Error in DeleteSpecialSlotController: ${error}`);
 			next(error);
 		}

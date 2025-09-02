@@ -7,7 +7,6 @@ export class AcceptRescheduleRequestUseCase implements IAcceptRescheduleRequestU
 	constructor(private readonly rescheduleRequestRepo: IRescheduleRequestRepository, private readonly sessionRepo: ISessionRepository) {}
 
 	async execute(userId: string, sessionId: string, isCounter: boolean): Promise<ISessionUserDTO | ISessionMentorDTO> {
-		console.log("isCounter: ", isCounter);
 		// 1. Find the reschedule request
 		const rescheduleRequest = await this.rescheduleRequestRepo.findBySessionId(sessionId);
 		if (!rescheduleRequest) throw new Error("Reschedule request not found.");

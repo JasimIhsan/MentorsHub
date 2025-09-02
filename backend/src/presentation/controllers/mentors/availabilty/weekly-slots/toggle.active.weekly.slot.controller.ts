@@ -11,7 +11,6 @@ export class ToggleActiveWeeklyAvailabilityController {
 			await this._useCase.execute(slotId, mentorId);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Slot updated successfully" });
 		} catch (error) {
-			console.log(`❌ Error in ToggleActiveWeeklyAvailabilityController: ${error}`);
 			logger.error(`❌ Error in ToggleActiveWeeklyAvailabilityController: ${error}`);
 			next(error);
 		}

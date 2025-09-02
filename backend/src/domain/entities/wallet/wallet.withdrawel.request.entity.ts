@@ -1,6 +1,5 @@
 import { WithdrawalRequestStatusEnum } from "../../../application/interfaces/enums/withdrawel.request.status.enum";
 import { IWithdrawalRequestDocument } from "../../../infrastructure/database/models/wallet/wallet.withdrawel.request.model";
-import { PersonEntity } from "../session.entity";
 
 export type WithdrawalRequestEntityProps = {
 	id?: string;

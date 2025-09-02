@@ -18,7 +18,7 @@ const WalletSchema = new Schema<IWalletDocument>(
 		balance: { type: Number, required: true, default: 0 },
 		isRequestedWithdrawal: { type: Boolean, default: false },
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 );
 
 // Optional: one wallet per user-role combination

@@ -12,7 +12,6 @@ export class RequestWithdrawalController {
 			const request = await this._useCase.execute(userId, amount);
 			res.status(HttpStatusCode.OK).json({ success: true, request });
 		} catch (error) {
-			console.log(`❌ Error in RequestWithdrawalController: ${error}`);
 			logger.error(`❌ Error in RequestWithdrawalController: ${error}`);
 			next(error);
 		}

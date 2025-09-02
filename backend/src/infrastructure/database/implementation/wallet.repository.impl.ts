@@ -1,9 +1,7 @@
 import { WalletModel } from "../models/wallet/wallet.model";
 import { WalletTransactionModel } from "../models/wallet/wallet.transaction.model";
-import { WithdrawalRequestModel } from "../models/wallet/wallet.withdrawel.request.model";
 import { IWalletRepository } from "../../../domain/repositories/wallet.repository";
 import { WalletEntity } from "../../../domain/entities/wallet/wallet.entity";
-import { WithdrawalRequestEntity } from "../../../domain/entities/wallet/wallet.withdrawel.request.entity";
 import { AdminModel } from "../models/admin/admin.model";
 import { handleExceptionError } from "../../utils/handle.exception.error";
 import { WalletTransactionEntity } from "../../../domain/entities/wallet/wallet.transaction.entity";
@@ -157,7 +155,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 
 	async revenueChartData(
 		adminId: string,
-		months: number // 0 = all, 1 = last‑30‑days, 6 = 6 months, 12 = 1 year
+		months: number, // 0 = all, 1 = last‑30‑days, 6 = 6 months, 12 = 1 year
 	): Promise<{ name: string; total: number }[]> {
 		try {
 			/* ---------- 1. Match filter ------------------------------------ */
