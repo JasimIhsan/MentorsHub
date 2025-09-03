@@ -8,8 +8,8 @@ services:
          context: .
          dockerfile: Dockerfile.prod
       restart: always
-      env_file:
-         - .env
+      # env_file:
+      #    - .env
       environment:
          - NODE_ENV=production
       volumes:
