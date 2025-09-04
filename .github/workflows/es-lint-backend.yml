@@ -20,7 +20,7 @@ jobs:
               node-version: 18
 
          - name: Install dependencies in backend
-           run: npm ci
+           run: npm install
            working-directory: ./backend
 
          - name: Run ESLint
