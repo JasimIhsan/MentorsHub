@@ -21,7 +21,7 @@ export class EmailServiceImpl implements IEmailService {
 	}
 
 	async sendPasswordResetEmail(email: string, token: string, username: string): Promise<void> {
-		const url = `http://localhost:5173/reset-password/${token}`;
+		const url = `${process.env.FRONTEND_ORIGIN_PROD}/reset-password/${token}`;
 		let template = this.loadTemplate("reset.email.template");
 		template = template.replace("{{reset_link}}", url);
 		template = template.replace("{{user_name}}", username);
