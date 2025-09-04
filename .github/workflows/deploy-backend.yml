@@ -3,6 +3,9 @@ name: Deploy Backend with Docker
 on:
    push:
       branches: ["main"]
+      paths:
+         - "backend/**" # Only run if backend folder has changes
+         - ".github/workflows/deploy-backend.yml" # Run if this workflow file changes
 
 jobs:
    build-and-deploy:
