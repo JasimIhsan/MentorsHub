@@ -8,6 +8,9 @@ import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
 import { UserStatusEnums } from "../../../interfaces/enums/user.status.enums";
 import { mapToUserDTO } from "../../../dtos/user.dtos";
+import { INotifyUserUseCase } from "../../../interfaces/usecases/notification/notification.usecase";
+import { ICreateUserProgressUseCase } from "../../../interfaces/usecases/gamification";
+import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 
 interface GoogleUserData {
 	email: string;
@@ -18,7 +21,13 @@ interface GoogleUserData {
 }
 
 export class GoogleAuthUsecase implements IGoogleAuthUsecase {
-	constructor(private readonly userRepo: IUserRepository, private readonly tokenService: ITokenService, private readonly hashService: IHashService) {}
+	constructor(
+		private readonly userRepo: IUserRepository, //
+		private readonly tokenService: ITokenService,
+		private readonly hashService: IHashService,
+		private readonly notifyUserUseCase: INotifyUserUseCase,
+		private readonly createUserProgressUsecase: ICreateUserProgressUseCase
+	) {}
 
 	private async getGoogleUserData(idToken: string): Promise<GoogleUserData> {
 		if (!idToken) throw new Error("Google token is required");
@@ -54,6 +63,23 @@ export class GoogleAuthUsecase implements IGoogleAuthUsecase {
 				});
 
 				user = await this.userRepo.createUser(newUser);
+
+				await this.createUserProgressUsecase.execute(user.id!);
+				await this.notifyUserUseCase.execute({
+					title: "👋 Welcome to MentorsHub!",
+					message: `Hi ${user.firstName} ${user.lastName}, glad to see you here. Start exploring sessions and leveling up!`,
+					isRead: false,
+					recipientId: user.id as string,
+					type: NotificationTypeEnum.WELCOME,
+				});
+			} else {
+				await this.notifyUserUseCase.execute({
+					title: "👋 Welcome Back!",
+					message: `Hi ${user.firstName} ${user.lastName}, glad to see you again!`,
+					isRead: false,
+					recipientId: user.id!,
+					type: NotificationTypeEnum.WELCOME,
+				});
 			}
 
 			const accessToken = this.tokenService.generateAccessToken(user.id!);

@@ -8,6 +8,8 @@ import { RoleEnum } from "../../../interfaces/enums/role.enum";
 import { MentorRequestStatusEnum } from "../../../interfaces/enums/mentor.request.status.enum";
 import { UserStatusEnums } from "../../../interfaces/enums/user.status.enums";
 import { mapToUserDTO } from "../../../dtos/user.dtos";
+import { INotifyUserUseCase } from "../../../interfaces/usecases/notification/notification.usecase";
+import { NotificationTypeEnum } from "../../../interfaces/enums/notification.type.enum";
 
 export class SignupUseCase implements ISignupUseCase {
 	constructor(
@@ -16,6 +18,7 @@ export class SignupUseCase implements ISignupUseCase {
 		private readonly verifyOtp: IVerifyOtpUsecase,
 		private readonly createUserProgress: ICreateUserProgressUseCase,
 		private readonly hashService: IHashService,
+		private readonly notifyUserUseCase: INotifyUserUseCase
 	) {}
 
 	async execute(otp: string, firstName: string, lastName: string, email: string, password: string) {
@@ -57,6 +60,14 @@ export class SignupUseCase implements ISignupUseCase {
 		// 7️⃣ Issue tokens
 		const accessToken = this.tokenService.generateAccessToken(userId);
 		const refreshToken = this.tokenService.generateRefreshToken(userId);
+
+		await this.notifyUserUseCase.execute({
+			title: "👋 Welcome to MentorsHub!",
+			message: `Hi ${firstName} ${lastName}, glad to see you here. Start exploring sessions and leveling up!`,
+			isRead: false,
+			recipientId: userId,
+			type: NotificationTypeEnum.WELCOME,
+		});
 
 		return { user: mapToUserDTO(savedUser), accessToken, refreshToken };
 	}
