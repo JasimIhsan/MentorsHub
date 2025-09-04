@@ -6,9 +6,10 @@ import { Menu } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { logoutSession } from "@/api/user/authentication.api.service";
 import { logout } from "@/store/slices/userSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import { useSocket } from "@/context/SocketContext";
+import { RootState } from "@/store/store";
 // import { socketService } from "@/services/socket.service";
 
 export function MobileNav() {
@@ -17,6 +18,7 @@ export function MobileNav() {
 	const pathname = location.pathname;
 	const dispatch = useDispatch();
 	const { disconnectSocket, isConnected } = useSocket();
+	const user = useSelector((state: RootState) => state.userAuth.user);
 
 	const handleLogout = async () => {
 		try {
@@ -76,10 +78,10 @@ export function MobileNav() {
 					<div className="px-7 mt-7">
 						<Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
 							<Avatar className="h-8 w-8">
-								<AvatarImage src="/placeholder.svg" alt="User" />
-								<AvatarFallback>JD</AvatarFallback>
+								<AvatarImage src={user?.avatar as string} alt="User" />
+								<AvatarFallback>{user?.firstName?.slice(0, 1)}</AvatarFallback>
 							</Avatar>
-							<span className="font-bold">John Doe</span>
+							<span className="font-bold">{user?.firstName} {user?.lastName}</span>
 						</Link>
 					</div>
 					<nav className="mt-5 flex flex-col gap-4">

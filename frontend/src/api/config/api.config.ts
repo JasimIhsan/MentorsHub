@@ -45,7 +45,7 @@ const refreshAccessToken = async (): Promise<string> => {
 	} catch (error) {
 		console.error("❌ Failed to refresh token", error);
 		localStorage.removeItem("persist:root");
-		// window.location.href = "/authenticate";
+		window.location.href = "/authenticate";
 		throw error;
 	}
 };
@@ -82,18 +82,18 @@ axiosInstance.interceptors.response.use(
 		}
 
 		// ✅ Handle 403 – blocked user or session expired
-		// if (error.response?.status === 403) {
-		// 	localStorage.removeItem("persist:root");
+		if (error.response?.status === 403) {
+			localStorage.removeItem("persist:root");
 
-		// 	if ((error.response.data as any)?.blocked) {
-		// 		setTimeout(() => {
-		// 			window.location.href = "/authenticate";
-		// 		}, 3000);
-		// 	} else {
-		// 		window.location.href = "/authenticate";
-		// 	}
-		// 	return Promise.reject(error);
-		// }
+			if ((error.response.data as any)?.blocked) {
+				setTimeout(() => {
+					window.location.href = "/authenticate";
+				}, 3000);
+			} else {
+				window.location.href = "/authenticate";
+			}
+			return Promise.reject(error);
+		}
 
 		return Promise.reject(error);
 	}
