@@ -7,7 +7,7 @@ export const startSessionExpiryJob = () => {
 	console.log("🟢 Cron Job: Session Expiry Job Initialized");
 
 	// Runs every 10 seconds:  "sec  min  hr  day  mon  dow"
-	cron.schedule("*/15 * * * *", async () => {
+	cron.schedule("* * * * *", async () => {
 		console.log("⏰ Cron Job Running: Checking for expirable sessions (every 15 minutes)");
 
 		const repo = new SessionRepositoryImpl();
