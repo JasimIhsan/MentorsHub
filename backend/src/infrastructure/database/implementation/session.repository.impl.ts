@@ -65,7 +65,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			limit?: number;
 			search?: string;
 			status?: string;
-		},
+		}
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const { page = 1, limit = 10, search = "", status = "" } = options || {};
@@ -108,7 +108,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			filter?: "all" | "free" | "paid" | "today" | "week" | "month";
 			page: number;
 			limit: number;
-		},
+		}
 	): Promise<{ sessions: SessionEntity[]; total: number }> {
 		try {
 			const query: any = { mentorId };
@@ -219,7 +219,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
 						"participants.$.paymentId": paymentId,
 						status: newStatus,
 					},
-				},
+				}
 			);
 		} catch (error) {
 			return handleExceptionError(error, "Error updating session payment");
@@ -252,6 +252,10 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			// const sessionEnd = new Date(sessionStart.getTime() + session.hours * 60 * 60 * 1000);
 			return sessionEnd < now;
 		});
+		
+		console.log("now: ", now);
+		console.log("sessions: ", sessions);
+		console.log("expirable: ", expirable);
 
 		return expirable.map((doc) => SessionEntity.fromDB(doc));
 	}

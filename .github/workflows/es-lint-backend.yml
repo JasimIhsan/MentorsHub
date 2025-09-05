@@ -3,8 +3,14 @@ name: ESLint Check Backend
 on:
    push:
       branches: [main]
+      paths:
+         - "backend/**" # Only run if backend folder has changes
+         - ".github/workflows/es-lint-backend.yml" # Run if this workflow file changes
    pull_request:
       branches: [main]
+      paths:
+         - "backend/**" # Only run if backend folder has changes
+         - ".github/workflows/es-lint-backend.yml" # Run if this workflow file changes
 
 jobs:
    lint:

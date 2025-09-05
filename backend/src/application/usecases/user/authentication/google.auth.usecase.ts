@@ -26,7 +26,7 @@ export class GoogleAuthUsecase implements IGoogleAuthUsecase {
 		private readonly tokenService: ITokenService,
 		private readonly hashService: IHashService,
 		private readonly notifyUserUseCase: INotifyUserUseCase,
-		private readonly createUserProgressUsecase: ICreateUserProgressUseCase
+		private readonly createUserProgressUsecase: ICreateUserProgressUseCase,
 	) {}
 
 	private async getGoogleUserData(idToken: string): Promise<GoogleUserData> {
