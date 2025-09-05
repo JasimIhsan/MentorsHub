@@ -2,7 +2,8 @@ import axios, { AxiosError, AxiosInstance } from "axios";
 
 // ============ CONFIG ============
 
-const baseURL = import.meta.env.VITE_SERVER_URL as string;
+const server_url = import.meta.env.VITE_SERVER_URL as string
+const baseURL = `${server_url}/api`;
 
 // ============ TOKEN STORAGE (IN-MEMORY) ============
 let currentAccessToken: string | null = null;
