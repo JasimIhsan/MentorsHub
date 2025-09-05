@@ -237,7 +237,6 @@ export class SessionRepositoryImpl implements ISessionRepository {
 
 	async getExpirableSessions(): Promise<SessionEntity[]> {
 		const now = new Date();
-		const nowIST = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
 
 		const sessions = await SessionModel.find({
 			status: { $in: [SessionStatusEnum.APPROVED, SessionStatusEnum.PENDING, SessionStatusEnum.UPCOMING] },
@@ -246,19 +245,19 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		const expirable = sessions.filter((session) => {
 			const [hours, minutes] = session.endTime.split(":").map(Number);
 
-			// Convert date + time to IST
-			const sessionEndIST = new Date(session.date);
-			sessionEndIST.setHours(hours);
-			sessionEndIST.setMinutes(minutes);
-			sessionEndIST.setSeconds(0);
+			// STEP 1: Convert session.date (UTC midnight) → IST date
+			const sessionDateIST = new Date(session.date.getTime() + 5.5 * 60 * 60 * 1000); // add 5:30 hrs for IST
 
-			// Convert to IST timezone
-			const sessionEnd = new Date(sessionEndIST.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+			// STEP 2: Set end time in IST
+			sessionDateIST.setHours(hours);
+			sessionDateIST.setMinutes(minutes);
+			sessionDateIST.setSeconds(0);
 
-			return sessionEnd < nowIST;
+			// STEP 3: Compare with current IST time
+			const nowIST = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+			return sessionDateIST < nowIST;
 		});
 
-		console.log("now IST:", nowIST);
 		console.log("sessions:", sessions);
 		console.log("expirable:", expirable);
 
