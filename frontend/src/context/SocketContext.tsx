@@ -30,7 +30,7 @@ export const SocketProvider = ({ children, userId }: { children: React.ReactNode
 	useEffect(() => {
 		if (!userId || socketRef.current) return;
 
-		const socket = io("http://localhost:5858", {
+		const socket = io(import.meta.env.VITE_SERVER_URL, {
 			auth: { userId },
 		});
 
