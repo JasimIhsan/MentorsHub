@@ -13,9 +13,10 @@ interface BrowseMentorsFilterContentProps {
 	dropdownOpen: boolean;
 	setDropdownOpen: (value: boolean) => void;
 	applyFilters: () => void;
+	removeFilters: () => void;
 }
 
-export const BrowseMentorsFilterContent = ({ tempPriceRange, setTempPriceRange, tempSelectedSkills, setTempSelectedSkills, dropdownOpen, setDropdownOpen, applyFilters }: BrowseMentorsFilterContentProps) => {
+export const BrowseMentorsFilterContent = ({ tempPriceRange, setTempPriceRange, tempSelectedSkills, setTempSelectedSkills, dropdownOpen, setDropdownOpen, applyFilters, removeFilters }: BrowseMentorsFilterContentProps) => {
 	// Toggle interest selection
 	const handleInterestToggle = (value: string) => {
 		setTempSelectedSkills((prev) => (prev.includes(value) ? prev.filter((i) => i !== value) : [...prev, value]));
@@ -78,11 +79,12 @@ export const BrowseMentorsFilterContent = ({ tempPriceRange, setTempPriceRange, 
 			</div>
 
 			{/* Apply Button */}
-			<div className="mt-auto">
+			<div className="mt-auto flex gap-2 flex-col">
+				<Button onClick={removeFilters} className="w-full" variant="outline">Remove Filters</Button>
 				<Button onClick={applyFilters} className="w-full text-white font-semibold py-2 rounded-lg transition-colors">
 					Apply Filters
 				</Button>
-			</div>
+		</div>
 		</div>
 	);
 };

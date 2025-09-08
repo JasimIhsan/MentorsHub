@@ -82,6 +82,20 @@ export default function BrowseMentorsPage() {
 		setDrawerOpen(false);
 	};
 
+	const removeFilters = () => {
+		setTempPriceRange([0, 200]);
+		setPriceRange([0, 200]);
+		setTempSelectedSkills([]);
+		setSelectedSkills([]);
+		setSearchQuery("");
+		setSortBy("recommended");
+		setCurrentPage(1);
+		setDrawerOpen(false);
+
+		// Clear all URL parameters
+		setSearchParams({}, { replace: true });
+	};
+
 	// Calculate total pages
 	const totalPages = Math.ceil(total / mentorsPerPage);
 
@@ -114,6 +128,7 @@ export default function BrowseMentorsPage() {
 							dropdownOpen={dropdownOpen}
 							setDropdownOpen={setDropdownOpen}
 							applyFilters={applyFilters}
+							removeFilters={removeFilters}
 						/>
 					</SheetContent>
 				</Sheet>
