@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, Plus, MessageCircle, ArrowLeft, MoreVertical, Paperclip, Phone, Send, Smile, Video, CheckCheck, Trash2, Info, User } from "lucide-react";
+import { Search, Plus, MessageCircle, ArrowLeft, MoreVertical, Paperclip, Phone, Send, Smile, Video, CheckCheck, Trash2, Info, User, X, CircleX } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,6 +16,7 @@ import { Alert } from "@/components/custom/alert";
 import { formatTime } from "@/utility/time-data-formatter";
 import { toast } from "sonner";
 import { Socket } from "socket.io-client";
+import EmojiPicker from "emoji-picker-react";
 
 // Define interfaces
 export interface User {
@@ -496,9 +497,9 @@ export function ChatSidebar({ userId, chats, selectedChatId, onChatSelect, isUse
 			<div className="p-4 border-b border-gray-200">
 				<div className="flex items-center justify-between mb-4">
 					<h1 className="text-xl font-semibold text-gray-900">Messages</h1>
-					<Button size="sm" className="bg-green-600 hover:bg-green-700">
+					{/* <Button size="sm" className="bg-green-600 hover:bg-green-700">
 						<Plus className="h-4 w-4" />
-					</Button>
+					</Button> */}
 				</div>
 				<div className="relative">
 					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -599,6 +600,7 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 	const [newMessage, setNewMessage] = useState("");
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+	const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
 
 	const scrollToBottom = () => {
 		if (messagesEndRef.current) {
@@ -631,6 +633,14 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 			e.preventDefault();
 			handleSendMessage();
 		}
+	};
+
+	const handleEmojiSelect = (emoji: { emoji: string }) => {
+		setNewMessage((prevMessage) => prevMessage + emoji.emoji);
+	};
+
+	const handleEmojiToggle = () => {
+		setIsEmojiPickerOpen((prev) => !prev);
 	};
 
 	if (!selectedChat) {
@@ -680,7 +690,7 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 					<h2 className="text-sm font-medium text-gray-900">{selectedChat.isGroupChat ? selectedChat.groupName : `${chatPartner?.firstName || ""} ${chatPartner?.lastName || ""}`}</h2>
 					<p className="text-xs text-gray-500">{selectedChat.isGroupChat ? `${selectedChat.participants.length} members` : isPartnerOnline ? "Online" : "Offline"}</p>
 				</div>
-				<div className="flex items-center space-x-2">
+				{/* <div className="flex items-center space-x-2">
 					<Button variant="ghost" size="sm" disabled={!socket}>
 						<Phone className="h-5 w-5" />
 					</Button>
@@ -690,7 +700,7 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 					<Button variant="ghost" size="sm">
 						<MoreVertical className="h-5 w-5" />
 					</Button>
-				</div>
+				</div> */}
 			</div>
 			<div className="flex-1 overflow-y-auto p-4 bg-gray-50">
 				{loading ? (
@@ -720,13 +730,18 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 			</div>
 			<div className="p-4 border-t border-gray-200 bg-white shrink-0 sticky bottom-0 z-10">
 				<div className="flex items-center space-x-2">
-					<Button variant="ghost" size="sm" disabled={!socket}>
+					{/* <Button variant="ghost" size="sm" disabled={!socket}>
 						<Paperclip className="h-5 w-5" />
-					</Button>
+					</Button> */}
 					<div className="flex-1 relative">
+						{isEmojiPickerOpen && (
+							<div className="absolute bottom-12 right-0 z-20">
+								<EmojiPicker onEmojiClick={handleEmojiSelect} />
+							</div>
+						)}
 						<Input placeholder="Type a message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyPress={handleKeyPress} className="pr-10" disabled={!socket} />
-						<Button variant="ghost" size="sm" className="absolute right-1 top-1/2 transform -translate-y-1/2" disabled={!socket}>
-							<Smile className="h-4 w-4" />
+						<Button variant="ghost" size="sm" onClick={handleEmojiToggle} className="absolute right-1 top-1/2 transform -translate-y-1/2" disabled={!socket}>
+							{isEmojiPickerOpen ? <CircleX className="h-5 w-5" /> : <Smile className="h-5 w-5" />}
 						</Button>
 					</div>
 					<Button onClick={handleSendMessage} disabled={!newMessage.trim() || !socket} className="bg-green-600 hover:bg-green-700">
