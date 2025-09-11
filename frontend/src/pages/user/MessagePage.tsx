@@ -152,18 +152,35 @@ export function MessagePage() {
 				console.error("Invalid message received:", message);
 				return;
 			}
-			// Add message to the selected chat
+
+			// If message belongs to the selected chat → append to messages
 			if (message.chatId === selectedChatId) {
 				setAllMessages((prev) => {
-					if (prev.some((msg) => msg.id === message.id)) {
-						return prev;
-					}
+					if (prev.some((msg) => msg.id === message.id)) return prev;
 					return [...prev, message];
 				});
-			} else if (message.sender.id !== user.id) {
-				// Increment unread count for non-selected chat if not sent by the user
-				setChats((prevChats) => prevChats.map((chat) => (chat.id === message.chatId ? { ...chat, unreadCount: chat.unreadCount + 1, lastMessage: message } : chat)));
 			}
+
+			// Always update lastMessage & unreadCount for the chat, then re-order list
+			setChats((prevChats) => {
+				let updatedChats = prevChats.map((chat) =>
+					chat.id === message.chatId
+						? {
+								...chat,
+								lastMessage: message,
+								unreadCount: message.chatId === selectedChatId || message.sender.id === user.id ? 0 : chat.unreadCount + 1,
+						  }
+						: chat
+				);
+
+				// Move chat with new message to the top
+				const chatWithMessage = updatedChats.find((c) => c.id === message.chatId);
+				if (chatWithMessage) {
+					updatedChats = [chatWithMessage, ...updatedChats.filter((c) => c.id !== message.chatId)];
+				}
+
+				return updatedChats;
+			});
 		};
 
 		const handleMessagesRead = ({ chatId, userId: readerId }: { chatId: string; userId: string }) => {
@@ -220,7 +237,18 @@ export function MessagePage() {
 			}
 		};
 
-		const handleNewChat = (chat: Chat) => setChats((prevChats) => [chat, ...prevChats]);
+		const handleNewChat = (chat: Chat) => {
+			console.log("New chat:", chat);
+			// setChats((prevChats) => [chat, ...prevChats])
+			setChats((prevChats) => {
+				// Check if chat already exists
+				if (prevChats.some((c) => c.id === chat.id)) return prevChats;
+
+				// Add unreadCount if missing
+				const newChat = { ...chat, unreadCount: chat.unreadCount || 0 };
+				return [newChat, ...prevChats];
+			});
+		};
 
 		socket.on("receive-message", handleReceiveMessage);
 		socket.on("messages-read", handleMessagesRead);
@@ -314,6 +342,7 @@ export function MessagePage() {
 			return;
 		}
 
+		// Create temporary message object for UI
 		const message: ISendMessage = {
 			id: Math.random().toString(36).substring(2, 9), // Temporary ID
 			chatId,
@@ -323,6 +352,33 @@ export function MessagePage() {
 			type: "text",
 		};
 
+		const tempMessage: IReceiveMessage = {
+			...message,
+			chatId: message.chatId || "",
+			sender: { id: user.id, fullName: user.fullName || "", avatar: user.avatar || "" }, // add sender details
+			readBy: [user.id], // you already "read" your own message
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		};
+
+		// Optimistically update the chat list
+		setChats((prevChats) => {
+			let updatedChats = prevChats.map((chat) =>
+				chat.id === chatId
+					? { ...chat, lastMessage: tempMessage, unreadCount: 0 } // reset unreadCount since it's your message
+					: chat
+			);
+
+			// Move this chat to the top
+			const chatWithMessage = updatedChats.find((c) => c.id === chatId);
+			if (chatWithMessage) {
+				updatedChats = [chatWithMessage, ...updatedChats.filter((c) => c.id !== chatId)];
+			}
+
+			return updatedChats;
+		});
+
+		// Send message via socket
 		try {
 			socket.emit("send-message", message);
 		} catch (error) {

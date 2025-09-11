@@ -3,6 +3,7 @@ import { Server, Socket } from "socket.io";
 import { createChatUseCase, deleteMessageUseCase, getMessageUnreadCountsByUser, markMessageAsReadUseCase, sendMessageUsecase, updateUnreadCountsForChatUseCase } from "../../../application/usecases/text-message/composer";
 import { userRepository } from "../../../infrastructure/composer";
 import { mapToChatDTO } from "../../../application/dtos/chats.dto";
+import { onlineUsers } from "../../../infrastructure/socket/context";
 
 export function registerMessageHandlers(io: Server, socket: Socket) {
 	// Join user-specific room for targeted notifications
@@ -34,10 +35,11 @@ export function registerMessageHandlers(io: Server, socket: Socket) {
 
 				// ✅ Map to DTO
 				const chatDTO = mapToChatDTO(newChatEntity, participants, undefined, adminUser);
-
 				// ✅ Emit to both users
-				io.to(`user_${senderId}`).emit("new-chat", chatDTO);
-				io.to(`user_${receiverId}`).emit("new-chat", chatDTO);
+				// io.to(`user_${senderId}`).emit("new-chat", chatDTO);
+				// io.to(`user_${receiverId}`).emit("new-chat", chatDTO);
+				if (onlineUsers.get(senderId)) onlineUsers.get(senderId)?.emit("new-chat", chatDTO);
+				if (onlineUsers.get(receiverId)) onlineUsers.get(receiverId)?.emit("new-chat", chatDTO);
 			}
 
 			// ✅ Step 2: Send the message
