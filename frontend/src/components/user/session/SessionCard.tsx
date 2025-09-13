@@ -30,9 +30,6 @@ interface SessionCardProps {
 }
 
 export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, setSessionToCancel, setShowReviewModal, setSessionToReview, setShowPaymentMethodModal, setSessionToPay }: SessionCardProps) {
-	// Log session data for debugging
-	console.log("session: ", session);
-
 	// State for reschedule modal visibility
 	const [showRescheduleModal, setShowRescheduleModal] = useState(false);
 
