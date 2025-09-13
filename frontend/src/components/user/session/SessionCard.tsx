@@ -30,25 +30,24 @@ interface SessionCardProps {
 }
 
 export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, setSessionToCancel, setShowReviewModal, setSessionToReview, setShowPaymentMethodModal, setSessionToPay }: SessionCardProps) {
-	console.log('session: ', session);
+	// State for reschedule modal visibility
 	const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+
+	// State for reason dropdown visibility
 	const [isReasonOpen, setIsReasonOpen] = useState(false);
+
 	// Format current date to YYYY-MM-DD
 	const formatToDateInput = (date: Date) => {
 		return date.toISOString().split("T")[0];
 	};
 
-	// Initialize with current date
+	// Initialize reschedule data with current date and session times
 	const [rescheduleData, setRescheduleData] = useState({
-		date: formatToDateInput(new Date()), // Set to current date
+		date: formatToDateInput(new Date()),
 		startTime: session.startTime,
 		endTime: session.endTime,
 		message: "",
 	});
-
-	// // Check if session is expired
-	// const isExpired = session.status === "upcoming" && isSessionExpired(session.date, session.endTime);
-	// const type = isExpired ? "expired" : session.status;
 
 	// Update endTime when startTime changes
 	useEffect(() => {
@@ -58,7 +57,7 @@ export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, se
 		}
 	}, [rescheduleData.startTime, session.hours]);
 
-	// Initiate payment
+	// Handle payment initiation
 	const handleInitiatePayment = () => {
 		setSessionToPay(session);
 		setShowPaymentMethodModal(true);
@@ -84,7 +83,7 @@ export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, se
 		<Card className="overflow-hidden p-0">
 			<CardContent className="p-0">
 				<div className="flex flex-col md:flex-row">
-					<div className="relative flex-shrink-0 h-24 w-full md:h-auto md:w-48 bg-primary/10">
+					<div className="relative flex-shrink-0 h-24 w-full md:h-auto md:w-35 lg:w-48 bg-primary/10">
 						<div className="absolute inset-0 flex items-center justify-center">
 							<Avatar className="h-16 w-16 border-2 border-background">
 								<AvatarImage src={session.mentor.avatar!} alt={`${session.mentor.firstName} ${session.mentor.lastName}`} />
@@ -99,7 +98,7 @@ export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, se
 									<h3 className="font-bold text-lg cursor-pointer hover:underline">{session.topic}</h3>
 								</Link>
 								<p className="text-muted-foreground">with {`${session.mentor.firstName} ${session.mentor.lastName}`}</p>
-								<div className="mt-2 flex flex-wrap items-center gap-4">
+								<div className="mt-2 flex flex-col gap-2 sm:flex-row sm:gap-4 md:flex-col md:gap-2 2xl:flex-row 2xl:gap-4">
 									<div className="flex items-center gap-1">
 										<CalendarDays className="h-4 w-4 text-muted-foreground" />
 										<span className="text-sm">{formatDate(session.date)}</span>
@@ -129,7 +128,9 @@ export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, se
 									)}
 								</div>
 							</div>
-							<div className="flex items-center gap-2">
+
+							{/* Session actions and status */}
+							<div className="flex md:flex-col md:items-end lg:flex-row lg:items-center gap-2">
 								{session.status === "upcoming" && (
 									<>
 										<Button asChild>

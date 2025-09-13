@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Search, Plus, MessageCircle, ArrowLeft, MoreVertical, Paperclip, Phone, Send, Smile, Video, CheckCheck, Trash2, Info, User } from "lucide-react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { Search, MessageCircle, ArrowLeft, Send, Smile, CheckCheck, Trash2, Info, User, X, CircleX } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,15 +16,16 @@ import { Alert } from "@/components/custom/alert";
 import { formatTime } from "@/utility/time-data-formatter";
 import { toast } from "sonner";
 import { Socket } from "socket.io-client";
+import EmojiPicker from "emoji-picker-react";
+import { Textarea } from "@/components/ui/textarea";
 
 // Define interfaces
 export interface User {
 	id: string;
-	name: string;
 	avatar: string;
 	status: "online" | "offline";
 	lastSeen?: string;
-	firstName?: string;
+	firstName: string;
 	lastName?: string;
 }
 
@@ -70,6 +71,7 @@ export function MessagePage() {
 	const [chats, setChats] = useState<Chat[]>([]);
 	const [isMobile, setIsMobile] = useState(false);
 	const [showChat, setShowChat] = useState(false);
+	``;
 	const [loading, setLoading] = useState(false);
 	const { socket, isUserOnline } = useSocket();
 	const user = useSelector((state: RootState) => state.userAuth.user);
@@ -152,18 +154,35 @@ export function MessagePage() {
 				console.error("Invalid message received:", message);
 				return;
 			}
-			// Add message to the selected chat
+
+			// If message belongs to the selected chat → append to messages
 			if (message.chatId === selectedChatId) {
 				setAllMessages((prev) => {
-					if (prev.some((msg) => msg.id === message.id)) {
-						return prev;
-					}
+					if (prev.some((msg) => msg.id === message.id)) return prev;
 					return [...prev, message];
 				});
-			} else if (message.sender.id !== user.id) {
-				// Increment unread count for non-selected chat if not sent by the user
-				setChats((prevChats) => prevChats.map((chat) => (chat.id === message.chatId ? { ...chat, unreadCount: chat.unreadCount + 1, lastMessage: message } : chat)));
 			}
+
+			// Always update lastMessage & unreadCount for the chat, then re-order list
+			setChats((prevChats) => {
+				let updatedChats = prevChats.map((chat) =>
+					chat.id === message.chatId
+						? {
+								...chat,
+								lastMessage: message,
+								unreadCount: message.chatId === selectedChatId || message.sender.id === user.id ? 0 : chat.unreadCount + 1,
+						  }
+						: chat
+				);
+
+				// Move chat with new message to the top
+				const chatWithMessage = updatedChats.find((c) => c.id === message.chatId);
+				if (chatWithMessage) {
+					updatedChats = [chatWithMessage, ...updatedChats.filter((c) => c.id !== message.chatId)];
+				}
+
+				return updatedChats;
+			});
 		};
 
 		const handleMessagesRead = ({ chatId, userId: readerId }: { chatId: string; userId: string }) => {
@@ -220,7 +239,26 @@ export function MessagePage() {
 			}
 		};
 
-		const handleNewChat = (chat: Chat) => setChats((prevChats) => [chat, ...prevChats]);
+		const handleNewChat = (chat: Chat) => {
+			console.log("New chat:", chat);
+			// setChats((prevChats) => [chat, ...prevChats])
+			setChats((prevChats) => {
+				// Check if chat already exists
+				if (prevChats.some((c) => c.id === chat.id)) return prevChats;
+
+				// Add unreadCount if missing
+				const newChat = { ...chat, unreadCount: chat.unreadCount || 0 };
+				return [newChat, ...prevChats];
+			});
+
+			if (tempChat) {
+				const tempPartner = getChatPartner(user.id!, tempChat.participants);
+				const newPartner = getChatPartner(user.id!, chat.participants);
+				if (tempPartner?.id === newPartner?.id) {
+					handleChatSelect(chat.id);
+				}
+			}
+		};
 
 		socket.on("receive-message", handleReceiveMessage);
 		socket.on("messages-read", handleMessagesRead);
@@ -276,7 +314,8 @@ export function MessagePage() {
 			participants: [
 				{
 					id: mentor.userId,
-					name: `${mentor.firstName} ${mentor.lastName}`,
+					firstName: mentor.firstName,
+					lastName: mentor.lastName,
 					avatar: mentor.avatar || "/placeholder.svg",
 					status: "offline",
 				},
@@ -314,6 +353,7 @@ export function MessagePage() {
 			return;
 		}
 
+		// Create temporary message object for UI
 		const message: ISendMessage = {
 			id: Math.random().toString(36).substring(2, 9), // Temporary ID
 			chatId,
@@ -323,6 +363,33 @@ export function MessagePage() {
 			type: "text",
 		};
 
+		const tempMessage: IReceiveMessage = {
+			...message,
+			chatId: message.chatId || "",
+			sender: { id: user.id, fullName: user.fullName || "", avatar: user.avatar || "" }, // add sender details
+			readBy: [user.id], // you already "read" your own message
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		};
+
+		// Optimistically update the chat list
+		setChats((prevChats) => {
+			let updatedChats = prevChats.map((chat) =>
+				chat.id === chatId
+					? { ...chat, lastMessage: tempMessage, unreadCount: 0 } // reset unreadCount since it's your message
+					: chat
+			);
+
+			// Move this chat to the top
+			const chatWithMessage = updatedChats.find((c) => c.id === chatId);
+			if (chatWithMessage) {
+				updatedChats = [chatWithMessage, ...updatedChats.filter((c) => c.id !== chatId)];
+			}
+
+			return updatedChats;
+		});
+
+		// Send message via socket
 		try {
 			socket.emit("send-message", message);
 		} catch (error) {
@@ -440,13 +507,15 @@ export function ChatSidebar({ userId, chats, selectedChatId, onChatSelect, isUse
 			<div className="p-4 border-b border-gray-200">
 				<div className="flex items-center justify-between mb-4">
 					<h1 className="text-xl font-semibold text-gray-900">Messages</h1>
-					<Button size="sm" className="bg-green-600 hover:bg-green-700">
-						<Plus className="h-4 w-4" />
-					</Button>
 				</div>
 				<div className="relative">
 					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-					<Input placeholder="Search conversations or mentors..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-gray-50 border-gray-200" />
+					<Input placeholder="Search conversations or mentors..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 pr-10 bg-gray-50 border-gray-200" />
+					{searchQuery && (
+						<button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+							<X className="h-4 w-4" />
+						</button>
+					)}
 				</div>
 			</div>
 			<div className="flex-1 overflow-y-auto">
@@ -541,8 +610,11 @@ interface ChatWindowProps {
 
 export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage, getChatPartner, onDeleteMessage, isUserOnline, isMobile, loading, socket }: ChatWindowProps) {
 	const [newMessage, setNewMessage] = useState("");
+	const [cursorPosition, setCursorPosition] = useState<number | null>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+	const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const scrollToBottom = () => {
 		if (messagesEndRef.current) {
@@ -563,10 +635,19 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 		scrollToBottom();
 	}, [messages]);
 
+	useLayoutEffect(() => {
+		if (textareaRef.current && cursorPosition !== null) {
+			textareaRef.current.selectionStart = textareaRef.current.selectionEnd = cursorPosition;
+			textareaRef.current.focus();
+			setCursorPosition(null); // Reset after setting
+		}
+	}, [newMessage, cursorPosition]);
+
 	const handleSendMessage = () => {
 		if (newMessage.trim()) {
 			onSendMessage(newMessage.trim());
 			setNewMessage("");
+			setIsEmojiPickerOpen(false);
 		}
 	};
 
@@ -575,6 +656,21 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 			e.preventDefault();
 			handleSendMessage();
 		}
+	};
+
+	const handleEmojiSelect = (emoji: { emoji: string }) => {
+		const textarea = textareaRef.current;
+		if (textarea) {
+			const start = textarea.selectionStart || 0;
+			const end = textarea.selectionEnd || 0;
+			const newText = newMessage.slice(0, start) + emoji.emoji + newMessage.slice(end);
+			setNewMessage(newText);
+			setCursorPosition(start + emoji.emoji.length); // Set new position
+		}
+	};
+
+	const handleEmojiToggle = () => {
+		setIsEmojiPickerOpen((prev) => !prev);
 	};
 
 	if (!selectedChat) {
@@ -595,7 +691,7 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 
 	const userMessages = messages.filter((msg) => msg.chatId === selectedChat.id);
 	const chatPartner = getChatPartner(user!.id!, selectedChat.participants);
-	if (!chatPartner && !selectedChat.isGroupChat) return null; // Handle null chatPartner for non-group chats
+	if (!chatPartner && !selectedChat.isGroupChat) return null;
 
 	const isPartnerOnline = selectedChat.isGroupChat ? false : isUserOnline(chatPartner?.id || "");
 
@@ -609,9 +705,9 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 				)}
 				<div className="relative">
 					<Avatar className="h-10 w-10">
-						<AvatarImage src={selectedChat.isGroupChat ? "/group-placeholder.svg" : chatPartner?.avatar || "/placeholder.svg"} alt={selectedChat.groupName || chatPartner?.name || "Chat"} />
+						<AvatarImage src={selectedChat.isGroupChat ? "/group-placeholder.svg" : chatPartner?.avatar || "/placeholder.svg"} alt={selectedChat.groupName || `${chatPartner?.firstName} ${chatPartner?.lastName}` || "Chat"} />
 						<AvatarFallback>
-							{(selectedChat.isGroupChat ? selectedChat.groupName : chatPartner?.firstName || "Chat")
+							{(selectedChat.isGroupChat ? selectedChat.groupName : `${chatPartner?.firstName}` || "Chat")
 								?.split(" ")
 								.map((n) => n[0])
 								.join("")
@@ -621,19 +717,8 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 					{!selectedChat.isGroupChat && isPartnerOnline && <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"></div>}
 				</div>
 				<div className="ml-3 flex-1">
-					<h2 className="text-sm font-medium text-gray-900">{selectedChat.isGroupChat ? selectedChat.groupName : `${chatPartner?.firstName || ""} ${chatPartner?.lastName || ""}`}</h2>
+					<h2 className="text-sm font-medium text-gray-900">{selectedChat.isGroupChat ? selectedChat.groupName : `${chatPartner?.firstName} ${chatPartner?.lastName || ""}`}</h2>
 					<p className="text-xs text-gray-500">{selectedChat.isGroupChat ? `${selectedChat.participants.length} members` : isPartnerOnline ? "Online" : "Offline"}</p>
-				</div>
-				<div className="flex items-center space-x-2">
-					<Button variant="ghost" size="sm" disabled={!socket}>
-						<Phone className="h-5 w-5" />
-					</Button>
-					<Button variant="ghost" size="sm" disabled={!socket}>
-						<Video className="h-5 w-5" />
-					</Button>
-					<Button variant="ghost" size="sm">
-						<MoreVertical className="h-5 w-5" />
-					</Button>
 				</div>
 			</div>
 			<div className="flex-1 overflow-y-auto p-4 bg-gray-50">
@@ -663,14 +748,25 @@ export function ChatWindow({ user, selectedChat, messages, onBack, onSendMessage
 				<div ref={messagesEndRef} />
 			</div>
 			<div className="p-4 border-t border-gray-200 bg-white shrink-0 sticky bottom-0 z-10">
-				<div className="flex items-center space-x-2">
-					<Button variant="ghost" size="sm" disabled={!socket}>
-						<Paperclip className="h-5 w-5" />
-					</Button>
+				<div className="flex items-end space-x-2">
 					<div className="flex-1 relative">
-						<Input placeholder="Type a message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyPress={handleKeyPress} className="pr-10" disabled={!socket} />
-						<Button variant="ghost" size="sm" className="absolute right-1 top-1/2 transform -translate-y-1/2" disabled={!socket}>
-							<Smile className="h-4 w-4" />
+						{isEmojiPickerOpen && (
+							<div className="absolute bottom-12 right-0 z-20">
+								<EmojiPicker onEmojiClick={handleEmojiSelect} />
+							</div>
+						)}
+						<Textarea
+							ref={textareaRef}
+							placeholder="Type a message..."
+							value={newMessage}
+							onChange={(e) => setNewMessage(e.target.value)}
+							onKeyDown={handleKeyPress}
+							className="w-full pr-10 p-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-green-600 disabled:opacity-50 min-h-[40px] max-h-[80px]"
+							rows={1}
+							disabled={!socket}
+						/>
+						<Button variant="ghost" size="sm" onClick={handleEmojiToggle} className="absolute right-1 inset-y-0 flex items-center justify-center disabled:opacity-50" disabled={!socket}>
+							{isEmojiPickerOpen ? <CircleX className="h-5 w-5" /> : <Smile className="h-5 w-5" />}
 						</Button>
 					</div>
 					<Button onClick={handleSendMessage} disabled={!newMessage.trim() || !socket} className="bg-green-600 hover:bg-green-700">

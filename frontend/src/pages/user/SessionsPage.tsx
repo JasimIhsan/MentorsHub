@@ -141,7 +141,7 @@ export function SessionsPage() {
 	}
 
 	return (
-		<div className="w-full py-8 px-10 md:px-20 xl:px-25">
+		<div className="w-full py-8 px-10 md:px-20 xl:px-65">
 			<div className="flex flex-col gap-8">
 				<div className="flex flex-col gap-4">
 					<h1 className="text-3xl font-bold tracking-tight">My Sessions</h1>
