@@ -22,6 +22,8 @@ import {
 	deleteDateSlotAPI,
 } from "@/api/mentor.availability.api.service";
 import { toast } from "sonner";
+import { convertUTCtoLocal } from "@/utility/time-converter/utcToLocal";
+import { convertLocaltoUTC } from "@/utility/time-converter/localToUTC";
 
 // Interfaces
 interface IWeeklyAvailability {
@@ -150,8 +152,9 @@ export function MentorAvailabilityPage() {
 			if (response.success) {
 				const newSlots = initializeWeeklySlots();
 				response.slots.forEach((slot: IWeeklyAvailability) => {
+					const { startTime, endTime } = convertUTCtoLocal(slot.startTime, slot.endTime);
 					const day = slot.dayOfWeek.toString();
-					newSlots[day].slots.push(slot);
+					newSlots[day].slots.push({ ...slot, startTime, endTime });
 					newSlots[day].unavailable = !isDayAvailable(newSlots[day].slots);
 				});
 				setWeeklySlots(newSlots);
@@ -169,20 +172,41 @@ export function MentorAvailabilityPage() {
 			const response = await fetchDateSlotsAPI(user.id);
 			if (response.success) {
 				const newDateSlots: IDateAvailability = {};
+
 				response.slots.forEach((slot: IDateSlot) => {
-					const date = slot.date;
-					if (!newDateSlots[date]) {
-						newDateSlots[date] = { slots: [] };
+					// Convert UTC -> local time
+					const { startTime, endTime, date: localDateStr } = convertUTCtoLocal(slot.startTime, slot.endTime, new Date(slot.date));
+
+					// Use localDateStr as key for easier UI grouping
+					const slotDateKey = localDateStr; // "YYYY-MM-DD"
+
+					if (!newDateSlots[slotDateKey]) {
+						newDateSlots[slotDateKey] = { slots: [] };
 					}
-					newDateSlots[date].slots.push({
+
+					newDateSlots[slotDateKey].slots.push({
 						id: slot.id,
 						mentorId: slot.mentorId,
-						date: slot.date,
-						startTime: slot.startTime,
-						endTime: slot.endTime,
+						date: localDateStr, // already formatted as "YYYY-MM-DD"
+						startTime,
+						endTime,
 					});
 				});
-				setDateSlots(newDateSlots);
+
+				// Optional: Sort the slots for each date by startTime
+				Object.keys(newDateSlots).forEach((date) => {
+					newDateSlots[date].slots.sort((a, b) => a.startTime.localeCompare(b.startTime));
+				});
+
+				// Optional: Sort the entire dateSlots object by date
+				const sortedDateSlots: IDateAvailability = {};
+				Object.keys(newDateSlots)
+					.sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+					.forEach((date) => {
+						sortedDateSlots[date] = newDateSlots[date];
+					});
+
+				setDateSlots(sortedDateSlots);
 			}
 		} catch (error) {
 			console.error("Error fetching date slots:", error);
@@ -251,11 +275,13 @@ export function MentorAvailabilityPage() {
 		e.preventDefault();
 		if (!user?.id) return;
 
+		const utcSlot = convertLocaltoUTC(newWeeklySlot.startTime, newWeeklySlot.endTime); // no date for weekly
 		const slot = {
 			day: newWeeklySlot.day,
-			startTime: newWeeklySlot.startTime,
-			endTime: newWeeklySlot.endTime,
+			startTime: utcSlot.startTime,
+			endTime: utcSlot.endTime,
 		};
+		console.log(`slot: `, slot);
 
 		const existingSlots = weeklySlots[newWeeklySlot.day].slots;
 		const hasOverlap = existingSlots.some((existingSlot) => doSlotsOverlap(slot, existingSlot));
@@ -273,7 +299,7 @@ export function MentorAvailabilityPage() {
 						...prev,
 						[newWeeklySlot.day]: {
 							unavailable: false,
-							slots: [...prev[newWeeklySlot.day].slots, { ...response.slot, isActive: true }],
+							slots: [...prev[newWeeklySlot.day].slots, { ...response.slot, startTime: newWeeklySlot.startTime, endTime: newWeeklySlot.endTime, isActive: true }],
 						},
 					};
 					return updatedSlots;
@@ -318,19 +344,22 @@ export function MentorAvailabilityPage() {
 		e.preventDefault();
 		if (!user?.id) return;
 
+		const utcSlot = convertLocaltoUTC(newDateSlot.startTime, newDateSlot.endTime, new Date(newDateSlot.date));
 		const slot = {
-			date: newDateSlot.date,
-			startTime: newDateSlot.startTime,
-			endTime: newDateSlot.endTime,
+			date: utcSlot.date?.toISOString().substring(0, 10)!,
+			startTime: utcSlot.startTime,
+			endTime: utcSlot.endTime,
 		};
+
+		console.log(`slot: `, slot);
 
 		try {
 			const response = await addDateSlotAPI(user.id, slot);
 			if (response.success) {
 				const newSlot = response.slot;
+				console.log("newSlot: ", newSlot);
 				setDateSlots((prev) => {
 					const updatedSlots = { ...prev };
-					// Append to existing date if it exists, otherwise create new
 					if (!updatedSlots[newDateSlot.date]) {
 						updatedSlots[newDateSlot.date] = { slots: [] };
 					}
@@ -339,14 +368,12 @@ export function MentorAvailabilityPage() {
 						{
 							id: newSlot.id,
 							mentorId: newSlot.mentorId,
-							startTime: newSlot.startTime,
-							endTime: newSlot.endTime,
-							date: newSlot.date,
+							startTime: newDateSlot.startTime,
+							endTime: newDateSlot.endTime,
+							date: newDateSlot.date,
 						},
 					];
-					// Sort slots for the date
 					updatedSlots[newDateSlot.date].slots = sortDateSlotsByStartTime(updatedSlots[newDateSlot.date].slots);
-					// Sort the entire dateSlots object by date
 					const sortedDateSlots: IDateAvailability = {};
 					Object.keys(updatedSlots)
 						.sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
@@ -462,7 +489,6 @@ export function MentorAvailabilityPage() {
 				if (error instanceof Error) toast.error(error.message);
 			}
 		} else {
-
 			const existingDateSlots = dateSlots[editSlot.day]?.slots.filter((slot) => slot.id !== editSlot.slotId) || [];
 			const hasOverlap = existingDateSlots.some((slot) => doSlotsOverlap(updatedSlot, slot));
 			if (hasOverlap) {

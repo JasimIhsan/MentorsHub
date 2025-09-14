@@ -1,9 +1,9 @@
-import { Bell, CheckCircle2, MoreHorizontal } from "lucide-react";
+import { Bell, CheckCircle2, MoreHorizontal, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNotifications } from "@/hooks/useNotification";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
@@ -59,12 +59,17 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onMar
 	);
 };
 
-// NotificationDropdown component with More options dropdown and filter
+// NotificationDropdown component with frontend scroll pagination
 export const NotificationDropdown: React.FC = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [filter, setFilter] = useState<"all" | "read" | "unread">("all");
+	const [page, setPage] = useState(1);
+	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const containerRef = useRef<HTMLDivElement>(null);
 	const user = useSelector((state: RootState) => state.userAuth.user);
 	const { notifications, markAsRead, markAllAsRead, unreadCount, isLoading } = useNotifications(user?.id || "");
+	const itemsPerPage = 10; // Number of notifications per page
+	const maxItems = 20; // Maximum notifications to display
 
 	// Filter notifications based on filter state
 	const filteredNotifications = notifications.filter((n) => {
@@ -73,6 +78,43 @@ export const NotificationDropdown: React.FC = () => {
 		if (filter === "read") return n.isRead;
 		return true;
 	});
+
+	// Calculate paginated notifications for display
+	const paginatedNotifications = filteredNotifications.slice(0, Math.min(page * itemsPerPage, maxItems));
+	const hasMore = paginatedNotifications.length < Math.min(filteredNotifications.length, maxItems);
+
+	// Scroll handler for pagination
+	useEffect(() => {
+		if (!containerRef.current || !hasMore || isLoadingMore) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting) {
+					setIsLoadingMore(true);
+					// Simulate loading delay for UX
+					setTimeout(() => {
+						setPage((prev) => prev + 1);
+						setIsLoadingMore(false);
+					}, 2000); // 2-second delay
+				}
+			},
+			{ threshold: 0.1 }
+		);
+
+		// Observe the 10th notification or the last one if less than 10
+		const targetIndex = Math.min(paginatedNotifications.length - 1, itemsPerPage - 1);
+		const targetChild = containerRef.current.children[targetIndex];
+		if (targetChild) {
+			observer.observe(targetChild);
+		}
+
+		return () => observer.disconnect();
+	}, [hasMore, isLoadingMore, paginatedNotifications]);
+
+	// Reset pagination on filter change
+	useEffect(() => {
+		setPage(1);
+	}, [filter]);
 
 	return (
 		<DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -83,31 +125,49 @@ export const NotificationDropdown: React.FC = () => {
 					<span className="sr-only">Notifications</span>
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-80 md:w-120">
-				<div className="flex items-center justify-between px-3 py-2">
-					<DropdownMenuLabel className="p-0">Notifications</DropdownMenuLabel>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" size="icon" className="h-8 w-8">
-								<MoreHorizontal className="h-5 w-5" />
-								<span className="sr-only">More options</span>
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem onClick={markAllAsRead}>Mark all as read</DropdownMenuItem>
-							<DropdownMenuSeparator />
-							<DropdownMenuItem onClick={() => setFilter("all")}>Show all</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setFilter("read")}>Show read</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => setFilter("unread")}>Show unread</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
-				</div>
+			<DropdownMenuContent
+				align="end"
+				className="w-80 md:w-96" // Narrow for mobile, wider for desktop
+				sideOffset={4} // Small gap from trigger
+				forceMount // Ensure stable positioning
+			>
+				<DropdownMenuLabel className="p-0">
+					<div className="flex items-center justify-between px-3 py-2">
+						<span>Notifications</span>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="ghost" size="icon" className="h-8 w-8">
+									<MoreHorizontal className="h-5 w-5" />
+									<span className="sr-only">More options</span>
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end" sideOffset={4}>
+								<DropdownMenuItem onClick={markAllAsRead}>Mark all as read</DropdownMenuItem>
+								<DropdownMenuSeparator />
+								<DropdownMenuItem onClick={() => setFilter("all")}>Show all</DropdownMenuItem>
+								<DropdownMenuItem onClick={() => setFilter("read")}>Show read</DropdownMenuItem>
+								<DropdownMenuItem onClick={() => setFilter("unread")}>Show unread</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</div>
+				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<div className="max-h-80 overflow-y-auto" style={{ scrollbarGutter: "stable both-edges" }}>
+				<div
+					ref={containerRef}
+					className="max-h-80 overflow-y-auto" // Scrollable container
+					style={{ scrollbarGutter: "stable both-edges" }}>
 					{isLoading ? (
-						<div className="p-3 text-center text-sm text-muted-foreground">Loading notifications...</div>
-					) : filteredNotifications.length > 0 ? (
-						filteredNotifications.map((n) => <NotificationItem key={n.id} notification={n} onMarkAsRead={markAsRead} />)
+						<div className="p-3 text-center text-sm text-muted-foreground">
+							<Loader2 className="h-4 w-4 animate-spin mx-auto text-muted-foreground" />
+							<span>Loading notifications...</span>
+						</div>
+					) : paginatedNotifications.length > 0 ? (
+						<>
+							{paginatedNotifications.map((n) => (
+								<NotificationItem key={n.id} notification={n} onMarkAsRead={markAsRead} />
+							))}
+							{hasMore && <div className="p-3 text-center">{isLoadingMore && <Loader2 className="h-4 w-4 animate-spin mx-auto text-muted-foreground" />}</div>}
+						</>
 					) : (
 						<div className="p-3 text-center text-sm text-muted-foreground">{filter === "unread" ? "No unread notifications" : filter === "read" ? "No read notifications" : "No notifications"}</div>
 					)}
