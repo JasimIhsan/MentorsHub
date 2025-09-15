@@ -142,7 +142,8 @@ export class WeeklyAvailabilityRepositoryImpl implements IWeeklyAvailabilityRepo
 
 	async findByMentorId(mentorId: string): Promise<WeeklyAvailabilityEntity[]> {
 		try {
-			const docs = await WeeklyAvailabilityModel.find({ mentorId, isActive: true });
+			const docs = await WeeklyAvailabilityModel.find({ mentorId, isActive: true }).sort({ dayOfWeek: 1, startTime: 1});
+
 			return docs.map(WeeklyAvailabilityEntity.fromDbDocument);
 		} catch (error) {
 			return handleExceptionError(error, "Error finding availability slots by mentor ID");
