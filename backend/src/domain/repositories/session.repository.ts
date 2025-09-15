@@ -35,4 +35,5 @@ export interface ISessionRepository {
 	findRevenueByMentor(mentorId: string): Promise<number>;
 	countSessions(): Promise<number>;
 	getExpirableSessions(): Promise<SessionEntity[]>;
+	findOverlappingSessions(mentorId: string, date: Date, start: string, end: string, excludeSessionId: string): Promise<SessionEntity[]>;
 }

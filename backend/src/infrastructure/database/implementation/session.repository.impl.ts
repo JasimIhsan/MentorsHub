@@ -413,4 +413,22 @@ export class SessionRepositoryImpl implements ISessionRepository {
 			return handleExceptionError(error, "Error counting sessions");
 		}
 	}
+
+	async findOverlappingSessions(mentorId: string, date: Date, start: string, end: string, excludeSessionId: string): Promise<SessionEntity[]> {
+		try {
+			const sessions = await SessionModel.find({
+				mentorId,
+				date,
+				status: SessionStatusEnum.PENDING,
+				_id: { $ne: excludeSessionId },
+				$or: [
+					{ startTime: { $lt: end }, endTime: { $gt: start } }, // overlapping logic
+				],
+			});
+
+			return sessions.map(SessionEntity.fromDB);
+		} catch (error) {
+			return handleExceptionError(error, "Error finding overlapping sessions");
+		}
+	}
 }
