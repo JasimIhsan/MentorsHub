@@ -5,11 +5,18 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export function convertUTCtoLocal(startTime: string, endTime: string, date?: Date): { date: string; startTime: string; endTime: string } {
+export function convertUTCtoLocal(startTime: string, endTime: string, date?: string): { date: string; startTime: string; endTime: string } {
 	const localZone = "Asia/Kolkata";
+
 	const toLocal = (time: string) => {
 		const [hours, minutes] = time.split(":").map(Number);
-		const utcDate = date ? dayjs.utc(date).hour(hours).minute(minutes).second(0).millisecond(0) : dayjs.utc("1970-01-01").hour(hours).minute(minutes);
+		// Take date from server, set hours and minutes, then convert to local timezone
+		const utcDate = dayjs
+			.utc(date || "1970-01-01")
+			.set("hour", hours)
+			.set("minute", minutes)
+			.set("second", 0)
+			.set("millisecond", 0);
 		return utcDate.tz(localZone);
 	};
 
@@ -17,7 +24,7 @@ export function convertUTCtoLocal(startTime: string, endTime: string, date?: Dat
 	const endLocal = toLocal(endTime);
 
 	return {
-		date: startLocal.format("YYYY-MM-DD"), // always string
+		date: startLocal.format("YYYY-MM-DD"), // Always in local timezone
 		startTime: startLocal.format("HH:mm"),
 		endTime: endLocal.format("HH:mm"),
 	};
