@@ -22,6 +22,8 @@ import { fetchMentorAvailabilityAPI } from "@/api/mentors.api.service";
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
 import { formatTime } from "@/utility/time-data-formatter";
 import { motion } from "framer-motion";
+import { convertUTCtoLocal } from "@/utility/time-converter/utcToLocal";
+import { convertLocaltoUTC } from "@/utility/time-converter/localToUTC";
 
 export interface SessionData {
 	mentorId: string;
@@ -34,6 +36,23 @@ export interface SessionData {
 	message: string;
 	totalAmount: number;
 	pricing: "free" | "paid" | "both-pricing";
+}
+
+function calculateEndTime(startTime: string, hours: number): string {
+	const [hour, minute] = startTime.split(":").map(Number);
+
+	const startDate = new Date();
+	startDate.setHours(hour);
+	startDate.setMinutes(minute);
+	startDate.setSeconds(0);
+
+	startDate.setHours(startDate.getHours() + hours);
+
+	const endHour = String(startDate.getHours()).padStart(2, "0");
+	const endMinute = String(startDate.getMinutes()).padStart(2, "0");
+	const endTime = `${endHour}:${endMinute}`;
+
+	return endTime;
 }
 
 export function RequestSessionPage() {
@@ -57,13 +76,18 @@ export function RequestSessionPage() {
 				toast.error("Please select a date and time.");
 				return;
 			}
-			console.log(`date in page : `, date);
-			// const localDateString = getLocalDateString(date);
 
 			try {
 				const response = await fetchMentorAvailabilityAPI(mentorId as string, date, hours);
+
 				if (response.success && response.isExist) {
-					setAvailability(response.availability);
+					// Convert each UTC slot to local
+					const localSlots = response.availability.map((slot: string) => {
+						const { startTime } = convertUTCtoLocal(slot, calculateEndTime(slot, hours), date?.toISOString());
+						return startTime;
+					});
+
+					setAvailability(localSlots);
 					setTime("");
 					setIsSlotValid(true);
 				} else {
@@ -106,21 +130,6 @@ export function RequestSessionPage() {
 		return sessionFee + platformFee;
 	};
 
-	// const validateSlot = (selectedTime: string, selectedHours: number) => {
-	// 	if (!selectedTime || !date) return false;
-	// 	const selectedDateTime = parse(selectedTime, "HH:mm", date);
-	// 	const selectedEndTime = new Date(selectedDateTime.getTime() + selectedHours * 60 * 60 * 1000);
-
-	// 	const isValid = availability.some((slot) => {
-	// 		const slotStart = parse(slot.startTime, "HH:mm", date);
-	// 		const slotEnd = new Date(slotStart.getTime() + slot.duration * 60 * 60 * 1000);
-	// 		return selectedDateTime >= slotStart && selectedEndTime <= slotEnd;
-	// 	});
-
-	// 	setIsSlotValid(isValid);
-	// 	return isValid;
-	// };
-
 	const handleTimeChange = (value: string) => {
 		setTime(value);
 		if (value) {
@@ -138,30 +147,17 @@ export function RequestSessionPage() {
 		}
 	};
 
-	const calculateEndTime = (startTime: string): string => {
-		const [hour, minute] = startTime.split(":").map(Number);
-
-		const startDate = new Date();
-		startDate.setHours(hour);
-		startDate.setMinutes(minute);
-		startDate.setSeconds(0);
-
-		startDate.setHours(startDate.getHours() + hours);
-
-		const endHour = String(startDate.getHours()).padStart(2, "0");
-		const endMinute = String(startDate.getMinutes()).padStart(2, "0");
-		const endTime = `${endHour}:${endMinute}`;
-
-		return endTime;
-	};
+	// Convert local times to UTC before sending
+	const utcTimes = time ? convertLocaltoUTC(time, calculateEndTime(time, hours), date || undefined) : { startTime: "", endTime: "" };
 
 	const requestData: SessionData = {
 		mentorId: mentorId,
 		userId: user?.id as string,
 		topic: topic,
-		date: (date ? new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())) : date) as Date,
-		startTime: time,
-		endTime: calculateEndTime(time),
+		// keep date in UTC
+		date: utcTimes.date || (date ? new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())) : date)!,
+		startTime: utcTimes.startTime, // UTC time
+		endTime: utcTimes.endTime, // UTC time
 		hours: hours,
 		message: message,
 		totalAmount: calculateTotal(),
@@ -183,7 +179,7 @@ export function RequestSessionPage() {
 			const response = await axiosInstance.post("/user/sessions/create-session", requestData);
 			if (response.data.success) {
 				toast.success(response.data.message || "Session request submitted successfully! Awaiting mentor approval.");
-				navigate("/request-confirmation", { state: { requestData } });
+				navigate("/request-confirmation", { state: { requestData: { ...requestData, startTime: time, endTime: calculateEndTime(time, hours), date: date } } });
 			}
 		} catch (error: any) {
 			console.error("Session creation error:", error);
@@ -269,7 +265,7 @@ export function RequestSessionPage() {
 												{availability.map((slot) => (
 													<motion.div key={slot} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
 														<Button variant={time === slot ? "default" : "outline"} size="sm" className={`w-full py-8 relative ${time === slot ? "ring-2 ring-blue-500 ring-offset-1" : ""}`} onClick={() => handleTimeChange(slot)}>
-															{`${formatTime(slot)} - ${formatTime(calculateEndTime(slot))}`}
+															{`${formatTime(slot)} - ${formatTime(calculateEndTime(slot, hours))}`}
 														</Button>
 													</motion.div>
 												))}
@@ -278,27 +274,6 @@ export function RequestSessionPage() {
 											<p className="text-gray-500 text-sm">No slots available in this period</p>
 										)}
 									</div>
-									{/* <Select value={time} onValueChange={handleTimeChange}>
-										<SelectTrigger id="time" className="w-full">
-											<SelectValue placeholder={availability.length ? "Select a time slot" : "No slots available"} />
-										</SelectTrigger>
-										<SelectContent>
-											{availability.length ? (
-												availability.map((slot, index) => {
-													const dateTime = new Date(`2025-05-05T${slot}:00`); // Use a fixed date or dynamically generate
-													return (
-														<SelectItem key={index} value={slot}>
-															{format(dateTime, "h:mm a")} 
-														</SelectItem>
-													);
-												})
-											) : (
-												<SelectItem value="none" disabled>
-													No slots available
-												</SelectItem>
-											)}
-										</SelectContent>
-									</Select> */}
 									{!isSlotValid && time && <p className="mt-2 text-sm text-red-500">The selected time and duration are not available. Please choose another slot or adjust the duration.</p>}
 								</div>
 							</CardContent>

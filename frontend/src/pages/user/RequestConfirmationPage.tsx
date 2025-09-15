@@ -16,7 +16,7 @@ export function RequestConfirmationPage() {
 				<p className="text-red-500 text-center">No session request data found. Please try submitting your request again.</p>
 				<div className="mt-4 flex justify-center">
 					<Button asChild>
-						<Link to="/mentors">Back to Mentors</Link>
+						<Link to="/browse">Back to Mentors</Link>
 					</Button>
 				</div>
 			</div>
@@ -24,7 +24,7 @@ export function RequestConfirmationPage() {
 	}
 
 	return (
-		<div className="container py-8">
+		<div className="w-full py-8">
 			<div className="mx-auto max-w-lg">
 				<Card className="overflow-hidden p-0">
 					<div className="bg-gradient-to-r from-primary to-blue-500 p-6 text-center text-white">
