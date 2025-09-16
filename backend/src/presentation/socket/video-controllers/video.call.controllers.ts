@@ -23,14 +23,13 @@ export const registerVideoCallHandlers = (io: Server, socket: Socket) => {
 			// Extract hours and minutes from the start time
 			const [hours, minutes] = session.startTime.split(":").map(Number);
 
-			// Build UTC datetime from session.date (which is likely stored in UTC midnight)
+			// Build full UTC datetime for session start
 			const sessionStartUTC = new Date(session.date);
-			sessionStartUTC.setUTCHours(hours - 5, minutes - 30, 0, 0); // subtract IST offset to get true UTC time
+			sessionStartUTC.setUTCHours(hours, minutes, 0, 0); // keep in UTC
 
-			// Calculate allowed join time in UTC
+			// Allowed join time = 5 minutes before start
 			const joinAllowedTimeUTC = new Date(sessionStartUTC.getTime() - 5 * 60 * 1000);
 
-			// Now is also in UTC
 			const nowUTC = new Date();
 
 			if (nowUTC < joinAllowedTimeUTC) {

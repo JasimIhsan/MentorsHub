@@ -48,6 +48,7 @@ export function MentorDetailsPage() {
 				console.log(`mentor : `, mentor);
 				const response = await mentorAvailabilityToUserAPI(mentorId as string);
 				if (response.success) {
+					console.log(`response 😀: `, response);
 					setAvailabilityData(response.availability);
 				}
 			} catch (error) {

@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import { useSocket } from "@/context/SocketContext";
 import { RootState } from "@/store/store";
+import { NotificationDropdown } from "@/components/custom/NotificationDropdown";
 // import { socketService } from "@/services/socket.service";
 
 export function MobileNav() {
@@ -67,6 +68,8 @@ export function MobileNav() {
 
 	return (
 		<div className="md:hidden">
+			<NotificationDropdown />
+
 			<Sheet open={open} onOpenChange={setOpen}>
 				<SheetTrigger asChild>
 					<Button variant="ghost" size="icon" className="md:hidden">
@@ -81,7 +84,9 @@ export function MobileNav() {
 								<AvatarImage src={user?.avatar as string} alt="User" />
 								<AvatarFallback>{user?.firstName?.slice(0, 1)}</AvatarFallback>
 							</Avatar>
-							<span className="font-bold">{user?.firstName} {user?.lastName}</span>
+							<span className="font-bold">
+								{user?.firstName} {user?.lastName}
+							</span>
 						</Link>
 					</div>
 					<nav className="mt-5 flex flex-col gap-4">

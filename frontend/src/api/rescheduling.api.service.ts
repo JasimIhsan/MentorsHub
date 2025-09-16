@@ -4,7 +4,7 @@ export async function requestSessionRescheduleAPI(
 	sessionId: string,
 	data: {
 		userId: string;
-		date: string;
+		date: Date;
 		startTime: string;
 		endTime: string;
 		message: string;

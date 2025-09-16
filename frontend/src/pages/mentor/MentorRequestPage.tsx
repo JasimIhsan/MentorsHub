@@ -8,6 +8,7 @@ import { RequestList } from "@/components/mentor/requests/RequestList";
 import { useSearchParams } from "react-router-dom";
 import { fetchSessionsByMentor } from "@/api/session.api.service";
 import { PaginationControls } from "@/components/custom/PaginationControls";
+import { convertSessionsArrayToLocal } from "@/utility/time-converter/conversion-helpers";
 
 export function MentorRequestsPage() {
 	const user = useSelector((state: RootState) => state.userAuth.user);
@@ -51,7 +52,11 @@ export function MentorRequestsPage() {
 			setIsLoading(true);
 			try {
 				const response = await fetchSessionsByMentor(user?.id as string, filterOption, activeTab, page, limit);
-				setRequests(Array.isArray(response.requests) ? response.requests : []);
+
+				const localRequests = convertSessionsArrayToLocal(response.requests) as ISessionMentorDTO[];
+				const requestsWithLocalTime = Array.isArray(localRequests) ? localRequests : [];
+
+				setRequests(requestsWithLocalTime);
 				setTotalPages(Math.ceil((response.total || 0) / limit));
 			} catch (err) {
 				console.error("Failed to fetch requests:", err);

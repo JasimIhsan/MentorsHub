@@ -1,4 +1,4 @@
-import { ArrowRightLeft, Calendar, LogOut, Settings, User, Wallet } from "lucide-react";
+import { ArrowRightLeft, LogOut, Settings, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -68,11 +68,6 @@ export function MentorHeader() {
 						<span className="sm:hidden">Switch</span>
 					</Button>
 
-					<Button variant="outline" size="icon">
-						<Calendar className="h-5 w-5" />
-						<span className="sr-only">Calendar</span>
-					</Button>
-
 					<NotificationDropdown />
 
 					<DropdownMenu>
@@ -80,7 +75,7 @@ export function MentorHeader() {
 							<Button variant="ghost" className="relative h-8 w-8 rounded-full">
 								<Avatar className="h-9 w-9">
 									<AvatarImage src={user.avatar ?? ""} alt="User" />
-									<AvatarFallback>{user.firstName?.slice(0, 1) ?? "" + user.lastName?.slice(0, 1) ?? ""}</AvatarFallback>
+									<AvatarFallback>{user.firstName?.slice(0, 1) ?? "" + user.lastName?.slice(0, 1)}</AvatarFallback>
 								</Avatar>
 							</Button>
 						</DropdownMenuTrigger>

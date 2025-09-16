@@ -23,7 +23,10 @@ export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 		const session = await this.sessionRepo.findById(sessionId);
 		if (!session) throw new Error("Session not found");
 
-		// ✅ Check using existing availability logic
+		// Calculate endTime if not available
+		const endTime = session.endTime || this.calculateEndTime(session.startTime, session.hours);
+
+		// Check availability only for APPROVAL
 		if (status === SessionStatusEnum.APPROVED) {
 			const availableSlots = await this.getAvailabilityUseCase.execute(session.mentor.id, session.date, session.hours);
 			if (!availableSlots.includes(session.startTime)) {
@@ -31,10 +34,12 @@ export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 			}
 		}
 
+		// Update status for main session
 		const updatedSession = await this.sessionRepo.updateStatus(sessionId, status, rejectReason);
 		const allParticipants = updatedSession.participants;
 		const paidParticipants = allParticipants.filter((p) => p.paymentStatus === SessionPaymentStatusEnum.COMPLETED);
 
+		// Handle COMPLETED sessions (fund release + gamification)
 		if (status === SessionStatusEnum.COMPLETED) {
 			for (const p of paidParticipants) {
 				const user = await this.userRepo.findUserById(p.user.id);
@@ -47,8 +52,31 @@ export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 			await this.releaseSessionFundsUseCase.execute(sessionId);
 		}
 
-		const { title, msg, type } = SessionStatusNotificationMap[status];
+		// Auto reject overlapping sessions when APPROVED
+		if (status === SessionStatusEnum.APPROVED) {
+			const overlappingSessions = await this.sessionRepo.findOverlappingSessions(session.mentor.id, session.date, session.startTime, endTime, sessionId);
+			console.log("overlappingSessions: ", overlappingSessions);
 
+			for (const s of overlappingSessions) {
+				await this.sessionRepo.updateStatus(s.id, SessionStatusEnum.REJECTED, "Slot already booked");
+
+				// Notify each rejected session participant
+				const { title, msg, type } = SessionStatusNotificationMap[SessionStatusEnum.REJECTED];
+				for (const p of s.participants) {
+					await this.notifyUserUseCase.execute({
+						recipientId: p.user.id,
+						title,
+						message: msg(s.topic),
+						type,
+						isRead: false,
+						link: "/sessions",
+					});
+				}
+			}
+		}
+
+		// Notify main session participants about the final status
+		const { title, msg, type } = SessionStatusNotificationMap[status];
 		for (const p of allParticipants) {
 			await this.notifyUserUseCase.execute({
 				recipientId: p.user.id,
@@ -59,5 +87,12 @@ export class UpdateSessionStatusUsecase implements IUpdateSessionStatusUseCase {
 				link: "/sessions",
 			});
 		}
+	}
+
+	// Helper to calculate endTime if not present
+	private calculateEndTime(startTime: string, hours: number): string {
+		const [h, m] = startTime.split(":").map(Number);
+		const endHour = h + hours;
+		return `${endHour.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
 	}
 }

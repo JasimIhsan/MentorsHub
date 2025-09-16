@@ -10,6 +10,7 @@ import { FilterDropdown } from "@/components/mentor/session-history/FilterDropdo
 import { SessionList } from "@/components/mentor/session-history/SessionList";
 import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { fetchSessionHistoryAPI } from "@/api/session.api.service";
+import { convertSessionsArrayToLocal } from "@/utility/time-converter/conversion-helpers";
 
 export function MentorSessionHistoryPage() {
 	const [searchParams, setSearchParams] = useSearchParams();
@@ -33,7 +34,8 @@ export function MentorSessionHistoryPage() {
 		setLoading(true);
 		try {
 			const response = await fetchSessionHistoryAPI(user.id, filterOption, currentPage, sessionsPerPage);
-			setSessions(response.sessions);
+			const localSessions = convertSessionsArrayToLocal(response.sessions) as ISessionMentorDTO[];
+			setSessions(localSessions);
 			setTotalPages(Math.ceil(response.total / sessionsPerPage));
 		} catch (err: any) {
 			const message = err.message || "Failed to load session history.";

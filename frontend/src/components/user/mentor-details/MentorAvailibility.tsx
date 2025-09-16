@@ -3,6 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Calendar, Clock } from "lucide-react";
 import { WeekDay } from "@/interfaces/mentor.interface";
 import { formatTime } from "@/utility/time-data-formatter";
+import { convertUTCtoLocal } from "@/utility/time-converter/utcToLocal";
 
 interface AvailabilitySlot {
 	id: string;
@@ -44,15 +45,15 @@ const dayOfWeekMap: { [key: number]: WeekDay } = {
 };
 
 export function MentorAvailability({ selectedDay, setSelectedDay, availabilityData }: MentorAvailabilityProps) {
-	console.log("availabilityData: ", availabilityData);
 	// Initialize empty object if no availability data for weekly slots
 	const weeklyAvailability =
 		availabilityData?.weekly?.reduce((acc, slot) => {
 			const day = dayOfWeekMap[slot.dayOfWeek!];
 			if (!acc[day]) acc[day] = [];
+			const {startTime, endTime} = convertUTCtoLocal(slot.startTime, slot.endTime)
 			acc[day].push({
-				startTime: slot.startTime,
-				endTime: slot.endTime,
+				startTime,
+				endTime,
 				dayOfWeek: slot.dayOfWeek!,
 			});
 			return acc;
@@ -63,18 +64,14 @@ export function MentorAvailability({ selectedDay, setSelectedDay, availabilityDa
 		availabilityData?.special?.reduce((acc, slot) => {
 			const date = slot.date!.split("T")[0];
 			if (!acc[date]) acc[date] = [];
+			const {startTime, endTime, date: localDate} = convertUTCtoLocal(slot.startTime, slot.endTime, slot.date)
 			acc[date].push({
-				startTime: slot.startTime,
-				endTime: slot.endTime,
-				date: slot.date!,
+				startTime,
+				endTime,
+				date: localDate,
 			});
 			return acc;
 		}, {} as Record<string, { startTime: string; endTime: string; date: string }[]>) || ({} as Record<string, { startTime: string; endTime: string; date: string }[]>);
-
-	console.log(`Weekly Availability : `, weeklyAvailability);
-	console.log(`----------------------------------------`);
-	console.log(`Special Availability : `, specialAvailability);
-	console.log(`----------------------------------------`);
 
 	return (
 		<div className="space-y-6">

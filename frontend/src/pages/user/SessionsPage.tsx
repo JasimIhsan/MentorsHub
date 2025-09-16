@@ -18,6 +18,7 @@ import { SessionCard } from "@/components/user/session/SessionCard";
 import { CategoryFilter } from "@/components/user/session/CategoryFilter";
 import { CancelSessionDialog } from "@/components/user/session/CancelSessionDialog";
 import { SessionStatusEnum } from "@/interfaces/enums/session.status.enum";
+import { convertSessionsArrayToLocal } from "@/utility/time-converter/conversion-helpers";
 
 declare global {
 	interface Window {
@@ -86,7 +87,8 @@ export function SessionsPage() {
 				if (!sessionsResponse.success) {
 					throw new Error("No sessions data received");
 				}
-				setSessions(sessionsResponse.sessions);
+				const localSessions = convertSessionsArrayToLocal(sessionsResponse.sessions) as ISessionUserDTO[];
+				setSessions(localSessions);
 				setTotalPages(Math.ceil(sessionsResponse.total / itemsPerPage));
 			} catch (err: any) {
 				const message = err.response?.data?.message || "Failed to load data.";

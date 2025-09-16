@@ -21,6 +21,8 @@ import { CounterProposeDialog } from "@/components/common/reschedule/CounterProp
 import { ProposalCard } from "@/components/common/reschedule/ProposalCard";
 import { getStatusBadgeVariant } from "@/utility/session.status.badge";
 import { IRescheduleRequestDTO } from "@/interfaces/reschedule.interface";
+import { convertUTCtoLocal } from "@/utility/time-converter/utcToLocal";
+import { convertSessionToLocal } from "@/utility/time-converter/conversion-helpers";
 
 // Returns payment status badge component
 function getPaymentStatusBadge(status: SessionPaymentStatusEnum) {
@@ -70,7 +72,8 @@ export function SessionDetailsPage() {
 			try {
 				const response = await fetchSessionByUser(user.id!, sessionId);
 				if (response.success) {
-					setSession(response.session);
+					const localSession = convertSessionToLocal(response.session);
+					setSession(localSession);
 				}
 			} catch (error) {
 				if (error instanceof Error) {
@@ -81,13 +84,11 @@ export function SessionDetailsPage() {
 		fetchSession();
 	}, [user?.id, sessionId]);
 
-	console.log(`counter proposal : `, session?.rescheduleRequest?.counterProposal);
-
+	console.log(`session : `, session);
 	// Handle session cancellation
 	const handleCancelSession = async () => {
 		if (!user?.id || !session) return;
 		const isMentor = user.id === session.mentor._id;
-		console.log("isMentor: ", isMentor);
 		try {
 			const response = isMentor ? await cancelSessionByMentorAPI(user.id, session.id) : await cancelSessionAPI(user.id, session.id);
 			if (response.success) {
@@ -106,7 +107,11 @@ export function SessionDetailsPage() {
 			const response = await acceptProposalRescheduleAPI(user.id, rescheduleRequest.sessionId, isCounterProposal);
 			if (response.success) {
 				toast.success("Proposal accepted successfully.");
-				setSession(response.session);
+				const localSession = {
+					...response.session,
+					...convertUTCtoLocal(response.session.startTime, response.session.endTime, response.session.date),
+				};
+				setSession(localSession);
 			}
 		} catch (error) {
 			if (error instanceof Error) toast.error(error.message);
@@ -253,7 +258,18 @@ export function SessionDetailsPage() {
 							</h4>
 
 							{/* Current/Original Proposal */}
-							<ProposalCard proposal={rescheduleRequest.currentProposal} showActions={canTakeAction} onAccept={() => handleAcceptProposal(false)} onReject={handleCancelSession} title="Current Proposal" variant="default" />
+							<ProposalCard
+								proposal={rescheduleRequest.currentProposal}
+								showActions={
+									canTakeAction &&
+									!rescheduleRequest.counterProposal && // Hide actions if counter proposal exists
+									!isInitiator // Hide actions if user is the initiator
+								}
+								onAccept={() => handleAcceptProposal(false)}
+								onReject={handleCancelSession}
+								title="Current Proposal"
+								variant="default"
+							/>
 
 							{/* Counter Proposal */}
 							{rescheduleRequest.counterProposal && (
@@ -262,18 +278,26 @@ export function SessionDetailsPage() {
 										<ArrowRight className="w-4 h-4 text-gray-400" />
 										<span className="text-sm text-gray-600">Counter proposed</span>
 									</div>
-									<ProposalCard proposal={rescheduleRequest.counterProposal} title="Counter Proposal" variant="counter" showActions={canTakeAction} onAccept={() => handleAcceptProposal(true)} onReject={handleCancelSession} />
+									<ProposalCard
+										proposal={rescheduleRequest.counterProposal}
+										title="Counter Proposal"
+										variant="counter"
+										showActions={
+											canTakeAction && rescheduleRequest.lastActionBy !== user?.id // Hide actions if user initiated the counter proposal
+										}
+										onAccept={() => handleAcceptProposal(true)}
+										onReject={handleCancelSession}
+									/>
 								</>
 							)}
 
-							{/* Show actions for original proposal if no counter proposal */}
+							{/* Show counter propose button only if no counter proposal exists and user is not the initiator */}
 							{!rescheduleRequest.counterProposal && canTakeAction && !isInitiator && (
 								<div className="flex gap-2">
 									<Button onClick={() => setIsCounterProposeDialogOpen(true)} variant="outline">
 										<RefreshCw className="w-4 h-4 mr-2" />
 										Counter Propose
 									</Button>
-
 									<CounterProposeDialog session={session} userId={user?.id || ""} isOpen={isCounterProposeDialogOpen} onOpenChange={setIsCounterProposeDialogOpen} onSuccess={handleRescheduleSuccess} />
 								</div>
 							)}

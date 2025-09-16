@@ -33,7 +33,7 @@ export class SpecialAvailabilityRepositoryImpl implements ISpecialAvailabilityRe
 
 	async findByMentorId(mentorId: string): Promise<SpecialAvailabilityEntity[]> {
 		try {
-			const docs = await SpecialAvailabilityModel.find({ mentorId });
+			const docs = await SpecialAvailabilityModel.find({ mentorId }).sort({ date: 1, startTime: 1 });
 			return docs.map(SpecialAvailabilityEntity.fromDbDocument);
 		} catch (error) {
 			return handleExceptionError(error, "Error finding availability slots by mentor ID");
