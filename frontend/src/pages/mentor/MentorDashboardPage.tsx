@@ -14,6 +14,7 @@ import { MentorReviewRatingChart } from "@/components/mentor/dashboard/AverageRa
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { MentorReportDocument } from "@/components/mentor/dashboard/MentorReportDocument";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { convertSessionsArrayToLocal } from "@/utility/time-converter/conversion-helpers";
 
 export interface PerformanceData {
 	week: string;
@@ -65,8 +66,10 @@ export function MentorDashboardPage() {
 			try {
 				const response = await fetchMentorDashboardData(user?.id!);
 				if (!response) toast.error("Failed to fetch dashboard data");
-				setSessions(response.upcoming);
-				setRequests(response.requests);
+				const localSessions = convertSessionsArrayToLocal(response.upcoming) as ISessionMentorDTO[];
+				const localRequests = convertSessionsArrayToLocal(response.requests) as ISessionMentorDTO[];
+				setSessions(localSessions);
+				setRequests(localRequests);
 				setReviews(response.reviews);
 				setStats(response.stats);
 			} catch (error) {
@@ -77,30 +80,6 @@ export function MentorDashboardPage() {
 		};
 		fetchSessions();
 	}, [user?.id]);
-
-	// Fetch performance data when component mounts or filterPerformancePeriod changes
-	// useEffect(() => {
-	// 	const fetchData = async () => {
-	// 		setIsPerformanceLoading(true);
-	// 		setPerformanceError(null);
-	// 		try {
-	// 			const response = await fetchMetorPerfomanceChartData(user?.id!, filterPerformancePeriod);
-	// 			if (response.success) setPerformanceData(response.performance);
-	// 		} catch (err) {
-	// 			setPerformanceError("Failed to load performance data.");
-	// 			console.error(err);
-	// 		} finally {
-	// 			setIsPerformanceLoading(false);
-	// 		}
-	// 	};
-
-	// 	fetchData();
-	// }, [user?.id, filterPerformancePeriod]);
-
-	// Handle performance filter change
-	// const handlePerformanceFilterChange = (value: PeriodType) => {
-	// 	setFilterPerformancePeriod(value);
-	// };
 
 	// Fetch rating data when component mounts or filterRatingPeriod changes
 	useEffect(() => {
@@ -224,31 +203,6 @@ export function MentorDashboardPage() {
 					</CardContent>
 				</Card>
 			</div>
-
-			{/* <Card>
-				<CardHeader className="flex justify-between">
-					<div>
-						<CardTitle>Session Performance</CardTitle>
-						<CardDescription>Performance metrics for your sessions</CardDescription>
-					</div>
-					<div className="mb-4">
-						<Select value={filterPerformancePeriod} onValueChange={handlePerformanceFilterChange}>
-							<SelectTrigger className="w-[180px]">
-								<SelectValue placeholder="Select period" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="all">All Time</SelectItem>
-								<SelectItem value="month">Last Month</SelectItem>
-								<SelectItem value="sixMonths">Last 6 Months</SelectItem>
-								<SelectItem value="year">Last Year</SelectItem>
-							</SelectContent>
-						</Select>
-					</div>
-				</CardHeader>
-				<CardContent>
-					<MentorPerformanceChart data={performanceData} isLoading={isPerformanceLoading} error={performanceError} />
-				</CardContent>
-			</Card> */}
 		</div>
 	);
 }

@@ -8,7 +8,7 @@ dayjs.extend(timezone);
 export function convertLocaltoUTC(
   startTime: string,
   endTime: string,
-  date?: Date
+  date?: string
 ): { date?: Date; startTime: string; endTime: string } {
   const istZone = "Asia/Kolkata"; // IST timezone
 

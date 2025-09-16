@@ -10,6 +10,8 @@ import { calculateEndTime } from "@/utility/calculate.endTime";
 import { counterProposeRescheduleAPI } from "@/api/rescheduling.api.service";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
 import { Calendar, Clock } from "lucide-react";
+import { convertLocaltoUTC } from "@/utility/time-converter/localToUTC";
+import { convertUTCtoLocal } from "@/utility/time-converter/utcToLocal";
 
 interface CounterProposeDialogProps {
 	session: ISessionUserDTO | ISessionMentorDTO;
@@ -46,9 +48,11 @@ export function CounterProposeDialog({ session, userId, isOpen, onOpenChange, on
 	const handleSubmit = async () => {
 		if (!session.rescheduleRequest) return;
 		try {
-			const response = await counterProposeRescheduleAPI(userId, session.id, rescheduleStartTime, rescheduleEndTime, rescheduleMessage, new Date(rescheduleDate));
+			const { startTime, endTime, date } = convertLocaltoUTC(rescheduleStartTime, rescheduleEndTime, rescheduleDate);
+			const response = await counterProposeRescheduleAPI(userId, session.id, startTime, endTime, rescheduleMessage, date as Date);
 			if (response.success) {
-				onSuccess(response.request);
+				const localRequest = { ...response.request, ...convertUTCtoLocal(response.request.startTime, response.request.endTime, response.request.date) };
+				onSuccess(localRequest);
 				toast.success("Counter proposal sent successfully.");
 				resetForm();
 				onOpenChange(false);

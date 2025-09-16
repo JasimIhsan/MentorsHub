@@ -3,13 +3,13 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
-// import { SessionDetailsModal } from "@/components/custom/SessionDetailsModal";
 import { ISessionMentorDTO } from "@/interfaces/session.interface";
 import { fetchUpcomingSessionsByMentorAPI, updateSessionStatatusAPI } from "@/api/session.api.service";
 import { SessionList } from "@/components/mentor/upcoming-sessions/SessionList";
 import { SessionFilter } from "@/components/mentor/upcoming-sessions/SessionFilter";
 import { PaginationControls } from "@/components/custom/PaginationControls";
 import { SessionSkeleton } from "@/components/mentor/upcoming-sessions/LoadingSkeleton";
+import { convertSessionsArrayToLocal } from "@/utility/time-converter/conversion-helpers";
 
 export function MentorUpcomingSessionsPage() {
 	const [searchParams, setSearchParams] = useSearchParams();
@@ -64,7 +64,9 @@ export function MentorUpcomingSessionsPage() {
 				throw new Error("No sessions data received");
 			}
 
-			setSessions(response.sessions);
+			const localSession = convertSessionsArrayToLocal(response.sessions) as ISessionMentorDTO[];
+
+			setSessions(localSession);
 			setTotalPages(Math.ceil(response.total / sessionsPerPage));
 		} catch (err: any) {
 			const message = err.response?.message || "Failed to load sessions.";

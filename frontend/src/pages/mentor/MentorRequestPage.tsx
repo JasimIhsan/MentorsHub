@@ -8,7 +8,7 @@ import { RequestList } from "@/components/mentor/requests/RequestList";
 import { useSearchParams } from "react-router-dom";
 import { fetchSessionsByMentor } from "@/api/session.api.service";
 import { PaginationControls } from "@/components/custom/PaginationControls";
-import { convertUTCtoLocal } from "@/utility/time-converter/utcToLocal";
+import { convertSessionsArrayToLocal } from "@/utility/time-converter/conversion-helpers";
 
 export function MentorRequestsPage() {
 	const user = useSelector((state: RootState) => state.userAuth.user);
@@ -53,19 +53,8 @@ export function MentorRequestsPage() {
 			try {
 				const response = await fetchSessionsByMentor(user?.id as string, filterOption, activeTab, page, limit);
 
-				const requestsWithLocalTime = Array.isArray(response.requests)
-					? response.requests.map((req: ISessionMentorDTO) => {
-							// Convert start and end times to local
-							const { startTime, endTime, date } = convertUTCtoLocal(req.startTime, req.endTime, req.date ? new Date(req.date).toISOString() : undefined);
-
-							return {
-								...req,
-								startTime, // local start time
-								endTime, // local end time
-								date, // local date
-							};
-					  })
-					: [];
+				const localRequests = convertSessionsArrayToLocal(response.requests) as ISessionMentorDTO[];
+				const requestsWithLocalTime = Array.isArray(localRequests) ? localRequests : [];
 
 				setRequests(requestsWithLocalTime);
 				setTotalPages(Math.ceil((response.total || 0) / limit));

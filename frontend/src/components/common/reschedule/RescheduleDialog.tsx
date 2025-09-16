@@ -10,6 +10,8 @@ import { ISessionUserDTO } from "@/interfaces/session.interface";
 import { calculateEndTime } from "@/utility/calculate.endTime";
 import { requestSessionRescheduleAPI } from "@/api/rescheduling.api.service";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
+import { convertLocaltoUTC } from "@/utility/time-converter/localToUTC";
+import { convertUTCtoLocal } from "@/utility/time-converter/utcToLocal";
 
 interface RescheduleDialogProps {
 	session: ISessionUserDTO;
@@ -45,15 +47,17 @@ export function RescheduleDialog({ session, userId, isOpen, onOpenChange, onSucc
 	// Handle reschedule request submission
 	const handleSubmit = async () => {
 		try {
+			const { startTime, endTime, date } = convertLocaltoUTC(rescheduleStartTime, rescheduleEndTime, rescheduleDate);
 			const response = await requestSessionRescheduleAPI(session.id, {
 				userId,
-				date: rescheduleDate,
-				startTime: rescheduleStartTime,
-				endTime: rescheduleEndTime,
+				date: date as Date,
+				startTime,
+				endTime,
 				message: rescheduleMessage,
 			});
 			if (response.success) {
-				onSuccess(response.request); // Update session state with new reschedule request
+				const localRequest = { ...response.request, ...convertUTCtoLocal(response.request.startTime, response.request.endTime, response.request.date) };
+				onSuccess(localRequest);
 				toast.success(response.message || "Reschedule request sent successfully.");
 				resetForm();
 				onOpenChange(false);

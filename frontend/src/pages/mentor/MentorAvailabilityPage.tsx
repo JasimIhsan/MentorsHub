@@ -175,7 +175,7 @@ export function MentorAvailabilityPage() {
 
 				response.slots.forEach((slot: IDateSlot) => {
 					// Convert UTC -> local time
-					const { startTime, endTime, date: localDateStr } = convertUTCtoLocal(slot.startTime, slot.endTime, new Date(slot.date));
+					const { startTime, endTime, date: localDateStr } = convertUTCtoLocal(slot.startTime, slot.endTime, slot.date);
 
 					// Use localDateStr as key for easier UI grouping
 					const slotDateKey = localDateStr; // "YYYY-MM-DD"
@@ -344,7 +344,7 @@ export function MentorAvailabilityPage() {
 		e.preventDefault();
 		if (!user?.id) return;
 
-		const utcSlot = convertLocaltoUTC(newDateSlot.startTime, newDateSlot.endTime, new Date(newDateSlot.date));
+		const utcSlot = convertLocaltoUTC(newDateSlot.startTime, newDateSlot.endTime, newDateSlot.date);
 		const slot = {
 			date: utcSlot.date?.toISOString().substring(0, 10)!,
 			startTime: utcSlot.startTime,
