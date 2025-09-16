@@ -148,7 +148,7 @@ export function RequestSessionPage() {
 	};
 
 	// Convert local times to UTC before sending
-	const utcTimes = time ? convertLocaltoUTC(time, calculateEndTime(time, hours), date || undefined) : { startTime: "", endTime: "" };
+	const utcTimes = time ? convertLocaltoUTC(time, calculateEndTime(time, hours), date ? date.toISOString() : undefined) : { startTime: "", endTime: "" };
 
 	const requestData: SessionData = {
 		mentorId: mentorId,
