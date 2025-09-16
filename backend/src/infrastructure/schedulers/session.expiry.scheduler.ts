@@ -6,7 +6,7 @@ import { rescheduleRequestRepository } from "../composer";
 export const startSessionExpiryJob = () => {
 	console.log("🟢 Cron Job: Session Expiry Job Initialized");
 
-	cron.schedule("*/15 * * * *", async () => {
+	cron.schedule("* * * * *", async () => {
 		console.log("⏰ Cron Job Running: Checking for expirable sessions (every 15 minutes)");
 
 		const repo = new SessionRepositoryImpl();
@@ -21,7 +21,7 @@ export const startSessionExpiryJob = () => {
 				await rescheduleRequestRepository.update(request);
 			}
 
-			console.log(`🔴 Session ${session.id} marked as expired`);
+			console.log(`🔴 Session ${session.id} (${session.topic}) marked as expired`);
 		}
 	});
 };

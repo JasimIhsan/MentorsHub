@@ -245,17 +245,14 @@ export class SessionRepositoryImpl implements ISessionRepository {
 		const expirable = sessions.filter((session) => {
 			const [hours, minutes] = session.endTime.split(":").map(Number);
 
-			// STEP 1: Convert session.date (UTC midnight) → IST date
-			const sessionDateIST = new Date(session.date.getTime() + 5.5 * 60 * 60 * 1000); // add 5:30 hrs for IST
+			// session.date is already UTC → directly set end time in UTC
+			const sessionEnd = new Date(session.date);
+			sessionEnd.setUTCHours(hours);
+			sessionEnd.setUTCMinutes(minutes);
+			sessionEnd.setUTCSeconds(0);
 
-			// STEP 2: Set end time in IST
-			sessionDateIST.setHours(hours);
-			sessionDateIST.setMinutes(minutes);
-			sessionDateIST.setSeconds(0);
-
-			// STEP 3: Compare with current IST time
-			const nowIST = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
-			return sessionDateIST < nowIST;
+			// Compare directly with current UTC time
+			return sessionEnd < now;
 		});
 
 		console.log("sessions:", sessions);
