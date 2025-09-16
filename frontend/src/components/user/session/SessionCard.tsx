@@ -15,6 +15,7 @@ import { ISessionUserDTO } from "@/interfaces/session.interface";
 import { formatDate, formatTime } from "@/utility/time-data-formatter";
 import { toast } from "sonner";
 import { requestSessionRescheduleAPI } from "@/api/rescheduling.api.service";
+import { convertLocaltoUTC } from "@/utility/time-converter/localToUTC";
 
 interface SessionCardProps {
 	session: ISessionUserDTO;
@@ -66,9 +67,12 @@ export function SessionCard({ session, isRazorpayLoaded, setShowCancelDialog, se
 	// Handle reschedule form submission
 	const handleRescheduleSubmit = async () => {
 		try {
+			const utcData = convertLocaltoUTC(rescheduleData.date, rescheduleData.startTime, rescheduleData.endTime);
 			const response = await requestSessionRescheduleAPI(session.id, {
 				userId: session.userId,
-				...rescheduleData,
+				date: utcData.date as Date,
+				...utcData,
+				message: rescheduleData.message,
 			});
 			if (response.success) {
 				setShowRescheduleModal(false);
