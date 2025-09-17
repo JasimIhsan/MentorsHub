@@ -15,6 +15,7 @@ import { markAllNotificationsAsReadThunk, markNotificationAsReadThunk } from "@/
 import { ISessionUserDTO } from "@/interfaces/session.interface";
 import { IMentorDTO } from "@/interfaces/mentor.interface";
 import TopRatedMentors from "@/components/user/Dashboard/MentorsReadyNow";
+import { convertSessionsArrayToLocal } from "@/utility/time-converter/conversion-helpers";
 
 export const DashboardPage: React.FC = () => {
 	const user = useSelector((state: RootState) => state.userAuth.user) as UserInterface | null;
@@ -34,7 +35,8 @@ export const DashboardPage: React.FC = () => {
 			try {
 				const data = await fetchDashboardDatas(user?.id!);
 				if (data) {
-					setUpcomingSessions(data.sessions);
+					const localSessions = convertSessionsArrayToLocal(data.sessions) as ISessionUserDTO[];
+					setUpcomingSessions(localSessions);
 					setTopRatedMentor(data.mentor);
 				}
 			} catch (error) {
