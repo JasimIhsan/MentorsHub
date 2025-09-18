@@ -7,8 +7,10 @@ import { DeleteUserUseCase } from "./users.tab/delete.user.usecase";
 import { UpdateUserUsecase } from "./users.tab/update.user.usecase";
 import { VerifyMentorApplicationUseCase } from "./mentor-application.tab/verify.mentor.application.usecase";
 import { notifyUserUseCase } from "../notification/composer";
+import { GetAdminDetailsUseCase } from "./auth/get.admin.details.usecase";
 
 export const adminLoginUsecase = new AdminLoginUsecase(adminRepository, tokenService);
+export const getAdminDetailsUsecase = new GetAdminDetailsUseCase(adminRepository);
 export const getAllUsersUsecase = new GetAllUsersUsecase(userRepository);
 export const createUserUsecase = new CreateUserUsecase(userRepository, hashService);
 export const updateUserStatusUseCase = new UpdateUserStatusUsecase(userRepository);

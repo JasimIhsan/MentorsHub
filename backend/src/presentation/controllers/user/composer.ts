@@ -50,10 +50,11 @@ import { GetAllListedGamificationTasksController } from "./gamification/get.all.
 import { getAllListedGamificationTasksUseCase, getUserProgressUseCase } from "../../../application/usecases/gamification/composer";
 import { GetUserProgressController } from "./gamification/get.user.progress.controller";
 import { GetSessionByUserController } from "./session/get.session.by.user.controller";
+import { getAdminDetailsUsecase } from "../../../application/usecases/admin/composer";
 
 export const signupController = new SignupController(signupUseCase);
 export const signinController = new SigninController(signinUseCase);
-export const refreshController = new RefreshTokenController(refreshUseCase);
+export const refreshController = new RefreshTokenController(refreshUseCase, getUserProfileUsecase, getAdminDetailsUsecase);
 export const forgotPasswordController = new ForgotPasswrodController(forgotPasswordUseCase);
 export const verifyResetTokenController = new VerifyResetTokenController(verifyResetTokenUseCase);
 export const resetPasswordController = new ResetPasswordController(resetPasswordUseCase);

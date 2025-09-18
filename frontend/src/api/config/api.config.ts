@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
+import { toast } from "sonner";
 
 const server_url = import.meta.env.VITE_SERVER_URL as string;
 const baseURL = `${server_url}/api`;
@@ -13,7 +14,7 @@ export const setAccessToken = (token: string) => {
 };
 
 // ===== REFRESH CLIENT (NO INTERCEPTORS) =====
-const tokenClient: AxiosInstance = axios.create({
+export const tokenClient: AxiosInstance = axios.create({
 	baseURL,
 	withCredentials: true,
 });
@@ -94,6 +95,7 @@ axiosInstance.interceptors.response.use(
 		}
 
 		if (error.response?.status === 403) {
+			toast.error("Caught 403 error, please log out and log back in.");
 			localStorage.removeItem("persist:root");
 			window.location.href = "/authenticate";
 		}

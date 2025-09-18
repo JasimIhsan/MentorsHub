@@ -3,15 +3,24 @@ import { RefreshTokenUseCase } from "../../../../application/usecases/user/authe
 import { Payload } from "../../../../application/interfaces/usecases/user/token.service.interface";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
+import { IGetUserProfileUseCase } from "../../../../application/interfaces/usecases/user/user.profile.usecase.interfaces";
+import { IGetAdminDetailsUseCase } from "../../../../application/interfaces/usecases/admin/admin.auth.interface";
 
 export class RefreshTokenController {
-	constructor(private refreshUsecase: RefreshTokenUseCase) {}
+	constructor(private refreshUsecase: RefreshTokenUseCase, private getUserProfileUsecase: IGetUserProfileUseCase, private getAdminDetailsUsecase: IGetAdminDetailsUseCase) {}
 
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const user = req.user as Payload;
 			const newAccessToken = this.refreshUsecase.execute(user.userId, user.isAdmin as boolean);
 			res.clearCookie("access_token");
+
+			let userProfile;
+			if (!user.isAdmin) {
+				userProfile = await this.getUserProfileUsecase.execute(user.userId);
+			} else {
+				userProfile = await this.getAdminDetailsUsecase.execute(user.userId);
+			}
 
 			res.cookie("access_token", newAccessToken, {
 				httpOnly: true,
@@ -20,7 +29,7 @@ export class RefreshTokenController {
 				maxAge: parseInt(process.env.JWT_ACCESS_TOKEN_EXPIRES as string), // 5 minutes
 			});
 
-			res.status(HttpStatusCode.OK).json({ success: true, accessToken: newAccessToken, message: "New access token generated" });
+			res.status(HttpStatusCode.OK).json({ success: true, accessToken: newAccessToken, user: userProfile, isAdmin: user.isAdmin, message: "New access token generated" });
 		} catch (error) {
 			logger.error(`❌ Error in RefreshTokenController: ${error}`);
 			next(error);
