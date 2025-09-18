@@ -18,7 +18,7 @@ const QuickLinks: React.FC = () => {
           </Link>
         </Button>
         <Button variant="outline" className="h-auto py-4 justify-start text-left min-w-[200px]" asChild>
-          <Link to="/ready-now" className="flex flex-col items-start">
+          <Link to="/browse" className="flex flex-col items-start">
             <span className="font-medium">Mentors Ready Now</span>
             <span className="text-xs text-muted-foreground">Connect with available mentors</span>
           </Link>

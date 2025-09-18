@@ -23,7 +23,7 @@ const TopRatedMentors: React.FC<TopRatedMentorsProps> = ({ mentors, isLoading })
 						<CardDescription className="text-sm sm:text-base">Connect with our highest-rated mentors</CardDescription>
 					</div>
 					<Button variant="ghost" size="sm" asChild className="w-full sm:w-auto">
-						<Link to="/top-rated">View All</Link>
+						<Link to="/browse">View All</Link>
 					</Button>
 				</div>
 			</CardHeader>

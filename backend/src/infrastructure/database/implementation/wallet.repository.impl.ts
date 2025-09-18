@@ -51,10 +51,18 @@ export class WalletRepositoryImpl implements IWalletRepository {
 
 	async updateBalance(userId: string, amount: number, type: TransactionsTypeEnum = TransactionsTypeEnum.CREDIT, role: RoleEnum = RoleEnum.USER): Promise<WalletEntity | null> {
 		try {
-			let roleQuery: any = role === RoleEnum.ADMIN ? RoleEnum.ADMIN : { $in: [RoleEnum.USER, RoleEnum.MENTOR] };
 			const updateAmount = type === TransactionsTypeEnum.CREDIT ? amount : -amount;
+			const userObjectId = new mongoose.Types.ObjectId(userId);
 
-			const wallet = await WalletModel.findOneAndUpdate({ userId, role: roleQuery }, { $inc: { balance: updateAmount } }, { new: true });
+			let query;
+			if (role === RoleEnum.ADMIN) {
+				query = { userId: userObjectId, role: RoleEnum.ADMIN };
+			} else {
+				query = { userId: userObjectId, role: { $in: [RoleEnum.USER, RoleEnum.MENTOR] } };
+			}
+
+			const wallet = await WalletModel.findOneAndUpdate(query, { $inc: { balance: updateAmount } }, { new: true });
+
 			return wallet ? WalletEntity.fromDBDocument(wallet) : null;
 		} catch (error) {
 			return handleExceptionError(error, "Error updating wallet balance");
@@ -155,7 +163,7 @@ export class WalletRepositoryImpl implements IWalletRepository {
 
 	async revenueChartData(
 		adminId: string,
-		months: number, // 0 = all, 1 = last‑30‑days, 6 = 6 months, 12 = 1 year
+		months: number // 0 = all, 1 = last‑30‑days, 6 = 6 months, 12 = 1 year
 	): Promise<{ name: string; total: number }[]> {
 		try {
 			/* ---------- 1. Match filter ------------------------------------ */
