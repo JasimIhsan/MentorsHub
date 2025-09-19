@@ -22,6 +22,7 @@ export function AdminMentorApplicationsPage() {
 	const [limit] = useState(10);
 	const [selectedMentor, setSelectedMentor] = useState<IMentorDTO | null>(null);
 	const { loadingMentors, mentors, total } = useMentors({ page, limit, search: debouncedSearchTerm, status: currentTab });
+	console.log("application card");
 
 	useEffect(() => {
 		setMentorsList(mentors);

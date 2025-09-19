@@ -20,6 +20,7 @@ interface ApplicationCardProps {
 }
 
 export default function ApplicationCard({ application, updateMentorStatus, onViewDetails }: ApplicationCardProps) {
+	console.log('application: ', application);
 	const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
 	const [isDocumentsDialogOpen, setIsDocumentsDialogOpen] = useState(false);
 	const [rejectionReason, setRejectionReason] = useState("");

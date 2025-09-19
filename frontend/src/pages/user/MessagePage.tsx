@@ -307,26 +307,42 @@ export function MessagePage() {
 		return participants.find((user) => user.id !== currentUserId) || null;
 	};
 
+	// Handle mentor selection
 	const handleMentorSelect = (mentor: IMentorDTO) => {
-		if (!mentor?.userId) return;
-		const tempChat: Chat = {
-			id: "",
-			participants: [
-				{
-					id: mentor.userId,
-					firstName: mentor.firstName,
-					lastName: mentor.lastName,
-					avatar: mentor.avatar || "/placeholder.svg",
-					status: "offline",
-				},
-			],
-			unreadCount: 0,
-			isGroupChat: false,
-		};
-		setTempChat(tempChat);
-		setSelectedChatId(undefined);
-		if (isMobile) {
-			setShowChat(true);
+		if (!mentor?.userId || !user) return;
+
+		// Check for existing chat with this mentor
+		const existingChat = chats.find((chat) => {
+			if (chat.isGroupChat) return false;
+			const partner = getChatPartner(user.id!, chat.participants);
+			return partner?.id === mentor.userId;
+		});
+
+		if (existingChat) {
+			// If chat exists, select it and clear tempChat
+			handleChatSelect(existingChat.id);
+			setTempChat(null);
+		} else {
+			// Create temporary chat if no existing chat is found
+			const tempChat: Chat = {
+				id: "",
+				participants: [
+					{
+						id: mentor.userId,
+						firstName: mentor.firstName,
+						lastName: mentor.lastName,
+						avatar: mentor.avatar || "/placeholder.svg",
+						status: "offline",
+					},
+				],
+				unreadCount: 0,
+				isGroupChat: false,
+			};
+			setTempChat(tempChat);
+			setSelectedChatId(undefined);
+			if (isMobile) {
+				setShowChat(true);
+			}
 		}
 	};
 

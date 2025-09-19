@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
@@ -18,11 +18,7 @@ interface UserStats {
 	badges?: string[]; // Added to store earned badges
 }
 
-interface GamificationCardProps {
-	onTestClick: () => Promise<void>;
-}
-
-const GamificationCard: React.FC<GamificationCardProps> = ({ onTestClick }) => {
+const GamificationCard = () => {
 	const [userStats, setUserStats] = useState<UserStats | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const userId = useSelector((state: RootState) => state.userAuth.user?.id);

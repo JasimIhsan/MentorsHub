@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { UserInterface } from "@/interfaces/interfaces";
 import { AppDispatch, RootState } from "@/store/store";
-import axiosInstance from "@/api/config/api.config";
 import WelcomeHeader from "@/components/user/Dashboard/WelcomeSection";
 import GamificationCard from "@/components/user/Dashboard/GamificationCard";
 import UpcomingSessions from "@/components/user/Dashboard/UpcomingSessions";
@@ -55,15 +54,6 @@ export const DashboardPage: React.FC = () => {
 		return null;
 	}
 
-	const test = async () => {
-		try {
-			const response = await axiosInstance.get("/user/test");
-			toast.success(response.data.message);
-		} catch (error: any) {
-			toast.error(error.response.data.message);
-		}
-	};
-
 	const markAsRead = async (notificationId: string) => {
 		dispatch(markNotificationAsReadThunk(notificationId));
 	};
@@ -77,7 +67,7 @@ export const DashboardPage: React.FC = () => {
 			<div className="flex flex-col gap-8">
 				<WelcomeHeader user={user} />
 				<section className="flex flex-col gap-4 px-10 md:px-20 xl:px-25">
-					<GamificationCard onTestClick={test} />
+					<GamificationCard />
 					<UpcomingSessions isLoading={loading} sessions={upcomingSessions} />
 					<Notifications isLoading={isLoading} notifications={notifications} markAsRead={markAsRead} markAllAsRead={markAllAsRead} userId={user.id as string} />
 				</section>
