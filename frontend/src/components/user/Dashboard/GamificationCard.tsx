@@ -153,7 +153,7 @@ const GamificationCard: React.FC<GamificationCardProps> = ({ onTestClick }) => {
 							</div>
 						</div>
 					</div>
-					<Button onClick={onTestClick}>Test</Button>
+					{/* <Button onClick={onTestClick}>Test</Button> */}
 					<div className="flex flex-col gap-2">
 						<Button asChild size="sm" className=" hover:bg-secondary">
 							<Link to="/gamification">View Progress</Link>
