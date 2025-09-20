@@ -30,6 +30,19 @@ export class RequestSessionUseCase implements IRequestSessionUseCase {
 		const mentorProfile = await this.mentorRepo.findMentorByUserId(input.mentorId);
 		if (!mentorProfile) throw new Error("Mentor not found");
 
+		// const upcomingSessions = await this.sessionRepo.findByUser(input.userId, { page: 1, limit: 5, status: SessionStatusEnum.UPCOMING });
+		
+		// const sessionsWithMentor = upcomingSessions.sessions.filter((session) => {
+		// 	const now = new Date()
+		// 	const todayDate = now.getDate();
+		// 	const lastWeek = now.setDate(todayDate - 7);
+
+
+		// 	return input.mentorId === session.mentor.id && now.setDate(lastWeek) < session.date
+		// });
+
+		// if(sessionsWithMentor.length > 3) throw new Error("Already have 3 sessions with this mentor.");
+
 		// Check if date is exactly tomorrow
 		// const today = new Date();
 		// today.setHours(0, 0, 0, 0); // midnight today
