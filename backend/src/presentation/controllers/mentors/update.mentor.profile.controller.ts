@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { IUpdateMentorProfileUseCase } from "../../../application/interfaces/usecases/mentors/mentor.profile.interfaces";
 import { logger } from "../../../infrastructure/utils/logger";
+import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 
 export class UpdateMentorProfileController {
 	constructor(private readonly updateMentorProfileUseCase: IUpdateMentorProfileUseCase) {}
@@ -74,7 +75,7 @@ export class UpdateMentorProfileController {
 				avatar,
 			);
 
-			res.status(200).json({
+			res.status(HttpStatusCode.OK).json({
 				success: true,
 				message: "Mentor profile and user details updated successfully",
 				mentor,
