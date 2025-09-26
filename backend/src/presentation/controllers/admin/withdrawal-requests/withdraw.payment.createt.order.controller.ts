@@ -3,11 +3,11 @@ import { IWithdrawPaymentCreateOrderUseCase } from "../../../../application/inte
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class WithdrawPaymentCreateOrderController {
-	constructor(private readonly _useCase: IWithdrawPaymentCreateOrderUseCase) {}
+	constructor(private readonly withdrawPaymentCreateOrderUseCase: IWithdrawPaymentCreateOrderUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { requestId } = req.params;
-			const order = await this._useCase.execute(requestId);
+			const order = await this.withdrawPaymentCreateOrderUseCase.execute(requestId);
 			res.status(HttpStatusCode.OK).json({ success: true, order });
 		} catch (error) {
 			next(error);

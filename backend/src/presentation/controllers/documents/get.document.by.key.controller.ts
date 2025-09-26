@@ -9,7 +9,7 @@ export interface CustomRequest extends Request {
 }
 
 export class GetDocumentByKeyController {
-	constructor(private readonly _useCase: IGetDocumentByKeyUseCase) {}
+	constructor(private readonly getDocumentByKeyUseCase: IGetDocumentByKeyUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const customReq = req as CustomRequest;
@@ -17,7 +17,7 @@ export class GetDocumentByKeyController {
 			const user = customReq.user;
 			const documentKey = req.query.documentKey;
 
-			const document = await this._useCase.execute({ mentorId, user, documentKey: documentKey as string });
+			const document = await this.getDocumentByKeyUseCase.execute({ mentorId, user, documentKey: documentKey as string });
 
 			// Redirect to S3 URL, user won’t see it in frontend code
 			// res.redirect(document);

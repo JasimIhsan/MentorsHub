@@ -4,13 +4,13 @@ import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
 
 export class CouterRescheduleRequestController {
-	constructor(private readonly _useCase: ICounterRescheduleRequestUseCase) {}
+	constructor(private readonly counterRescheduleRequestUseCase: ICounterRescheduleRequestUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { sessionId, userId } = req.params;
 			const { startTime, endTime, message, date } = req.body;
 
-			const request = await this._useCase.execute(userId, sessionId, startTime, endTime, message, new Date(date));
+			const request = await this.counterRescheduleRequestUseCase.execute(userId, sessionId, startTime, endTime, message, new Date(date));
 
 			res.status(HttpStatusCode.OK).json({ success: true, request, message: "Request sent successfully" });
 		} catch (error) {

@@ -4,13 +4,13 @@ import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 import { logger } from "../../../infrastructure/utils/logger";
 
 export class RescheduleSessionController {
-	constructor(private readonly _useCase: ICreateRescheduleRequestUsecase) {}
+	constructor(private readonly createRescheduleRequestUseCase: ICreateRescheduleRequestUsecase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { sessionId } = req.params;
 			const { userId, date, startTime, endTime, message } = req.body;
 
-			const request = await this._useCase.execute({
+			const request = await this.createRescheduleRequestUseCase.execute({
 				proposedDate: new Date(date),
 				proposedStartTime: startTime,
 				proposedEndTime: endTime,

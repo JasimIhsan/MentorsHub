@@ -4,11 +4,11 @@ import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 
 export class RejectWithdrawalRequestController {
-	constructor(private readonly _useCase: IRejectWithdrawalRequestUseCase) {}
+	constructor(private readonly rejectWithdrawalRequestUseCase: IRejectWithdrawalRequestUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { requestId } = req.params;
-			const reqeust = await this._useCase.execute(requestId);
+			const reqeust = await this.rejectWithdrawalRequestUseCase.execute(requestId);
 			res.status(HttpStatusCode.OK).json({ success: true, reqeust, message: "Request rejected successfully" });
 		} catch (error) {
 			logger.error("❌ Error in RejectWithdrawalRequestController: ", error);

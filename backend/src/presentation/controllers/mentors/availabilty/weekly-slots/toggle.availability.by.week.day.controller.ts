@@ -4,12 +4,12 @@ import { logger } from "../../../../../infrastructure/utils/logger";
 import { HttpStatusCode } from "../../../../../shared/constants/http.status.codes";
 
 export class ToggleAvailabilityByWeekDayController {
-	constructor(private readonly _useCase: IToggleAvailabilityByWeekDayUseCase) {}
+	constructor(private readonly toggleAvailabilityByWeekDayUseCase: IToggleAvailabilityByWeekDayUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { mentorId } = req.params;
 			const { dayOfWeek, status } = req.body;
-			await this._useCase.execute(mentorId, parseInt(dayOfWeek), status);
+			await this.toggleAvailabilityByWeekDayUseCase.execute(mentorId, parseInt(dayOfWeek), status);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Availability updated successfully" });
 		} catch (error) {
 			logger.error(`❌ Error in ToggleAvailabilityByWeekDayController: ${error}`);

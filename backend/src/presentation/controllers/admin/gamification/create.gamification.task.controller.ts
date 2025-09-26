@@ -4,12 +4,12 @@ import { logger } from "../../../../infrastructure/utils/logger";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class CreateGamificationTaskController {
-	constructor(private useCase: ICreateGamificationTaskUseCase) {}
+	constructor(private readonly createGamificationTaskUseCase: ICreateGamificationTaskUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { title, xpReward, targetCount, actionType } = req.body;
 
-			const task = await this.useCase.execute({ title, xpReward, targetCount, actionType });
+			const task = await this.createGamificationTaskUseCase.execute({ title, xpReward, targetCount, actionType });
 
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Task created successfully", task });
 		} catch (error) {

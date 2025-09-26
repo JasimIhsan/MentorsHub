@@ -4,11 +4,11 @@ import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 import { logger } from "../../../../infrastructure/utils/logger";
 
 export class GetWithdrawalRequestsController {
-	constructor(private readonly _useCase: IGetWithdrawalRequestsUseCase) {}
+	constructor(private readonly getWithdrawalRequestsUseCase: IGetWithdrawalRequestsUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { page, limit, status, searchTerm } = req.query;
-			const result = await this._useCase.execute({ page: parseInt(page as string), limit: parseInt(limit as string), status: status as string, searchTerm: searchTerm as string });
+			const result = await this.getWithdrawalRequestsUseCase.execute({ page: parseInt(page as string), limit: parseInt(limit as string), status: status as string, searchTerm: searchTerm as string });
 
 			res.status(HttpStatusCode.OK).json({ success: true, requests: result.requests, total: result.totalCount });
 		} catch (error) {

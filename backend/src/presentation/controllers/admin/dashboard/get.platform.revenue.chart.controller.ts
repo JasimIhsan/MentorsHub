@@ -4,7 +4,7 @@ import { logger } from "../../../../infrastructure/utils/logger";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class GetPlatformRevenueChartDataController {
-	constructor(private readonly _useCase: IGetPlatformRevenueChartDataUseCase) {}
+	constructor(private readonly getPlatformRevenueChartDataUseCase: IGetPlatformRevenueChartDataUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const adminId = req.params.adminId;
@@ -26,7 +26,7 @@ export class GetPlatformRevenueChartDataController {
 					break;
 			}
 
-			const chartData = await this._useCase.execute(adminId, months);
+			const chartData = await this.getPlatformRevenueChartDataUseCase.execute(adminId, months);
 
 			res.status(HttpStatusCode.OK).json({ success: true, chartData });
 		} catch (error) {

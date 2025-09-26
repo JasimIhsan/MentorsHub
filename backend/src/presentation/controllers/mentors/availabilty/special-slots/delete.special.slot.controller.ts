@@ -4,11 +4,11 @@ import { HttpStatusCode } from "../../../../../shared/constants/http.status.code
 import { logger } from "../../../../../infrastructure/utils/logger";
 
 export class DeleteSpecialSlotController {
-	constructor(private readonly _useCase: IDeleteSpecialSlotUseCase) {}
+	constructor(private readonly deleteSpecialSlotUseCase: IDeleteSpecialSlotUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { mentorId, slotId } = req.params;
-			await this._useCase.execute(slotId, mentorId);
+			await this.deleteSpecialSlotUseCase.execute(slotId, mentorId);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Slot deleted successfully" });
 		} catch (error) {
 			logger.error(`❌ Error in DeleteSpecialSlotController: ${error}`);

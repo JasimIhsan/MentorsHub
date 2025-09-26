@@ -3,7 +3,7 @@ import { IGetUsersGrowthChartDataUseCase } from "../../../../application/interfa
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class GetUsersGrowthChartDataController {
-	constructor(private readonly _useCase: IGetUsersGrowthChartDataUseCase) {}
+	constructor(private readonly getUsersGrowthChartDataUseCase: IGetUsersGrowthChartDataUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const adminId = req.params.adminId;
@@ -29,7 +29,7 @@ export class GetUsersGrowthChartDataController {
 				}
 			}
 
-			const chartData = await this._useCase.execute(adminId, months);
+			const chartData = await this.getUsersGrowthChartDataUseCase.execute(adminId, months);
 			res.status(HttpStatusCode.OK).json({ success: true, chartData });
 		} catch (error) {
 			next(error);

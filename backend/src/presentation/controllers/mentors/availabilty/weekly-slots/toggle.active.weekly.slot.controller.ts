@@ -4,11 +4,11 @@ import { HttpStatusCode } from "../../../../../shared/constants/http.status.code
 import { logger } from "../../../../../infrastructure/utils/logger";
 
 export class ToggleActiveWeeklyAvailabilityController {
-	constructor(private readonly _useCase: IToggleAvailabilityWeeklySlotUseCase) {}
+	constructor(private readonly toggleAvailabilityWeeklySlotUseCase: IToggleAvailabilityWeeklySlotUseCase) {}
 	async handle(req: Request, res: Response, next: NextFunction) {
 		try {
 			const { mentorId, slotId } = req.params;
-			await this._useCase.execute(slotId, mentorId);
+			await this.toggleAvailabilityWeeklySlotUseCase.execute(slotId, mentorId);
 			res.status(HttpStatusCode.OK).json({ success: true, message: "Slot updated successfully" });
 		} catch (error) {
 			logger.error(`❌ Error in ToggleActiveWeeklyAvailabilityController: ${error}`);
