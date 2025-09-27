@@ -62,7 +62,7 @@ export const AppRoutes = () => {
 		};
 
 		AuthUser();
-	}, [dispatch, navigate, location.pathname]);
+	}, []);
 
 	if (isLoading) return <LoadingSpinner />;
 
