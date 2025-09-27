@@ -6,7 +6,7 @@ import { rescheduleRequestRepository } from "../composer";
 export const startSessionExpiryJob = () => {
 	console.log("🟢 Cron Job: Session Expiry Job Initialized");
 
-	cron.schedule("* * * * *", async () => {
+	cron.schedule("*/15 * * * *", async () => {
 		console.log("⏰ Cron Job Running: Checking for expirable sessions (every 15 minutes)");
 
 		const repo = new SessionRepositoryImpl();
