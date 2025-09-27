@@ -20,7 +20,7 @@ export function MentorSessionHistoryPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [selectedSession, setSelectedSession] = useState<ISessionMentorDTO | null>(null);
 	const user = useSelector((state: RootState) => state.userAuth.user);
-	const filterOption = searchParams.get("status") || "completed";
+	const filterOption = searchParams.get("status") || "completed" || "expired";
 	const currentPage = parseInt(searchParams.get("page") || "1", 10);
 	const sessionsPerPage = 5;
 

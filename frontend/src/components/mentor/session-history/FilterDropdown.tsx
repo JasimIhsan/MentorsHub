@@ -17,6 +17,7 @@ export function FilterDropdown({ filterOption, onFilterChange }: FilterDropdownP
 			<DropdownMenuContent>
 				<DropdownMenuItem onClick={() => onFilterChange("completed")}>Completed</DropdownMenuItem>
 				<DropdownMenuItem onClick={() => onFilterChange("canceled")}>Canceled</DropdownMenuItem>
+				<DropdownMenuItem onClick={() => onFilterChange("expired")}>Expired</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

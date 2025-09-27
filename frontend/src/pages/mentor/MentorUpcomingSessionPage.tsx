@@ -110,7 +110,7 @@ export function MentorUpcomingSessionsPage() {
 	}
 
 	return (
-		<div className="w-full">
+		<div className="w-full xl:w-[80%]">
 			<div className="flex flex-col gap-8">
 				<div className="flex justify-between items-center">
 					<div className="flex flex-col">
