@@ -1,19 +1,19 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IGetMentorWeeklyPerformanceUseCase } from "../../../../application/interfaces/usecases/mentors/mentor.dashboard.interface";
 import { logger } from "../../../../infrastructure/utils/logger";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class GetMentorWeeklyPerformanceController {
-	constructor(private readonly getMentorWeeklyPerformanceUseCase: IGetMentorWeeklyPerformanceUseCase) {}
-	async handle(req: Request, res: Response, next: NextFunction) {
-		try {
-			const mentorId = req.params.mentorId;
-			const period = req.query.period;
-			const performance = await this.getMentorWeeklyPerformanceUseCase.execute(mentorId, period as "all" | "month" | "sixMonths" | "year");
-			res.status(HttpStatusCode.OK).json({ success: true, performance });
-		} catch (error) {
-			logger.error(`❌ Error in GetMentorWeeklyPerformanceController: ${error}`);
-			next(error);
-		}
-	}
+   constructor(private readonly getMentorWeeklyPerformanceUseCase: IGetMentorWeeklyPerformanceUseCase) {}
+   async handle(req: Request, res: Response, next: NextFunction) {
+      try {
+         const mentorId = Array.isArray(req.params.mentorId) ? req.params.mentorId[0] : req.params.mentorId;
+         const period = req.query.period;
+         const performance = await this.getMentorWeeklyPerformanceUseCase.execute(mentorId, period as "all" | "month" | "sixMonths" | "year");
+         res.status(HttpStatusCode.OK).json({ success: true, performance });
+      } catch (error) {
+         logger.error(`❌ Error in GetMentorWeeklyPerformanceController: ${error}`);
+         next(error);
+      }
+   }
 }

@@ -6,80 +6,80 @@ import { RescheduleRequestModel } from "../models/session/reschedule.request.mod
 import { SessionModel } from "../models/session/session.model";
 
 export class RescheduleRequestRepositoryImpl implements IRescheduleRequestRepository {
-	async create(entity: RescheduleRequestEntity): Promise<RescheduleRequestEntity> {
-		try {
-			const rescheduleRequestDocument = RescheduleRequestEntity.toObject(entity);
-			const rescheduleRequest = await RescheduleRequestModel.create(rescheduleRequestDocument);
-			return RescheduleRequestEntity.fromDbDocument(rescheduleRequest);
-		} catch (error) {
-			return handleExceptionError(error, "Error creating reschedule request");
-		}
-	}
+   async create(entity: RescheduleRequestEntity): Promise<RescheduleRequestEntity> {
+      try {
+         const rescheduleRequestDocument = RescheduleRequestEntity.toObject(entity);
+         const rescheduleRequest = await RescheduleRequestModel.create(rescheduleRequestDocument);
+         return RescheduleRequestEntity.fromDbDocument(rescheduleRequest);
+      } catch (error) {
+         return handleExceptionError(error, "Error creating reschedule request");
+      }
+   }
 
-	async findById(id: string): Promise<RescheduleRequestEntity | null> {
-		try {
-			const rescheduleRequest = await RescheduleRequestModel.findById(id);
-			return rescheduleRequest ? RescheduleRequestEntity.fromDbDocument(rescheduleRequest) : null;
-		} catch (error) {
-			return handleExceptionError(error, "Error finding reschedule request by ID");
-		}
-	}
+   async findById(id: string): Promise<RescheduleRequestEntity | null> {
+      try {
+         const rescheduleRequest = await RescheduleRequestModel.findById(id);
+         return rescheduleRequest ? RescheduleRequestEntity.fromDbDocument(rescheduleRequest) : null;
+      } catch (error) {
+         return handleExceptionError(error, "Error finding reschedule request by ID");
+      }
+   }
 
-	async findBySessionId(sessionId: string): Promise<RescheduleRequestEntity | null> {
-		try {
-			const rescheduleRequests = await RescheduleRequestModel.findOne({ sessionId });
-			return rescheduleRequests ? RescheduleRequestEntity.fromDbDocument(rescheduleRequests) : null;
-		} catch (error) {
-			return handleExceptionError(error, "Error finding reschedule requests by session ID");
-		}
-	}
+   async findBySessionId(sessionId: string): Promise<RescheduleRequestEntity | null> {
+      try {
+         const rescheduleRequests = await RescheduleRequestModel.findOne({ sessionId });
+         return rescheduleRequests ? RescheduleRequestEntity.fromDbDocument(rescheduleRequests) : null;
+      } catch (error) {
+         return handleExceptionError(error, "Error finding reschedule requests by session ID");
+      }
+   }
 
-	async findBySessionIds(ids: string[]): Promise<RescheduleRequestEntity[]> {
-		try {
-			const rescheduleRequests = await RescheduleRequestModel.find({ sessionId: { $in: ids } });
-			return rescheduleRequests.map((rescheduleRequest) => RescheduleRequestEntity.fromDbDocument(rescheduleRequest));
-		} catch (error) {
-			return handleExceptionError(error, "Error finding reschedule requests by session IDs");
-		}
-	}
+   async findBySessionIds(ids: string[]): Promise<RescheduleRequestEntity[]> {
+      try {
+         const rescheduleRequests = await RescheduleRequestModel.find({ sessionId: { $in: ids } });
+         return rescheduleRequests.map((rescheduleRequest) => RescheduleRequestEntity.fromDbDocument(rescheduleRequest));
+      } catch (error) {
+         return handleExceptionError(error, "Error finding reschedule requests by session IDs");
+      }
+   }
 
-	async update(entity: RescheduleRequestEntity): Promise<void> {
-		try {
-			const rescheduleRequestDocument = RescheduleRequestEntity.toObject(entity);
-			await RescheduleRequestModel.findByIdAndUpdate(entity.id, rescheduleRequestDocument);
-		} catch (error) {
-			return handleExceptionError(error, "Error updating reschedule request");
-		}
-	}
+   async update(entity: RescheduleRequestEntity): Promise<void> {
+      try {
+         const rescheduleRequestDocument = RescheduleRequestEntity.toObject(entity);
+         await RescheduleRequestModel.findByIdAndUpdate(entity.id, rescheduleRequestDocument);
+      } catch (error) {
+         return handleExceptionError(error, "Error updating reschedule request");
+      }
+   }
 
-	async delete(id: string): Promise<void> {
-		try {
-			await RescheduleRequestModel.findByIdAndDelete(id);
-		} catch (error) {
-			return handleExceptionError(error, "Error deleting reschedule request");
-		}
-	}
+   async delete(id: string): Promise<void> {
+      try {
+         await RescheduleRequestModel.findByIdAndDelete(id);
+      } catch (error) {
+         return handleExceptionError(error, "Error deleting reschedule request");
+      }
+   }
 
-	async findByMentorId(mentorId: string, filters: { page: number; limit: number; status?: RescheduleStatusEnum }): Promise<RescheduleRequestEntity[]> {
-		try {
-			const skip = (filters.page - 1) * filters.limit;
+   async findByMentorId(mentorId: string, filters: { page: number; limit: number; status?: RescheduleStatusEnum }): Promise<RescheduleRequestEntity[]> {
+      try {
+         const skip = (filters.page - 1) * filters.limit;
 
-			const sessions = await SessionModel.find({ mentorId }, { _id: 1 }).lean();
-			const sessionIds = sessions.map((session) => session._id);
+         const sessions = await SessionModel.find({ mentorId }, { _id: 1 });
+         const sessionIds = sessions.map((session) => session._id);
 
-			const query: any = {
-				sessionId: { $in: sessionIds },
-			};
+         const query: any = {
+            sessionId: { $in: sessionIds },
+         };
 
-			if (filters.status) {
-				query.status = filters.status;
-			}
+         if (filters.status) {
+            query.status = filters.status;
+         }
 
-			const requests = await RescheduleRequestModel.find(query).skip(skip).limit(filters.limit).lean();
+         const requests = await RescheduleRequestModel.find(query).skip(skip).limit(filters.limit);
 
-			return requests.map(RescheduleRequestEntity.fromDbDocument);
-		} catch (error) {
-			return handleExceptionError(error, "Error finding reschedule requests by initiator");
-		}
-	}
+         return requests.map((req) => RescheduleRequestEntity.fromDbDocument(req as any));
+      } catch (error) {
+         return handleExceptionError(error, "Error finding reschedule requests by initiator");
+      }
+   }
 }

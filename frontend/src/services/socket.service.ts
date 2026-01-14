@@ -60,8 +60,6 @@
 // 			this.notifyConnectionChange(false);
 // 		});
 
-		
-
 // 		this.isInitialized = true;
 // 	}
 
@@ -74,12 +72,12 @@
 // 		return () => this.socket?.off(event, callback);
 // 	}
 
-// 	public onVideoCallEvent(event: string, callback: (data: any) => void): () => void {
+// 	public onVideoCallEvent(event: string, callback: (data: unknown) => void): () => void {
 // 		this.socket?.on(event, callback);
 // 		return () => this.socket?.off(event, callback);
 // 	}
 
-// 	public onMessageEvent(event: string, callback: (data: any) => void): () => void {
+// 	public onMessageEvent(event: string, callback: (data: unknown) => void): () => void {
 // 		this.socket?.on(event, callback);
 // 		return () => this.socket?.off(event, callback);
 // 	}
@@ -92,7 +90,7 @@
 // 		};
 // 	}
 
-// 	public emit(event: string, data: any): void {
+// 	public emit(event: string, data: unknown): void {
 // 		if (this.socket?.connected) {
 // 			this.socket.emit(event, data);
 // 		} else {
@@ -104,12 +102,12 @@
 // 		return !!this.socket?.connected;
 // 	}
 
-// 	public on(event: string, callback: (data: any) => void): () => void {
+// 	public on(event: string, callback: (data: unknown) => void): () => void {
 // 		this.socket?.on(event, callback);
 // 		return () => this.socket?.off(event, callback);
 // 	}
 
-// 	public off(event: string, callback?: (data: any) => void): void {
+// 	public off(event: string, callback?: (data: unknown) => void): void {
 // 		this.socket?.off(event, callback);
 // 	}
 

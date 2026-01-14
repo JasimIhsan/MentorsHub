@@ -4,16 +4,16 @@ import { logger } from "../../../infrastructure/utils/logger";
 import { HttpStatusCode } from "../../../shared/constants/http.status.codes";
 
 export class UpdateReviewController {
-	constructor(private updateReviewUseCase: IUpdateReviewUseCase) {}
-	async handle(req: Request, res: Response, next: NextFunction) {
-		try {
-			const { reviewId } = req.params;
-			// const { reviewerId, mentorId, sessionId, rating, comment } = req.body;
-			const review = await this.updateReviewUseCase.execute(reviewId, req.body);
-			res.status(HttpStatusCode.OK).json({ success: true, review,  message: "Review updated successfully" });
-		} catch (error) {
-			logger.error(`❌ Error in UpdateReviewController: ${error}`);
-			next(error);
-		}
-	}
+   constructor(private updateReviewUseCase: IUpdateReviewUseCase) {}
+   async handle(req: Request, res: Response, next: NextFunction) {
+      try {
+         const reviewId = Array.isArray(req.params.reviewId) ? req.params.reviewId[0] : req.params.reviewId;
+         // const { reviewerId, mentorId, sessionId, rating, comment } = req.body;
+         const review = await this.updateReviewUseCase.execute(reviewId, req.body);
+         res.status(HttpStatusCode.OK).json({ success: true, review, message: "Review updated successfully" });
+      } catch (error) {
+         logger.error(`❌ Error in UpdateReviewController: ${error}`);
+         next(error);
+      }
+   }
 }

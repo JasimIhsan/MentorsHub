@@ -1,38 +1,38 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IGetUsersGrowthChartDataUseCase } from "../../../../application/interfaces/usecases/admin/admin.dashboard.interface";
 import { HttpStatusCode } from "../../../../shared/constants/http.status.codes";
 
 export class GetUsersGrowthChartDataController {
-	constructor(private readonly getUsersGrowthChartDataUseCase: IGetUsersGrowthChartDataUseCase) {}
-	async handle(req: Request, res: Response, next: NextFunction) {
-		try {
-			const adminId = req.params.adminId;
-			const { range } = req.query;
-			let months = 0;
+   constructor(private readonly getUsersGrowthChartDataUseCase: IGetUsersGrowthChartDataUseCase) {}
+   async handle(req: Request, res: Response, next: NextFunction) {
+      try {
+         const adminId = Array.isArray(req.params.adminId) ? req.params.adminId[0] : req.params.adminId;
+         const range = req.query.range;
+         let months = 0;
 
-			switch (range) {
-				case "30days": {
-					months = 1;
-					break;
-				}
-				case "6months": {
-					months = 6;
-					break;
-				}
-				case "1year": {
-					months = 12;
-					break;
-				}
-				case "all": {
-					months = 0;
-					break;
-				}
-			}
+         switch (range) {
+            case "30days": {
+               months = 1;
+               break;
+            }
+            case "6months": {
+               months = 6;
+               break;
+            }
+            case "1year": {
+               months = 12;
+               break;
+            }
+            case "all": {
+               months = 0;
+               break;
+            }
+         }
 
-			const chartData = await this.getUsersGrowthChartDataUseCase.execute(adminId, months);
-			res.status(HttpStatusCode.OK).json({ success: true, chartData });
-		} catch (error) {
-			next(error);
-		}
-	}
+         const chartData = await this.getUsersGrowthChartDataUseCase.execute(adminId, months);
+         res.status(HttpStatusCode.OK).json({ success: true, chartData });
+      } catch (error) {
+         next(error);
+      }
+   }
 }
