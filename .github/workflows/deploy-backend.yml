@@ -29,15 +29,15 @@ jobs:
               docker compose -f docker-compose.prod.yml push
            working-directory: ./backend
 
-         # SSH into EC2 and deploy
-         - name: Deploy to EC2
-           uses: appleboy/ssh-action@v1.0.3
-           with:
-              host: ${{ secrets.EC2_HOST }}
-              username: ${{ secrets.EC2_USER }}
-              key: ${{ secrets.EC2_SSH_KEY }}
-              script: |
-                 IMAGE_NAME=${{ secrets.DOCKER_HUB_USERNAME }}/mentorshub-backend
-                 docker compose pull
-                 docker compose down
-                 docker compose up -d
+         # # SSH into EC2 and deploy
+         # - name: Deploy to EC2
+         #   uses: appleboy/ssh-action@v1.0.3
+         #   with:
+         #      host: ${{ secrets.EC2_HOST }}
+         #      username: ${{ secrets.EC2_USER }}
+         #      key: ${{ secrets.EC2_SSH_KEY }}
+         #      script: |
+         #         IMAGE_NAME=${{ secrets.DOCKER_HUB_USERNAME }}/mentorshub-backend
+         #         docker compose pull
+         #         docker compose down
+         #         docker compose up -d
