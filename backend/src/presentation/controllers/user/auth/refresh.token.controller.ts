@@ -32,6 +32,8 @@ export class RefreshTokenController {
 			res.status(HttpStatusCode.OK).json({ success: true, accessToken: newAccessToken, user: userProfile, isAdmin: user.isAdmin, message: "New access token generated" });
 		} catch (error) {
 			logger.error(`❌ Error in RefreshTokenController: ${error}`);
+			res.clearCookie("access_token");
+			res.clearCookie("refresh_token");
 			next(error);
 		}
 	}

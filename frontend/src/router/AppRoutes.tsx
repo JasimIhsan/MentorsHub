@@ -54,6 +54,9 @@ export const AppRoutes = () => {
 				}
 			} catch (error) {
 				toast.error("Please login to continue");
+				dispatch(logout());
+				dispatch(adminLogout());
+				localStorage.removeItem("persist:root");
 				if (location.pathname.startsWith("/admin")) navigate("/admin/login", { replace: true });
 				else navigate("/authenticate", { replace: true });
 			} finally {

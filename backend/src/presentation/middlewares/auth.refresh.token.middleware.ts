@@ -29,6 +29,8 @@ export const verifyRefreshToken = async (req: Request, res: Response, next: Next
 		// decode and validate token
 		const decoded = tokenService.validateRefreshToken(refreshToken);
 		if (!decoded) {
+			res.clearCookie("access_token");
+			res.clearCookie("refresh_token");
 			res.status(HttpStatusCode.FORBIDDEN).json({ success: false, message: "Invalid token" });
 			return;
 		}
@@ -37,6 +39,8 @@ export const verifyRefreshToken = async (req: Request, res: Response, next: Next
 		next();
 	} catch (error) {
 		logger.error(`❌ Error in verifyRefreshToken: ${error}`);
+		res.clearCookie("access_token");
+		res.clearCookie("refresh_token");
 		next(error);
 	}
 };
